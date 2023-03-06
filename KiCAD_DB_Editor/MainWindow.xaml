@@ -1,0 +1,32 @@
+﻿<Window x:Class="KiCAD_DB_Editor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:KiCAD_DB_Editor"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded">
+    <Window.DataContext>
+        <local:DataObj/>
+    </Window.DataContext>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <TextBox Margin="5,5,5,5" TextWrapping="Wrap" Text="{Binding Project.ProjectPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top"/>
+        <Button x:Name="button_Save" Margin="5,5,5,5" Grid.Row="1" Content="Save" Click="button_Save_Click"  />
+        <Button x:Name="button_Open" Margin="5,5,5,5" Grid.Row="2" Content="Open" Click="button_Open_Click" />
+        <ListBox Margin="5,5,5,5" Grid.Row="3" d:ItemsSource="{d:SampleData ItemCount=5}" ItemsSource="{Binding Project.Libraries, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="DblFilePath"/>
+        <Button x:Name="button_Include" Margin="5,5,5,5" Grid.Row="4" Content="Include" Click="button_Include_Click"  />
+        <ListBox Margin="5,5,5,5" Grid.Row="5" d:ItemsSource="{d:SampleData ItemCount=5}" ItemsSource="{Binding Project.UnincludedLibraries, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding Project.SelectedUnincludedLibrary, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+    </Grid>
+</Window>

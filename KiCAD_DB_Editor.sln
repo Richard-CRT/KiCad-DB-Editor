@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33122.133
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KiCAD_DB_Editor", "KiCAD_DB_Editor\KiCAD_DB_Editor.csproj", "{F9EF3992-D5A6-49E0-BC08-FB9AF8A9F8AB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F9EF3992-D5A6-49E0-BC08-FB9AF8A9F8AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9EF3992-D5A6-49E0-BC08-FB9AF8A9F8AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9EF3992-D5A6-49E0-BC08-FB9AF8A9F8AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9EF3992-D5A6-49E0-BC08-FB9AF8A9F8AB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {290AADD8-A65A-4BD1-B455-58C49742A668}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "KiCAD_DB_Editor": {
+      "commandName": "Project",
+      "commandLineArgs": "\"C:\\Users\\richa\\OneDrive\\Projects\\Library\\foo.kidbe_proj\""
+    }
+  }
+}

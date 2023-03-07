@@ -41,11 +41,10 @@ namespace KiCAD_DB_Editor
                                             // Be careful not to reconstruct _project, as we will lose access to the project object
                                             // that the form is using
 
-            string[] cmdLineArgs = Environment.GetCommandLineArgs();
-            if (cmdLineArgs.Length > 1)
+            string lastProjectPath = Properties.Settings.Default.LastProjectPath;
+            if (lastProjectPath != "")
             {
-                string openWithFilePath = cmdLineArgs[1];
-                DataObj.Project = Project.FromFile(openWithFilePath);
+                DataObj.Project = Project.FromFile(lastProjectPath);
             }
         }
 
@@ -55,6 +54,9 @@ namespace KiCAD_DB_Editor
             saveFileDialog.Filter = "Project file (*.kidbe_proj)|*.kidbe_proj";
             if (saveFileDialog.ShowDialog() == true)
                 DataObj.Project.SaveToFile(saveFileDialog.FileName);
+
+            Properties.Settings.Default.LastProjectPath = saveFileDialog.FileName;
+            Properties.Settings.Default.Save();
         }
 
         private void button_Open_Click(object sender, RoutedEventArgs e)
@@ -63,6 +65,9 @@ namespace KiCAD_DB_Editor
             openFileDialog.Filter = "Project file (*.kidbe_proj)|*.kidbe_proj";
             if (openFileDialog.ShowDialog() == true)
                 DataObj.Project = Project.FromFile(openFileDialog.FileName);
+
+            Properties.Settings.Default.LastProjectPath = openFileDialog.FileName;
+            Properties.Settings.Default.Save();
         }
 
         private void button_Include_Click(object sender, RoutedEventArgs e)

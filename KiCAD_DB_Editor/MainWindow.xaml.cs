@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -41,38 +42,61 @@ namespace KiCAD_DB_Editor
                                             // Be careful not to reconstruct _project, as we will lose access to the project object
                                             // that the form is using
 
-            string lastProjectPath = Properties.Settings.Default.LastProjectPath;
-            if (lastProjectPath != "")
+            if (Properties.Settings.Default.OpenProjectPath != "" && File.Exists(Properties.Settings.Default.OpenProjectPath))
             {
-                DataObj.Project = Project.FromFile(lastProjectPath);
+                DataObj.Project = Project.FromFile(Properties.Settings.Default.OpenProjectPath);
             }
         }
 
-        private void button_Save_Click(object sender, RoutedEventArgs e)
+        private void button_NewLibrary_Click(object sender, RoutedEventArgs e)
         {
-            SaveFileDialog saveFileDialog = new();
-            saveFileDialog.Filter = "Project file (*.kidbe_proj)|*.kidbe_proj";
-            if (saveFileDialog.ShowDialog() == true)
-                DataObj.Project.SaveToFile(saveFileDialog.FileName);
-
-            Properties.Settings.Default.LastProjectPath = saveFileDialog.FileName;
-            Properties.Settings.Default.Save();
+            DataObj.Project.NewLibrary("foodesc");
         }
 
-        private void button_Open_Click(object sender, RoutedEventArgs e)
+        #region Menu > File
+
+        private void menuItem_FileNewProject_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void menuItem_FileOpenProject_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new();
             openFileDialog.Filter = "Project file (*.kidbe_proj)|*.kidbe_proj";
             if (openFileDialog.ShowDialog() == true)
+            {
                 DataObj.Project = Project.FromFile(openFileDialog.FileName);
 
-            Properties.Settings.Default.LastProjectPath = openFileDialog.FileName;
-            Properties.Settings.Default.Save();
+                Properties.Settings.Default.OpenProjectPath = openFileDialog.FileName;
+                Properties.Settings.Default.Save();
+            }
         }
 
-        private void button_Include_Click(object sender, RoutedEventArgs e)
+        private void menuItem_FileSaveProject_Click(object sender, RoutedEventArgs e)
         {
-            DataObj.Project.IncludeSelectedUnincludedLibrary();
+            if (Properties.Settings.Default.OpenProjectPath != "")
+                DataObj.Project.SaveToFile(Properties.Settings.Default.OpenProjectPath);
         }
+
+        private void menuItem_FileSaveAsProject_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new();
+            saveFileDialog.Filter = "Project file (*.kidbe_proj)|*.kidbe_proj";
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                DataObj.Project.SaveToFile(saveFileDialog.FileName);
+
+                Properties.Settings.Default.OpenProjectPath = saveFileDialog.FileName;
+                Properties.Settings.Default.Save();
+            }
+        }
+
+        private void menuItem_FileExit_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        #endregion
     }
 }

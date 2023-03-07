@@ -18,49 +18,48 @@ namespace KiCAD_DB_Editor
     {
         public static Project FromFile(string filePath)
         {
-            Project o;
+            Project project;
             try
             {
                 var jsonString = File.ReadAllText(filePath);
 
-                Project? project;
-                project = (Project?)JsonSerializer.Deserialize(jsonString, typeof(Project));
+                Project? o;
+                o = (Project?)JsonSerializer.Deserialize(jsonString, typeof(Project));
 
-                if (project is null) throw new ArgumentNullException("Project is null");
+                if (o is null) throw new ArgumentNullException("Project is null");
 
-                o = (Project)project!;
+                project = (Project)o!;
             }
             catch (FileNotFoundException)
             {
                 throw;
             }
 
-            return o;
+            return project;
         }
 
 
         // ============================================================================================
         // ============================================================================================
 
-
-        private string? _projectPath;
-        public string ProjectPath
+        private Library? _selectedLibrary = null;
+        [JsonIgnore]
+        public Library? SelectedLibrary
         {
-            get { Debug.Assert(_projectPath is not null); return _projectPath; }
+            get { return _selectedLibrary; }
             set
             {
-                if (_projectPath != value)
+                if (_selectedLibrary != value)
                 {
-                    _projectPath = value;
+                    _selectedLibrary = value;
 
                     InvokePropertyChanged();
-
-                    ScanForLibraries();
                 }
             }
         }
 
         private ObservableCollection<Library>? _libraries = null;
+        [JsonPropertyName("libraries")]
         public ObservableCollection<Library> Libraries
         {
             get { Debug.Assert(_libraries is not null); return _libraries; }
@@ -81,76 +80,46 @@ namespace KiCAD_DB_Editor
 
         private void _libraries_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            ScanForLibraries();
         }
 
-        private ObservableCollection<string>? _unincludedLibraries = null;
+        private string? _newLibraryName = null;
         [JsonIgnore]
-        public ObservableCollection<string> UnincludedLibraries
+        public string NewLibraryName
         {
-            get { Debug.Assert(_unincludedLibraries is not null); return _unincludedLibraries; }
+            get { Debug.Assert(_newLibraryName is not null); return _newLibraryName; }
             set
             {
-                if (_unincludedLibraries != value)
+                if (_newLibraryName != value)
                 {
-                    _unincludedLibraries = value;
+                    _newLibraryName = value;
 
                     InvokePropertyChanged();
+                    InvokePropertyChanged(nameof(NewLibraryNameValid));
                 }
             }
         }
-
-        private string? _selectedUnincludedLibrary = null;
         [JsonIgnore]
-        public string? SelectedUnincludedLibrary
+        public bool NewLibraryNameValid
         {
-            get { return _selectedUnincludedLibrary; }
-            set
+            get
             {
-                if (_selectedUnincludedLibrary != value)
-                {
-                    _selectedUnincludedLibrary = value;
-
-                    InvokePropertyChanged();
-                }
+                string trimmedNewLibraryName = NewLibraryName.Trim();
+                return
+                    trimmedNewLibraryName != "" &&
+                    !Libraries.Any(l => l.Name.ToLower() == trimmedNewLibraryName.ToLower());
             }
         }
 
         public Project()
         {
-            ProjectPath = "";
+            NewLibraryName = ""; // Exists for binding to textbox so must start as not-null
             Libraries = new ObservableCollection<Library>();
         }
 
-        public Project(string filepath)
+        public void NewLibrary(string description)
         {
-            ProjectPath = "";
-            Libraries = new ObservableCollection<Library>();
-        }
-
-        public void ScanForLibraries()
-        {
-            if (Directory.Exists(ProjectPath))
-            {
-                HashSet<string> includedLibraryPaths = new HashSet<string>(Libraries.Select(l => l.DblFilePath));
-                UnincludedLibraries = new ObservableCollection<string>(
-                    Directory.GetFiles(ProjectPath, "*.kicad_dbl")
-                    .Select(p => Path.GetRelativePath(ProjectPath, p))
-                    .Where(p => !includedLibraryPaths.Contains(p))
-                    );
-            }
-            else
-            {
-                UnincludedLibraries = new ObservableCollection<string>();
-            }
-        }
-
-        public void IncludeSelectedUnincludedLibrary()
-        {
-            if (SelectedUnincludedLibrary is not null)
-            {
-                Libraries.Add(new Library(SelectedUnincludedLibrary));
-            }
+            if (NewLibraryNameValid)
+                Libraries.Add(new(NewLibraryName, description));
         }
 
         public void SaveToFile(string filePath)

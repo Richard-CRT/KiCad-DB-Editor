@@ -36,10 +36,12 @@ namespace KiCAD_DB_Editor
             InitializeComponent();
         }
 
+        #region Events
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             DataObj = (DataObj)DataContext; // Take the default data object that the XAML constructed
-                                            // Be careful not to reconstruct _project, as we will lose access to the project object
+                                            // Be careful not to reconstruct _dataObj, as we will lose access to the dataObj object
                                             // that the form is using
 
             if (Properties.Settings.Default.OpenProjectPath != "" && File.Exists(Properties.Settings.Default.OpenProjectPath))
@@ -50,19 +52,39 @@ namespace KiCAD_DB_Editor
 
         private void button_NewLibrary_Click(object sender, RoutedEventArgs e)
         {
-            DataObj.Project.NewLibrary("foodesc");
+            DataObj.Project.NewLibrary();
         }
 
-        #region Menu > File
+        #endregion
 
-        private void menuItem_FileNewProject_Click(object sender, RoutedEventArgs e)
+
+        #region CommandBindings
+
+        private void CommandBinding_New_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
+            e.CanExecute = true;
 
+            e.Handled = true;
         }
 
-        private void menuItem_FileOpenProject_Click(object sender, RoutedEventArgs e)
+        private void CommandBinding_New_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            DataObj.Project = new();
+
+            e.Handled = true;
+        }
+
+        private void CommandBinding_Open_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+
+            e.Handled = true;
+        }
+
+        private void CommandBinding_Open_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new();
+            openFileDialog.Title = "Open KiCAD DB Editor Project File";
             openFileDialog.Filter = "Project file (*.kidbe_proj)|*.kidbe_proj";
             if (openFileDialog.ShowDialog() == true)
             {
@@ -71,17 +93,40 @@ namespace KiCAD_DB_Editor
                 Properties.Settings.Default.OpenProjectPath = openFileDialog.FileName;
                 Properties.Settings.Default.Save();
             }
+
+            e.Handled = true;
         }
 
-        private void menuItem_FileSaveProject_Click(object sender, RoutedEventArgs e)
+        private void CommandBinding_Save_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+
+            e.Handled = true;
+        }
+
+        private void CommandBinding_Save_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             if (Properties.Settings.Default.OpenProjectPath != "")
+            {
                 DataObj.Project.SaveToFile(Properties.Settings.Default.OpenProjectPath);
+
+                e.Handled = true;
+            }
+            else
+                CommandBinding_SaveAs_Executed(sender, e);
         }
 
-        private void menuItem_FileSaveAsProject_Click(object sender, RoutedEventArgs e)
+        private void CommandBinding_SaveAs_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+
+            e.Handled = true;
+        }
+
+        private void CommandBinding_SaveAs_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             SaveFileDialog saveFileDialog = new();
+            saveFileDialog.Title = "Save KiCAD DB Editor Project File";
             saveFileDialog.Filter = "Project file (*.kidbe_proj)|*.kidbe_proj";
             if (saveFileDialog.ShowDialog() == true)
             {
@@ -90,13 +135,30 @@ namespace KiCAD_DB_Editor
                 Properties.Settings.Default.OpenProjectPath = saveFileDialog.FileName;
                 Properties.Settings.Default.Save();
             }
+
+            e.Handled = true;
         }
+
+        private void CommandBinding_Delete_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+
+            e.Handled = true;
+        }
+
+        private void CommandBinding_Delete_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (e.Parameter is Library)
+                DataObj.Project.DeleteLibrary((Library)e.Parameter);
+
+            e.Handled = true;
+        }
+
+        #endregion
 
         private void menuItem_FileExit_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
-
-        #endregion
     }
 }

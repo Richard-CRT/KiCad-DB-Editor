@@ -6,27 +6,36 @@
         xmlns:diag="clr-namespace:System.Diagnostics;assembly=WindowsBase"
         xmlns:local="clr-namespace:KiCAD_DB_Editor"
         xmlns:properties="clr-namespace:KiCAD_DB_Editor.Properties"
-        xmlns:Converters="clr-namespace:KiCAD_DB_Editor.Converters" x:Class="KiCAD_DB_Editor.MainWindow"
+        xmlns:converters="clr-namespace:KiCAD_DB_Editor.Converters"
+        x:Class="KiCAD_DB_Editor.MainWindow"
         mc:Ignorable="d"
-        Title="{Binding OpenProjectPath, Source={x:Static properties:Settings.Default}, StringFormat=KiCAD DB Editor | \{0\}}" Height="800" Width="1600" Loaded="Window_Loaded">
-    <Window.Resources>
-        <Converters:NullToBoolConverter x:Key="NullToBoolConverter"/>
-        <Converters:EmptyStringToBoolConverter x:Key="EmptyStringToBoolConverter"/>
-    </Window.Resources>
+        Title="{Binding OpenProjectPath, Source={x:Static properties:Settings.Default}, StringFormat=KiCAD DB Editor | \{0\}}" Height="900" Width="1800" Loaded="Window_Loaded">
     <Window.DataContext>
         <local:DataObj/>
     </Window.DataContext>
+    <Window.Resources>
+        <converters:NullToBoolConverter x:Key="NullToBoolConverter"/>
+        <converters:EmptyStringToBoolConverter x:Key="EmptyStringToBoolConverter"/>
+        <converters:MultiBoolAndConverter x:Key="MultiBoolAndConverter"/>
+    </Window.Resources>
+    <Window.CommandBindings>
+        <CommandBinding Command="New" CanExecute="CommandBinding_New_CanExecute" Executed="CommandBinding_New_Executed" />
+        <CommandBinding Command="Open" CanExecute="CommandBinding_Open_CanExecute" Executed="CommandBinding_Open_Executed" />
+        <CommandBinding Command="Save" CanExecute="CommandBinding_Save_CanExecute" Executed="CommandBinding_Save_Executed" />
+        <CommandBinding Command="SaveAs" CanExecute="CommandBinding_SaveAs_CanExecute" Executed="CommandBinding_SaveAs_Executed" />
+        <CommandBinding Command="Delete" CanExecute="CommandBinding_Delete_CanExecute" Executed="CommandBinding_Delete_Executed" />
+    </Window.CommandBindings>
 
     <DockPanel x:Name="dockPanel_TopLevel">
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem x:Name="menuItem_FileNewProject" Header="_New Project" Click="menuItem_FileNewProject_Click" />
-                <MenuItem x:Name="menuItem_FileOpenProject" Header="_Open Project..." Click="menuItem_FileOpenProject_Click" />
+                <MenuItem x:Name="menuItem_FileNewProject" Header="_New Project" Command="New" />
+                <MenuItem x:Name="menuItem_FileOpenProject" Header="_Open Project..." Command="Open" />
                 <Separator />
-                <MenuItem x:Name="menuItem_FileSaveProject" Header="_Save Project" Click="menuItem_FileSaveProject_Click" IsEnabled="{Binding OpenProjectPath, Source={x:Static properties:Settings.Default}, Converter={StaticResource EmptyStringToBoolConverter}}" />
-                <MenuItem x:Name="menuItem_FileSaveAsProject" Header="_Save Project As..." Click="menuItem_FileSaveAsProject_Click" />
+                <MenuItem x:Name="menuItem_FileSaveProject" Header="_Save Project" Command="Save" />
+                <MenuItem x:Name="menuItem_FileSaveAsProject" Header="_Save Project As..." Command="SaveAs" />
                 <Separator />
-                <MenuItem x:Name="menuItem_FileExit" Header="_Exit" Click="menuItem_FileExit_Click" />
+                <MenuItem x:Name="menuItem_FileExit" Header="_Exit" Click="menuItem_FileExit_Click"  />
             </MenuItem>
         </Menu>
         <Grid >
@@ -46,24 +55,37 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <Grid Grid.Row="0" >
+                <Grid Grid.Row="0" Margin="5,5,5,0" >
                     <Grid.RowDefinitions>
-                        <RowDefinition/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBox Margin="5,5,5,5" Text="{Binding Project.NewLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" />
-                    <Button x:Name="button_NewLibrary"  Grid.Column="1" Margin="5,5,5,5"  Content="New Library" Click="button_NewLibrary_Click" IsEnabled="{Binding Project.NewLibraryNameValid, Mode=OneWay}" Padding="5,5,5,5"   />
+                    <TextBox Margin="0,0,5,0" Text="{Binding Project.NewLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" />
+                    <Button x:Name="button_NewLibrary" Grid.Column="1" Margin="0,0,0,0" Content="New Library" Click="button_NewLibrary_Click" Padding="5,5,5,5" ToolTip="Each library maps to a `*.kicad_dbl` file" />
                 </Grid>
-                <ListBox Margin="5,5,5,5" Grid.Row="1" d:ItemsSource="{d:SampleData ItemCount=5}" ItemsSource="{Binding Project.Libraries, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Name" SelectedItem="{Binding Project.SelectedLibrary, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <ListView Margin="5,5,5,5" Grid.Row="1" ItemsSource="{Binding Project.Libraries, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Name" SelectedItem="{Binding Project.SelectedLibrary}">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" />
+                            <GridViewColumn Header="Description" DisplayMemberBinding="{Binding Description}" />
+                        </GridView>
+                    </ListView.View>
+                    <ListView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Delete"
+                                    Command="Delete"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}" />
+                        </ContextMenu>
+                    </ListView.ContextMenu>
+                </ListView>
+                <!--<ListBox Margin="5,5,5,5" Grid.Row="2" ItemsSource="{Binding Project.Libraries, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Name" SelectedItem="{Binding Project.SelectedLibrary, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />-->
 
             </Grid>
             <GridSplitter HorizontalAlignment="Stretch" Grid.Column="1" />
-            <!-- Uses the new DataContext as the context, NOT the parent Window's DC -->
-            <local:UserControl_Library Grid.Column="2" DataContext="{Binding Project.SelectedLibrary, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                IsEnabled="{Binding Converter={StaticResource NullToBoolConverter}, Mode=OneWay}" />
+            <local:UserControl_Library Grid.Column="2" DataContext="{Binding Project.SelectedLibrary, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
         </Grid>
     </DockPanel>
 </Window>

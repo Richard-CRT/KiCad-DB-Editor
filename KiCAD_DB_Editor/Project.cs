@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Shapes;
 using Path = System.IO.Path;
@@ -94,19 +95,7 @@ namespace KiCAD_DB_Editor
                     _newLibraryName = value;
 
                     InvokePropertyChanged();
-                    InvokePropertyChanged(nameof(NewLibraryNameValid));
                 }
-            }
-        }
-        [JsonIgnore]
-        public bool NewLibraryNameValid
-        {
-            get
-            {
-                string trimmedNewLibraryName = NewLibraryName.Trim();
-                return
-                    trimmedNewLibraryName != "" &&
-                    !Libraries.Any(l => l.Name.ToLower() == trimmedNewLibraryName.ToLower());
             }
         }
 
@@ -116,10 +105,29 @@ namespace KiCAD_DB_Editor
             Libraries = new ObservableCollection<Library>();
         }
 
-        public void NewLibrary(string description)
+        public void NewLibrary(string description = "")
         {
-            if (NewLibraryNameValid)
+            if (Library.CheckNameValid(NewLibraryName))
                 Libraries.Add(new(NewLibraryName, description));
+            else
+            {
+                const string newLibraryNamePrefix = $"Library ";
+                const string regexPattern = @$"^{newLibraryNamePrefix}\d+$";
+
+                int currentMax = Libraries.Where(l => Regex.IsMatch(l.Name, regexPattern))
+                    .Select(l => int.Parse(l.Name.Remove(0, newLibraryNamePrefix.Length)))
+                    .DefaultIfEmpty()
+                    .Max();
+
+                string newLibraryName = $"{newLibraryNamePrefix}{currentMax + 1}";
+
+                Libraries.Add(new(newLibraryName, description));
+            }
+        }
+
+        public void DeleteLibrary(Library library)
+        {
+            Libraries.Remove(library);
         }
 
         public void SaveToFile(string filePath)

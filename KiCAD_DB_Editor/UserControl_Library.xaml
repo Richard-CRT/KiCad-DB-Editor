@@ -4,12 +4,116 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:KiCAD_DB_Editor"
+             xmlns:converters="clr-namespace:KiCAD_DB_Editor.Converters"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="700" d:DesignWidth="1400"
+             DataContextChanged="UserControl_DataContextChanged">
     <d:UserControl.DataContext>
         <local:Library/>
     </d:UserControl.DataContext>
-    <Grid>
-        <TextBox HorizontalAlignment="Left" Margin="0,0,0,0" TextWrapping="Wrap" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top" Width="400"/>
+    <UserControl.Resources>
+        <converters:NullToBoolConverter x:Key="NullToBoolConverter"/>
+        <converters:MultiBoolAndConverter x:Key="MultiBoolAndConverter"/>
+    </UserControl.Resources>
+    <UserControl.CommandBindings>
+        <CommandBinding Command="{x:Static local:UserControl_Library.ImportCommand}" CanExecute="CommandBinding_Import_CanExecute" Executed="CommandBinding_Import_Executed" />
+        <CommandBinding Command="{x:Static local:UserControl_Library.ExportCommand}" CanExecute="CommandBinding_Export_CanExecute" Executed="CommandBinding_Export_Executed" />
+        <CommandBinding Command="Delete" CanExecute="CommandBinding_Delete_CanExecute" Executed="CommandBinding_Delete_Executed" />
+    </UserControl.CommandBindings>
+    <Grid
+        IsEnabled="{Binding Converter={StaticResource NullToBoolConverter}, Mode=OneWay}"
+        Margin="5,5,5,5"
+        >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Row="0" Margin="5,5,5,0" >
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Label Content="Name:" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" Margin="0,0,5,0"/>
+            <TextBox Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" FontWeight="Bold" FontSize="16" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="0,0,5,0" />
+            <Button Grid.Column="2" Content="Import from KiCAD file" Padding="5,5,5,5" HorizontalAlignment="Center" VerticalAlignment="Center" Command="{x:Static local:UserControl_Library.ImportCommand}" Margin="0,0,5,0" />
+            <Button Grid.Column="3" Content="Export to KiCAD file" Padding="5,5,5,5" HorizontalAlignment="Center" VerticalAlignment="Center" Command="{x:Static local:UserControl_Library.ExportCommand}" />
+        </Grid>
+        <Grid Grid.Row="1" Margin="5,5,5,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Label Content="Description:" VerticalContentAlignment="Center" HorizontalAlignment="Left" VerticalAlignment="Center" />
+            <TextBox TextWrapping="Wrap" Text="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" VerticalAlignment="Center" Grid.ColumnSpan="5"/>
+
+            <Label Content="Type:" VerticalContentAlignment="Center" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Row="1" />
+            <TextBox TextWrapping="Wrap" Text="{Binding Source.Type, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  Grid.Column="1" VerticalContentAlignment="Center" Margin="0,2,0,2" Grid.Row="1"/>
+            <Label Content="DSN:" VerticalContentAlignment="Center" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="2" Grid.Row="1" />
+            <TextBox TextWrapping="Wrap" Text="{Binding Source.DSN, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="3" VerticalContentAlignment="Center" Margin="0,2,0,2" Grid.Row="1"/>
+            <Label Content="Username:" VerticalContentAlignment="Center" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="4" Grid.Row="1" />
+            <TextBox TextWrapping="Wrap" Text="{Binding Source.Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="5" VerticalContentAlignment="Center" Margin="0,2,0,2" Grid.Row="1"/>
+
+            <Label Content="Password:" VerticalContentAlignment="Center" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Row="2" />
+            <TextBox TextWrapping="Wrap" Text="{Binding Source.Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" FontFamily="{StaticResource Password}" VerticalContentAlignment="Center" Margin="0,2,0,2"/>
+            <Label Content="Time Out (s):" VerticalContentAlignment="Center" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Row="2" Grid.Column="2" />
+            <TextBox TextWrapping="Wrap" Text="{Binding Source.TimeOutSeconds, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="3" VerticalContentAlignment="Center" Margin="0,2,0,2"/>
+            <Label Content="Connection String:" VerticalContentAlignment="Center" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Row="2" Grid.Column="4" />
+            <TextBox TextWrapping="Wrap" Text="{Binding Source.ConnectionString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="5" VerticalContentAlignment="Center" Margin="0,2,0,2"/>
+        </Grid>
+
+        <Grid Grid.Row="2" Margin="5,5,5,0" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Margin="0,0,5,0" Text="{Binding NewCategoryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" />
+            <Button x:Name="button_NewCategory" Grid.Column="1" Margin="0,0,0,0" Content="New Category" Click="button_NewCategory_Click" Padding="5,5,5,5" ToolTip="Each library maps to a table in the `*.kicad_dbl` file" />
+        </Grid>
+
+        <Grid Grid.Row="3">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="3*"/>
+            </Grid.ColumnDefinitions>
+            <ListBox Grid.Column="0" Margin="5,5,5,5" ItemsSource="{Binding Categories, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedCategory}">
+
+                <ListBox.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Delete"
+                                    Command="Delete"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}" />
+                    </ContextMenu>
+                </ListBox.ContextMenu>
+
+            </ListBox>
+            <local:UserControl_Category Grid.Column="2" DataContext="{Binding SelectedCategory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+        </Grid>
     </Grid>
 </UserControl>

@@ -4,6 +4,6 @@
              xmlns:local="clr-namespace:KiCAD_DB_Editor"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <FontFamily x:Key="Password">pack://application:,,,/Fonts/#Password</FontFamily>
     </Application.Resources>
 </Application>

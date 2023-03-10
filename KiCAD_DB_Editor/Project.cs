@@ -105,10 +105,12 @@ namespace KiCAD_DB_Editor
             Libraries = new ObservableCollection<Library>();
         }
 
-        public void NewLibrary()
+        public Library NewLibrary()
         {
+            Library newLibrary;
+
             if (Library.CheckNameValid(NewLibraryName))
-                Libraries.Add(new(NewLibraryName));
+                newLibrary = new(NewLibraryName);
             else
             {
                 const string newLibraryNamePrefix = $"Library ";
@@ -121,8 +123,18 @@ namespace KiCAD_DB_Editor
 
                 string newLibraryName = $"{newLibraryNamePrefix}{currentMax + 1}";
 
-                Libraries.Add(new(newLibraryName));
+                newLibrary = new(newLibraryName);
             }
+
+            Libraries.Add(newLibrary);
+            return newLibrary;
+        }
+
+        public Library NewLibrary(string importFilePath)
+        {
+            Library newLibrary = NewLibrary();
+            newLibrary.ImportFromKiCADDBL(importFilePath);
+            return newLibrary;
         }
 
         public void DeleteLibrary(Library library)

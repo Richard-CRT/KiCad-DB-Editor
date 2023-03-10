@@ -13,28 +13,77 @@
     <UserControl.Resources>
         <converters:NullToBoolConverter x:Key="NullToBoolConverter"/>
     </UserControl.Resources>
-    <Grid
+    <GroupBox
         IsEnabled="{Binding Converter={StaticResource NullToBoolConverter}, Mode=OneWay}"
         Margin="5,5,5,5"
         >
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition/>
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
-
-        <Grid Grid.Row="0" Margin="5,5,5,0" >
+        <GroupBox.Header>
+            <Label Content="Symbol Field" FontWeight="Bold" Padding="5,0,5,0" />
+        </GroupBox.Header>
+        <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <Label Content="Name:" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" Margin="0,0,5,0"/>
-            <TextBox Text="{Binding SymbolFieldName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" FontWeight="Bold" FontSize="16" VerticalContentAlignment="Center" VerticalAlignment="Center" />
+
+            <Grid Grid.Row="0" Margin="5,5,5,0" >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Label Content="Name:" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" Margin="0,0,5,0"/>
+                <TextBox Text="{Binding SymbolFieldName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" FontWeight="Bold" FontSize="16" VerticalContentAlignment="Center" VerticalAlignment="Center" />
+            </Grid>
+            <Grid Grid.Row="1" Margin="5,5,5,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition />
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <Label Content="Table Column Name:" VerticalContentAlignment="Center" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="0" Grid.ColumnSpan="1" />
+                <TextBox TextWrapping="Wrap" Text="{Binding TableColumnName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="1" VerticalContentAlignment="Center" Margin="2,2,2,2" Grid.ColumnSpan="6" />
+
+                <Label Grid.Row="1" Grid.Column="0" Content="Setting" VerticalContentAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" />
+                <Label Grid.Row="1" Grid.Column="1" Content="Override Default" VerticalContentAlignment="Center" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="Bold" />
+                <Label Grid.Row="1" Grid.Column="2" Content="Value" VerticalContentAlignment="Center" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="Bold" />
+                <Label Grid.Row="1" Grid.Column="3" Content="Setting" VerticalContentAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" />
+                <Label Grid.Row="1" Grid.Column="4" Content="Override Default" VerticalContentAlignment="Center" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="Bold" />
+                <Label Grid.Row="1" Grid.Column="5" Content="Value" VerticalContentAlignment="Center" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="Bold" />
+                
+                <Label Grid.Row="2" Grid.Column="0" Content="Visible On Add" VerticalContentAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <CheckBox Grid.Row="2" Grid.Column="1" IsChecked="{Binding OverrideSymbolFieldVisibleOnAdd, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,5,0" />
+                <CheckBox Grid.Row="2" Grid.Column="2" IsChecked="{Binding SymbolFieldVisibleOnAdd, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding OverrideSymbolFieldVisibleOnAdd, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,5,0" />
+                <Label Grid.Row="2" Grid.Column="3" Content="Visible In Chooser" VerticalContentAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <CheckBox Grid.Row="2" Grid.Column="4" IsChecked="{Binding OverrideSymbolFieldVisibleInChooser, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,5,0" />
+                <CheckBox Grid.Row="2" Grid.Column="5" IsChecked="{Binding SymbolFieldVisibleInChooser, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding OverrideSymbolFieldVisibleInChooser, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,5,0" />
+
+                <Label Grid.Row="3" Grid.Column="0" Content="Show Field Name" VerticalContentAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center"  />
+                <CheckBox Grid.Row="3" Grid.Column="1" IsChecked="{Binding OverrideSymbolFieldShowName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,5,0" />
+                <CheckBox Grid.Row="3" Grid.Column="2" IsChecked="{Binding SymbolFieldShowName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding OverrideSymbolFieldShowName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,5,0" />
+                <Label Grid.Row="3" Grid.Column="3" Content="Inherit Properties" VerticalContentAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <CheckBox Grid.Row="3" Grid.Column="4" IsChecked="{Binding OverrideSymbolFieldInheritProperties, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,5,0" />
+                <CheckBox Grid.Row="3" Grid.Column="5" IsChecked="{Binding SymbolFieldInheritProperties, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding OverrideSymbolFieldInheritProperties, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,5,0" />
+
+            </Grid>
         </Grid>
-    </Grid>
+    </GroupBox>
 </UserControl>

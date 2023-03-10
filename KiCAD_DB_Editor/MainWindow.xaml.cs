@@ -24,6 +24,10 @@ namespace KiCAD_DB_Editor
     /// </summary>
     public partial class MainWindow : Window
     {
+        public static RoutedCommand ExitCommand = new RoutedCommand();
+        public static RoutedCommand ImportCommand = new RoutedCommand();
+        public static RoutedCommand ExportCommand = new RoutedCommand();
+
         private DataObj? _dataObj = null;
         private DataObj DataObj
         {
@@ -150,17 +154,91 @@ namespace KiCAD_DB_Editor
 
         private void CommandBinding_Delete_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            if (e.Parameter is Library)
-                DataObj.Project.DeleteLibrary((Library)e.Parameter);
+            if (e.Parameter is Library l)
+                DataObj.Project.DeleteLibrary(l);
+
+            e.Handled = true;
+        }
+
+        private void CommandBinding_Help_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+
+            e.Handled = true;
+        }
+
+        private void CommandBinding_Help_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo("https://docs.kicad.org/7.0/en/eeschema/eeschema.html#database-libraries") { UseShellExecute = true });
+
+            e.Handled = true;
+        }
+
+        private void CommandBinding_Exit_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+
+            e.Handled = true;
+        }
+
+        private void CommandBinding_Exit_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            this.Close();
+
+            e.Handled = true;
+        }
+
+        private void CommandBinding_Import_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+
+            e.Handled = true;
+        }
+
+        private void CommandBinding_Import_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            bool? result;
+            int i = 1;
+            do
+            {
+                OpenFileDialog openFileDialog = new();
+                openFileDialog.Title = $"Import KiCAD DB Config File {i}";
+                openFileDialog.Filter = "KiCAD DB config file (*.kicad_dbl)|*.kicad_dbl";
+                result = openFileDialog.ShowDialog();
+                if (result == true)
+                    DataObj.Project.NewLibrary(openFileDialog.FileName);
+                i++;
+            }
+            while (result == true);
+
+            e.Handled = true;
+        }
+
+        private void CommandBinding_Export_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+
+            e.Handled = true;
+        }
+
+        private void CommandBinding_Export_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            bool? result;
+            foreach (Library library in DataObj.Project.Libraries)
+            {
+                SaveFileDialog saveFileDialog = new();
+                saveFileDialog.Title = $"Export KiCAD DB Config File | Library \"{library.Name}\" ";
+                saveFileDialog.Filter = "KiCAD DB config file (*.kicad_dbl)|*.kicad_dbl";
+                result = saveFileDialog.ShowDialog();
+                if (result == true)
+                    library.ExportToKiCADDBLFile(saveFileDialog.FileName);
+                else
+                    break;
+            }
 
             e.Handled = true;
         }
 
         #endregion
-
-        private void menuItem_FileExit_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        }
     }
 }

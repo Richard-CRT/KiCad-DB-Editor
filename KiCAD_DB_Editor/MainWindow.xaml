@@ -9,7 +9,7 @@
         xmlns:converters="clr-namespace:KiCAD_DB_Editor.Converters"
         x:Class="KiCAD_DB_Editor.MainWindow"
         mc:Ignorable="d"
-        Title="{Binding OpenProjectPath, Source={x:Static properties:Settings.Default}, StringFormat=KiCAD DB Editor | \{0\}}" Height="900" Width="1800" Loaded="Window_Loaded">
+        Title="{Binding OpenProjectPath, Source={x:Static properties:Settings.Default}, StringFormat=KiCAD DB Editor | \{0\}}" Height="900" Width="1800" Loaded="Window_Loaded" Icon="Images/Icon.png">
     <Window.DataContext>
         <local:DataObj/>
     </Window.DataContext>
@@ -24,6 +24,10 @@
         <CommandBinding Command="Save" CanExecute="CommandBinding_Save_CanExecute" Executed="CommandBinding_Save_Executed" />
         <CommandBinding Command="SaveAs" CanExecute="CommandBinding_SaveAs_CanExecute" Executed="CommandBinding_SaveAs_Executed" />
         <CommandBinding Command="Delete" CanExecute="CommandBinding_Delete_CanExecute" Executed="CommandBinding_Delete_Executed" />
+        <CommandBinding Command="Help" CanExecute="CommandBinding_Help_CanExecute" Executed="CommandBinding_Help_Executed" />
+        <CommandBinding Command="{x:Static local:MainWindow.ExitCommand}" CanExecute="CommandBinding_Exit_CanExecute" Executed="CommandBinding_Exit_Executed" />
+        <CommandBinding Command="{x:Static local:MainWindow.ImportCommand}" CanExecute="CommandBinding_Import_CanExecute" Executed="CommandBinding_Import_Executed" />
+        <CommandBinding Command="{x:Static local:MainWindow.ExportCommand}" CanExecute="CommandBinding_Export_CanExecute" Executed="CommandBinding_Export_Executed" />
     </Window.CommandBindings>
 
     <DockPanel x:Name="dockPanel_TopLevel">
@@ -35,7 +39,10 @@
                 <MenuItem x:Name="menuItem_FileSaveProject" Header="_Save Project" Command="Save" />
                 <MenuItem x:Name="menuItem_FileSaveAsProject" Header="_Save Project As..." Command="SaveAs" />
                 <Separator />
-                <MenuItem x:Name="menuItem_FileExit" Header="_Exit" Click="menuItem_FileExit_Click"  />
+                <MenuItem x:Name="menuItem_FileExit" Header="_Exit" Command="{x:Static local:MainWindow.ExitCommand}" />
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_KiCAD DB Documentation" Command="Help" />
             </MenuItem>
         </Menu>
         <Grid >
@@ -53,9 +60,21 @@
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
+
                 <Grid Grid.Row="0" Margin="5,5,5,0" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0" Content="Import multiple KiCAD files" Padding="5,5,5,5" VerticalAlignment="Center" Command="{x:Static local:MainWindow.ImportCommand}" Margin="0,0,2.5,0" />
+                    <Button Grid.Column="1" Content="Export all to KiCAD files" Padding="5,5,5,5" VerticalAlignment="Center" Command="{x:Static local:MainWindow.ExportCommand}" Margin="2.5,0,0,0" />
+                </Grid>
+
+                <Grid Grid.Row="1" Margin="5,5,5,0" >
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
@@ -66,7 +85,8 @@
                     <TextBox Margin="0,0,5,0" Text="{Binding Project.NewLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" />
                     <Button x:Name="button_NewLibrary" Grid.Column="1" Margin="0,0,0,0" Content="New Library" Click="button_NewLibrary_Click" Padding="5,5,5,5" ToolTip="Each library maps to a `*.kicad_dbl` file" />
                 </Grid>
-                <ListView Margin="5,5,5,5" Grid.Row="1" ItemsSource="{Binding Project.Libraries, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Name" SelectedItem="{Binding Project.SelectedLibrary}">
+                
+                <ListView Margin="5,5,5,5" Grid.Row="2" ItemsSource="{Binding Project.Libraries, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Name" SelectedItem="{Binding Project.SelectedLibrary}">
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" />
@@ -85,11 +105,7 @@
 
             </Grid>
             <GridSplitter HorizontalAlignment="Stretch" Grid.Column="1" />
-            <local:UserControl_Library Grid.Column="2" DataContext="{Binding Project.SelectedLibrary, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" BorderThickness="1,1,0,1" >
-                <local:UserControl_Library.BorderBrush>
-                    <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ActiveBorderColorKey}}"/>
-                </local:UserControl_Library.BorderBrush>
-            </local:UserControl_Library>
+            <local:UserControl_Library Grid.Column="2" DataContext="{Binding Project.SelectedLibrary, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
         </Grid>
     </DockPanel>
 </Window>

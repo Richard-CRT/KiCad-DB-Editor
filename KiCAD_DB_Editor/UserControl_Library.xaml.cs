@@ -23,9 +23,6 @@ namespace KiCAD_DB_Editor
     /// </summary>
     public partial class UserControl_Library : UserControl
     {
-        public static RoutedCommand ImportCommand = new RoutedCommand();
-        public static RoutedCommand ExportCommand = new RoutedCommand();
-
         private Library? _library = null;
         private Library Library
         {
@@ -69,8 +66,8 @@ namespace KiCAD_DB_Editor
 
         private void CommandBinding_Delete_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            if (e.Parameter is Category)
-                Library.DeleteCategory((Category)e.Parameter);
+            if (e.Parameter is Category c)
+                Library.DeleteCategory(c);
 
             e.Handled = true;
         }

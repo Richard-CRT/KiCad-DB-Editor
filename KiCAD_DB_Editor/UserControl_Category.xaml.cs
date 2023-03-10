@@ -51,5 +51,25 @@ namespace KiCAD_DB_Editor
         }
 
         #endregion
+
+
+        #region CommandBindings
+
+        private void CommandBinding_Delete_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+
+            e.Handled = true;
+        }
+
+        private void CommandBinding_Delete_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (e.Parameter is SymbolFieldMap sFM)
+                Category.DeleteSymbolFieldMap(sFM);
+
+            e.Handled = true;
+        }
+
+        #endregion
     }
 }

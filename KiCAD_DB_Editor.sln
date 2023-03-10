@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33122.133
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KiCAD_DB_Editor", "KiCAD_DB_Editor\KiCAD_DB_Editor.csproj", "{F9EF3992-D5A6-49E0-BC08-FB9AF8A9F8AB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KiCAD_DB_Editor", "KiCAD_DB_Editor\KiCAD_DB_Editor.csproj", "{F9EF3992-D5A6-49E0-BC08-FB9AF8A9F8AB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

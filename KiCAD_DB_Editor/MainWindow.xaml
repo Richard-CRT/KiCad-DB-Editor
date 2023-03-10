@@ -9,9 +9,10 @@
         xmlns:converters="clr-namespace:KiCAD_DB_Editor.Converters"
         x:Class="KiCAD_DB_Editor.MainWindow"
         mc:Ignorable="d"
-        Height="900" Width="1800" Loaded="Window_Loaded" Icon="Images/Icon.png">
+        Height="900" Width="1800" Loaded="Window_Loaded" Icon="Images/Icon.png" d:Title="KiCAD DB Editor | New Project">
     <Window.Title>
-        <Binding Path="OpenProjectPath" Source="{x:Static properties:Settings.Default}" StringFormat="KiCAD DB Editor | {0}" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" />
+        <Binding Path="OpenProjectPath" Source="{x:Static properties:Settings.Default}" StringFormat="KiCAD DB Editor | {0}" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay"
+                 />
     </Window.Title>
     <Window.DataContext>
         <local:DataObj/>
@@ -55,7 +56,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="5"/>
-                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="4*"/>
             </Grid.ColumnDefinitions>
             <Grid>
                 <Grid.ColumnDefinitions>

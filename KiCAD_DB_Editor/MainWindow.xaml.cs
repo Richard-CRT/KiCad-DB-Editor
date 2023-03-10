@@ -1,6 +1,9 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.Common;
+using System.Data.Odbc;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -47,7 +50,7 @@ namespace KiCAD_DB_Editor
             DataObj = (DataObj)DataContext; // Take the default data object that the XAML constructed
                                             // Be careful not to reconstruct _dataObj, as we will lose access to the dataObj object
                                             // that the form is using
-            
+
             if (Properties.Settings.Default.OpenProjectPath == "")
             {
                 Debug.Assert(ApplicationCommands.New.CanExecute(null, this));

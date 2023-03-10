@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:KiCAD_DB_Editor"
              xmlns:converters="clr-namespace:KiCAD_DB_Editor.Converters"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" DataContextChanged="UserControl_DataContextChanged">
+             d:DesignHeight="700" d:DesignWidth="1400" DataContextChanged="UserControl_DataContextChanged">
     <d:UserControl.DataContext>
         <local:Category/>
     </d:UserControl.DataContext>
@@ -26,7 +26,9 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition/>
+                <RowDefinition Height="2*"/>
+                <RowDefinition Height="5"/>
+                <RowDefinition Height="3*"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
@@ -122,13 +124,17 @@
                                     CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}" />
                             </ContextMenu>
                         </ListBox.ContextMenu>
-                        
+
                     </ListBox>
                 </Grid>
                 <GridSplitter HorizontalAlignment="Stretch" Grid.Column="1" />
 
                 <local:UserControl_SymbolFieldMap Grid.Column="2" DataContext="{Binding SelectedSymbolFieldMap, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="5,0,0,0" />
             </Grid>
+            
+            <GridSplitter VerticalAlignment="Stretch" Grid.Row="3" HorizontalAlignment="Stretch" />
+            
+            <DataGrid x:Name="dataGrid_TableEditor" Grid.Row="4" ItemsSource="{Binding DatabaseDataTable.DefaultView, UpdateSourceTrigger=PropertyChanged}" AutoGeneratingColumn="dataGrid_TableEditor_AutoGeneratingColumn" Margin="0,5,0,0" FrozenColumnCount="1" />
         </Grid>
     </GroupBox>
 </UserControl>

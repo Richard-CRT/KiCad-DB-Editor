@@ -2,8 +2,12 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Data;
+using System.Data.Common;
+using System.Data.Odbc;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Packaging;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -25,9 +29,24 @@ namespace KiCAD_DB_Editor
             return trimmedNewCategoryName != "";
         }
 
+        // ============================================================================================
+        // ============================================================================================
 
-        // ============================================================================================
-        // ============================================================================================
+        private Library? _parentLibrary;
+        [JsonInclude, JsonPropertyName("parent_library")]
+        public Library? ParentLibrary
+        {
+            get { return _parentLibrary; }
+            set
+            {
+                if (_parentLibrary != value)
+                {
+                    _parentLibrary = value;
+
+                    InvokePropertyChanged();
+                }
+            }
+        }
 
         private string? _name = null;
         [JsonPropertyName("name")]
@@ -192,6 +211,37 @@ namespace KiCAD_DB_Editor
             }
         }
 
+        private DataTable? _databaseDataTable = null;
+        [JsonIgnore]
+        public DataTable DatabaseDataTable
+        {
+            get { Debug.Assert(_databaseDataTable is not null); return _databaseDataTable; }
+            set
+            {
+                if (_databaseDataTable != value)
+                {
+                    if (_databaseDataTable is not null)
+                    {
+                        _databaseDataTable.RowChanged -= _databaseDataTable_WriteToDatabase;
+                        _databaseDataTable.RowDeleted -= _databaseDataTable_WriteToDatabase;
+                    }
+                    _databaseDataTable = value;
+                    _databaseDataTable.RowChanged += _databaseDataTable_WriteToDatabase;
+                    _databaseDataTable.RowDeleted += _databaseDataTable_WriteToDatabase;
+
+                    InvokePropertyChanged();
+                }
+            }
+        }
+
+        private bool _disable_databaseDataTable_WritingToDatabase = false;
+        private void _databaseDataTable_WriteToDatabase(object sender, EventArgs e)
+        {
+            if (_disable_databaseDataTable_WritingToDatabase)
+                return;
+            _performDatabaseAction(write: true);
+        }
+
         /// <summary>
         /// Exists only to get the WPF designer to believe I can use this object as DataContext
         /// </summary>
@@ -205,15 +255,18 @@ namespace KiCAD_DB_Editor
             NewSymbolFieldName = ""; // Exists for binding to textbox so must start as not-null
             SymbolFieldMaps = new();
             SymbolBuiltInPropertiesMap = new();
+            DatabaseDataTable = new();
         }
 
-        public Category(string name) : this()
+        public Category(Library parentLibrary, string name) : this()
         {
+            _parentLibrary = parentLibrary;
             Name = name;
         }
 
-        public Category(KiCADDBL_Library kiCADDBL_Library) : this()
+        public Category(Library parentLibrary, KiCADDBL_Library kiCADDBL_Library) : this()
         {
+            _parentLibrary = parentLibrary;
             if (kiCADDBL_Library.Name is not null) Name = kiCADDBL_Library.Name;
             if (kiCADDBL_Library.Table is not null) TableName = kiCADDBL_Library.Table;
             if (kiCADDBL_Library.Key is not null) KeyTableColumnName = kiCADDBL_Library.Key;
@@ -255,177 +308,59 @@ namespace KiCAD_DB_Editor
         {
             SymbolFieldMaps.Remove(symbolFieldMap);
         }
-    }
 
-    public class SymbolBuiltInPropertiesMap : NotifyObject
-    {
-        private bool? _useSymbolDescriptionTableColumnName = null;
-        [JsonPropertyName("use_description_table_column_name")]
-        public bool UseSymbolDescriptionTableColumnName
+        private void _performDatabaseAction(bool write = false, bool read = false)
         {
-            get { Debug.Assert(_useSymbolDescriptionTableColumnName is not null); return _useSymbolDescriptionTableColumnName.Value; }
-            set
+            if (!write && !read)
+                return;
+            if (ParentLibrary is not null)
             {
-                if (_useSymbolDescriptionTableColumnName != value)
-                {
-                    _useSymbolDescriptionTableColumnName = value;
+                string connectionString;
+                if (ParentLibrary.Source.ConnectionString != "")
+                    connectionString = $"{ParentLibrary.Source.ConnectionString};Connection Timeout={ParentLibrary.Source.TimeOutSeconds};";
+                else
+                    connectionString = $"DSN={ParentLibrary.Source.DSN};Uid={ParentLibrary.Source.Username};Pwd={ParentLibrary.Source.Password};Connection Timeout={ParentLibrary.Source.TimeOutSeconds};";
 
-                    InvokePropertyChanged();
+                try
+                {
+                    using (OdbcConnection connection = new OdbcConnection(connectionString))
+                    {
+                        connection.Open();
+
+                        OdbcDataAdapter dadapter = new OdbcDataAdapter();
+                        dadapter.MissingSchemaAction = MissingSchemaAction.AddWithKey;
+
+                        OdbcCommandBuilder builder =
+                            new OdbcCommandBuilder(dadapter);
+                        builder.QuotePrefix = "`";
+                        builder.QuoteSuffix = "`";
+
+
+                        string strSql = @$"SELECT * FROM {builder.QuoteIdentifier(TableName)}";
+                        dadapter.SelectCommand = new OdbcCommand(strSql, connection);
+
+                        if (write)
+                        {
+                            dadapter.Update(DatabaseDataTable);
+                        }
+                        if (read)
+                        {
+                            _disable_databaseDataTable_WritingToDatabase = true;
+                            dadapter.Fill(DatabaseDataTable);
+                            _disable_databaseDataTable_WritingToDatabase = false;
+                        }
+                    }
+                }
+                catch
+                {
+                    Debug.WriteLine($"Error while accessing {connectionString}");
                 }
             }
         }
 
-
-        private string? _symbolDescriptionTableColumnName = null;
-        [JsonPropertyName("symbol_description_table_column_name")]
-        public string SymbolDescriptionTableColumnName
+        public void UpdateDatabaseDataTable()
         {
-            get { Debug.Assert(_symbolDescriptionTableColumnName is not null); return _symbolDescriptionTableColumnName; }
-            set
-            {
-                if (_symbolDescriptionTableColumnName != value)
-                {
-                    _symbolDescriptionTableColumnName = value;
-
-                    InvokePropertyChanged();
-                }
-            }
-        }
-
-
-        private bool? _useSymbolKeywordsTableColumnName = null;
-        [JsonPropertyName("use_symbol_keywords_table_column_name")]
-        public bool UseSymbolKeywordsTableColumnName
-        {
-            get { Debug.Assert(_useSymbolKeywordsTableColumnName is not null); return _useSymbolKeywordsTableColumnName.Value; }
-            set
-            {
-                if (_useSymbolKeywordsTableColumnName != value)
-                {
-                    _useSymbolKeywordsTableColumnName = value;
-
-                    InvokePropertyChanged();
-                }
-            }
-        }
-
-        private string? _symbolKeywordsTableColumnName = null;
-        [JsonPropertyName("symbol_keywords_table_column_name")]
-        public string SymbolKeywordsTableColumnName
-        {
-            get { Debug.Assert(_symbolKeywordsTableColumnName is not null); return _symbolKeywordsTableColumnName; }
-            set
-            {
-                if (_symbolKeywordsTableColumnName != value)
-                {
-                    _symbolKeywordsTableColumnName = value;
-
-                    InvokePropertyChanged();
-                }
-            }
-        }
-
-
-        private bool? _useSymbolExcludeFromBomTableColumnName = null;
-        [JsonPropertyName("use_symbol_exclude_from_bom_table_column_name")]
-        public bool UseSymbolExcludeFromBomTableColumnName
-        {
-            get { Debug.Assert(_useSymbolExcludeFromBomTableColumnName is not null); return _useSymbolExcludeFromBomTableColumnName.Value; }
-            set
-            {
-                if (_useSymbolExcludeFromBomTableColumnName != value)
-                {
-                    _useSymbolExcludeFromBomTableColumnName = value;
-
-                    InvokePropertyChanged();
-                }
-            }
-        }
-
-        private string? _symbolExcludeFromBomTableColumnName = null;
-        [JsonPropertyName("symbol_exclude_from_bom_table_column_name")]
-        public string SymbolExcludeFromBomTableColumnName
-        {
-            get { Debug.Assert(_symbolExcludeFromBomTableColumnName is not null); return _symbolExcludeFromBomTableColumnName; }
-            set
-            {
-                if (_symbolExcludeFromBomTableColumnName != value)
-                {
-                    _symbolExcludeFromBomTableColumnName = value;
-
-                    InvokePropertyChanged();
-                }
-            }
-        }
-
-
-        private bool? _useSymbolExcludeFromBoardTableColumnName = null;
-        [JsonPropertyName("use_symbol_exclude_from_board_table_column_name")]
-        public bool UseSymbolExcludeFromBoardTableColumnName
-        {
-            get { Debug.Assert(_useSymbolExcludeFromBoardTableColumnName is not null); return _useSymbolExcludeFromBoardTableColumnName.Value; }
-            set
-            {
-                if (_useSymbolExcludeFromBoardTableColumnName != value)
-                {
-                    _useSymbolExcludeFromBoardTableColumnName = value;
-
-                    InvokePropertyChanged();
-                }
-            }
-        }
-
-        private string? _symbolExcludeFromBoardTableColumnName = null;
-        [JsonPropertyName("symbol_exclude_from_board_table_column_name")]
-        public string SymbolExcludeFromBoardTableColumnName
-        {
-            get { Debug.Assert(_symbolExcludeFromBoardTableColumnName is not null); return _symbolExcludeFromBoardTableColumnName; }
-            set
-            {
-                if (_symbolExcludeFromBoardTableColumnName != value)
-                {
-                    _symbolExcludeFromBoardTableColumnName = value;
-
-                    InvokePropertyChanged();
-                }
-            }
-        }
-
-
-        public SymbolBuiltInPropertiesMap()
-        {
-            UseSymbolDescriptionTableColumnName = true;
-            SymbolDescriptionTableColumnName = "";
-            UseSymbolKeywordsTableColumnName = false;
-            SymbolKeywordsTableColumnName = "";
-            UseSymbolExcludeFromBomTableColumnName = false;
-            SymbolExcludeFromBomTableColumnName = "";
-            UseSymbolExcludeFromBoardTableColumnName = false;
-            SymbolExcludeFromBoardTableColumnName = "";
-        }
-
-        public SymbolBuiltInPropertiesMap(KiCADDBL_Library_Properties kiCADDBL_Library_Properties) : this()
-        {
-            if (kiCADDBL_Library_Properties.Description is not null)
-            {
-                UseSymbolDescriptionTableColumnName = true;
-                SymbolDescriptionTableColumnName = kiCADDBL_Library_Properties.Description;
-            }
-            if (kiCADDBL_Library_Properties.Keywords is not null)
-            {
-                UseSymbolKeywordsTableColumnName = true;
-                SymbolKeywordsTableColumnName = kiCADDBL_Library_Properties.Keywords;
-            }
-            if (kiCADDBL_Library_Properties.ExcludeFromBom is not null)
-            {
-                UseSymbolExcludeFromBomTableColumnName = true;
-                SymbolExcludeFromBomTableColumnName = kiCADDBL_Library_Properties.ExcludeFromBom;
-            }
-            if (kiCADDBL_Library_Properties.ExcludeFromBoard is not null)
-            {
-                UseSymbolExcludeFromBoardTableColumnName = true;
-                SymbolExcludeFromBoardTableColumnName = kiCADDBL_Library_Properties.ExcludeFromBoard;
-            }
+            _performDatabaseAction(read:true);
         }
     }
 }

@@ -42,12 +42,21 @@ namespace KiCAD_DB_Editor
                 Category = (Category)DataContext;   // Take the default data object that the XAML constructed
                                                     // Be careful not to reconstruct _category, as we will lose access to the category object
                                                     // that the UC has been passed
+                
+                Category.UpdateDatabaseDataTable();
             }
         }
 
         private void button_NewSymbolFieldMap_Click(object sender, RoutedEventArgs e)
         {
             Category.NewSymbolFieldMap();
+        }
+
+        private void dataGrid_TableEditor_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
+        {
+            // Ensure there's no issue with special characters in the column name
+            //if (e.Column is DataGridBoundColumn col)
+            //    col.Binding = new Binding(string.Format("[{0}]", e.PropertyName));
         }
 
         #endregion

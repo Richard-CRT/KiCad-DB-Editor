@@ -25,7 +25,7 @@ namespace KiCAD_DB_Editor
                 var jsonString = File.ReadAllText(filePath);
 
                 Project? o;
-                o = (Project?)JsonSerializer.Deserialize(jsonString, typeof(Project));
+                o = (Project?)JsonSerializer.Deserialize(jsonString, typeof(Project), new JsonSerializerOptions {ReferenceHandler = ReferenceHandler.Preserve });
 
                 if (o is null) throw new ArgumentNullException("Project is null");
 
@@ -144,7 +144,7 @@ namespace KiCAD_DB_Editor
 
         public void SaveToFile(string filePath)
         {
-            File.WriteAllText(filePath, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
+            File.WriteAllText(filePath, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true, ReferenceHandler = ReferenceHandler.Preserve }));
         }
     }
 }

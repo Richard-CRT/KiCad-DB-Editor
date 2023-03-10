@@ -18,6 +18,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Data.Odbc" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="Fonts\Password-Regular.ttf">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>

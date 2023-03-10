@@ -8,7 +8,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" DataContextChanged="UserControl_DataContextChanged">
     <d:UserControl.DataContext>
-        <local:Library/>
+        <local:Category/>
     </d:UserControl.DataContext>
     <UserControl.Resources>
         <converters:NullToBoolConverter x:Key="NullToBoolConverter"/>
@@ -19,6 +19,7 @@
         >
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -27,14 +28,94 @@
 
         <Grid Grid.Row="0" Margin="5,5,5,0" >
             <Grid.RowDefinitions>
-                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <Label Content="Name:" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" Margin="0,0,5,0"/>
-            <TextBox Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" FontWeight="Bold" FontSize="16" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="0,0,5,0" />
+            <TextBox Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" FontWeight="Bold" FontSize="16" VerticalContentAlignment="Center" VerticalAlignment="Center" />
+        </Grid>
+        <Grid Grid.Row="1" Margin="5,5,5,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <Label Content="Table Name:" VerticalContentAlignment="Center" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="0" Grid.ColumnSpan="2" />
+            <TextBox TextWrapping="Wrap" Text="{Binding TableName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="2" VerticalContentAlignment="Center" Margin="2,2,2,2" />
+            <Label Content="Symbols Column Name:" VerticalContentAlignment="Center" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="2" />
+            <TextBox TextWrapping="Wrap" Text="{Binding SymbolsTableColumnName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="5" VerticalContentAlignment="Center" Margin="2,2,2,2" />
+
+            <Label Content="Key Column Name:" VerticalContentAlignment="Center" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"  />
+            <TextBox TextWrapping="Wrap" Text="{Binding KeyTableColumnName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="2" VerticalContentAlignment="Center" Margin="2,2,2,2" />
+            <Label Content="Footprints Column Name:" VerticalContentAlignment="Center" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="2"  />
+            <TextBox TextWrapping="Wrap" Text="{Binding FootprintsTableColumnName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="5" VerticalContentAlignment="Center" Margin="2,2,2,2" />
+
+            <Label Grid.Row="2" Grid.Column="0" Content="Description Column Name:" VerticalContentAlignment="Center" HorizontalAlignment="Right" VerticalAlignment="Center" />
+            <CheckBox Grid.Row="2" Grid.Column="1" IsChecked="{Binding SymbolBuiltInPropertiesMap.UseSymbolDescriptionTableColumnName}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,5,0" />
+            <TextBox Grid.Row="2" Grid.Column="2" IsEnabled="{Binding SymbolBuiltInPropertiesMap.UseSymbolDescriptionTableColumnName}" Text="{Binding SymbolBuiltInPropertiesMap.SymbolDescriptionTableColumnName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalContentAlignment="Center" Margin="2,2,2,2" />
+            <Label Grid.Row="2" Grid.Column="3" Content="Exclude from BOM Column Name:" VerticalContentAlignment="Center" HorizontalAlignment="Right" VerticalAlignment="Center" />
+            <CheckBox Grid.Row="2" Grid.Column="4" IsChecked="{Binding SymbolBuiltInPropertiesMap.UseSymbolExcludeFromBomTableColumnName}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,5,0" />
+            <TextBox Grid.Row="2" Grid.Column="5" IsEnabled="{Binding SymbolBuiltInPropertiesMap.UseSymbolExcludeFromBomTableColumnName}" Text="{Binding SymbolBuiltInPropertiesMap.SymbolExcludeFromBomTableColumnName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalContentAlignment="Center" Margin="2,2,2,2" />
+
+            <Label Grid.Row="3" Grid.Column="0" Content="Keywords Column Name:" VerticalContentAlignment="Center" HorizontalAlignment="Right" VerticalAlignment="Center" />
+            <CheckBox Grid.Row="3" Grid.Column="1" IsChecked="{Binding SymbolBuiltInPropertiesMap.UseSymbolKeywordsTableColumnName}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,5,0" />
+            <TextBox Grid.Row="3" Grid.Column="2" IsEnabled="{Binding SymbolBuiltInPropertiesMap.UseSymbolKeywordsTableColumnName}" Text="{Binding SymbolBuiltInPropertiesMap.SymbolKeywordsTableColumnName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalContentAlignment="Center" Margin="2,2,2,2" />
+            <Label Grid.Row="3" Grid.Column="3" Content="Exclude from Board Column Name:" VerticalContentAlignment="Center" HorizontalAlignment="Right" VerticalAlignment="Center" />
+            <CheckBox Grid.Row="3" Grid.Column="4" IsChecked="{Binding SymbolBuiltInPropertiesMap.UseSymbolExcludeFromBoardTableColumnName}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,5,0" />
+            <TextBox Grid.Row="3" Grid.Column="5" IsEnabled="{Binding SymbolBuiltInPropertiesMap.UseSymbolExcludeFromBoardTableColumnName}" Text="{Binding SymbolBuiltInPropertiesMap.SymbolExcludeFromBoardTableColumnName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalContentAlignment="Center" Margin="2,2,2,2" />
+
+        </Grid>
+        <Grid Grid.Row="2" Margin="5,5,5,5">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                
+                <Grid Grid.Row="0" >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Text="{Binding NewSymbolFieldName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" />
+                    <Button x:Name="button_NewSymbolFieldMap" Grid.Column="1" Margin="5,0,0,0" Content="New Symbol Field Map" Click="button_NewSymbolFieldMap_Click" Padding="5,5,5,5" />
+                </Grid>
+                
+                <ListBox ItemsSource="{Binding SymbolFieldMaps, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="SymbolFieldName" SelectedItem="{Binding SelectedSymbolFieldMap}" Grid.Row="1" Margin="0,5,0,0"/>
+            </Grid>
+            <GridSplitter HorizontalAlignment="Stretch" Grid.Column="1" />
+
+            <local:UserControl_SymbolFieldMap Grid.Column="2" DataContext="{Binding SelectedSymbolFieldMap, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" BorderThickness="1,1,1,1" >
+                <local:UserControl_SymbolFieldMap.BorderBrush>
+                    <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ActiveBorderColorKey}}"/>
+                </local:UserControl_SymbolFieldMap.BorderBrush>
+            </local:UserControl_SymbolFieldMap>
         </Grid>
     </Grid>
 </UserControl>

@@ -148,16 +148,15 @@ namespace KiCAD_DB_Editor
         public Library()
         {
             Name = "<Library Name>";
-            Description = "<Library SymbolDescriptionTableColumnName>";
+            Description = "";
             Source = new LibrarySource();
             NewCategoryName = ""; // Exists for binding to textbox so must start as not-null
             Categories = new ObservableCollection<Category>();
         }
 
-        public Library(string name, string description) : this()
+        public Library(string name) : this()
         {
             Name = name;
-            Description = description;
         }
 
         public void NewCategory()

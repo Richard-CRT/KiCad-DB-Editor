@@ -215,9 +215,9 @@ namespace KiCAD_DB_Editor
         [JsonPropertyName("keywords"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? Keywords { get; set; }
         [JsonPropertyName("exclude_from_bom"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public int? ExcludeFromBom { get; set; }
+        public string? ExcludeFromBom { get; set; }
         [JsonPropertyName("exclude_from_board"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public int? ExcludeFromBoard { get; set; }
+        public string? ExcludeFromBoard { get; set; }
 
         // =================================================================================
         // 
@@ -230,8 +230,8 @@ namespace KiCAD_DB_Editor
         {
             if (builtInPropertiesMap.UseSymbolDescriptionTableColumnName) Description = builtInPropertiesMap.SymbolDescriptionTableColumnName;
             if (builtInPropertiesMap.UseSymbolKeywordsTableColumnName) Keywords = builtInPropertiesMap.SymbolKeywordsTableColumnName;
-            if (builtInPropertiesMap.UseSymbolExcludeFromBomTableColumnName) ExcludeFromBom = builtInPropertiesMap.SymbolExcludeFromBomTableColumnName ? 1 : 0;
-            if (builtInPropertiesMap.UseSymbolExcludeFromBoardTableColumnName) ExcludeFromBoard = builtInPropertiesMap.SymbolExcludeFromBoardTableColumnName ? 1 : 0;
+            if (builtInPropertiesMap.UseSymbolExcludeFromBomTableColumnName) ExcludeFromBom = builtInPropertiesMap.SymbolExcludeFromBomTableColumnName;
+            if (builtInPropertiesMap.UseSymbolExcludeFromBoardTableColumnName) ExcludeFromBoard = builtInPropertiesMap.SymbolExcludeFromBoardTableColumnName;
         }
     }
 }

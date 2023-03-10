@@ -71,6 +71,8 @@ namespace KiCAD_DB_Editor
         {
             DataObj.Project = new();
 
+            Properties.Settings.Default.OpenProjectPath = "";
+
             e.Handled = true;
         }
 

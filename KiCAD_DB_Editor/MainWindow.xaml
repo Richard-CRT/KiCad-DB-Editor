@@ -85,7 +85,11 @@
 
             </Grid>
             <GridSplitter HorizontalAlignment="Stretch" Grid.Column="1" />
-            <local:UserControl_Library Grid.Column="2" DataContext="{Binding Project.SelectedLibrary, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <local:UserControl_Library Grid.Column="2" DataContext="{Binding Project.SelectedLibrary, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" BorderThickness="1,1,0,1" >
+                <local:UserControl_Library.BorderBrush>
+                    <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ActiveBorderColorKey}}"/>
+                </local:UserControl_Library.BorderBrush>
+            </local:UserControl_Library>
         </Grid>
     </DockPanel>
 </Window>

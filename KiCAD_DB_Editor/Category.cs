@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Xml.Linq;
@@ -115,6 +118,22 @@ namespace KiCAD_DB_Editor
 
 
 
+        private SymbolFieldMap? _selectedSymbolFieldMap = null;
+        [JsonIgnore]
+        public SymbolFieldMap? SelectedSymbolFieldMap
+        {
+            get { return _selectedSymbolFieldMap; }
+            set
+            {
+                if (_selectedSymbolFieldMap != value)
+                {
+                    _selectedSymbolFieldMap = value;
+
+                    InvokePropertyChanged();
+                }
+            }
+        }
+
         private ObservableCollection<SymbolFieldMap>? _symbolFieldMaps = null;
         [JsonPropertyName("symbol_field_map")]
         public ObservableCollection<SymbolFieldMap> SymbolFieldMaps
@@ -124,7 +143,31 @@ namespace KiCAD_DB_Editor
             {
                 if (_symbolFieldMaps != value)
                 {
+                    if (_symbolFieldMaps is not null)
+                        _symbolFieldMaps.CollectionChanged -= _symbolFieldMaps_CollectionChanged;
                     _symbolFieldMaps = value;
+                    _symbolFieldMaps.CollectionChanged += _symbolFieldMaps_CollectionChanged;
+                    _symbolFieldMaps_CollectionChanged(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+
+                    InvokePropertyChanged();
+                }
+            }
+        }
+
+        private void _symbolFieldMaps_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+        }
+
+        private string? _newSymbolFieldName = null;
+        [JsonIgnore]
+        public string NewSymbolFieldName
+        {
+            get { Debug.Assert(_newSymbolFieldName is not null); return _newSymbolFieldName; }
+            set
+            {
+                if (_newSymbolFieldName != value)
+                {
+                    _newSymbolFieldName = value;
 
                     InvokePropertyChanged();
                 }
@@ -159,6 +202,7 @@ namespace KiCAD_DB_Editor
             KeyTableColumnName = "";
             SymbolsTableColumnName = "";
             FootprintsTableColumnName = "";
+            NewSymbolFieldName = ""; // Exists for binding to textbox so must start as not-null
             SymbolFieldMaps = new();
             SymbolBuiltInPropertiesMap = new();
         }
@@ -183,10 +227,49 @@ namespace KiCAD_DB_Editor
         {
             return $"{Name}";
         }
+
+        public void NewSymbolFieldMap()
+        {
+            string newSymbolFieldName;
+            if (SymbolFieldMap.CheckNameValid(NewSymbolFieldName))
+                newSymbolFieldName = NewSymbolFieldName;
+            else
+            {
+                const string newSymbolFieldNamePrefix = $"Field ";
+                const string regexPattern = @$"^{newSymbolFieldNamePrefix}\d+$";
+
+                int currentMax = SymbolFieldMaps.Where(l => Regex.IsMatch(l.SymbolFieldName, regexPattern))
+                    .Select(l => int.Parse(l.SymbolFieldName.Remove(0, newSymbolFieldNamePrefix.Length)))
+                    .DefaultIfEmpty()
+                    .Max();
+
+                newSymbolFieldName = $"{newSymbolFieldNamePrefix}{currentMax + 1}";
+            }
+
+            int loc = 0;
+            while (loc < SymbolFieldMaps.Count && SymbolFieldMaps[loc].SymbolFieldName.CompareTo(newSymbolFieldName) < 0) loc++;
+            SymbolFieldMaps.Insert(loc, new(newSymbolFieldName));
+        }
+
+        public void DeleteSymbolFieldMap(SymbolFieldMap symbolFieldMap)
+        {
+            SymbolFieldMaps.Remove(symbolFieldMap);
+        }
     }
 
     public class SymbolFieldMap : NotifyObject
     {
+        public static bool CheckNameValid(string name)
+        {
+            string trimmedNewSymbolFieldName = name.Trim();
+            return trimmedNewSymbolFieldName != "";
+        }
+
+
+        // ============================================================================================
+        // ============================================================================================
+
+
         private string? _tableColumnName = null;
         [JsonPropertyName("table_column_name")]
         public string TableColumnName
@@ -213,9 +296,16 @@ namespace KiCAD_DB_Editor
             {
                 if (_symbolFieldName != value)
                 {
-                    _symbolFieldName = value;
+                    if (SymbolFieldMap.CheckNameValid(value))
+                    {
+                        _symbolFieldName = value;
 
-                    InvokePropertyChanged();
+                        InvokePropertyChanged();
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Must not be an empty string");
+                    }
                 }
             }
         }
@@ -351,7 +441,7 @@ namespace KiCAD_DB_Editor
         public SymbolFieldMap()
         {
             TableColumnName = "";
-            SymbolFieldName = "";
+            SymbolFieldName = "<Symbol Field Name>";
 
             OverrideSymbolFieldVisibleOnAdd = false;
             SymbolFieldVisibleOnAdd = false;
@@ -364,6 +454,11 @@ namespace KiCAD_DB_Editor
 
             OverrideSymbolFieldInheritProperties = false;
             SymbolFieldInheritProperties = false;
+        }
+
+        public SymbolFieldMap(string symbolFieldName) : this()
+        {
+            SymbolFieldName = symbolFieldName;
         }
 
         public SymbolFieldMap(KiCADDBL_Library_Field kiCADDBL_Library_Field) : this()
@@ -484,11 +579,11 @@ namespace KiCAD_DB_Editor
             }
         }
 
-        private bool? _symbolExcludeFromBomTableColumnName = null;
+        private string? _symbolExcludeFromBomTableColumnName = null;
         [JsonPropertyName("symbol_exclude_from_bom_table_column_name")]
-        public bool SymbolExcludeFromBomTableColumnName
+        public string SymbolExcludeFromBomTableColumnName
         {
-            get { Debug.Assert(_symbolExcludeFromBomTableColumnName is not null); return _symbolExcludeFromBomTableColumnName.Value; }
+            get { Debug.Assert(_symbolExcludeFromBomTableColumnName is not null); return _symbolExcludeFromBomTableColumnName; }
             set
             {
                 if (_symbolExcludeFromBomTableColumnName != value)
@@ -517,11 +612,11 @@ namespace KiCAD_DB_Editor
             }
         }
 
-        private bool? _symbolExcludeFromBoardTableColumnName = null;
+        private string? _symbolExcludeFromBoardTableColumnName = null;
         [JsonPropertyName("symbol_exclude_from_board_table_column_name")]
-        public bool SymbolExcludeFromBoardTableColumnName
+        public string SymbolExcludeFromBoardTableColumnName
         {
-            get { Debug.Assert(_symbolExcludeFromBoardTableColumnName is not null); return _symbolExcludeFromBoardTableColumnName.Value; }
+            get { Debug.Assert(_symbolExcludeFromBoardTableColumnName is not null); return _symbolExcludeFromBoardTableColumnName; }
             set
             {
                 if (_symbolExcludeFromBoardTableColumnName != value)
@@ -536,14 +631,14 @@ namespace KiCAD_DB_Editor
 
         public SymbolBuiltInPropertiesMap()
         {
-            UseSymbolDescriptionTableColumnName = false;
+            UseSymbolDescriptionTableColumnName = true;
             SymbolDescriptionTableColumnName = "";
             UseSymbolKeywordsTableColumnName = false;
             SymbolKeywordsTableColumnName = "";
             UseSymbolExcludeFromBomTableColumnName = false;
-            SymbolExcludeFromBomTableColumnName = false;
+            SymbolExcludeFromBomTableColumnName = "";
             UseSymbolExcludeFromBoardTableColumnName = false;
-            SymbolExcludeFromBoardTableColumnName = false;
+            SymbolExcludeFromBoardTableColumnName = "";
         }
 
         public SymbolBuiltInPropertiesMap(KiCADDBL_Library_Properties kiCADDBL_Library_Properties) : this()
@@ -561,12 +656,12 @@ namespace KiCAD_DB_Editor
             if (kiCADDBL_Library_Properties.ExcludeFromBom is not null)
             {
                 UseSymbolExcludeFromBomTableColumnName = true;
-                SymbolExcludeFromBomTableColumnName = kiCADDBL_Library_Properties.ExcludeFromBom != 0;
+                SymbolExcludeFromBomTableColumnName = kiCADDBL_Library_Properties.ExcludeFromBom;
             }
             if (kiCADDBL_Library_Properties.ExcludeFromBoard is not null)
             {
                 UseSymbolExcludeFromBoardTableColumnName = true;
-                SymbolExcludeFromBoardTableColumnName = kiCADDBL_Library_Properties.ExcludeFromBoard != 0;
+                SymbolExcludeFromBoardTableColumnName = kiCADDBL_Library_Properties.ExcludeFromBoard;
             }
         }
     }

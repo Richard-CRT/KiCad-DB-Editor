@@ -45,6 +45,11 @@ namespace KiCAD_DB_Editor
             }
         }
 
+        private void button_NewSymbolFieldMap_Click(object sender, RoutedEventArgs e)
+        {
+            Category.NewSymbolFieldMap();
+        }
+
         #endregion
     }
 }

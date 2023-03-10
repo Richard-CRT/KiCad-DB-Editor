@@ -27,7 +27,6 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -81,19 +80,7 @@
             <TextBox TextWrapping="Wrap" Text="{Binding Source.ConnectionString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="5" VerticalContentAlignment="Center" Margin="0,2,0,2"/>
         </Grid>
 
-        <Grid Grid.Row="2" Margin="5,5,5,0" >
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <TextBox Margin="0,0,5,0" Text="{Binding NewCategoryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" />
-            <Button x:Name="button_NewCategory" Grid.Column="1" Margin="0,0,0,0" Content="New Category" Click="button_NewCategory_Click" Padding="5,5,5,5" ToolTip="Each library maps to a table in the `*.kicad_dbl` file" />
-        </Grid>
-
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="2" Margin="5,5,5,5">
             <Grid.RowDefinitions>
                 <RowDefinition/>
             </Grid.RowDefinitions>
@@ -102,18 +89,42 @@
                 <ColumnDefinition Width="5"/>
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
-            <ListBox Grid.Column="0" Margin="5,5,5,5" ItemsSource="{Binding Categories, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedCategory}">
+            <Grid Grid.Column="0" >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
 
-                <ListBox.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="Delete"
+                <Grid Grid.Row="0" >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Text="{Binding NewCategoryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" />
+                    <Button x:Name="button_NewCategory" Grid.Column="1" Margin="5,0,0,0" Content="New Category" Click="button_NewCategory_Click" Padding="5,5,5,5" ToolTip="Each library maps to a table in the `*.kicad_dbl` file" />
+                </Grid>
+
+                <ListBox ItemsSource="{Binding Categories, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedCategory}" Grid.Row="1" Margin="0,5,0,0">
+
+                    <ListBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Delete"
                                     Command="Delete"
                                     CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}" />
-                    </ContextMenu>
-                </ListBox.ContextMenu>
+                        </ContextMenu>
+                    </ListBox.ContextMenu>
 
-            </ListBox>
-            <local:UserControl_Category Grid.Column="2" DataContext="{Binding SelectedCategory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </ListBox>
+            </Grid>
+            <GridSplitter HorizontalAlignment="Stretch" Grid.Column="1" />
+            <local:UserControl_Category Grid.Column="2" DataContext="{Binding SelectedCategory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" BorderThickness="1,1,1,1" >
+                <local:UserControl_Category.BorderBrush>
+                    <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ActiveBorderColorKey}}"/>
+                </local:UserControl_Category.BorderBrush>
+            </local:UserControl_Category>
         </Grid>
     </Grid>
 </UserControl>

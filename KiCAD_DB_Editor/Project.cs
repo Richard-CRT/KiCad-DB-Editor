@@ -105,10 +105,10 @@ namespace KiCAD_DB_Editor
             Libraries = new ObservableCollection<Library>();
         }
 
-        public void NewLibrary(string description = "")
+        public void NewLibrary()
         {
             if (Library.CheckNameValid(NewLibraryName))
-                Libraries.Add(new(NewLibraryName, description));
+                Libraries.Add(new(NewLibraryName));
             else
             {
                 const string newLibraryNamePrefix = $"Library ";
@@ -121,7 +121,7 @@ namespace KiCAD_DB_Editor
 
                 string newLibraryName = $"{newLibraryNamePrefix}{currentMax + 1}";
 
-                Libraries.Add(new(newLibraryName, description));
+                Libraries.Add(new(newLibraryName));
             }
         }
 

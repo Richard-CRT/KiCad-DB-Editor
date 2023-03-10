@@ -47,8 +47,14 @@ namespace KiCAD_DB_Editor
             DataObj = (DataObj)DataContext; // Take the default data object that the XAML constructed
                                             // Be careful not to reconstruct _dataObj, as we will lose access to the dataObj object
                                             // that the form is using
+            
+            if (Properties.Settings.Default.OpenProjectPath == "")
+            {
+                Debug.Assert(ApplicationCommands.New.CanExecute(null, this));
+                ApplicationCommands.New.Execute(null, this);
+            }
 
-            if (Properties.Settings.Default.OpenProjectPath != "" && File.Exists(Properties.Settings.Default.OpenProjectPath))
+            if (Properties.Settings.Default.OpenProjectPath != "New Project" && File.Exists(Properties.Settings.Default.OpenProjectPath))
             {
                 DataObj.Project = Project.FromFile(Properties.Settings.Default.OpenProjectPath);
             }
@@ -75,7 +81,7 @@ namespace KiCAD_DB_Editor
         {
             DataObj.Project = new();
 
-            Properties.Settings.Default.OpenProjectPath = "";
+            Properties.Settings.Default.OpenProjectPath = "New Project";
 
             e.Handled = true;
         }
@@ -112,7 +118,7 @@ namespace KiCAD_DB_Editor
 
         private void CommandBinding_Save_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            if (Properties.Settings.Default.OpenProjectPath != "")
+            if (Properties.Settings.Default.OpenProjectPath != "" && Properties.Settings.Default.OpenProjectPath != "New Project")
             {
                 DataObj.Project.SaveToFile(Properties.Settings.Default.OpenProjectPath);
 

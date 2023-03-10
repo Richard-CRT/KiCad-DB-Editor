@@ -93,7 +93,7 @@
                     <ColumnDefinition Width="5"/>
                     <ColumnDefinition Width="3*"/>
                 </Grid.ColumnDefinitions>
-                <Grid Grid.Column="0" >
+                <Grid Grid.Column="0" Margin="0,0,5,0" >
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition/>
@@ -124,7 +124,7 @@
                     </ListBox>
                 </Grid>
                 <GridSplitter HorizontalAlignment="Stretch" Grid.Column="1" />
-                <local:UserControl_Category Grid.Column="2" DataContext="{Binding SelectedCategory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <local:UserControl_Category Grid.Column="2" DataContext="{Binding SelectedCategory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="5,0,0,0" />
             </Grid>
         </Grid>
     </GroupBox>

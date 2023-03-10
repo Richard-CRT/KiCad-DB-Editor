@@ -116,9 +116,9 @@ namespace KiCAD_DB_Editor
             }
         }
         [JsonPropertyName("categories")]
-        public Category[] CategoriesEncapsulated
+        public List<Category> CategoriesEncapsulated
         {
-            get { return Categories.OrderBy(c => c.Name).ToArray(); }
+            get { return Categories.OrderBy(c => c.Name).ToList(); }
             set { Categories = new ObservableCollection<Category>(value.OrderBy(c => c.Name)); }
         }
 
@@ -205,7 +205,7 @@ namespace KiCAD_DB_Editor
 
             var newCategories = kiCADDBL.Libraries?.Select(kL => new Category(this, kL));
             if (newCategories is not null && newCategories.Any())
-                CategoriesEncapsulated = newCategories.ToArray();
+                CategoriesEncapsulated = newCategories.ToList();
         }
 
         public void ExportToKiCADDBLFile(string filePath)

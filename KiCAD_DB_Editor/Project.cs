@@ -60,7 +60,7 @@ namespace KiCAD_DB_Editor
         }
 
         private ObservableCollection<Library>? _libraries = null;
-        [JsonPropertyName("libraries")]
+        [JsonIgnore]
         public ObservableCollection<Library> Libraries
         {
             get { Debug.Assert(_libraries is not null); return _libraries; }
@@ -77,6 +77,12 @@ namespace KiCAD_DB_Editor
                     InvokePropertyChanged();
                 }
             }
+        }
+        [JsonPropertyName("libraries")]
+        public List<Library> LibrariesEncapsulated
+        {
+            get { return Libraries.OrderBy(l => l.Name).ToList(); }
+            set { Libraries = new ObservableCollection<Library>(value.OrderBy(l => l.Name)); }
         }
 
         private void _libraries_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

@@ -25,7 +25,19 @@ namespace KiCAD_DB_Editor
         private Category? Category
         {
             get { return _category; }
-            set { if (_category != value) _category = value; }
+            set
+            {
+                if (_category != value)
+                {
+                    if (_category is not null)
+
+                        _category.DataTableUpdated -= _category_DataTableUpdated;
+                    _category = value;
+
+                    if (_category is not null)
+                        _category.DataTableUpdated += _category_DataTableUpdated;
+                }
+            }
         }
 
         public UserControl_Category()
@@ -84,6 +96,12 @@ namespace KiCAD_DB_Editor
             }
         }
 
+        private void _category_DataTableUpdated(object? sender, EventArgs e)
+        {
+            dataGrid_TableEditor.AutoGenerateColumns = false;
+            dataGrid_TableEditor.AutoGenerateColumns = true;
+        }
+
         #endregion
 
 
@@ -110,5 +128,10 @@ namespace KiCAD_DB_Editor
         }
 
         #endregion
+
+        private void dataGrid_TableEditor_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
+        {
+
+        }
     }
 }

@@ -201,7 +201,12 @@ namespace KiCAD_DB_Editor
 
         public void DeleteLibrary(Library library)
         {
+            int indexOfRemoval = Libraries.IndexOf(library);
             Libraries.Remove(library);
+            if (indexOfRemoval >= Libraries.Count)
+                SelectedLibrary = Libraries.Last();
+            else
+                SelectedLibrary = Libraries[indexOfRemoval];
         }
 
         public string GetNextPrimaryKey(List<Category> failedCategories)
@@ -211,7 +216,9 @@ namespace KiCAD_DB_Editor
 
         public void SaveToFile(string filePath)
         {
-            File.WriteAllText(filePath, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true, ReferenceHandler = ReferenceHandler.Preserve }));
+            string tempPath = $"{filePath}.tmp";
+            File.WriteAllText(tempPath, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true, ReferenceHandler = ReferenceHandler.Preserve }));
+            File.Move(tempPath, filePath, overwrite: true);
         }
     }
 }

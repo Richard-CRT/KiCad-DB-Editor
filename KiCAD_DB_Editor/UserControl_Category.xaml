@@ -156,7 +156,7 @@
 
 
 
-                <DataGrid x:Name="dataGrid_TableEditor" ItemsSource="{Binding DatabaseDataTable.DefaultView, UpdateSourceTrigger=PropertyChanged}" FrozenColumnCount="1" IsEnabled="{Binding DatabaseConnectionValid, Mode=OneWay}" CanUserResizeRows="False" CanUserAddRows="False" />
+                <DataGrid x:Name="dataGrid_TableEditor" ItemsSource="{Binding DatabaseDataTable.DefaultView, UpdateSourceTrigger=PropertyChanged}" FrozenColumnCount="1" IsEnabled="{Binding DatabaseConnectionValid, Mode=OneWay}" CanUserResizeRows="False" CanUserAddRows="False" AutoGeneratingColumn="dataGrid_TableEditor_AutoGeneratingColumn" />
             </DockPanel>
 
         </Grid>

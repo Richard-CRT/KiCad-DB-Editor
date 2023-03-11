@@ -380,9 +380,15 @@ namespace KiCAD_DB_Editor
 
         public void DeleteSymbolFieldMap(SymbolFieldMap symbolFieldMap)
         {
+            int indexOfRemoval = SymbolFieldMaps.IndexOf(symbolFieldMap);
             SymbolFieldMaps.Remove(symbolFieldMap);
+            if (indexOfRemoval >= SymbolFieldMaps.Count)
+                SelectedSymbolFieldMap = SymbolFieldMaps.Last();
+            else
+                SelectedSymbolFieldMap = SymbolFieldMaps[indexOfRemoval];
         }
 
+        public event EventHandler DataTableUpdated;
         private Exception? _performDatabaseAction(bool write = false, bool read = false)
         {
             if (!write && !read)
@@ -420,8 +426,10 @@ namespace KiCAD_DB_Editor
                         if (read)
                         {
                             _disable_databaseDataTable_WritingToDatabase = true;
+                            DatabaseDataTable = new();
                             dadapter.Fill(DatabaseDataTable);
                             _disable_databaseDataTable_WritingToDatabase = false;
+                            DataTableUpdated?.Invoke(this, EventArgs.Empty);
                         }
                         DatabaseConnectionValid = true;
                         DatabaseConnectionStatus = "Connection Successful";

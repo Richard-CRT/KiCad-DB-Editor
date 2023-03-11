@@ -7,6 +7,7 @@ using System.Data.Odbc;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -19,6 +20,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace KiCAD_DB_Editor
 {
@@ -38,9 +40,16 @@ namespace KiCAD_DB_Editor
             set { if (_dataObj != value) _dataObj = value; }
         }
 
+        private DispatcherTimer DispatcherTimer;
+
         public MainWindow()
         {
             InitializeComponent();
+
+            DispatcherTimer = new();
+            DispatcherTimer.Interval = TimeSpan.FromMinutes(5);
+            DispatcherTimer.IsEnabled = true;
+            DispatcherTimer.Tick += DispatcherTimer_Tick;
         }
 
         #region Events
@@ -66,6 +75,19 @@ namespace KiCAD_DB_Editor
         private void button_NewLibrary_Click(object sender, RoutedEventArgs e)
         {
             DataObj.Project.NewLibrary();
+        }
+
+        /// <summary>
+        /// Periodic auto-save
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DispatcherTimer_Tick(object? sender, EventArgs e)
+        {
+            if (Properties.Settings.Default.OpenProjectPath != "" && Properties.Settings.Default.OpenProjectPath != "New Project")
+            {
+                DataObj.Project.SaveToFile($"{Properties.Settings.Default.OpenProjectPath}.bak");
+            }
         }
 
         #endregion

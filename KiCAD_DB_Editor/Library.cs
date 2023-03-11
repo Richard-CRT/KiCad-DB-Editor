@@ -250,7 +250,15 @@ namespace KiCAD_DB_Editor
 
         public void DeleteCategory(Category category)
         {
+            int indexOfRemoval = Categories.IndexOf(category);
             Categories.Remove(category);
+            if (Categories.Any())
+            {
+                if (indexOfRemoval >= Categories.Count)
+                    SelectedCategory = Categories.Last();
+                else
+                    SelectedCategory = Categories[indexOfRemoval];
+            }
         }
 
         public string GetNextPrimaryKey(List<Category> failedCategories, string? keyPattern = null)

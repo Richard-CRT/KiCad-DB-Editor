@@ -22,9 +22,9 @@ namespace KiCAD_DB_Editor
     public partial class UserControl_SymbolFieldMap : UserControl
     {
         private SymbolFieldMap? _symbolFieldMap = null;
-        private SymbolFieldMap SymbolFieldMap
+        private SymbolFieldMap? SymbolFieldMap
         {
-            get { Debug.Assert(_symbolFieldMap is not null); return _symbolFieldMap; }
+            get { return _symbolFieldMap; }
             set { if (_symbolFieldMap != value) _symbolFieldMap = value; }
         }
 
@@ -37,12 +37,14 @@ namespace KiCAD_DB_Editor
 
         private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (DataContext is SymbolFieldMap)
+            if (DataContext is SymbolFieldMap dC)
             {
-                SymbolFieldMap = (SymbolFieldMap)DataContext;   // Take the default data object that the XAML constructed
+                SymbolFieldMap = dC;   // Take the default data object that the XAML constructed
                                                                 // Be careful not to reconstruct _symbolFieldMap, as we will lose access to the symbol field map object
                                                                 // that the UC has been passed
             }
+            else
+                SymbolFieldMap = null;
         }
 
         #endregion

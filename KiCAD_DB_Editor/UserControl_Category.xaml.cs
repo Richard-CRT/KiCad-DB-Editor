@@ -22,9 +22,9 @@ namespace KiCAD_DB_Editor
     public partial class UserControl_Category : UserControl
     {
         private Category? _category = null;
-        private Category Category
+        private Category? Category
         {
-            get { Debug.Assert(_category is not null); return _category; }
+            get { return _category; }
             set { if (_category != value) _category = value; }
         }
 
@@ -37,26 +37,34 @@ namespace KiCAD_DB_Editor
 
         private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (DataContext is Category)
+            if (DataContext is Category dC)
             {
-                Category = (Category)DataContext;   // Take the default data object that the XAML constructed
-                                                    // Be careful not to reconstruct _category, as we will lose access to the category object
-                                                    // that the UC has been passed
-                
+                Category = dC;   // Take the default data object that the XAML constructed
+                                 // Be careful not to reconstruct _category, as we will lose access to the category object
+                                 // that the UC has been passed
+
                 Category.UpdateDatabaseDataTable();
             }
+            else
+                Category = null;
         }
 
         private void button_NewSymbolFieldMap_Click(object sender, RoutedEventArgs e)
         {
-            Category.NewSymbolFieldMap();
+            if (Category is not null)
+                Category.NewSymbolFieldMap();
         }
 
-        private void dataGrid_TableEditor_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
+        private void button_Connect_Click(object sender, RoutedEventArgs e)
         {
-            // Ensure there's no issue with special characters in the column name
-            //if (e.Column is DataGridBoundColumn col)
-            //    col.Binding = new Binding(string.Format("[{0}]", e.PropertyName));
+            if (Category is not null)
+                Category.UpdateDatabaseDataTable();
+        }
+
+        private void button_NewPart_Click(object sender, RoutedEventArgs e)
+        {
+            if (Category is not null)
+                Category.NewDataBaseDataTableRow();
         }
 
         #endregion
@@ -66,13 +74,19 @@ namespace KiCAD_DB_Editor
 
         private void CommandBinding_Delete_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = true;
+            if (Category is not null)
+                e.CanExecute = false;
+            else
+            {
+                e.CanExecute = true;
 
-            e.Handled = true;
+                e.Handled = true;
+            }
         }
 
         private void CommandBinding_Delete_Executed(object sender, ExecutedRoutedEventArgs e)
         {
+            Debug.Assert(Category is not null);
             if (e.Parameter is SymbolFieldMap sFM)
                 Category.DeleteSymbolFieldMap(sFM);
 

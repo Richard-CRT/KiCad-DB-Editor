@@ -23,11 +23,6 @@ namespace KiCAD_DB_Editor
 {
     public class Category : NotifyObject
     {
-        public static bool CheckNameValid(string name)
-        {
-            string trimmedNewCategoryName = name.Trim();
-            return trimmedNewCategoryName != "";
-        }
 
         // ============================================================================================
         // ============================================================================================
@@ -55,11 +50,12 @@ namespace KiCAD_DB_Editor
             get { Debug.Assert(_name is not null); return _name; }
             set
             {
-                if (_name != value)
+                string trimmed = value.Trim();
+                if (_name != trimmed)
                 {
-                    if (Category.CheckNameValid(value))
+                    if (trimmed != "")
                     {
-                        _name = value;
+                        _name = trimmed;
 
                         InvokePropertyChanged();
                     }
@@ -136,6 +132,45 @@ namespace KiCAD_DB_Editor
         }
 
 
+        private bool? _useCategorySpecificKeyPattern = null;
+        [JsonPropertyName("use_category_specific_key_pattern")]
+        public bool UseCategorySpecificKeyPattern
+        {
+            get { Debug.Assert(_useCategorySpecificKeyPattern is not null); return _useCategorySpecificKeyPattern.Value; }
+            set
+            {
+                if (_useCategorySpecificKeyPattern != value)
+                {
+                    _useCategorySpecificKeyPattern = value;
+
+                    InvokePropertyChanged();
+                }
+            }
+        }
+        private string? _categorySpecificKeyPattern = null;
+        [JsonPropertyName("category_specific_key_pattern")]
+        public string CategorySpecificKeyPattern
+        {
+            get { Debug.Assert(_categorySpecificKeyPattern is not null); return _categorySpecificKeyPattern; }
+            set
+            {
+                string trimmed = value.Trim();
+                if (_categorySpecificKeyPattern != trimmed)
+                {
+                    if (trimmed.Length <= 20 && Project.s_KeyPatternRegex.IsMatch(trimmed))
+                    {
+                        _categorySpecificKeyPattern = trimmed;
+
+                        InvokePropertyChanged();
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Must match key pattern");
+                    }
+                }
+            }
+        }
+
 
         private SymbolFieldMap? _selectedSymbolFieldMap = null;
         [JsonIgnore]
@@ -184,9 +219,10 @@ namespace KiCAD_DB_Editor
             get { Debug.Assert(_newSymbolFieldName is not null); return _newSymbolFieldName; }
             set
             {
-                if (_newSymbolFieldName != value)
+                string trimmed = value.Trim();
+                if (_newSymbolFieldName != trimmed)
                 {
-                    _newSymbolFieldName = value;
+                    _newSymbolFieldName = trimmed;
 
                     InvokePropertyChanged();
                 }
@@ -205,6 +241,40 @@ namespace KiCAD_DB_Editor
                 if (_symbolBuiltInPropertiesMap != value)
                 {
                     _symbolBuiltInPropertiesMap = value;
+
+                    InvokePropertyChanged();
+                }
+            }
+        }
+
+
+
+        private bool? _databaseConnectionValid = null;
+        [JsonIgnore]
+        public bool DatabaseConnectionValid
+        {
+            get { Debug.Assert(_databaseConnectionValid is not null); return _databaseConnectionValid.Value; }
+            set
+            {
+                if (_databaseConnectionValid != value)
+                {
+                    _databaseConnectionValid = value;
+
+                    InvokePropertyChanged();
+                }
+            }
+        }
+
+        private string? _databaseConnectionStatus = null;
+        [JsonIgnore]
+        public string DatabaseConnectionStatus
+        {
+            get { Debug.Assert(_databaseConnectionStatus is not null); return _databaseConnectionStatus; }
+            set
+            {
+                if (_databaseConnectionStatus != value)
+                {
+                    _databaseConnectionStatus = value;
 
                     InvokePropertyChanged();
                 }
@@ -252,10 +322,14 @@ namespace KiCAD_DB_Editor
             KeyTableColumnName = "";
             SymbolsTableColumnName = "";
             FootprintsTableColumnName = "";
+            UseCategorySpecificKeyPattern = false;
+            CategorySpecificKeyPattern = "CMP-####";
             NewSymbolFieldName = ""; // Exists for binding to textbox so must start as not-null
             SymbolFieldMaps = new();
             SymbolBuiltInPropertiesMap = new();
+            DatabaseConnectionValid = false;
             DatabaseDataTable = new();
+            DatabaseConnectionStatus = "";
         }
 
         public Category(Library parentLibrary, string name) : this()
@@ -284,7 +358,7 @@ namespace KiCAD_DB_Editor
         public void NewSymbolFieldMap()
         {
             string newSymbolFieldName;
-            if (SymbolFieldMap.CheckNameValid(NewSymbolFieldName))
+            if (NewSymbolFieldName != "")
                 newSymbolFieldName = NewSymbolFieldName;
             else
             {
@@ -349,18 +423,85 @@ namespace KiCAD_DB_Editor
                             dadapter.Fill(DatabaseDataTable);
                             _disable_databaseDataTable_WritingToDatabase = false;
                         }
+                        DatabaseConnectionValid = true;
+                        DatabaseConnectionStatus = "Connection Successful";
                     }
                 }
-                catch
+                catch (OdbcException ex)
                 {
                     Debug.WriteLine($"Error while accessing {connectionString}");
+                    DatabaseDataTable.Clear();
+                    if (ex.Message.Contains("HY000"))
+                        DatabaseConnectionStatus = $"Connection Failed (Table `{TableName}` not found)";
+                    else if (ex.Message.Contains("IM002"))
+                        DatabaseConnectionStatus = $"Connection Failed (Database `{ParentLibrary.Source.DSN}` not found)";
+                    else
+                        DatabaseConnectionStatus = $"Connection Failed (Unknown)";
+                    DatabaseConnectionValid = false;
                 }
             }
         }
 
         public void UpdateDatabaseDataTable()
         {
-            _performDatabaseAction(read:true);
+            _performDatabaseAction(read: true);
+        }
+
+        public string GetNextPrimaryKey(string? keyPattern = null)
+        {
+            if (keyPattern is null && UseCategorySpecificKeyPattern)
+                keyPattern = CategorySpecificKeyPattern;
+
+            UpdateDatabaseDataTable();
+
+            if (DatabaseDataTable.PrimaryKey.Length != 1)
+                throw new ArgumentException("This app only supports single column primary keys");
+            var primaryKeyColumn = DatabaseDataTable.PrimaryKey[0];
+
+            string newPrimaryKey;
+            // Need to find the next component ID
+            if (keyPattern is not null)
+            {
+                IEnumerable<string> primaryKeys = DatabaseDataTable.AsEnumerable().Select(r =>
+                {
+                    string? pK = r.Field<string>(primaryKeyColumn.ColumnName);
+                    if (pK is null)
+                        throw new ArgumentException("Primary keys must not be null");
+                    return pK!;
+                });
+
+                newPrimaryKey = Project.s_GetNextPrimaryKey(keyPattern, primaryKeys, true);
+            }
+            else
+            {
+                // Ask library to find it for us
+                Debug.Assert(ParentLibrary is not null);
+                newPrimaryKey = ParentLibrary.GetNextPrimaryKey();
+            }
+
+            return newPrimaryKey;
+        }
+
+        public void NewDataBaseDataTableRow()
+        {
+            if (DatabaseDataTable.PrimaryKey.Length != 1)
+                throw new ArgumentException("This app only supports single column primary keys");
+            var primaryKeyColumn = DatabaseDataTable.PrimaryKey[0];
+
+            DataRow newDR = DatabaseDataTable.NewRow();
+
+            string newPrimaryKey = GetNextPrimaryKey();
+
+            newDR[primaryKeyColumn.ColumnName] = newPrimaryKey;
+            try
+            {
+                DatabaseDataTable.Rows.Add(newDR);
+            }
+            catch (ConstraintException ex)
+            {
+                Debug.WriteLine("Constraint exception when adding new row:");
+                Debug.WriteLine(ex.Message);
+            }
         }
     }
 }

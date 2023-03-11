@@ -121,6 +121,8 @@ namespace KiCAD_DB_Editor
 
         private void CommandBinding_Save_Executed(object sender, ExecutedRoutedEventArgs e)
         {
+            FocusManager.SetFocusedElement(this, this); // Force LostFocus validation
+
             if (Properties.Settings.Default.OpenProjectPath != "" && Properties.Settings.Default.OpenProjectPath != "New Project")
             {
                 DataObj.Project.SaveToFile(Properties.Settings.Default.OpenProjectPath);
@@ -140,6 +142,8 @@ namespace KiCAD_DB_Editor
 
         private void CommandBinding_SaveAs_Executed(object sender, ExecutedRoutedEventArgs e)
         {
+            FocusManager.SetFocusedElement(this, this); // Force LostFocus validation
+
             SaveFileDialog saveFileDialog = new();
             saveFileDialog.Title = "Save KiCAD DB Editor Project File";
             saveFileDialog.Filter = "Project file (*.kidbe_proj)|*.kidbe_proj";

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -19,10 +20,24 @@ namespace KiCAD_DB_Editor
 {
     public class Library : NotifyObject
     {
-        public static bool CheckNameValid(string name)
+
+        // ============================================================================================
+        // ============================================================================================
+
+        private Project? _parentProject;
+        [JsonInclude, JsonPropertyName("parent_project")]
+        public Project? ParentProject
         {
-            string trimmedNewLibraryName = name.Trim();
-            return trimmedNewLibraryName != "";
+            get { return _parentProject; }
+            set
+            {
+                if (_parentProject != value)
+                {
+                    _parentProject = value;
+
+                    InvokePropertyChanged();
+                }
+            }
         }
 
         private string? _name = null;
@@ -32,9 +47,10 @@ namespace KiCAD_DB_Editor
             get { Debug.Assert(_name is not null); return _name; }
             set
             {
-                if (_name != value)
+                string trimmed = value.Trim();
+                if (_name != trimmed)
                 {
-                    if (Library.CheckNameValid(value))
+                    if (trimmed != "")
                     {
                         _name = value;
 
@@ -79,6 +95,49 @@ namespace KiCAD_DB_Editor
                 }
             }
         }
+
+
+
+        private bool? _useLibrarySpecificKeyPattern = null;
+        [JsonPropertyName("use_library_specific_key_pattern")]
+        public bool UseLibrarySpecificKeyPattern
+        {
+            get { Debug.Assert(_useLibrarySpecificKeyPattern is not null); return _useLibrarySpecificKeyPattern.Value; }
+            set
+            {
+                if (_useLibrarySpecificKeyPattern != value)
+                {
+                    _useLibrarySpecificKeyPattern = value;
+
+                    InvokePropertyChanged();
+                }
+            }
+        }
+        private string? _librarySpecificKeyPattern = null;
+        [JsonPropertyName("library_specific_key_pattern")]
+        public string LibrarySpecificKeyPattern
+        {
+            get { Debug.Assert(_librarySpecificKeyPattern is not null); return _librarySpecificKeyPattern; }
+            set
+            {
+                string trimmed = value.Trim();
+                if (_librarySpecificKeyPattern != trimmed)
+                {
+                    if (trimmed.Length <= 20 && Project.s_KeyPatternRegex.IsMatch(trimmed))
+                    {
+                        _librarySpecificKeyPattern = trimmed;
+
+                        InvokePropertyChanged();
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Must match key pattern");
+                    }
+                }
+            }
+        }
+
+
 
         private Category? _selectedCategory = null;
         [JsonIgnore]
@@ -133,9 +192,10 @@ namespace KiCAD_DB_Editor
             get { Debug.Assert(_newCategoryName is not null); return _newCategoryName; }
             set
             {
-                if (_newCategoryName != value)
+                string trimmed = value.Trim();
+                if (_newCategoryName != trimmed)
                 {
-                    _newCategoryName = value;
+                    _newCategoryName = trimmed;
 
                     InvokePropertyChanged();
                 }
@@ -150,6 +210,8 @@ namespace KiCAD_DB_Editor
             Name = "<Library Name>";
             Description = "";
             Source = new LibrarySource();
+            UseLibrarySpecificKeyPattern = false;
+            LibrarySpecificKeyPattern = "CMP-####";
             NewCategoryName = ""; // Exists for binding to textbox so must start as not-null
             Categories = new ObservableCollection<Category>();
         }
@@ -167,7 +229,7 @@ namespace KiCAD_DB_Editor
         public void NewCategory()
         {
             string newCategoryName;
-            if (Category.CheckNameValid(NewCategoryName))
+            if (NewCategoryName != "")
                 newCategoryName = NewCategoryName;
             else
             {
@@ -190,6 +252,24 @@ namespace KiCAD_DB_Editor
         public void DeleteCategory(Category category)
         {
             Categories.Remove(category);
+        }
+
+        public string GetNextPrimaryKey(string? keyPattern = null)
+        {
+            if (keyPattern is null && UseLibrarySpecificKeyPattern)
+                keyPattern = LibrarySpecificKeyPattern;
+
+            string nextPrimaryKey;
+            if (keyPattern is not null)
+                nextPrimaryKey = Project.s_GetNextPrimaryKey(keyPattern, Categories.Select(c => c.GetNextPrimaryKey(keyPattern)), false);
+            else
+            {
+                // Ask project to find it for us
+                Debug.Assert(ParentProject is not null);
+                nextPrimaryKey = ParentProject.GetNextPrimaryKey();
+            }
+
+            return nextPrimaryKey;
         }
 
         public void ImportFromKiCADDBL(string filePath)

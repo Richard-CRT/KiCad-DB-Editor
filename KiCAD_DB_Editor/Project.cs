@@ -17,6 +17,29 @@ namespace KiCAD_DB_Editor
 {
     public class Project : NotifyObject
     {
+        public static readonly Regex s_KeyPatternRegex = new(@"^((#+)[A-Z-_+=!£$%^&*()[\]{}<>:;@,.?]*|[A-Z-_+=!£$%^&*()[\]{}<>:;@,.?]*(#+))$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        public static string s_GetNextPrimaryKey(string keyPattern, IEnumerable<string> primaryKeys, bool increment)
+        {
+            List<int> matchingPrimaryKeyInts = new();
+            // CMP-###    ->     CMP-(\d\d\d)
+            int firstHashIndex = keyPattern.IndexOf('#');
+            int lastHashIndex = keyPattern.LastIndexOf('#');
+            int numDigits = lastHashIndex - firstHashIndex + 1;
+            string hashSubstring = keyPattern.Substring(firstHashIndex, numDigits);
+            string modifiedKeyPattern = $"^{keyPattern.Substring(0, firstHashIndex)}({hashSubstring.Replace("#", @"\d")}){keyPattern.Substring(lastHashIndex + 1)}$";
+            Regex categorySpecificKeyPatternRegex = new Regex(modifiedKeyPattern, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            foreach (string pK in primaryKeys)
+            {
+                Match m = categorySpecificKeyPatternRegex.Match(pK);
+                if (m.Success)
+                    matchingPrimaryKeyInts.Add(int.Parse(m.Groups[1].Value));
+            }
+            int currentMax = matchingPrimaryKeyInts.DefaultIfEmpty().Max();
+            int newPrimaryKeyInt = increment ? currentMax + 1 : currentMax;
+            string newPrimaryKey = keyPattern.Replace(hashSubstring, newPrimaryKeyInt.ToString().PadLeft(numDigits, '0'));
+            return newPrimaryKey;
+        }
+
         public static Project FromFile(string filePath)
         {
             Project project;
@@ -25,7 +48,7 @@ namespace KiCAD_DB_Editor
                 var jsonString = File.ReadAllText(filePath);
 
                 Project? o;
-                o = (Project?)JsonSerializer.Deserialize(jsonString, typeof(Project), new JsonSerializerOptions {ReferenceHandler = ReferenceHandler.Preserve });
+                o = (Project?)JsonSerializer.Deserialize(jsonString, typeof(Project), new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve });
 
                 if (o is null) throw new ArgumentNullException("Project is null");
 
@@ -39,9 +62,34 @@ namespace KiCAD_DB_Editor
             return project;
         }
 
+        // ============================================================================================
+        // ============================================================================================
 
-        // ============================================================================================
-        // ============================================================================================
+        private string? _projectKeyPattern = null;
+        [JsonPropertyName("project_key_pattern")]
+        public string ProjectKeyPattern
+        {
+            get { Debug.Assert(_projectKeyPattern is not null); return _projectKeyPattern; }
+            set
+            {
+                string trimmed = value.Trim();
+                if (_projectKeyPattern != trimmed)
+                {
+                    if (trimmed.Length <= 20 && Project.s_KeyPatternRegex.IsMatch(trimmed))
+                    {
+                        _projectKeyPattern = trimmed;
+
+                        InvokePropertyChanged();
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Must match key pattern");
+                    }
+                }
+            }
+        }
+
+
 
         private Library? _selectedLibrary = null;
         [JsonIgnore]
@@ -96,9 +144,10 @@ namespace KiCAD_DB_Editor
             get { Debug.Assert(_newLibraryName is not null); return _newLibraryName; }
             set
             {
-                if (_newLibraryName != value)
+                string trimmed = value.Trim();
+                if (_newLibraryName != trimmed)
                 {
-                    _newLibraryName = value;
+                    _newLibraryName = trimmed;
 
                     InvokePropertyChanged();
                 }
@@ -107,6 +156,7 @@ namespace KiCAD_DB_Editor
 
         public Project()
         {
+            ProjectKeyPattern = "CMP-####";
             NewLibraryName = ""; // Exists for binding to textbox so must start as not-null
             Libraries = new ObservableCollection<Library>();
         }
@@ -115,7 +165,7 @@ namespace KiCAD_DB_Editor
         {
             Library newLibrary;
 
-            if (Library.CheckNameValid(NewLibraryName))
+            if (NewLibraryName != "")
                 newLibrary = new(NewLibraryName);
             else
             {
@@ -132,7 +182,11 @@ namespace KiCAD_DB_Editor
                 newLibrary = new(newLibraryName);
             }
 
-            Libraries.Add(newLibrary);
+
+            int loc = 0;
+            while (loc < Libraries.Count && Libraries[loc].Name.CompareTo(newLibrary.Name) < 0) loc++;
+            Libraries.Insert(loc, newLibrary);
+
             return newLibrary;
         }
 
@@ -146,6 +200,11 @@ namespace KiCAD_DB_Editor
         public void DeleteLibrary(Library library)
         {
             Libraries.Remove(library);
+        }
+
+        public string GetNextPrimaryKey()
+        {
+            return Project.s_GetNextPrimaryKey(ProjectKeyPattern, Libraries.Select(l => l.GetNextPrimaryKey(ProjectKeyPattern)), false);
         }
 
         public void SaveToFile(string filePath)

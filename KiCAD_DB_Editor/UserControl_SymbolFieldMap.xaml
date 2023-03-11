@@ -17,7 +17,7 @@
         IsEnabled="{Binding Converter={StaticResource NullToBoolConverter}, Mode=OneWay}"
         >
         <GroupBox.Header>
-            <Label Content="Symbol Field" FontWeight="Bold" Padding="5,0,5,0" />
+            <TextBlock Text="Symbol Field" FontWeight="Bold" Padding="5,0,5,0" />
         </GroupBox.Header>
         <Grid>
             <Grid.RowDefinitions>
@@ -38,7 +38,7 @@
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
                 <Label Content="Name:" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" Margin="0,0,5,0"/>
-                <TextBox Text="{Binding SymbolFieldName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" FontWeight="Bold" FontSize="16" VerticalContentAlignment="Center" VerticalAlignment="Center" />
+                <TextBox Text="{Binding SymbolFieldName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" Grid.Column="1" FontWeight="Bold" FontSize="16" VerticalContentAlignment="Center" VerticalAlignment="Center" />
             </Grid>
             <Grid Grid.Row="1" Margin="5,5,5,0">
                 <Grid.RowDefinitions>

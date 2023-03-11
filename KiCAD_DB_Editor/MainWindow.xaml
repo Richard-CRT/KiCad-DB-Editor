@@ -49,48 +49,44 @@
                 <MenuItem Header="_KiCAD DB Documentation" Command="Help" />
             </MenuItem>
         </Menu>
-        <Grid >
-            <Grid.RowDefinitions>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
+        <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="5"/>
-                <ColumnDefinition Width="4*"/>
+                <ColumnDefinition Width="6*"/>
             </Grid.ColumnDefinitions>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
+            <Grid Margin="5,5,5,5">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
 
-                <Grid Grid.Row="0" Margin="5,5,5,0" >
+                <Grid Grid.Row="0">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
-
-                    <Button Grid.Column="0" Content="Import multiple KiCAD files" Padding="5,5,5,5" VerticalAlignment="Center" Command="{x:Static local:MainWindow.ImportCommand}" Margin="0,0,2.5,0" />
-                    <Button Grid.Column="1" Content="Export all to KiCAD files" Padding="5,5,5,5" VerticalAlignment="Center" Command="{x:Static local:MainWindow.ExportCommand}" Margin="2.5,0,0,0" />
+                    <Label Grid.Row="0" Grid.Column="0" Content="Project Key Pattern:" VerticalContentAlignment="Center" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                    <TextBox Grid.Row="0" Grid.Column="1" TextWrapping="Wrap" Text="{Binding Project.ProjectKeyPattern, Mode=TwoWay, UpdateSourceTrigger=LostFocus, ValidatesOnExceptions=True}" VerticalContentAlignment="Center" Margin="2,2,2,2" />
                 </Grid>
+                
 
-                <Grid Grid.Row="1" Margin="5,5,5,0" >
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+                <Button Grid.Column="0" Content="Import multiple KiCAD files" Padding="5,5,5,5" VerticalAlignment="Center" Command="{x:Static local:MainWindow.ImportCommand}" Margin="0,5,0,0" Grid.Row="1" />
+                <Button Grid.Column="0" Grid.Row="2"  Content="Export all to KiCAD files" Padding="5,5,5,5" VerticalAlignment="Center" Command="{x:Static local:MainWindow.ExportCommand}" Margin="0,5,0,0" />
+
+                <Grid Grid.Row="3" Margin="0,5,0,0" >
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBox Margin="0,0,5,0" Text="{Binding Project.NewLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" />
-                    <Button x:Name="button_NewLibrary" Grid.Column="1" Margin="0,0,0,0" Content="New Library" Click="button_NewLibrary_Click" Padding="5,5,5,5" ToolTip="Each library maps to a `*.kicad_dbl` file" />
+                    <TextBox Margin="0,0,5,0" Text="{Binding Project.NewLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Grid.Row="1" />
+                    <Button x:Name="button_NewLibrary" Grid.Column="1" Margin="0,0,0,0" Content="New Library" Click="button_NewLibrary_Click" Padding="5,5,5,5" ToolTip="Each library maps to a `*.kicad_dbl` file" Grid.Row="1" />
                 </Grid>
-                
-                <ListView Margin="5,5,5,5" Grid.Row="2" ItemsSource="{Binding Project.Libraries, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Name" SelectedItem="{Binding Project.SelectedLibrary}">
+
+                <ListView Grid.Row="4" ItemsSource="{Binding Project.Libraries, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Name" SelectedItem="{Binding Project.SelectedLibrary}" Margin="0,5,0,0">
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" />

@@ -24,9 +24,9 @@ namespace KiCAD_DB_Editor
     public partial class UserControl_Library : UserControl
     {
         private Library? _library = null;
-        private Library Library
+        private Library? Library
         {
-            get { Debug.Assert(_library is not null); return _library; }
+            get { return _library; }
             set { if (_library != value) _library = value; }
         }
 
@@ -39,17 +39,20 @@ namespace KiCAD_DB_Editor
 
         private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (DataContext is Library)
+            if (DataContext is Library dC)
             {
-                Library = (Library)DataContext; // Take the default data object that the XAML constructed
-                                                // Be careful not to reconstruct _library, as we will lose access to the library object
-                                                // that the UC has been passed
+                Library = (Library)dC; // Take the default data object that the XAML constructed
+                                       // Be careful not to reconstruct _library, as we will lose access to the library object
+                                       // that the UC has been passed
             }
+            else
+                Library = null;
         }
 
         private void button_NewCategory_Click(object sender, RoutedEventArgs e)
         {
-            Library.NewCategory();
+            if (Library is not null)
+                Library.NewCategory();
         }
 
         #endregion
@@ -59,13 +62,19 @@ namespace KiCAD_DB_Editor
 
         private void CommandBinding_Delete_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = true;
+            if (Library is null)
+                e.CanExecute = false;
+            else
+            {
+                e.CanExecute = true;
 
-            e.Handled = true;
+                e.Handled = true;
+            }
         }
 
         private void CommandBinding_Delete_Executed(object sender, ExecutedRoutedEventArgs e)
         {
+            Debug.Assert(Library is not null);
             if (e.Parameter is Category c)
                 Library.DeleteCategory(c);
 
@@ -74,13 +83,19 @@ namespace KiCAD_DB_Editor
 
         private void CommandBinding_Import_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = true;
+            if (Library is null)
+                e.CanExecute = false;
+            else
+            {
+                e.CanExecute = true;
 
-            e.Handled = true;
+                e.Handled = true;
+            }
         }
 
         private void CommandBinding_Import_Executed(object sender, ExecutedRoutedEventArgs e)
         {
+            Debug.Assert(Library is not null);
             OpenFileDialog openFileDialog = new();
             openFileDialog.Title = "Import KiCAD DB Config File";
             openFileDialog.Filter = "KiCAD DB config file (*.kicad_dbl)|*.kicad_dbl";
@@ -92,13 +107,19 @@ namespace KiCAD_DB_Editor
 
         private void CommandBinding_Export_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = true;
+            if (Library is not null)
+                e.CanExecute = false;
+            else
+            {
+                e.CanExecute = true;
 
-            e.Handled = true;
+                e.Handled = true;
+            }
         }
 
         private void CommandBinding_Export_Executed(object sender, ExecutedRoutedEventArgs e)
         {
+            Debug.Assert(Library is not null);
             SaveFileDialog saveFileDialog = new();
             saveFileDialog.Title = "Export KiCAD DB Config File";
             saveFileDialog.Filter = "KiCAD DB config file (*.kicad_dbl)|*.kicad_dbl";

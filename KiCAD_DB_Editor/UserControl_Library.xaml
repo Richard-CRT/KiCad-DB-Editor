@@ -143,7 +143,7 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBox Text="{Binding NewCategoryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" />
-                        <Button x:Name="button_NewCategory" Grid.Column="1" Margin="5,0,0,0" Content="New Category" Click="button_NewCategory_Click" Padding="5,5,5,5" ToolTip="Each library maps to a table in the `*.kicad_dbl` file" />
+                        <Button x:Name="button_NewCategory" Grid.Column="1" Margin="5,0,0,0" Content="New Category" Click="button_NewCategory_Click" Padding="5,5,5,5" ToolTip="Each category maps to a table in a `*.kicad_dbl` file" />
                     </Grid>
 
                     <ListBox ItemsSource="{Binding Categories, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedCategory}" Grid.Row="1" Margin="0,5,0,0">

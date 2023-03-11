@@ -106,7 +106,7 @@ namespace KiCAD_DB_Editor
 
         private void CommandBinding_Export_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            if (Library is not null)
+            if (Library is null)
                 e.CanExecute = false;
             else
             {

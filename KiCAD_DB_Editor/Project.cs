@@ -147,10 +147,9 @@ namespace KiCAD_DB_Editor
             get { Debug.Assert(_newLibraryName is not null); return _newLibraryName; }
             set
             {
-                string trimmed = value.Trim();
-                if (_newLibraryName != trimmed)
+                if (_newLibraryName != value)
                 {
-                    _newLibraryName = trimmed;
+                    _newLibraryName = value;
 
                     InvokePropertyChanged();
                 }

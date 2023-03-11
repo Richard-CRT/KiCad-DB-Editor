@@ -47,10 +47,9 @@ namespace KiCAD_DB_Editor
             get { Debug.Assert(_name is not null); return _name; }
             set
             {
-                string trimmed = value.Trim();
-                if (_name != trimmed)
+                if (_name != value)
                 {
-                    if (trimmed != "")
+                    if (value.Trim() != "")
                     {
                         _name = value;
 
@@ -192,10 +191,9 @@ namespace KiCAD_DB_Editor
             get { Debug.Assert(_newCategoryName is not null); return _newCategoryName; }
             set
             {
-                string trimmed = value.Trim();
-                if (_newCategoryName != trimmed)
+                if (_newCategoryName != value)
                 {
-                    _newCategoryName = trimmed;
+                    _newCategoryName = value;
 
                     InvokePropertyChanged();
                 }

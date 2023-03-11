@@ -45,12 +45,11 @@ namespace KiCAD_DB_Editor
             get { Debug.Assert(_symbolFieldName is not null); return _symbolFieldName; }
             set
             {
-                string trimmed = value.Trim();
-                if (_symbolFieldName != trimmed)
+                if (_symbolFieldName != value)
                 {
-                    if (trimmed != "")
+                    if (value.Trim() != "")
                     {
-                        _symbolFieldName = trimmed;
+                        _symbolFieldName = value;
 
                         InvokePropertyChanged();
                     }

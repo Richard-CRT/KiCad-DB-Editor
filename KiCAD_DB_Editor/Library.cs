@@ -25,7 +25,7 @@ namespace KiCAD_DB_Editor
         // ============================================================================================
 
         private Project? _parentProject;
-        [JsonInclude, JsonPropertyName("parent_project")]
+        [JsonIgnore]
         public Project? ParentProject
         {
             get { return _parentProject; }
@@ -216,14 +216,15 @@ namespace KiCAD_DB_Editor
             Categories = new ObservableCollection<Category>();
         }
 
-        public Library(string name) : this()
+        public Library(Project parentProject, string name) : this()
         {
+            ParentProject = parentProject;
             Name = name;
         }
 
         public override string ToString()
         {
-            return $"{Name} - {Description}";
+            return $"{Name}";
         }
 
         public void NewCategory()
@@ -254,19 +255,19 @@ namespace KiCAD_DB_Editor
             Categories.Remove(category);
         }
 
-        public string GetNextPrimaryKey(string? keyPattern = null)
+        public string GetNextPrimaryKey(List<Category> failedCategories, string? keyPattern = null)
         {
             if (keyPattern is null && UseLibrarySpecificKeyPattern)
                 keyPattern = LibrarySpecificKeyPattern;
 
             string nextPrimaryKey;
             if (keyPattern is not null)
-                nextPrimaryKey = Project.s_GetNextPrimaryKey(keyPattern, Categories.Select(c => c.GetNextPrimaryKey(keyPattern)), false);
+                nextPrimaryKey = Project.s_GetNextPrimaryKey(keyPattern, Categories.Select(c => c.GetNextPrimaryKey(failedCategories, keyPattern)), false);
             else
             {
                 // Ask project to find it for us
                 Debug.Assert(ParentProject is not null);
-                nextPrimaryKey = ParentProject.GetNextPrimaryKey();
+                nextPrimaryKey = ParentProject.GetNextPrimaryKey(failedCategories);
             }
 
             return nextPrimaryKey;

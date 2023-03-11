@@ -14,9 +14,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Xml.Linq;
 
 namespace KiCAD_DB_Editor
@@ -352,7 +349,12 @@ namespace KiCAD_DB_Editor
 
         public override string ToString()
         {
-            return $"{Name}";
+            if (ParentLibrary is not null)
+            {
+                return $"{ParentLibrary} - {Name}";
+            }
+            else
+                return $"{Name}";
         }
 
         public void NewSymbolFieldMap()
@@ -383,10 +385,10 @@ namespace KiCAD_DB_Editor
             SymbolFieldMaps.Remove(symbolFieldMap);
         }
 
-        private void _performDatabaseAction(bool write = false, bool read = false)
+        private Exception? _performDatabaseAction(bool write = false, bool read = false)
         {
             if (!write && !read)
-                return;
+                return null;
             if (ParentLibrary is not null)
             {
                 string connectionString;
@@ -438,21 +440,27 @@ namespace KiCAD_DB_Editor
                     else
                         DatabaseConnectionStatus = $"Connection Failed (Unknown)";
                     DatabaseConnectionValid = false;
+
+                    return ex;
                 }
             }
+            return null;
         }
 
-        public void UpdateDatabaseDataTable()
+        public Exception? UpdateDatabaseDataTable()
         {
-            _performDatabaseAction(read: true);
+            return _performDatabaseAction(read: true);
         }
 
-        public string GetNextPrimaryKey(string? keyPattern = null)
+        public string GetNextPrimaryKey(List<Category> failedCategories, string? keyPattern = null)
         {
             if (keyPattern is null && UseCategorySpecificKeyPattern)
                 keyPattern = CategorySpecificKeyPattern;
 
-            UpdateDatabaseDataTable();
+            bool success = UpdateDatabaseDataTable() == null;
+
+            if (!success)
+                failedCategories.Add(this);
 
             if (DatabaseDataTable.PrimaryKey.Length != 1)
                 throw new ArgumentException("This app only supports single column primary keys");
@@ -476,13 +484,20 @@ namespace KiCAD_DB_Editor
             {
                 // Ask library to find it for us
                 Debug.Assert(ParentLibrary is not null);
-                newPrimaryKey = ParentLibrary.GetNextPrimaryKey();
+                newPrimaryKey = ParentLibrary.GetNextPrimaryKey(failedCategories);
             }
 
             return newPrimaryKey;
         }
 
-        public void NewDataBaseDataTableRow()
+        public (string, List<Category>) NewDataBaseDataTableRow()
+        {
+            List<Category> failedCategories = new();
+            string newPrimaryKey = GetNextPrimaryKey(failedCategories);
+            return (newPrimaryKey, failedCategories);
+        }
+
+        public List<Category> NewDataBaseDataTableRow(string primaryKey)
         {
             if (DatabaseDataTable.PrimaryKey.Length != 1)
                 throw new ArgumentException("This app only supports single column primary keys");
@@ -490,7 +505,8 @@ namespace KiCAD_DB_Editor
 
             DataRow newDR = DatabaseDataTable.NewRow();
 
-            string newPrimaryKey = GetNextPrimaryKey();
+            List<Category> failedCategories = new();
+            string newPrimaryKey = GetNextPrimaryKey(failedCategories);
 
             newDR[primaryKeyColumn.ColumnName] = newPrimaryKey;
             try
@@ -502,6 +518,8 @@ namespace KiCAD_DB_Editor
                 Debug.WriteLine("Constraint exception when adding new row:");
                 Debug.WriteLine(ex.Message);
             }
+
+            return failedCategories;
         }
     }
 }

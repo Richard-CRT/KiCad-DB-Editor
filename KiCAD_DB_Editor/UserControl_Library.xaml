@@ -150,9 +150,7 @@
 
                         <ListBox.ContextMenu>
                             <ContextMenu>
-                                <MenuItem Header="Delete"
-                                    Command="Delete"
-                                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}" />
+                                <MenuItem Header="Delete" Command="Delete" />
                             </ContextMenu>
                         </ListBox.ContextMenu>
 

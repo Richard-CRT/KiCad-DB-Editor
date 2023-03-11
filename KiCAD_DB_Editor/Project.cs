@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -53,6 +54,8 @@ namespace KiCAD_DB_Editor
                 if (o is null) throw new ArgumentNullException("Project is null");
 
                 project = (Project)o!;
+
+                project.Libraries.ToList().ForEach(l => l.ParentProject = project);
             }
             catch (FileNotFoundException)
             {
@@ -166,7 +169,7 @@ namespace KiCAD_DB_Editor
             Library newLibrary;
 
             if (NewLibraryName != "")
-                newLibrary = new(NewLibraryName);
+                newLibrary = new(this, NewLibraryName);
             else
             {
                 const string newLibraryNamePrefix = $"Library ";
@@ -179,7 +182,7 @@ namespace KiCAD_DB_Editor
 
                 string newLibraryName = $"{newLibraryNamePrefix}{currentMax + 1}";
 
-                newLibrary = new(newLibraryName);
+                newLibrary = new(this, newLibraryName);
             }
 
 
@@ -202,9 +205,9 @@ namespace KiCAD_DB_Editor
             Libraries.Remove(library);
         }
 
-        public string GetNextPrimaryKey()
+        public string GetNextPrimaryKey(List<Category> failedCategories)
         {
-            return Project.s_GetNextPrimaryKey(ProjectKeyPattern, Libraries.Select(l => l.GetNextPrimaryKey(ProjectKeyPattern)), false);
+            return Project.s_GetNextPrimaryKey(ProjectKeyPattern, Libraries.Select(l => l.GetNextPrimaryKey(failedCategories, ProjectKeyPattern)), false);
         }
 
         public void SaveToFile(string filePath)

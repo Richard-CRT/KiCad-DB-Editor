@@ -64,7 +64,24 @@ namespace KiCAD_DB_Editor
         private void button_NewPart_Click(object sender, RoutedEventArgs e)
         {
             if (Category is not null)
-                Category.NewDataBaseDataTableRow();
+            {
+                (string primaryKey, List<Category> failedCategories) = Category.NewDataBaseDataTableRow();
+                if (
+                    !failedCategories.Any() ||
+                    MessageBox.Show(
+                        Window.GetWindow(this),
+                        $"The next component part number can't be fully verified because the connection to the following tables failed:{Environment.NewLine}" +
+                        $"{string.Join(Environment.NewLine, failedCategories)}{Environment.NewLine}" +
+                        $"{Environment.NewLine}" +
+                        $"Press OK to proceed adding the part, you can still edit the part number after it has been added.",
+                        "Connection Failed",
+                        MessageBoxButton.OKCancel,
+                        MessageBoxImage.Warning) == MessageBoxResult.OK
+                        )
+                {
+                    Category.NewDataBaseDataTableRow(primaryKey);
+                }
+            }
         }
 
         #endregion
@@ -74,7 +91,7 @@ namespace KiCAD_DB_Editor
 
         private void CommandBinding_Delete_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            if (Category is not null)
+            if (Category is null || Category.SelectedSymbolFieldMap is null)
                 e.CanExecute = false;
             else
             {
@@ -86,9 +103,8 @@ namespace KiCAD_DB_Editor
 
         private void CommandBinding_Delete_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            Debug.Assert(Category is not null);
-            if (e.Parameter is SymbolFieldMap sFM)
-                Category.DeleteSymbolFieldMap(sFM);
+            Debug.Assert(Category is not null && Category.SelectedSymbolFieldMap is not null);
+            Category.DeleteSymbolFieldMap(Category.SelectedSymbolFieldMap);
 
             e.Handled = true;
         }

@@ -160,15 +160,20 @@ namespace KiCAD_DB_Editor
 
         private void CommandBinding_Delete_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = true;
+            if (DataObj.Project.SelectedLibrary is null)
+                e.CanExecute = false;
+            else
+            {
+                e.CanExecute = true;
 
-            e.Handled = true;
+                e.Handled = true;
+            }
         }
 
         private void CommandBinding_Delete_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            if (e.Parameter is Library l)
-                DataObj.Project.DeleteLibrary(l);
+            Debug.Assert(DataObj.Project.SelectedLibrary is not null);
+            DataObj.Project.DeleteLibrary(DataObj.Project.SelectedLibrary);
 
             e.Handled = true;
         }

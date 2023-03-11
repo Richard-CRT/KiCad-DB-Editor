@@ -62,7 +62,7 @@ namespace KiCAD_DB_Editor
 
         private void CommandBinding_Delete_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            if (Library is null)
+            if (Library is null || Library.SelectedCategory is null)
                 e.CanExecute = false;
             else
             {
@@ -74,9 +74,8 @@ namespace KiCAD_DB_Editor
 
         private void CommandBinding_Delete_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            Debug.Assert(Library is not null);
-            if (e.Parameter is Category c)
-                Library.DeleteCategory(c);
+            Debug.Assert(Library is not null && Library.SelectedCategory is not null);
+            Library.DeleteCategory(Library.SelectedCategory);
 
             e.Handled = true;
         }

@@ -505,14 +505,14 @@ namespace KiCAD_DB_Editor
 
         public List<Category> NewDataBaseDataTableRow(string primaryKey)
         {
+            List<Category> failedCategories = new();
+            string newPrimaryKey = GetNextPrimaryKey(failedCategories);
+
             if (DatabaseDataTable.PrimaryKey.Length != 1)
                 throw new ArgumentException("This app only supports single column primary keys");
             var primaryKeyColumn = DatabaseDataTable.PrimaryKey[0];
 
             DataRow newDR = DatabaseDataTable.NewRow();
-
-            List<Category> failedCategories = new();
-            string newPrimaryKey = GetNextPrimaryKey(failedCategories);
 
             newDR[primaryKeyColumn.ColumnName] = newPrimaryKey;
             try

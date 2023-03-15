@@ -285,26 +285,11 @@ namespace KiCAD_DB_Editor
             {
                 if (_databaseDataTable != value)
                 {
-                    if (_databaseDataTable is not null)
-                    {
-                        _databaseDataTable.RowChanged -= _databaseDataTable_WriteToDatabase;
-                        _databaseDataTable.RowDeleted -= _databaseDataTable_WriteToDatabase;
-                    }
                     _databaseDataTable = value;
-                    _databaseDataTable.RowChanged += _databaseDataTable_WriteToDatabase;
-                    _databaseDataTable.RowDeleted += _databaseDataTable_WriteToDatabase;
 
                     InvokePropertyChanged();
                 }
             }
-        }
-
-        private bool _disable_databaseDataTable_WritingToDatabase = false;
-        private void _databaseDataTable_WriteToDatabase(object sender, EventArgs e)
-        {
-            if (_disable_databaseDataTable_WritingToDatabase)
-                return;
-            _performDatabaseAction(write: true);
         }
 
         /// <summary>
@@ -324,7 +309,7 @@ namespace KiCAD_DB_Editor
             SymbolBuiltInPropertiesMap = new();
             DatabaseConnectionValid = false;
             DatabaseDataTable = new();
-            DatabaseConnectionStatus = "";
+            DatabaseConnectionStatus = "N/A";
         }
 
         public Category(Library parentLibrary, string name) : this()
@@ -388,7 +373,7 @@ namespace KiCAD_DB_Editor
                 SelectedSymbolFieldMap = SymbolFieldMaps[indexOfRemoval];
         }
 
-        public event EventHandler DataTableUpdated;
+        public event EventHandler? DataTableUpdated;
         private Exception? _performDatabaseAction(bool write = false, bool read = false)
         {
             if (!write && !read)
@@ -422,29 +407,30 @@ namespace KiCAD_DB_Editor
                         if (write)
                         {
                             dadapter.Update(DatabaseDataTable);
+                            // Use this to add/remove columns
+                            //new OdbcCommand(strSql, connection).ExecuteNonQuery();
                         }
-                        if (read)
+                        if (write || read)
                         {
-                            _disable_databaseDataTable_WritingToDatabase = true;
                             DatabaseDataTable = new();
                             dadapter.Fill(DatabaseDataTable);
-                            _disable_databaseDataTable_WritingToDatabase = false;
                             DataTableUpdated?.Invoke(this, EventArgs.Empty);
                         }
                         DatabaseConnectionValid = true;
-                        DatabaseConnectionStatus = "Connection Successful";
+                        DatabaseConnectionStatus = $"Fetch Successful ({DateTime.Now.ToString("HH:mm:ss")})";
                     }
                 }
                 catch (OdbcException ex)
                 {
                     Debug.WriteLine($"Error while accessing {connectionString}");
                     DatabaseDataTable.Clear();
+                    DataTableUpdated?.Invoke(this, EventArgs.Empty);
                     if (ex.Message.Contains("HY000"))
-                        DatabaseConnectionStatus = $"Connection Failed (Table `{TableName}` not found)";
+                        DatabaseConnectionStatus = $"Fetch Failed (Table `{TableName}` not found)";
                     else if (ex.Message.Contains("IM002"))
-                        DatabaseConnectionStatus = $"Connection Failed (Database `{ParentLibrary.Source.DSN}` not found)";
+                        DatabaseConnectionStatus = $"Fetch Failed (Database `{ParentLibrary.Source.DSN}` not found)";
                     else
-                        DatabaseConnectionStatus = $"Connection Failed (Unknown)";
+                        DatabaseConnectionStatus = $"Fetch Failed (Unknown)";
                     DatabaseConnectionValid = false;
 
                     return ex;
@@ -496,7 +482,7 @@ namespace KiCAD_DB_Editor
             return newPrimaryKey;
         }
 
-        public (string, List<Category>) NewDataBaseDataTableRow()
+        public (string, List<Category>) GetNextPrimaryKey()
         {
             List<Category> failedCategories = new();
             string newPrimaryKey = GetNextPrimaryKey(failedCategories);
@@ -526,6 +512,20 @@ namespace KiCAD_DB_Editor
             }
 
             return failedCategories;
+        }
+
+        public void WriteToDataBase()
+        {
+            _performDatabaseAction(write: true);
+        }
+
+        public void DeleteDataBaseDataTableColumn(string columnName)
+        {
+            if (DatabaseDataTable.Columns.Contains(columnName))
+            {
+                DatabaseDataTable.Columns.Remove(columnName);
+                DataTableUpdated?.Invoke(this, EventArgs.Empty);
+            }
         }
     }
 }

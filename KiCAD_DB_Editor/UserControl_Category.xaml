@@ -139,26 +139,7 @@
 
             <GridSplitter VerticalAlignment="Stretch" Grid.Row="3" HorizontalAlignment="Stretch" />
 
-            <DockPanel Grid.Row="4" Margin="0,5,0,0" >
-                <Grid DockPanel.Dock="Top">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
-                        <Button x:Name="button_NewPart" Content="New Part" Click="button_NewPart_Click" Padding="5,2,5,2" IsEnabled="{Binding DatabaseConnectionValid, Mode=OneWay}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5" Grid.Column="1">
-                        <TextBlock Text="{Binding DatabaseConnectionStatus, Mode=TwoWay, StringFormat=Status: \{0\}, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0" VerticalAlignment="Center" />
-                        <Button x:Name="button_Connect" Content="Test Connection" Click="button_Connect_Click" Padding="5,2,5,2" />
-                    </StackPanel>
-                </Grid>
-
-
-
-                <DataGrid x:Name="dataGrid_TableEditor" ItemsSource="{Binding DatabaseDataTable.DefaultView, UpdateSourceTrigger=PropertyChanged}" FrozenColumnCount="1" IsEnabled="{Binding DatabaseConnectionValid, Mode=OneWay}" CanUserResizeRows="False" CanUserAddRows="False" AutoGeneratingColumn="dataGrid_TableEditor_AutoGeneratingColumn" />
-            </DockPanel>
-
+            <local:UserControl_TableEditor Grid.Row="4" Margin="0,5,0,0" />
         </Grid>
     </GroupBox>
 </UserControl>

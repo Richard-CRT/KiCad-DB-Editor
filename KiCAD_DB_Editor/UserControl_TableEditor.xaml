@@ -30,7 +30,7 @@
                 <TextBlock Text="{Binding DatabaseConnectionStatus, Mode=TwoWay, StringFormat=Status: \{0\}, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0" VerticalAlignment="Center" />
                 <Button x:Name="button_Fetch" Content="Fetch Table" Command="{x:Static local:UserControl_TableEditor.FetchCommand}" Padding="5,2,5,2" />
                 <Button x:Name="button_WriteChanges" Content="Write Changes" Command="{x:Static local:UserControl_TableEditor.WriteChangesCommand}" Padding="5,2,5,2" Margin="5,0,0,0" />
-                <Button x:Name="button_AlterTable" Content="Alter Table" Command="{x:Static local:UserControl_TableEditor.AlterTableCommand}" Padding="5,2,5,2" Margin="5,0,0,0" />
+                <Button x:Name="button_AlterTable" Content="Alter Table Structure" Command="{x:Static local:UserControl_TableEditor.AlterTableCommand}" Padding="5,2,5,2" Margin="5,0,0,0" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,0,5,5" Grid.Column="1">
                 <Button x:Name="button_NewPart" Content="New Part" Click="button_NewPart_Click" Padding="5,2,5,2" IsEnabled="{Binding DatabaseConnectionValid, Mode=OneWay}" />

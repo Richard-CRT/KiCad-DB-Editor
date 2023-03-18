@@ -10,6 +10,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
@@ -118,6 +119,10 @@ namespace KiCAD_DB_Editor
         {
             Debug.Assert(Category is not null);
 
+            Window_AlterTable window_AlterTable = new();
+            window_AlterTable.Owner = Window.GetWindow(this);
+            window_AlterTable.ShowDialog();
+
             e.Handled = true;
         }
 
@@ -146,9 +151,14 @@ namespace KiCAD_DB_Editor
 
         private void CommandBinding_FetchCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            Debug.Assert(Category is not null);
+            if (Category is null)
+                e.CanExecute = false;
+            else
+            {
+                e.CanExecute = true;
 
-            e.Handled = true;
+                e.Handled = true;
+            }
         }
 
         private void CommandBinding_FetchCommand_Executed(object sender, ExecutedRoutedEventArgs e)

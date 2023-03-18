@@ -22,7 +22,9 @@ namespace KiCAD_DB_Editor
     /// </summary>
     public partial class UserControl_TableEditor : UserControl
     {
-        public static RoutedCommand DeleteColumnCommand = new RoutedCommand();
+        public static RoutedCommand FetchCommand = new RoutedCommand();
+        public static RoutedCommand WriteChangesCommand = new RoutedCommand();
+        public static RoutedCommand AlterTableCommand = new RoutedCommand();
 
         private Category? _category = null;
         private Category? Category
@@ -72,18 +74,6 @@ namespace KiCAD_DB_Editor
                 Category = null;
         }
 
-        private void button_Fetch_Click(object sender, RoutedEventArgs e)
-        {
-            if (Category is not null)
-                Category.UpdateDatabaseDataTable();
-        }
-
-        private void button_WriteChanges_Click(object sender, RoutedEventArgs e)
-        {
-            if (Category is not null)
-                Category.WriteToDataBase();
-        }
-
         private void button_NewPart_Click(object sender, RoutedEventArgs e)
         {
             if (Category is not null)
@@ -107,21 +97,12 @@ namespace KiCAD_DB_Editor
             }
         }
 
-        private DataGridColumnHeader? selectedDGCH = null;
-        private void dataGrid_TableEditor_ColumnHeader_ContextMenuOpening(object sender, ContextMenuEventArgs e)
-        {
-            if (sender is DataGridColumnHeader dGCH)
-                selectedDGCH = dGCH;
-            else
-                selectedDGCH = null;
-        }
-
         #endregion
 
 
         #region CommandBindings
 
-        private void CommandBinding_DeleteColumn_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        private void CommandBinding_AlterTableCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
             if (Category is null)
                 e.CanExecute = false;
@@ -133,18 +114,50 @@ namespace KiCAD_DB_Editor
             }
         }
 
-        private void CommandBinding_DeleteColumn_Executed(object sender, ExecutedRoutedEventArgs e)
+        private void CommandBinding_AlterTableCommand_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            if (selectedDGCH is not null && selectedDGCH.DataContext is string columnName)
-            {
-                Debug.Assert(Category is not null);
+            Debug.Assert(Category is not null);
 
-                Category.DeleteDataBaseDataTableColumn(columnName);
+            e.Handled = true;
+        }
+
+        private void CommandBinding_WriteChangesCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            if (Category is null)
+                e.CanExecute = false;
+            else
+            {
+                e.CanExecute = true;
 
                 e.Handled = true;
             }
         }
 
+        private void CommandBinding_WriteChangesCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            Debug.Assert(Category is not null);
+
+            e.Handled = true;
+
+            Category.WriteToDataBase();
+        }
+
         #endregion
+
+        private void CommandBinding_FetchCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            Debug.Assert(Category is not null);
+
+            e.Handled = true;
+        }
+
+        private void CommandBinding_FetchCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            Debug.Assert(Category is not null);
+
+            e.Handled = true;
+
+            Category.UpdateDatabaseDataTable();
+        }
     }
 }

@@ -14,7 +14,9 @@
         <converters:NullToBoolConverter x:Key="NullToBoolConverter"/>
     </UserControl.Resources>
     <UserControl.CommandBindings>
-        <CommandBinding Command="{x:Static local:UserControl_TableEditor.DeleteColumnCommand}" CanExecute="CommandBinding_DeleteColumn_CanExecute" Executed="CommandBinding_DeleteColumn_Executed" />
+        <CommandBinding Command="{x:Static local:UserControl_TableEditor.FetchCommand}" CanExecute="CommandBinding_FetchCommand_CanExecute" Executed="CommandBinding_FetchCommand_Executed" />
+        <CommandBinding Command="{x:Static local:UserControl_TableEditor.WriteChangesCommand}" CanExecute="CommandBinding_WriteChangesCommand_CanExecute" Executed="CommandBinding_WriteChangesCommand_Executed" />
+        <CommandBinding Command="{x:Static local:UserControl_TableEditor.AlterTableCommand}" CanExecute="CommandBinding_AlterTableCommand_CanExecute" Executed="CommandBinding_AlterTableCommand_Executed" />
     </UserControl.CommandBindings>
     <DockPanel Margin="0,5,0,0"
                IsEnabled="{Binding Converter={StaticResource NullToBoolConverter}, Mode=OneWay}"
@@ -26,8 +28,9 @@
             </Grid.ColumnDefinitions>
             <StackPanel Orientation="Horizontal" Margin="5,0,0,5" >
                 <TextBlock Text="{Binding DatabaseConnectionStatus, Mode=TwoWay, StringFormat=Status: \{0\}, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0" VerticalAlignment="Center" />
-                <Button x:Name="button_Fetch" Content="Fetch Table" Click="button_Fetch_Click" Padding="5,2,5,2" />
-                <Button x:Name="button_WriteChanges" Content="Write Changes" Click="button_WriteChanges_Click" Padding="5,2,5,2" Margin="5,0,0,0" />
+                <Button x:Name="button_Fetch" Content="Fetch Table" Command="{x:Static local:UserControl_TableEditor.FetchCommand}" Padding="5,2,5,2" />
+                <Button x:Name="button_WriteChanges" Content="Write Changes" Command="{x:Static local:UserControl_TableEditor.WriteChangesCommand}" Padding="5,2,5,2" Margin="5,0,0,0" />
+                <Button x:Name="button_AlterTable" Content="Alter Table" Command="{x:Static local:UserControl_TableEditor.AlterTableCommand}" Padding="5,2,5,2" Margin="5,0,0,0" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,0,5,5" Grid.Column="1">
                 <Button x:Name="button_NewPart" Content="New Part" Click="button_NewPart_Click" Padding="5,2,5,2" IsEnabled="{Binding DatabaseConnectionValid, Mode=OneWay}" />
@@ -36,20 +39,6 @@
 
 
 
-        <DataGrid x:Name="dataGrid_TableEditor" d:ItemsSource="{d:SampleData}" ItemsSource="{Binding DatabaseDataTable.DefaultView, UpdateSourceTrigger=PropertyChanged}" FrozenColumnCount="1" IsEnabled="{Binding DatabaseConnectionValid, Mode=OneWay}" CanUserResizeRows="False" CanUserAddRows="False" SelectionUnit="CellOrRowHeader" RowHeaderWidth="20" >
-            <DataGrid.Resources>
-                <ContextMenu x:Key="DataGridColumnHeaderContextMenu">
-                    <MenuItem Header="Delete Column" Command="{x:Static local:UserControl_TableEditor.DeleteColumnCommand}"
-                              CommandTarget="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}}"
-                              CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridColumnHeader}}}"
-                              />
-                </ContextMenu>
-
-                <Style TargetType="{x:Type DataGridColumnHeader}">
-                    <EventSetter Event="ContextMenuOpening" Handler="dataGrid_TableEditor_ColumnHeader_ContextMenuOpening"/>
-                    <Setter Property="ContextMenu" Value="{StaticResource DataGridColumnHeaderContextMenu}" />
-                </Style>
-            </DataGrid.Resources>
-        </DataGrid>
+        <DataGrid x:Name="dataGrid_TableEditor" d:ItemsSource="{d:SampleData}" ItemsSource="{Binding DatabaseDataTable.DefaultView, UpdateSourceTrigger=PropertyChanged}" FrozenColumnCount="1" IsEnabled="{Binding DatabaseConnectionValid, Mode=OneWay}" CanUserResizeRows="False" CanUserAddRows="False" SelectionUnit="CellOrRowHeader" RowHeaderWidth="20" />
     </DockPanel>
 </UserControl>

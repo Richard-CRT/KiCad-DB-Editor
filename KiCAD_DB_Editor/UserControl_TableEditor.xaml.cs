@@ -79,7 +79,7 @@ namespace KiCAD_DB_Editor
         {
             if (Category is not null)
             {
-                (string primaryKey, List<Category> failedCategories) = Category.GetNextPrimaryKey();
+                (string? primaryKey, List<Category> failedCategories) = Category.GetNextPrimaryKey();
                 if (
                     !failedCategories.Any() ||
                     MessageBox.Show(
@@ -93,7 +93,8 @@ namespace KiCAD_DB_Editor
                         MessageBoxImage.Warning) == MessageBoxResult.OK
                         )
                 {
-                    Category.NewDataBaseDataTableRow(primaryKey);
+                    if (primaryKey is not null)
+                        Category.NewDataBaseDataTableRow(primaryKey);
                 }
             }
         }

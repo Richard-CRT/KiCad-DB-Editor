@@ -268,7 +268,7 @@ namespace KiCAD_DB_Editor
 
             string nextPrimaryKey;
             if (keyPattern is not null)
-                nextPrimaryKey = Project.s_GetNextPrimaryKey(keyPattern, Categories.Select(c => c.GetNextPrimaryKey(failedCategories, keyPattern)), false);
+                nextPrimaryKey = Project.s_GetNextPrimaryKey(keyPattern, (IEnumerable<string>)Categories.Select(c => c.GetNextPrimaryKey(failedCategories, keyPattern)).Where(s => s is not null), false);
             else
             {
                 // Ask project to find it for us

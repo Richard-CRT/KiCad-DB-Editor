@@ -444,7 +444,7 @@ namespace KiCAD_DB_Editor
             return _performDatabaseAction(read: true);
         }
 
-        public string GetNextPrimaryKey(List<Category> failedCategories, string? keyPattern = null)
+        public string? GetNextPrimaryKey(List<Category> failedCategories, string? keyPattern = null)
         {
             if (keyPattern is null && UseCategorySpecificKeyPattern)
                 keyPattern = CategorySpecificKeyPattern;
@@ -452,7 +452,10 @@ namespace KiCAD_DB_Editor
             bool success = UpdateDatabaseDataTable() == null;
 
             if (!success)
+            {
                 failedCategories.Add(this);
+                return null;
+            }
 
             if (DatabaseDataTable.PrimaryKey.Length != 1)
                 throw new ArgumentException("This app only supports single column primary keys");
@@ -482,17 +485,16 @@ namespace KiCAD_DB_Editor
             return newPrimaryKey;
         }
 
-        public (string, List<Category>) GetNextPrimaryKey()
+        public (string?, List<Category>) GetNextPrimaryKey()
         {
             List<Category> failedCategories = new();
-            string newPrimaryKey = GetNextPrimaryKey(failedCategories);
+            string? newPrimaryKey = GetNextPrimaryKey(failedCategories);
             return (newPrimaryKey, failedCategories);
         }
 
         public List<Category> NewDataBaseDataTableRow(string primaryKey)
         {
             List<Category> failedCategories = new();
-            string newPrimaryKey = GetNextPrimaryKey(failedCategories);
 
             if (DatabaseDataTable.PrimaryKey.Length != 1)
                 throw new ArgumentException("This app only supports single column primary keys");
@@ -500,7 +502,7 @@ namespace KiCAD_DB_Editor
 
             DataRow newDR = DatabaseDataTable.NewRow();
 
-            newDR[primaryKeyColumn.ColumnName] = newPrimaryKey;
+            newDR[primaryKeyColumn.ColumnName] = primaryKey;
             try
             {
                 DatabaseDataTable.Rows.Add(newDR);

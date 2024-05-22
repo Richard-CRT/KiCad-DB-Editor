@@ -1,9 +1,0 @@
-﻿<Application x:Class="KiCAD_DB_Editor.App"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:KiCAD_DB_Editor"
-             StartupUri="MainWindow.xaml">
-    <Application.Resources>
-        <FontFamily x:Key="Password">pack://application:,,,/Fonts/#Password</FontFamily>
-    </Application.Resources>
-</Application>

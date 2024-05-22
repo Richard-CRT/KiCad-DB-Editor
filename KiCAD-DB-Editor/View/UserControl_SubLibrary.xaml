@@ -1,0 +1,17 @@
+﻿<UserControl x:Class="KiCAD_DB_Editor.UserControl_SubLibrary"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:KiCAD_DB_Editor"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <StackPanel>
+        <DockPanel>
+            <TextBlock DockPanel.Dock="Left" Text="Name" />
+            <TextBox DockPanel.Dock="Left" Text="{Binding SubLibraryVM.Name, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_SubLibrary}}}" />
+        </DockPanel>
+        <ListBox ItemsSource="{Binding SubLibraryVM.InheritedParameterVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_SubLibrary}}}" DisplayMemberPath="Name" Height="200" />
+        <ListBox ItemsSource="{Binding SubLibraryVM.ParameterVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_SubLibrary}}}" DisplayMemberPath="Name" Height="200" />
+    </StackPanel>
+</UserControl>

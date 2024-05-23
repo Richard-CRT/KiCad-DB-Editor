@@ -10,6 +10,8 @@ using System.Net.Http.Headers;
 using System.Windows.Data;
 using System.ComponentModel;
 using Microsoft.VisualBasic;
+using KiCAD_DB_Editor.Commands;
+using KiCAD_DB_Editor.View;
 
 namespace KiCAD_DB_Editor.ViewModel
 {
@@ -127,6 +129,10 @@ namespace KiCAD_DB_Editor.ViewModel
             // Technically overwrites SubLibrary.Parameters even though it was just assigned above
             ParameterVMs = new(subLibrary.Parameters.OrderBy(p => p.Name).Select(p => new ParameterVM(p)));
             Debug.Assert(_parameterVMs is not null);
+
+            // Setup commands
+            RemoveSubLibraryCommand = new BasicCommand(RemoveSubLibraryCommandExecuted, RemoveSubLibraryCommandCanExecute);
+            AddSubLibraryCommand = new BasicCommand(AddSubLibraryCommandExecuted, AddSubLibraryCommandCanExecute);
         }
 
         public bool RecursiveContains(SubLibraryVM otherSLVM)
@@ -144,5 +150,41 @@ namespace KiCAD_DB_Editor.ViewModel
             else
                 return this.Name.CompareTo(other.Name);
         }
+
+
+        #region Commands
+
+        public IBasicCommand RemoveSubLibraryCommand { get; }
+        public IBasicCommand AddSubLibraryCommand { get; }
+
+        private bool RemoveSubLibraryCommandCanExecute(object? parameter)
+        {
+            return parameter is SubLibraryVM;
+        }
+
+        private void RemoveSubLibraryCommandExecuted(object? parameter)
+        {
+            Debug.Assert(parameter is SubLibraryVM);
+
+            var slVM = (SubLibraryVM)parameter;
+            this.SubLibraryVMs.Remove(slVM);
+        }
+
+        private bool AddSubLibraryCommandCanExecute(object? parameter)
+        {
+            return parameter is SubLibraryVM;
+        }
+
+        private void AddSubLibraryCommandExecuted(object? parameter)
+        {
+            Debug.Assert(parameter is SubLibraryVM);
+
+            var slVM = (SubLibraryVM)parameter;
+            int index = ~this.SubLibraryVMs.BinarySearchIndexOf(slVM);
+            this.SubLibraryVMs.Insert(index, slVM);
+            slVM.ParentSubLibraryVM = this;
+        }
+
+        #endregion Commands
     }
 }

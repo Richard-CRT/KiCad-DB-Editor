@@ -7,11 +7,9 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <StackPanel>
-        <DockPanel>
-            <TextBlock DockPanel.Dock="Left" Text="Name" />
-            <TextBox DockPanel.Dock="Left" Text="{Binding SubLibraryVM.Name, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_SubLibrary}}}" />
-        </DockPanel>
-        <ListBox ItemsSource="{Binding SubLibraryVM.InheritedParameterVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_SubLibrary}}}" DisplayMemberPath="Name" Height="200" />
-        <ListBox ItemsSource="{Binding SubLibraryVM.ParameterVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_SubLibrary}}}" DisplayMemberPath="Name" Height="200" />
+        <TextBlock Text="Inherited Parameters" />
+        <ListBox ItemsSource="{Binding SubLibraryVM.InheritedParameterVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_SubLibrary}}}" DisplayMemberPath="Name" Height="60" />
+        <TextBlock Text="Parameters"/>
+        <ListBox ItemsSource="{Binding SubLibraryVM.ParameterVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_SubLibrary}}}" DisplayMemberPath="Name" Height="60" />
     </StackPanel>
 </UserControl>

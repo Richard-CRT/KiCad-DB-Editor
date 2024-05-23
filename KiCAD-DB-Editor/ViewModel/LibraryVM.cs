@@ -1,4 +1,6 @@
-﻿using KiCAD_DB_Editor.Model;
+﻿using KiCAD_DB_Editor.Commands;
+using KiCAD_DB_Editor.Model;
+using KiCAD_DB_Editor.View;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -50,6 +52,72 @@ namespace KiCAD_DB_Editor.ViewModel
             TopLevelSubLibraryVM = new(null, library.TopLevelSubLibrary);
             Debug.Assert(_topLevelSubLibraryVM is not null);
             Debug.Assert(_topLevelSubLibraryVMs is not null);
+
+            // Setup commands
+            EditSubLibraryCommand = new BasicCommand(EditSubLibraryCommandExecuted, EditSubLibraryCommandCanExecute);
+            NewSubLibraryCommand = new BasicCommand(NewSubLibraryCommandExecuted, NewSubLibraryCommandCanExecute);
+            DeleteSubLibraryCommand = new BasicCommand(DeleteSubLibraryCommandExecuted, DeleteSubLibraryCommandCanExecute);
         }
+
+
+        #region Commands
+
+        public IBasicCommand EditSubLibraryCommand { get; }
+        public IBasicCommand NewSubLibraryCommand { get; }
+        public IBasicCommand DeleteSubLibraryCommand { get; }
+
+        private bool EditSubLibraryCommandCanExecute(object? parameter)
+        {
+            return parameter is SubLibraryVM slVM;
+        }
+
+        private void EditSubLibraryCommandExecuted(object? parameter)
+        {
+            Debug.Assert(parameter is SubLibraryVM);
+            var slVM = (SubLibraryVM)parameter;
+            // Breaks MVVM but not worth the effort to respect MVVM for this
+            var dialog = new Window_EditSubLibrary(slVM.Name);
+            if (dialog.ShowDialog() == true)
+            {
+                slVM.Name = dialog.SubLibraryName;
+            }
+        }
+
+        private bool NewSubLibraryCommandCanExecute(object? parameter)
+        {
+            return parameter is SubLibraryVM slVM;
+        }
+
+        private void NewSubLibraryCommandExecuted(object? parameter)
+        {
+            Debug.Assert(parameter is SubLibraryVM);
+            var slVM = (SubLibraryVM)parameter;
+            // Breaks MVVM but not worth the effort to respect MVVM for this
+            var dialog = new Window_EditSubLibrary("");
+            if (dialog.ShowDialog() == true)
+            {
+                SubLibrary newSL = new(dialog.SubLibraryName);
+                SubLibraryVM newSLVM = new(null, newSL);
+                if (slVM.AddSubLibraryCommand.CanExecute(newSLVM))
+                    slVM.AddSubLibraryCommand.Execute(newSLVM);
+            }
+        }
+
+        private bool DeleteSubLibraryCommandCanExecute(object? parameter)
+        {
+            return parameter is SubLibraryVM slVM && slVM.ParentSubLibraryVM is not null && slVM.ParentSubLibraryVM.RemoveSubLibraryCommand.CanExecute(slVM);
+        }
+
+        private void DeleteSubLibraryCommandExecuted(object? parameter)
+        {
+            Debug.Assert(parameter is SubLibraryVM);
+            var slVM = (SubLibraryVM)parameter;
+            Debug.Assert(slVM.ParentSubLibraryVM is not null);
+
+            if (slVM.ParentSubLibraryVM.RemoveSubLibraryCommand.CanExecute(slVM))
+                slVM.ParentSubLibraryVM.RemoveSubLibraryCommand.Execute(slVM);
+        }
+
+        #endregion Commands
     }
 }

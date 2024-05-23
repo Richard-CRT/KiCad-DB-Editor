@@ -11,6 +11,23 @@
         <Style x:Key="TreeViewItemStyle_ExpandAll" TargetType="{x:Type TreeViewItem}">
             <Setter Property="IsExpanded" Value="True"/>
             <EventSetter Event="PreviewMouseDown" Handler="treeViewItem_PreviewMouseDown"/>
+            <Setter Property="Tag" Value="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}, Path=LibraryVM}"></Setter>
+            <Setter Property="ContextMenu">
+                <Setter.Value>
+                    <ContextMenu>
+                        <MenuItem Header="New Sub-Folder..."
+                            Command="{Binding PlacementTarget.Tag.NewSubLibraryCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu},Mode=FindAncestor}}"
+                            CommandParameter="{Binding }"></MenuItem>
+                        <MenuItem Header="Edit Folder..."
+                            Command="{Binding PlacementTarget.Tag.EditSubLibraryCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu},Mode=FindAncestor}}"
+                            CommandParameter="{Binding }"></MenuItem>
+                        <MenuItem Header="Delete Folder..."
+                            Command="{Binding PlacementTarget.Tag.DeleteSubLibraryCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu},Mode=FindAncestor}}"
+                            CommandParameter="{Binding }"></MenuItem>
+                    </ContextMenu>
+                </Setter.Value>
+            </Setter>
+
         </Style>
     </UserControl.Resources>
     <Grid>
@@ -21,11 +38,15 @@
         </Grid.ColumnDefinitions>
         <TreeView x:Name="treeView_SubLibraries"
                   ItemsSource="{Binding LibraryVM.TopLevelSubLibraryVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"
-                  ItemContainerStyle="{StaticResource TreeViewItemStyle_ExpandAll}" MouseMove="treeView_SubLibraries_MouseMove" DragOver="treeView_SubLibraries_DragOver" Drop="treeView_SubLibraries_Drop" AllowDrop="True"
+                  ItemContainerStyle="{StaticResource TreeViewItemStyle_ExpandAll}"
+                  MouseMove="treeView_SubLibraries_MouseMove"
+                  DragOver="treeView_SubLibraries_DragOver"
+                  Drop="treeView_SubLibraries_Drop"
+                  AllowDrop="True"
                   >
             <TreeView.Resources>
                 <HierarchicalDataTemplate ItemsSource="{Binding SubLibraryVMs}" DataType="{x:Type vm:SubLibraryVM}">
-                    <TextBlock Text="{Binding Name}" />
+                    <TextBlock Text="{Binding Name}"></TextBlock>
                 </HierarchicalDataTemplate>
             </TreeView.Resources>
         </TreeView>

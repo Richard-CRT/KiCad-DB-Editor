@@ -48,6 +48,13 @@ namespace KiCAD_DB_Editor
 
         private void treeViewItem_PreviewMouseDown(object sender, MouseEventArgs e)
         {
+            if (e.RightButton == MouseButtonState.Pressed)
+            {
+                if (sender is TreeViewItem treeViewItem)
+                {
+                    treeViewItem.Focus();
+                }
+            }
             if (!_isDragging && e.LeftButton == MouseButtonState.Pressed)
             {
                 _isDragging = true;
@@ -110,10 +117,13 @@ namespace KiCAD_DB_Editor
                 // Code to move the item in the model is placed here...
 
                 Debug.Assert(sourceSubLibraryVM.ParentSubLibraryVM is not null);
-                sourceSubLibraryVM.ParentSubLibraryVM.SubLibraryVMs.Remove(sourceSubLibraryVM);
-                int index = ~targetSubLibraryVM.SubLibraryVMs.BinarySearchIndexOf(sourceSubLibraryVM);
-                targetSubLibraryVM.SubLibraryVMs.Insert(index, sourceSubLibraryVM);
-                sourceSubLibraryVM.ParentSubLibraryVM = targetSubLibraryVM;
+
+                if (sourceSubLibraryVM.ParentSubLibraryVM.RemoveSubLibraryCommand.CanExecute(sourceSubLibraryVM) &&
+                    targetSubLibraryVM.AddSubLibraryCommand.CanExecute(sourceSubLibraryVM))
+                {
+                    sourceSubLibraryVM.ParentSubLibraryVM.RemoveSubLibraryCommand.Execute(sourceSubLibraryVM);
+                    targetSubLibraryVM.AddSubLibraryCommand.Execute(sourceSubLibraryVM);
+                }
             }
             e.Handled = true;
         }

@@ -32,9 +32,9 @@
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition Width="5"/>
-            <ColumnDefinition/>
+            <ColumnDefinition MinWidth="200"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="3*" MinWidth="300"/>
         </Grid.ColumnDefinitions>
         <TreeView x:Name="treeView_SubLibraries"
                   ItemsSource="{Binding LibraryVM.TopLevelSubLibraryVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"
@@ -50,7 +50,7 @@
                 </HierarchicalDataTemplate>
             </TreeView.Resources>
         </TreeView>
-        <GridSplitter Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="1,0,1,0" />
+        <GridSplitter Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="3,0,3,0" Width="3" />
         <local:UserControl_SubLibrary Grid.Column="2" SubLibraryVM="{Binding SelectedItem, ElementName=treeView_SubLibraries, Mode=OneWay}" />
     </Grid>
 </UserControl>

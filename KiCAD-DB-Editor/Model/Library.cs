@@ -36,7 +36,7 @@ namespace KiCAD_DB_Editor.Model
         // ======================================================================
 
         [JsonPropertyName("top_level_sublibrary")]
-        public SubLibrary TopLevelSubLibrary { get; set; } = new("top_level");
+        public SubLibrary TopLevelSubLibrary { get; set; } = new("Components");
 
         public void WriteToFile(string filePath)
         {

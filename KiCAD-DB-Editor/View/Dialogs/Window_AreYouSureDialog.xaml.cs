@@ -13,33 +13,15 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace KiCAD_DB_Editor.View
+namespace KiCAD_DB_Editor.View.Dialogs
 {
     /// <summary>
-    /// Interaction logic for Window_EditSubLibrary.xaml
+    /// Interaction logic for Window_AreYouSureDialog.xaml
     /// </summary>
-    public partial class Window_EditSubLibrary : Window
+    public partial class Window_AreYouSureDialog : Window
     {
-        #region Dependency Properties
-
-        public static readonly DependencyProperty SubLibraryNameProperty = DependencyProperty.Register(
-            nameof(SubLibraryName),
-            typeof(string),
-            typeof(Window_EditSubLibrary)
-            );
-
-        public string SubLibraryName
+        public Window_AreYouSureDialog()
         {
-            get => (string)GetValue(SubLibraryNameProperty);
-            set => SetValue(SubLibraryNameProperty, value);
-        }
-
-        #endregion
-
-        public Window_EditSubLibrary(string subLibraryName)
-        {
-            SubLibraryName = subLibraryName;
-
             InitializeComponent();
         }
 

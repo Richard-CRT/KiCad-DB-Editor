@@ -8,8 +8,8 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <StackPanel>
         <TextBlock Text="Inherited Parameters" />
-        <ListBox ItemsSource="{Binding SubLibraryVM.InheritedParameterVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_SubLibrary}}}" DisplayMemberPath="Name" Height="60" />
+        <ListBox ItemsSource="{Binding SubLibraryVM.InheritedParameterVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_SubLibrary}}}" DisplayMemberPath="Name" MinHeight="60" />
         <TextBlock Text="Parameters"/>
-        <ListBox ItemsSource="{Binding SubLibraryVM.ParameterVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_SubLibrary}}}" DisplayMemberPath="Name" Height="60" />
+        <ListBox ItemsSource="{Binding SubLibraryVM.ParameterVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_SubLibrary}}}" DisplayMemberPath="Name" MinHeight="60" />
     </StackPanel>
 </UserControl>

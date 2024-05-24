@@ -16,9 +16,13 @@ namespace KiCAD_DB_Editor.Model
         public List<Model.Parameter> Parameters { get; set; } = new();
 
         [JsonPropertyName("name"), JsonPropertyOrder(0)]
-        public string Name { get; set; }
+        public string Name { get; set; } = "default";
 
-        public SubLibrary(string name)
+        public SubLibrary()
+        {
+        }
+
+        internal SubLibrary(string name)
         {
             Name = name;
         }

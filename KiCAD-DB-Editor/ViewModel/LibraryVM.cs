@@ -1,6 +1,8 @@
 ﻿using KiCAD_DB_Editor.Commands;
+using KiCAD_DB_Editor.Exceptions;
 using KiCAD_DB_Editor.Model;
 using KiCAD_DB_Editor.View;
+using KiCAD_DB_Editor.View.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -59,6 +61,8 @@ namespace KiCAD_DB_Editor.ViewModel
             DeleteSubLibraryCommand = new BasicCommand(DeleteSubLibraryCommandExecuted, DeleteSubLibraryCommandCanExecute);
         }
 
+        public LibraryVM() : this(new()) { }
+
 
         #region Commands
 
@@ -68,18 +72,33 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private bool EditSubLibraryCommandCanExecute(object? parameter)
         {
-            return parameter is SubLibraryVM slVM;
+            return parameter is SubLibraryVM slVM && slVM.ParentSubLibraryVM is not null;
         }
 
         private void EditSubLibraryCommandExecuted(object? parameter)
         {
             Debug.Assert(parameter is SubLibraryVM);
             var slVM = (SubLibraryVM)parameter;
+            Debug.Assert(slVM.ParentSubLibraryVM is not null);
+
             // Breaks MVVM but not worth the effort to respect MVVM for this
             var dialog = new Window_EditSubLibrary(slVM.Name);
             if (dialog.ShowDialog() == true)
             {
-                slVM.Name = dialog.SubLibraryName;
+                try
+                {
+                    var pair = (slVM, dialog.SubLibraryName);
+                    if (slVM.ParentSubLibraryVM.EditSubLibraryCommand.CanExecute(pair))
+                        slVM.ParentSubLibraryVM.EditSubLibraryCommand.Execute(pair);
+                    else
+                        // Breaks MVVM but not worth the effort to respect MVVM for this
+                        (new Window_ErrorDialog("Name is invalid")).ShowDialog();
+                }
+                catch (ArgumentValidationException)
+                {
+                    // Breaks MVVM but not worth the effort to respect MVVM for this
+                    (new Window_ErrorDialog("Name is invalid")).ShowDialog();
+                }
             }
         }
 
@@ -96,10 +115,21 @@ namespace KiCAD_DB_Editor.ViewModel
             var dialog = new Window_EditSubLibrary("");
             if (dialog.ShowDialog() == true)
             {
-                SubLibrary newSL = new(dialog.SubLibraryName);
-                SubLibraryVM newSLVM = new(null, newSL);
-                if (slVM.AddSubLibraryCommand.CanExecute(newSLVM))
-                    slVM.AddSubLibraryCommand.Execute(newSLVM);
+                SubLibraryVM newSLVM = new();
+                try
+                {
+                    newSLVM.Name = dialog.SubLibraryName;
+                    if (slVM.AddSubLibraryCommand.CanExecute(newSLVM))
+                        slVM.AddSubLibraryCommand.Execute(newSLVM);
+                    else
+                        // Breaks MVVM but not worth the effort to respect MVVM for this
+                        (new Window_ErrorDialog("Unable to add sub-folder")).ShowDialog();
+                }
+                catch (ArgumentValidationException)
+                {
+                    // Breaks MVVM but not worth the effort to respect MVVM for this
+                    (new Window_ErrorDialog("Name is invalid")).ShowDialog();
+                }
             }
         }
 
@@ -114,8 +144,14 @@ namespace KiCAD_DB_Editor.ViewModel
             var slVM = (SubLibraryVM)parameter;
             Debug.Assert(slVM.ParentSubLibraryVM is not null);
 
-            if (slVM.ParentSubLibraryVM.RemoveSubLibraryCommand.CanExecute(slVM))
-                slVM.ParentSubLibraryVM.RemoveSubLibraryCommand.Execute(slVM);
+            if ((new Window_AreYouSureDialog()).ShowDialog() == true)
+            {
+                if (slVM.ParentSubLibraryVM.RemoveSubLibraryCommand.CanExecute(slVM))
+                    slVM.ParentSubLibraryVM.RemoveSubLibraryCommand.Execute(slVM);
+                else
+                    // Breaks MVVM but not worth the effort to respect MVVM for this
+                    (new Window_ErrorDialog("Unable to remove sub-folder")).ShowDialog();
+            }
         }
 
         #endregion Commands

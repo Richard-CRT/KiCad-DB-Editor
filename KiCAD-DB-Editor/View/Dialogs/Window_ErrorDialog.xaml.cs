@@ -13,32 +13,32 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace KiCAD_DB_Editor.View
+namespace KiCAD_DB_Editor.View.Dialogs
 {
     /// <summary>
-    /// Interaction logic for Window_EditSubLibrary.xaml
+    /// Interaction logic for Window_ErrorDialog.xaml
     /// </summary>
-    public partial class Window_EditSubLibrary : Window
+    public partial class Window_ErrorDialog : Window
     {
         #region Dependency Properties
 
-        public static readonly DependencyProperty SubLibraryNameProperty = DependencyProperty.Register(
-            nameof(SubLibraryName),
+        public static readonly DependencyProperty MessageProperty = DependencyProperty.Register(
+            nameof(Message),
             typeof(string),
-            typeof(Window_EditSubLibrary)
+            typeof(Window_ErrorDialog)
             );
 
-        public string SubLibraryName
+        public string Message
         {
-            get => (string)GetValue(SubLibraryNameProperty);
-            set => SetValue(SubLibraryNameProperty, value);
+            get => (string)GetValue(MessageProperty);
+            set => SetValue(MessageProperty, value);
         }
 
         #endregion
 
-        public Window_EditSubLibrary(string subLibraryName)
+        public Window_ErrorDialog(string message)
         {
-            SubLibraryName = subLibraryName;
+            Message = message;
 
             InitializeComponent();
         }
@@ -46,12 +46,6 @@ namespace KiCAD_DB_Editor.View
         private void button_OK_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
-            this.Close();
-        }
-
-        private void button_Cancel_Click(object sender, RoutedEventArgs e)
-        {
-            DialogResult = false;
             this.Close();
         }
     }

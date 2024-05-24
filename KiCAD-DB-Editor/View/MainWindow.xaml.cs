@@ -17,15 +17,22 @@ namespace KiCAD_DB_Editor
     /// </summary>
     public partial class MainWindow : Window
     {
+        private MainWindowVM? _mWVM;
+
         public MainWindow()
         {
             InitializeComponent();
+
+            if (DataContext is MainWindowVM mWVM)
+            {
+                _mWVM = mWVM;
+                _mWVM.OnRequestClose += (s, e) => this.Close();
+            }
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            if (DataContext is MainWindowVM mWVM)
-                mWVM.Loaded();
+            _mWVM?.WindowLoaded();
         }
     }
 }

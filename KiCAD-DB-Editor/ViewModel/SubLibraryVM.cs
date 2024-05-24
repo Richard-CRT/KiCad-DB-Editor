@@ -12,6 +12,7 @@ using System.ComponentModel;
 using Microsoft.VisualBasic;
 using KiCAD_DB_Editor.Commands;
 using KiCAD_DB_Editor.View;
+using KiCAD_DB_Editor.Exceptions;
 
 namespace KiCAD_DB_Editor.ViewModel
 {
@@ -70,7 +71,7 @@ namespace KiCAD_DB_Editor.ViewModel
                         _subLibraryVMs.CollectionChanged -= _subLibraryVMs_CollectionChanged;
                     _subLibraryVMs = value;
                     _subLibraryVMs.CollectionChanged += _subLibraryVMs_CollectionChanged;
-                                                                                                                                                                                                                                                                                                                      
+
                     _subLibraryVMs_CollectionChanged(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
                     InvokePropertyChanged();
                 }
@@ -80,7 +81,17 @@ namespace KiCAD_DB_Editor.ViewModel
         public string Name
         {
             get { return SubLibrary.Name; }
-            set { if (SubLibrary.Name != value) { SubLibrary.Name = value; InvokePropertyChanged(); } }
+            set
+            {
+                if (SubLibrary.Name != value)
+                {
+                    if (value.Length < 1 || value.Length > 100)
+                        throw new ArgumentValidationException("Name length is invalid");
+
+                    SubLibrary.Name = value;
+                    InvokePropertyChanged();
+                }
+            }
         }
 
         #endregion Notify Properties
@@ -112,7 +123,7 @@ namespace KiCAD_DB_Editor.ViewModel
                 case nameof(SubLibrary.Name):
                     SubLibraryVMs = new ObservableCollectionEx<SubLibraryVM>(SubLibraryVMs.OrderBy(slVM => slVM));
                     break;
-            }    
+            }
         }
 
         public SubLibraryVM(ViewModel.SubLibraryVM? parentSubLibraryVM, Model.SubLibrary subLibrary)
@@ -133,7 +144,11 @@ namespace KiCAD_DB_Editor.ViewModel
             // Setup commands
             RemoveSubLibraryCommand = new BasicCommand(RemoveSubLibraryCommandExecuted, RemoveSubLibraryCommandCanExecute);
             AddSubLibraryCommand = new BasicCommand(AddSubLibraryCommandExecuted, AddSubLibraryCommandCanExecute);
+            EditSubLibraryCommand = new BasicCommand(EditSubLibraryCommandExecuted, EditSubLibraryCommandCanExecute);
         }
+
+        public SubLibraryVM(ViewModel.SubLibraryVM? parentSubLibraryVM) : this(parentSubLibraryVM, new()) { }
+        public SubLibraryVM() : this(null) { }
 
         public bool RecursiveContains(SubLibraryVM otherSLVM)
         {
@@ -156,33 +171,50 @@ namespace KiCAD_DB_Editor.ViewModel
 
         public IBasicCommand RemoveSubLibraryCommand { get; }
         public IBasicCommand AddSubLibraryCommand { get; }
+        public IBasicCommand EditSubLibraryCommand { get; }
 
         private bool RemoveSubLibraryCommandCanExecute(object? parameter)
         {
-            return parameter is SubLibraryVM;
+            return parameter is SubLibraryVM slVM && SubLibraryVMs.Contains(slVM);
         }
 
         private void RemoveSubLibraryCommandExecuted(object? parameter)
         {
             Debug.Assert(parameter is SubLibraryVM);
-
             var slVM = (SubLibraryVM)parameter;
+            Debug.Assert(SubLibraryVMs.Contains(slVM));
+
             this.SubLibraryVMs.Remove(slVM);
         }
 
         private bool AddSubLibraryCommandCanExecute(object? parameter)
         {
-            return parameter is SubLibraryVM;
+            return parameter is SubLibraryVM slVM && !SubLibraryVMs.Select(oSlVM => oSlVM.Name).Contains(slVM.Name);
         }
 
         private void AddSubLibraryCommandExecuted(object? parameter)
         {
             Debug.Assert(parameter is SubLibraryVM);
-
             var slVM = (SubLibraryVM)parameter;
+            Debug.Assert(!SubLibraryVMs.Select(oSlVM => oSlVM.Name).Contains(slVM.Name));
+
             int index = ~this.SubLibraryVMs.BinarySearchIndexOf(slVM);
             this.SubLibraryVMs.Insert(index, slVM);
             slVM.ParentSubLibraryVM = this;
+        }
+
+        private bool EditSubLibraryCommandCanExecute(object? parameter)
+        {
+            return parameter is (SubLibraryVM slVM, string newName) && !SubLibraryVMs.Select(oSlVM => oSlVM.Name).Contains(newName);
+        }
+
+        private void EditSubLibraryCommandExecuted(object? parameter)
+        {
+            Debug.Assert(parameter is (SubLibraryVM, string));
+            (SubLibraryVM slVM, string newName) = ((SubLibraryVM, string))parameter;
+            Debug.Assert(!SubLibraryVMs.Select(oSlVM => oSlVM.Name).Contains(newName));
+
+            slVM.Name = newName;
         }
 
         #endregion Commands

@@ -5,8 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:KiCAD_DB_Editor.View.Dialogs"
         mc:Ignorable="d"
-        FocusManager.FocusedElement="{Binding ElementName=textBox_SubLibraryName}"
-        Title="Error" ResizeMode="NoResize" SizeToContent="WidthAndHeight">
+        Title="Error" ResizeMode="NoResize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen">
     <StackPanel Margin="10,0,10,10">
         <TextBlock Text="{Binding Message, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:Window_ErrorDialog}}}" />
         <DockPanel LastChildFill="False" Margin="0,5,0,0">

@@ -139,13 +139,13 @@ namespace KiCAD_DB_Editor.ViewModel
             SubLibraryVMs = new(subLibrary.SubLibraries.OrderBy(sL => sL.Name).Select(sL => new SubLibraryVM(this, sL)));
             Debug.Assert(_subLibraryVMs is not null);
             // Technically overwrites SubLibrary.Parameters even though it was just assigned above
-            ParameterVMs = new(subLibrary.Parameters.OrderBy(p => p.Name).Select(p => new ParameterVM(p)));
+            ParameterVMs = new(subLibrary.Parameters.OrderBy(p => p.Name).Select(p => new ParameterVM(this, p)));
             Debug.Assert(_parameterVMs is not null);
 
             // Setup commands
             RemoveSubLibraryCommand = new BasicCommand(RemoveSubLibraryCommandExecuted, RemoveSubLibraryCommandCanExecute);
             AddSubLibraryCommand = new BasicCommand(AddSubLibraryCommandExecuted, AddSubLibraryCommandCanExecute);
-            EditSubLibraryCommand = new BasicCommand(EditSubLibraryCommandExecuted, EditSubLibraryCommandCanExecute);
+            EditCommand = new BasicCommand(EditCommandExecuted, EditCommandCanExecute);
         }
 
         public SubLibraryVM(ViewModel.SubLibraryVM? parentSubLibraryVM) : this(parentSubLibraryVM, new()) { }
@@ -179,7 +179,7 @@ namespace KiCAD_DB_Editor.ViewModel
 
         public IBasicCommand RemoveSubLibraryCommand { get; }
         public IBasicCommand AddSubLibraryCommand { get; }
-        public IBasicCommand EditSubLibraryCommand { get; }
+        public IBasicCommand EditCommand { get; }
 
         private bool RemoveSubLibraryCommandCanExecute(object? parameter)
         {
@@ -211,12 +211,12 @@ namespace KiCAD_DB_Editor.ViewModel
             slVM.ParentSubLibraryVM = this;
         }
 
-        private bool EditSubLibraryCommandCanExecute(object? parameter)
+        private bool EditCommandCanExecute(object? parameter)
         {
             return parameter is (SubLibraryVM slVM, string newName) && !SubLibraryVMs.Select(oSlVM => oSlVM.Name).Contains(newName);
         }
 
-        private void EditSubLibraryCommandExecuted(object? parameter)
+        private void EditCommandExecuted(object? parameter)
         {
             Debug.Assert(parameter is (SubLibraryVM, string));
             (SubLibraryVM slVM, string newName) = ((SubLibraryVM, string))parameter;
@@ -226,5 +226,7 @@ namespace KiCAD_DB_Editor.ViewModel
         }
 
         #endregion Commands
+
+
     }
 }

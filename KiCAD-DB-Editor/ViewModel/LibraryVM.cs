@@ -88,8 +88,8 @@ namespace KiCAD_DB_Editor.ViewModel
                 try
                 {
                     var pair = (slVM, dialog.SubLibraryName);
-                    if (slVM.ParentSubLibraryVM.EditSubLibraryCommand.CanExecute(pair))
-                        slVM.ParentSubLibraryVM.EditSubLibraryCommand.Execute(pair);
+                    if (slVM.ParentSubLibraryVM.EditCommand.CanExecute(pair))
+                        slVM.ParentSubLibraryVM.EditCommand.Execute(pair);
                     else
                         // Breaks MVVM but not worth the effort to respect MVVM for this
                         (new Window_ErrorDialog("Name is invalid")).ShowDialog();

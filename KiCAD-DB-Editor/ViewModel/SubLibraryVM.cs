@@ -13,6 +13,7 @@ using Microsoft.VisualBasic;
 using KiCAD_DB_Editor.Commands;
 using KiCAD_DB_Editor.View;
 using KiCAD_DB_Editor.Exceptions;
+using KiCAD_DB_Editor.Model;
 
 namespace KiCAD_DB_Editor.ViewModel
 {
@@ -34,6 +35,7 @@ namespace KiCAD_DB_Editor.ViewModel
                     return ParentSubLibraryVM.InheritedParameterVMs.Concat(ParentSubLibraryVM.ParameterVMs).OrderBy(pVM => pVM);
                 }
             }
+
         }
 
         // Do not initialise here, do in constructor to link collection changed
@@ -52,8 +54,7 @@ namespace KiCAD_DB_Editor.ViewModel
 
                     _parameterVMs_CollectionChanged(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
                     InvokePropertyChanged();
-                    foreach (var subLibraryVM in SubLibraryVMs)
-                        subLibraryVM.InvokePropertyChanged(nameof(SubLibraryVM.InheritedParameterVMs));
+                    RefreshInheritedParameters();
                 }
             }
         }
@@ -164,6 +165,13 @@ namespace KiCAD_DB_Editor.ViewModel
                 return 1;
             else
                 return this.Name.CompareTo(other.Name);
+        }
+
+        public void RefreshInheritedParameters()
+        {
+            this.InvokePropertyChanged(nameof(SubLibraryVM.InheritedParameterVMs));
+            foreach (var subLibraryVM in SubLibraryVMs)
+                subLibraryVM.RefreshInheritedParameters();
         }
 
 

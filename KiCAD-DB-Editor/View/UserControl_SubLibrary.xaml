@@ -10,5 +10,9 @@
         <View:UserControl_Parameters
             ParameterVMs="{Binding SubLibraryVM.ParameterVMs, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_SubLibrary}}}"
             InheritedParameterVMs="{Binding SubLibraryVM.InheritedParameterVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_SubLibrary}}}"  />
+        <DockPanel LastChildFill="False">
+            <Button DockPanel.Dock="Right" Content="—" Command="{Binding SubLibraryVM.AddParameterCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_SubLibrary}}}" FontWeight="Bold" Width="25" Height="25" Padding="1,0,1,4" IsEnabled="False" />
+            <Button DockPanel.Dock="Right" Content="➕" Command="{Binding SubLibraryVM.AddParameterCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_SubLibrary}}}" Width="25" Height="25" Padding="1,0,1,2" />
+        </DockPanel>
     </StackPanel>
 </UserControl>

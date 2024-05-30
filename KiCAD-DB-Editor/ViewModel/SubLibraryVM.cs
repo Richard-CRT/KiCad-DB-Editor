@@ -14,28 +14,46 @@ using KiCAD_DB_Editor.Commands;
 using KiCAD_DB_Editor.View;
 using KiCAD_DB_Editor.Exceptions;
 using KiCAD_DB_Editor.Model;
+using KiCAD_DB_Editor.View.Dialogs;
+using System.Security.Cryptography;
 
 namespace KiCAD_DB_Editor.ViewModel
 {
     public class SubLibraryVM : NotifyObject, IComparable<SubLibraryVM>
     {
         public readonly Model.SubLibrary SubLibrary;
-        public ViewModel.SubLibraryVM? ParentSubLibraryVM;
+        private ViewModel.SubLibraryVM? _parentSubLibraryVM;
+        public ViewModel.SubLibraryVM? ParentSubLibraryVM
+        {
+            get { return _parentSubLibraryVM; }
+            set
+            {
+                if (_parentSubLibraryVM != value)
+                {
+                    _parentSubLibraryVM = value;
+
+                    InvokePropertyChanged(nameof(SubLibraryVM.Path));
+                    RefreshInheritedParameters();
+                }
+            }
+        }
 
         #region Notify Properties
 
+        private IEnumerable<ParameterVM>? _cachedInheritedParameterVMs;
         public IEnumerable<ParameterVM> InheritedParameterVMs
         {
             get
             {
-                if (ParentSubLibraryVM is null)
-                    return Array.Empty<ParameterVM>();
-                else
+                if (_cachedInheritedParameterVMs is null)
                 {
-                    return ParentSubLibraryVM.InheritedParameterVMs.Concat(ParentSubLibraryVM.ParameterVMs).OrderBy(pVM => pVM);
+                    if (ParentSubLibraryVM is null)
+                        _cachedInheritedParameterVMs = Enumerable.Empty<ParameterVM>();
+                    else
+                        _cachedInheritedParameterVMs = ParentSubLibraryVM.InheritedParameterVMs.Concat(ParentSubLibraryVM.ParameterVMs).OrderBy(pVM => pVM);
                 }
+                return _cachedInheritedParameterVMs;
             }
-
         }
 
         // Do not initialise here, do in constructor to link collection changed
@@ -54,7 +72,6 @@ namespace KiCAD_DB_Editor.ViewModel
 
                     _parameterVMs_CollectionChanged(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
                     InvokePropertyChanged();
-                    RefreshInheritedParameters();
                 }
             }
         }
@@ -86,13 +103,23 @@ namespace KiCAD_DB_Editor.ViewModel
             {
                 if (SubLibrary.Name != value)
                 {
-                    if (value.Length < 1 || value.Length > 100)
-                        throw new ArgumentValidationException("Name length is invalid");
-
-                    SubLibrary.Name = value;
-                    InvokePropertyChanged();
+                    try
+                    {
+                        if (EditCommand.CanExecute(value))
+                            EditCommand.Execute(value);
+                    }
+                    catch (ArgumentValidationException ex)
+                    {
+                        // Breaks MVVM but not worth the effort to respect MVVM for this
+                        (new Window_ErrorDialog(ex.Message)).ShowDialog();
+                    }
                 }
             }
+        }
+
+        public string Path
+        {
+            get { return ParentSubLibraryVM is null ? $"{Name}/" : $"{ParentSubLibraryVM.Path}{Name}/"; }
         }
 
         #endregion Notify Properties
@@ -100,6 +127,7 @@ namespace KiCAD_DB_Editor.ViewModel
         private void _parameterVMs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             SubLibrary.Parameters = ParameterVMs.Select(pVM => pVM.Parameter).ToList();
+            RefreshInheritedParameters();
         }
 
         private List<SubLibraryVM> subLibraryVMsSubscribed = new();
@@ -146,10 +174,8 @@ namespace KiCAD_DB_Editor.ViewModel
             RemoveSubLibraryCommand = new BasicCommand(RemoveSubLibraryCommandExecuted, RemoveSubLibraryCommandCanExecute);
             AddSubLibraryCommand = new BasicCommand(AddSubLibraryCommandExecuted, AddSubLibraryCommandCanExecute);
             EditCommand = new BasicCommand(EditCommandExecuted, EditCommandCanExecute);
+            AddParameterCommand = new BasicCommand(AddParameterCommandExecuted, AddParameterCommandCanExecute);
         }
-
-        public SubLibraryVM(ViewModel.SubLibraryVM? parentSubLibraryVM) : this(parentSubLibraryVM, new()) { }
-        public SubLibraryVM() : this(null) { }
 
         public bool RecursiveContains(SubLibraryVM otherSLVM)
         {
@@ -169,9 +195,17 @@ namespace KiCAD_DB_Editor.ViewModel
 
         public void RefreshInheritedParameters()
         {
+            _cachedInheritedParameterVMs = null;
             this.InvokePropertyChanged(nameof(SubLibraryVM.InheritedParameterVMs));
-            foreach (var subLibraryVM in SubLibraryVMs)
-                subLibraryVM.RefreshInheritedParameters();
+            if (SubLibraryVMs is not null)
+                foreach (var subLibraryVM in SubLibraryVMs)
+                    subLibraryVM.RefreshInheritedParameters();
+        }
+
+        // Method instead of property as we don't want to allow binding as when we change a SLVM's parent the recursive becomes out of date on old and new parent and I don't want to deal with it
+        public IEnumerable<ParameterVM> RecursiveParameterVMs()
+        {
+            return ParameterVMs.Concat(SubLibraryVMs.Aggregate(Enumerable.Empty<ParameterVM>(), (acc, slVM) => acc.Concat(slVM.RecursiveParameterVMs()))).OrderBy(pVM => pVM);
         }
 
 
@@ -180,6 +214,7 @@ namespace KiCAD_DB_Editor.ViewModel
         public IBasicCommand RemoveSubLibraryCommand { get; }
         public IBasicCommand AddSubLibraryCommand { get; }
         public IBasicCommand EditCommand { get; }
+        public IBasicCommand AddParameterCommand { get; }
 
         private bool RemoveSubLibraryCommandCanExecute(object? parameter)
         {
@@ -197,14 +232,16 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private bool AddSubLibraryCommandCanExecute(object? parameter)
         {
-            return parameter is SubLibraryVM slVM && !SubLibraryVMs.Select(oSlVM => oSlVM.Name).Contains(slVM.Name);
+            return parameter is SubLibraryVM slVM && !SubLibraryVMs.Where(oSlVM => oSlVM.Name.Equals(slVM.Name, StringComparison.OrdinalIgnoreCase)).Any() &&
+                !InheritedParameterVMs.Concat(ParameterVMs).Select(pVM => pVM.Name).Intersect(slVM.RecursiveParameterVMs().Select(pVM => pVM.Name), StringComparer.OrdinalIgnoreCase).Any();
         }
 
         private void AddSubLibraryCommandExecuted(object? parameter)
         {
             Debug.Assert(parameter is SubLibraryVM);
             var slVM = (SubLibraryVM)parameter;
-            Debug.Assert(!SubLibraryVMs.Select(oSlVM => oSlVM.Name).Contains(slVM.Name));
+            Debug.Assert(!SubLibraryVMs.Where(oSlVM => oSlVM.Name.Equals(slVM.Name, StringComparison.OrdinalIgnoreCase)).Any());
+            Debug.Assert(!InheritedParameterVMs.Concat(ParameterVMs).Select(pVM => pVM.Name).Intersect(slVM.RecursiveParameterVMs().Select(pVM => pVM.Name), StringComparer.OrdinalIgnoreCase).Any());
 
             int index = ~this.SubLibraryVMs.BinarySearchIndexOf(slVM);
             this.SubLibraryVMs.Insert(index, slVM);
@@ -213,16 +250,52 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private bool EditCommandCanExecute(object? parameter)
         {
-            return parameter is (SubLibraryVM slVM, string newName) && !SubLibraryVMs.Select(oSlVM => oSlVM.Name).Contains(newName);
+            return parameter is string newName && ParentSubLibraryVM is not null;
         }
 
         private void EditCommandExecuted(object? parameter)
         {
-            Debug.Assert(parameter is (SubLibraryVM, string));
-            (SubLibraryVM slVM, string newName) = ((SubLibraryVM, string))parameter;
-            Debug.Assert(!SubLibraryVMs.Select(oSlVM => oSlVM.Name).Contains(newName));
+            Debug.Assert(parameter is string);
+            string newName = (string)parameter;
+            Debug.Assert(ParentSubLibraryVM is not null);
 
-            slVM.Name = newName;
+            if (newName.Length < 1 || newName.Length > 100)
+                throw new ArgumentValidationException("New name is invalid length");
+            if (ParentSubLibraryVM.SubLibraryVMs.Where(oSlVM => oSlVM.Name.Equals(newName, StringComparison.OrdinalIgnoreCase)).Any())
+                throw new ArgumentValidationException("New name conflicts with existing sub-folder");
+
+            SubLibrary.Name = newName;
+            InvokePropertyChanged(nameof(SubLibraryVM.Name));
+            InvokePropertyChanged(nameof(SubLibraryVM.Path));
+        }
+
+        private bool AddParameterCommandCanExecute(object? parameter)
+        {
+            return true;
+        }
+
+        private void AddParameterCommandExecuted(object? parameter)
+        {
+            ParameterVM pVM = new(this, new(""));
+
+            int n = 1;
+            while (true)
+            {
+                string trialName = $"param{n}";
+                try
+                {
+                    if (pVM.EditCommand.CanExecute(trialName))
+                    {
+                        pVM.EditCommand.Execute(trialName);
+                        break;
+                    }
+                }
+                catch (ArgumentValidationException)
+                {
+                    n++;
+                }
+            }
+            ParameterVMs.Add(pVM);
         }
 
         #endregion Commands

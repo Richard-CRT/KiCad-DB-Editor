@@ -28,14 +28,8 @@ namespace KiCAD_DB_Editor.ViewModel
                 {
                     try
                     {
-                        if (value.Length < 1 || value.Length > 100)
-                            throw new ArgumentValidationException("Name length is invalid");
-
-                        if (ParentSubLibraryVM.ParameterVMs.Select(pVM => pVM.Name).Contains(value))
-                            throw new ArgumentValidationException("Parameter name already exists");
-
-                        Parameter.Name = value;
-                        InvokePropertyChanged();
+                        if (EditCommand.CanExecute(value))
+                            EditCommand.Execute(value);
                     }
                     catch (ArgumentValidationException ex)
                     {
@@ -54,7 +48,45 @@ namespace KiCAD_DB_Editor.ViewModel
             Parameter = parameter;
 
             ParentSubLibraryVM = parentSubLibraryVM;
+
+            // Setup commands
+            EditCommand = new BasicCommand(EditCommandExecuted, EditCommandCanExecute);
         }
+
+
+        #region Commands
+
+        public IBasicCommand EditCommand { get; }
+
+        private bool EditCommandCanExecute(object? parameter)
+        {
+            return parameter is string newName;
+        }
+
+        private void EditCommandExecuted(object? parameter)
+        {
+            Debug.Assert(parameter is string);
+            string newName = (string)parameter;
+
+            if (newName.Length < 1 || newName.Length > 100)
+                throw new ArgumentValidationException("New name is invalid length");
+
+            if (ParentSubLibraryVM.ParameterVMs.Where(pVM => pVM.Name.Equals(newName, StringComparison.OrdinalIgnoreCase)).Any())
+                throw new ArgumentValidationException("Parameter name already exists");
+
+            var conflictingParentParameterVMs = ParentSubLibraryVM.InheritedParameterVMs.Where(pVM => pVM.Name.Equals(newName, StringComparison.OrdinalIgnoreCase));
+            if (conflictingParentParameterVMs.Any())
+                throw new ArgumentValidationException($"Parameter name already exists in parent folder:\r\n{string.Join("\r\n", conflictingParentParameterVMs.Select(pVM => pVM.ParentSubLibraryVM.Path))}");
+
+            var conflictingRecursiveParameterVMs = ParentSubLibraryVM.RecursiveParameterVMs().Where(pVM => pVM.Name.Equals(newName, StringComparison.OrdinalIgnoreCase));
+            if (conflictingRecursiveParameterVMs.Any())
+                throw new ArgumentValidationException($"Parameter name already exists in sub-folder(s):\r\n{string.Join("\r\n", conflictingRecursiveParameterVMs.Select(pVM => pVM.ParentSubLibraryVM.Path))}");
+
+            Parameter.Name = newName;
+            InvokePropertyChanged(nameof(ParameterVM.Name));
+        }
+
+        #endregion Commands
 
         public int CompareTo(ViewModel.ParameterVM? other)
         {

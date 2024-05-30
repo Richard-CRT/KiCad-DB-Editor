@@ -87,17 +87,13 @@ namespace KiCAD_DB_Editor.ViewModel
             {
                 try
                 {
-                    var pair = (slVM, dialog.SubLibraryName);
-                    if (slVM.ParentSubLibraryVM.EditCommand.CanExecute(pair))
-                        slVM.ParentSubLibraryVM.EditCommand.Execute(pair);
-                    else
-                        // Breaks MVVM but not worth the effort to respect MVVM for this
-                        (new Window_ErrorDialog("Name is invalid")).ShowDialog();
+                    if (slVM.EditCommand.CanExecute(dialog.SubLibraryName))
+                        slVM.EditCommand.Execute(dialog.SubLibraryName);
                 }
-                catch (ArgumentValidationException)
+                catch (ArgumentValidationException ex)
                 {
                     // Breaks MVVM but not worth the effort to respect MVVM for this
-                    (new Window_ErrorDialog("Name is invalid")).ShowDialog();
+                    (new Window_ErrorDialog(ex.Message)).ShowDialog();
                 }
             }
         }
@@ -115,10 +111,9 @@ namespace KiCAD_DB_Editor.ViewModel
             var dialog = new Window_EditSubLibrary("");
             if (dialog.ShowDialog() == true)
             {
-                SubLibraryVM newSLVM = new();
+                SubLibraryVM newSLVM = new(null, new(dialog.SubLibraryName));
                 try
                 {
-                    newSLVM.Name = dialog.SubLibraryName;
                     if (slVM.AddSubLibraryCommand.CanExecute(newSLVM))
                         slVM.AddSubLibraryCommand.Execute(newSLVM);
                     else

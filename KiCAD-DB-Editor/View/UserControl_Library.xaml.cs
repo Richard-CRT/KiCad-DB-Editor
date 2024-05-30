@@ -1,4 +1,5 @@
-﻿using KiCAD_DB_Editor.ViewModel;
+﻿using KiCAD_DB_Editor.View.Dialogs;
+using KiCAD_DB_Editor.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -124,6 +125,10 @@ namespace KiCAD_DB_Editor
                     sourceSubLibraryVM.ParentSubLibraryVM.RemoveSubLibraryCommand.Execute(sourceSubLibraryVM);
                     targetSubLibraryVM.AddSubLibraryCommand.Execute(sourceSubLibraryVM);
                 }
+                else
+                    // Breaks MVVM but not worth the effort to respect MVVM for this
+                    (new Window_ErrorDialog("Unable to move sub-folder to destination, make sure the move wouldn't cause a conflict of nested duplicate parameter names etc." +
+                        "")).ShowDialog();
             }
             e.Handled = true;
         }

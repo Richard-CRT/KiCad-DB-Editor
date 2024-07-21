@@ -7,7 +7,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <StackPanel>
+        <TextBlock>Folder</TextBlock>
         <TextBox Text="{Binding FolderVM.Name, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Folder}}, UpdateSourceTrigger=PropertyChanged}" />
-        <ListBox ItemsSource="{Binding FolderVM.CategoryVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Folder}}}" DisplayMemberPath="Name" MinHeight="60" />
     </StackPanel>
 </UserControl>

@@ -18,30 +18,45 @@ namespace KiCAD_DB_Editor.ViewModel
 
         #region Notify Properties
 
-        private ViewModel.SubLibraryVM _topLevelSubLibraryVM;
-        public ViewModel.SubLibraryVM TopLevelSubLibraryVM
+        private ViewModel.FolderVM _topLevelFolderVM;
+        public ViewModel.FolderVM TopLevelFolderVM
         {
-            get { return _topLevelSubLibraryVM; }
+            get { return _topLevelFolderVM; }
             set
             {
-                if (_topLevelSubLibraryVM != value)
+                if (_topLevelFolderVM != value)
                 {
-                    _topLevelSubLibraryVM = value;
-                    if (_topLevelSubLibraryVMs is null)
-                        TopLevelSubLibraryVMs = new() { value };
+                    _topLevelFolderVM = value;
+                    if (_topLevelFolderVMs is null)
+                        TopLevelFolderVMs = new() { value };
                     else
-                        TopLevelSubLibraryVMs[0] = value;
+                        TopLevelFolderVMs[0] = value;
                     InvokePropertyChanged();
                 }
             }
         }
 
-        // Exists only to allow treeview to bind to a collection instead of single item, should not be used anywhere else
-        private ObservableCollectionEx<ViewModel.SubLibraryVM> _topLevelSubLibraryVMs;
-        public ObservableCollectionEx<ViewModel.SubLibraryVM> TopLevelSubLibraryVMs
+        private TreeViewItemVM _selectedTreeViewItemVM;
+        public TreeViewItemVM SelectedTreeViewItemVM
         {
-            get { return _topLevelSubLibraryVMs; }
-            private set { if (_topLevelSubLibraryVMs != value) { _topLevelSubLibraryVMs = value; InvokePropertyChanged(); } }
+            get { return _selectedTreeViewItemVM; }
+            set
+            {
+                if (_selectedTreeViewItemVM != value)
+                {
+                    _selectedTreeViewItemVM = value;
+                    InvokePropertyChanged();
+                }
+            }
+        }
+
+
+        // Exists only to allow treeview to bind to a collection instead of single item, should not be used anywhere else
+        private ObservableCollectionEx<ViewModel.FolderVM> _topLevelFolderVMs;
+        public ObservableCollectionEx<ViewModel.FolderVM> TopLevelFolderVMs
+        {
+            get { return _topLevelFolderVMs; }
+            private set { if (_topLevelFolderVMs != value) { _topLevelFolderVMs = value; InvokePropertyChanged(); } }
         }
 
         #endregion Notify Properties
@@ -51,14 +66,9 @@ namespace KiCAD_DB_Editor.ViewModel
             // Link model
             Library = library;
 
-            TopLevelSubLibraryVM = new(null, library.TopLevelSubLibrary);
-            Debug.Assert(_topLevelSubLibraryVM is not null);
-            Debug.Assert(_topLevelSubLibraryVMs is not null);
-
-            // Setup commands
-            EditSubLibraryCommand = new BasicCommand(EditSubLibraryCommandExecuted, EditSubLibraryCommandCanExecute);
-            NewSubLibraryCommand = new BasicCommand(NewSubLibraryCommandExecuted, NewSubLibraryCommandCanExecute);
-            DeleteSubLibraryCommand = new BasicCommand(DeleteSubLibraryCommandExecuted, DeleteSubLibraryCommandCanExecute);
+            TopLevelFolderVM = new(null, library.TopLevelFolder);
+            Debug.Assert(_topLevelFolderVM is not null);
+            Debug.Assert(_topLevelFolderVMs is not null);
         }
 
         public LibraryVM() : this(new()) { }
@@ -66,88 +76,6 @@ namespace KiCAD_DB_Editor.ViewModel
 
         #region Commands
 
-        public IBasicCommand EditSubLibraryCommand { get; }
-        public IBasicCommand NewSubLibraryCommand { get; }
-        public IBasicCommand DeleteSubLibraryCommand { get; }
-
-        private bool EditSubLibraryCommandCanExecute(object? parameter)
-        {
-            return parameter is SubLibraryVM slVM && slVM.ParentSubLibraryVM is not null;
-        }
-
-        private void EditSubLibraryCommandExecuted(object? parameter)
-        {
-            Debug.Assert(parameter is SubLibraryVM);
-            var slVM = (SubLibraryVM)parameter;
-            Debug.Assert(slVM.ParentSubLibraryVM is not null);
-
-            // Breaks MVVM but not worth the effort to respect MVVM for this
-            var dialog = new Window_EditSubLibrary(slVM.Name);
-            if (dialog.ShowDialog() == true)
-            {
-                try
-                {
-                    if (slVM.EditCommand.CanExecute(dialog.SubLibraryName))
-                        slVM.EditCommand.Execute(dialog.SubLibraryName);
-                }
-                catch (ArgumentValidationException ex)
-                {
-                    // Breaks MVVM but not worth the effort to respect MVVM for this
-                    (new Window_ErrorDialog(ex.Message)).ShowDialog();
-                }
-            }
-        }
-
-        private bool NewSubLibraryCommandCanExecute(object? parameter)
-        {
-            return parameter is SubLibraryVM slVM;
-        }
-
-        private void NewSubLibraryCommandExecuted(object? parameter)
-        {
-            Debug.Assert(parameter is SubLibraryVM);
-            var slVM = (SubLibraryVM)parameter;
-            // Breaks MVVM but not worth the effort to respect MVVM for this
-            var dialog = new Window_EditSubLibrary("");
-            if (dialog.ShowDialog() == true)
-            {
-                SubLibraryVM newSLVM = new(null, new(dialog.SubLibraryName));
-                try
-                {
-                    if (slVM.AddSubLibraryCommand.CanExecute(newSLVM))
-                        slVM.AddSubLibraryCommand.Execute(newSLVM);
-                    else
-                        // Breaks MVVM but not worth the effort to respect MVVM for this
-                        (new Window_ErrorDialog("Unable to add sub-folder")).ShowDialog();
-                }
-                catch (ArgumentValidationException)
-                {
-                    // Breaks MVVM but not worth the effort to respect MVVM for this
-                    (new Window_ErrorDialog("Name is invalid")).ShowDialog();
-                }
-            }
-        }
-
-        private bool DeleteSubLibraryCommandCanExecute(object? parameter)
-        {
-            return parameter is SubLibraryVM slVM && slVM.ParentSubLibraryVM is not null && slVM.ParentSubLibraryVM.RemoveSubLibraryCommand.CanExecute(slVM);
-        }
-
-        private void DeleteSubLibraryCommandExecuted(object? parameter)
-        {
-            Debug.Assert(parameter is SubLibraryVM);
-            var slVM = (SubLibraryVM)parameter;
-            Debug.Assert(slVM.ParentSubLibraryVM is not null);
-
-            if ((new Window_AreYouSureDialog()).ShowDialog() == true)
-            {
-                if (slVM.ParentSubLibraryVM.RemoveSubLibraryCommand.CanExecute(slVM))
-                    slVM.ParentSubLibraryVM.RemoveSubLibraryCommand.Execute(slVM);
-                else
-                    // Breaks MVVM but not worth the effort to respect MVVM for this
-                    (new Window_ErrorDialog("Unable to remove sub-folder")).ShowDialog();
-            }
-        }
 
         #endregion Commands
     }

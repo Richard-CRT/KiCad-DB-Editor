@@ -4,13 +4,13 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:KiCAD_DB_Editor"
-            xmlns:vm="clr-namespace:KiCAD_DB_Editor.ViewModel"
+             xmlns:vm="clr-namespace:KiCAD_DB_Editor.ViewModel"
+             xmlns:conv="clr-namespace:KiCAD_DB_Editor.View.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <Style x:Key="TreeViewItemStyle_ExpandAll" TargetType="{x:Type TreeViewItem}">
             <Setter Property="IsExpanded" Value="True"/>
-            <EventSetter Event="PreviewMouseDown" Handler="treeViewItem_PreviewMouseDown"/>
             <Setter Property="Tag" Value="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}, Path=LibraryVM}"></Setter>
             <Setter Property="ContextMenu">
                 <Setter.Value>
@@ -27,8 +27,9 @@
                     </ContextMenu>
                 </Setter.Value>
             </Setter>
-
         </Style>
+        <conv:TreeViewItemVM_to_FolderVM_Converter x:Key="TreeViewItemVM_to_FolderVM_Converter" />
+        <conv:TreeViewItemVM_to_CategoryVM_Converter x:Key="TreeViewItemVM_to_CategoryVM_Converter" />
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -36,21 +37,31 @@
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="3*" MinWidth="300"/>
         </Grid.ColumnDefinitions>
-        <TreeView x:Name="treeView_SubLibraries"
-                  ItemsSource="{Binding LibraryVM.TopLevelSubLibraryVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"
+        <TreeView x:Name="treeView_FoldersAndCategories"
+                  ItemsSource="{Binding LibraryVM.TopLevelFolderVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"
                   ItemContainerStyle="{StaticResource TreeViewItemStyle_ExpandAll}"
-                  MouseMove="treeView_SubLibraries_MouseMove"
-                  DragOver="treeView_SubLibraries_DragOver"
-                  Drop="treeView_SubLibraries_Drop"
-                  AllowDrop="True"
                   >
             <TreeView.Resources>
-                <HierarchicalDataTemplate ItemsSource="{Binding SubLibraryVMs}" DataType="{x:Type vm:SubLibraryVM}">
-                    <TextBlock Text="{Binding Name}"></TextBlock>
+                <HierarchicalDataTemplate ItemsSource="{Binding TreeViewItemVMs}" DataType="{x:Type vm:TreeViewItemVM}">
+                    <StackPanel Orientation="Horizontal">
+                        <Rectangle Width="10" Height="10">
+                            <Rectangle.Fill>
+                                <SolidColorBrush Color="{Binding TreeViewIconColour}"/>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                        <TextBlock Text="{Binding Name}" />
+                    </StackPanel>
                 </HierarchicalDataTemplate>
             </TreeView.Resources>
         </TreeView>
         <GridSplitter Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="3,0,3,0" Width="3" />
-        <local:UserControl_SubLibrary Grid.Column="2" SubLibraryVM="{Binding SelectedItem, ElementName=treeView_SubLibraries, Mode=OneWay}" />
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <local:UserControl_Folder Grid.Row="0" FolderVM="{Binding SelectedItem, Converter={StaticResource TreeViewItemVM_to_FolderVM_Converter}, ElementName=treeView_FoldersAndCategories, Mode=OneWay}" />
+            <local:UserControl_Category Grid.Row="1" CategoryVM="{Binding SelectedItem, Converter={StaticResource TreeViewItemVM_to_CategoryVM_Converter}, ElementName=treeView_FoldersAndCategories, Mode=OneWay}" />
+        </Grid>
     </Grid>
 </UserControl>

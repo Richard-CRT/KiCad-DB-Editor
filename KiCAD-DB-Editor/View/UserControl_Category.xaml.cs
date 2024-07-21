@@ -17,27 +17,27 @@ using System.Windows.Shapes;
 namespace KiCAD_DB_Editor
 {
     /// <summary>
-    /// Interaction logic for UserControl_SubLibrary.xaml
+    /// Interaction logic for UserControl_Category.xaml
     /// </summary>
-    public partial class UserControl_SubLibrary : UserControl
+    public partial class UserControl_Category : UserControl
     {
         #region Dependency Properties
 
-        public static readonly DependencyProperty SubLibraryVMProperty = DependencyProperty.Register(
-            nameof(SubLibraryVM),
-            typeof(SubLibraryVM),
-            typeof(UserControl_SubLibrary)
+        public static readonly DependencyProperty CategoryVMProperty = DependencyProperty.Register(
+            nameof(CategoryVM),
+            typeof(CategoryVM),
+            typeof(UserControl_Category)
             );
 
-        public SubLibraryVM SubLibraryVM
+        public CategoryVM CategoryVM
         {
-            get => (SubLibraryVM)GetValue(SubLibraryVMProperty);
-            set => SetValue(SubLibraryVMProperty, value);
+            get => (CategoryVM)GetValue(CategoryVMProperty);
+            set => SetValue(CategoryVMProperty, value);
         }
 
         #endregion
 
-        public UserControl_SubLibrary()
+        public UserControl_Category()
         {
             InitializeComponent();
         }

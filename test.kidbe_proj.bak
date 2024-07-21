@@ -1,0 +1,676 @@
+{
+  "$id": "1",
+  "parameters": {
+    "$id": "2",
+    "$values": [
+      {
+        "$id": "3",
+        "name": "BOM Comments"
+      },
+      {
+        "$id": "4",
+        "name": "Case/Package"
+      },
+      {
+        "$id": "5",
+        "name": "Description"
+      },
+      {
+        "$id": "6",
+        "name": "Manufacturer"
+      },
+      {
+        "$id": "7",
+        "name": "MPN"
+      },
+      {
+        "$id": "8",
+        "name": "Notes"
+      }
+    ]
+  },
+  "top_level_folder": {
+    "$id": "9",
+    "name": "Components",
+    "folders": {
+      "$id": "10",
+      "$values": [
+        {
+          "$id": "11",
+          "name": "Connectors",
+          "folders": {
+            "$id": "12",
+            "$values": [
+              {
+                "$id": "13",
+                "name": "Card Edge Connectors",
+                "folders": {
+                  "$id": "14",
+                  "$values": []
+                },
+                "categories": {
+                  "$id": "15",
+                  "$values": []
+                }
+              },
+              {
+                "$id": "16",
+                "name": "Headers \u0026 Wire Housings",
+                "folders": {
+                  "$id": "17",
+                  "$values": []
+                },
+                "categories": {
+                  "$id": "18",
+                  "$values": []
+                }
+              },
+              {
+                "$id": "19",
+                "name": "RF",
+                "folders": {
+                  "$id": "20",
+                  "$values": [
+                    {
+                      "$id": "21",
+                      "name": "SMA",
+                      "folders": {
+                        "$id": "22",
+                        "$values": []
+                      },
+                      "categories": {
+                        "$id": "23",
+                        "$values": []
+                      }
+                    }
+                  ]
+                },
+                "categories": {
+                  "$id": "24",
+                  "$values": []
+                }
+              }
+            ]
+          },
+          "categories": {
+            "$id": "25",
+            "$values": []
+          }
+        },
+        {
+          "$id": "26",
+          "name": "Diodes",
+          "folders": {
+            "$id": "27",
+            "$values": [
+              {
+                "$id": "28",
+                "name": "Schottky",
+                "folders": {
+                  "$id": "29",
+                  "$values": []
+                },
+                "categories": {
+                  "$id": "30",
+                  "$values": []
+                }
+              },
+              {
+                "$id": "31",
+                "name": "TVS",
+                "folders": {
+                  "$id": "32",
+                  "$values": []
+                },
+                "categories": {
+                  "$id": "33",
+                  "$values": []
+                }
+              },
+              {
+                "$id": "34",
+                "name": "Zener",
+                "folders": {
+                  "$id": "35",
+                  "$values": []
+                },
+                "categories": {
+                  "$id": "36",
+                  "$values": []
+                }
+              }
+            ]
+          },
+          "categories": {
+            "$id": "37",
+            "$values": []
+          }
+        },
+        {
+          "$id": "38",
+          "name": "Fiducials",
+          "folders": {
+            "$id": "39",
+            "$values": []
+          },
+          "categories": {
+            "$id": "40",
+            "$values": []
+          }
+        },
+        {
+          "$id": "41",
+          "name": "Frequency \u0026 Timing",
+          "folders": {
+            "$id": "42",
+            "$values": [
+              {
+                "$id": "43",
+                "name": "Crystals",
+                "folders": {
+                  "$id": "44",
+                  "$values": []
+                },
+                "categories": {
+                  "$id": "45",
+                  "$values": []
+                }
+              },
+              {
+                "$id": "46",
+                "name": "Oscillators",
+                "folders": {
+                  "$id": "47",
+                  "$values": []
+                },
+                "categories": {
+                  "$id": "48",
+                  "$values": []
+                }
+              }
+            ]
+          },
+          "categories": {
+            "$id": "49",
+            "$values": []
+          }
+        },
+        {
+          "$id": "50",
+          "name": "Graphical",
+          "folders": {
+            "$id": "51",
+            "$values": []
+          },
+          "categories": {
+            "$id": "52",
+            "$values": []
+          }
+        },
+        {
+          "$id": "53",
+          "name": "Inductors",
+          "folders": {
+            "$id": "54",
+            "$values": []
+          },
+          "categories": {
+            "$id": "55",
+            "$values": []
+          }
+        },
+        {
+          "$id": "56",
+          "name": "Integrated Circuits",
+          "folders": {
+            "$id": "57",
+            "$values": [
+              {
+                "$id": "58",
+                "name": "Amplifiers",
+                "folders": {
+                  "$id": "59",
+                  "$values": [
+                    {
+                      "$id": "60",
+                      "name": "Op Amps",
+                      "folders": {
+                        "$id": "61",
+                        "$values": []
+                      },
+                      "categories": {
+                        "$id": "62",
+                        "$values": []
+                      }
+                    }
+                  ]
+                },
+                "categories": {
+                  "$id": "63",
+                  "$values": []
+                }
+              },
+              {
+                "$id": "64",
+                "name": "Analogue Switches",
+                "folders": {
+                  "$id": "65",
+                  "$values": []
+                },
+                "categories": {
+                  "$id": "66",
+                  "$values": []
+                }
+              },
+              {
+                "$id": "67",
+                "name": "Comparators",
+                "folders": {
+                  "$id": "68",
+                  "$values": []
+                },
+                "categories": {
+                  "$id": "69",
+                  "$values": []
+                }
+              },
+              {
+                "$id": "70",
+                "name": "Current Sources",
+                "folders": {
+                  "$id": "71",
+                  "$values": []
+                },
+                "categories": {
+                  "$id": "72",
+                  "$values": []
+                }
+              },
+              {
+                "$id": "73",
+                "name": "Interfaces",
+                "folders": {
+                  "$id": "74",
+                  "$values": [
+                    {
+                      "$id": "75",
+                      "name": "IO Expanders",
+                      "folders": {
+                        "$id": "76",
+                        "$values": []
+                      },
+                      "categories": {
+                        "$id": "77",
+                        "$values": []
+                      }
+                    },
+                    {
+                      "$id": "78",
+                      "name": "Multiplexers, Demultiplexers",
+                      "folders": {
+                        "$id": "79",
+                        "$values": []
+                      },
+                      "categories": {
+                        "$id": "80",
+                        "$values": []
+                      }
+                    },
+                    {
+                      "$id": "81",
+                      "name": "Voltage Level Translators",
+                      "folders": {
+                        "$id": "82",
+                        "$values": []
+                      },
+                      "categories": {
+                        "$id": "83",
+                        "$values": []
+                      }
+                    }
+                  ]
+                },
+                "categories": {
+                  "$id": "84",
+                  "$values": []
+                }
+              },
+              {
+                "$id": "85",
+                "name": "Load Switches",
+                "folders": {
+                  "$id": "86",
+                  "$values": []
+                },
+                "categories": {
+                  "$id": "87",
+                  "$values": []
+                }
+              },
+              {
+                "$id": "88",
+                "name": "Logic",
+                "folders": {
+                  "$id": "89",
+                  "$values": [
+                    {
+                      "$id": "90",
+                      "name": "Gates",
+                      "folders": {
+                        "$id": "91",
+                        "$values": []
+                      },
+                      "categories": {
+                        "$id": "92",
+                        "$values": []
+                      }
+                    }
+                  ]
+                },
+                "categories": {
+                  "$id": "93",
+                  "$values": []
+                }
+              },
+              {
+                "$id": "94",
+                "name": "Memory",
+                "folders": {
+                  "$id": "95",
+                  "$values": [
+                    {
+                      "$id": "96",
+                      "name": "EEPROM",
+                      "folders": {
+                        "$id": "97",
+                        "$values": []
+                      },
+                      "categories": {
+                        "$id": "98",
+                        "$values": []
+                      }
+                    }
+                  ]
+                },
+                "categories": {
+                  "$id": "99",
+                  "$values": []
+                }
+              },
+              {
+                "$id": "100",
+                "name": "NFC",
+                "folders": {
+                  "$id": "101",
+                  "$values": []
+                },
+                "categories": {
+                  "$id": "102",
+                  "$values": []
+                }
+              },
+              {
+                "$id": "103",
+                "name": "Power Supplies",
+                "folders": {
+                  "$id": "104",
+                  "$values": []
+                },
+                "categories": {
+                  "$id": "105",
+                  "$values": []
+                }
+              },
+              {
+                "$id": "106",
+                "name": "Processors",
+                "folders": {
+                  "$id": "107",
+                  "$values": []
+                },
+                "categories": {
+                  "$id": "108",
+                  "$values": []
+                }
+              },
+              {
+                "$id": "109",
+                "name": "Voltage References",
+                "folders": {
+                  "$id": "110",
+                  "$values": []
+                },
+                "categories": {
+                  "$id": "111",
+                  "$values": []
+                }
+              }
+            ]
+          },
+          "categories": {
+            "$id": "112",
+            "$values": []
+          }
+        },
+        {
+          "$id": "113",
+          "name": "LED",
+          "folders": {
+            "$id": "114",
+            "$values": []
+          },
+          "categories": {
+            "$id": "115",
+            "$values": []
+          }
+        },
+        {
+          "$id": "116",
+          "name": "Mechanical",
+          "folders": {
+            "$id": "117",
+            "$values": [
+              {
+                "$id": "118",
+                "name": "Mounting Brackets",
+                "folders": {
+                  "$id": "119",
+                  "$values": []
+                },
+                "categories": {
+                  "$id": "120",
+                  "$values": []
+                }
+              },
+              {
+                "$id": "121",
+                "name": "Mounting Holes",
+                "folders": {
+                  "$id": "122",
+                  "$values": []
+                },
+                "categories": {
+                  "$id": "123",
+                  "$values": []
+                }
+              },
+              {
+                "$id": "124",
+                "name": "Standoffs",
+                "folders": {
+                  "$id": "125",
+                  "$values": []
+                },
+                "categories": {
+                  "$id": "126",
+                  "$values": []
+                }
+              }
+            ]
+          },
+          "categories": {
+            "$id": "127",
+            "$values": []
+          }
+        },
+        {
+          "$id": "128",
+          "name": "Miscellaneous",
+          "folders": {
+            "$id": "129",
+            "$values": []
+          },
+          "categories": {
+            "$id": "130",
+            "$values": []
+          }
+        },
+        {
+          "$id": "131",
+          "name": "Radio \u0026 RF",
+          "folders": {
+            "$id": "132",
+            "$values": [
+              {
+                "$id": "133",
+                "name": "Printed Antennae",
+                "folders": {
+                  "$id": "134",
+                  "$values": []
+                },
+                "categories": {
+                  "$id": "135",
+                  "$values": []
+                }
+              }
+            ]
+          },
+          "categories": {
+            "$id": "136",
+            "$values": []
+          }
+        },
+        {
+          "$id": "137",
+          "name": "Relays",
+          "folders": {
+            "$id": "138",
+            "$values": [
+              {
+                "$id": "139",
+                "name": "Reed",
+                "folders": {
+                  "$id": "140",
+                  "$values": []
+                },
+                "categories": {
+                  "$id": "141",
+                  "$values": []
+                }
+              }
+            ]
+          },
+          "categories": {
+            "$id": "142",
+            "$values": []
+          }
+        },
+        {
+          "$id": "143",
+          "name": "Resistors",
+          "folders": {
+            "$id": "144",
+            "$values": []
+          },
+          "categories": {
+            "$id": "145",
+            "$values": []
+          }
+        },
+        {
+          "$id": "146",
+          "name": "Sensors",
+          "folders": {
+            "$id": "147",
+            "$values": []
+          },
+          "categories": {
+            "$id": "148",
+            "$values": []
+          }
+        },
+        {
+          "$id": "149",
+          "name": "Switches",
+          "folders": {
+            "$id": "150",
+            "$values": [
+              {
+                "$id": "151",
+                "name": "DIP Switches",
+                "folders": {
+                  "$id": "152",
+                  "$values": []
+                },
+                "categories": {
+                  "$id": "153",
+                  "$values": []
+                }
+              }
+            ]
+          },
+          "categories": {
+            "$id": "154",
+            "$values": []
+          }
+        },
+        {
+          "$id": "155",
+          "name": "Test Points",
+          "folders": {
+            "$id": "156",
+            "$values": []
+          },
+          "categories": {
+            "$id": "157",
+            "$values": []
+          }
+        },
+        {
+          "$id": "158",
+          "name": "Transistors",
+          "folders": {
+            "$id": "159",
+            "$values": [
+              {
+                "$id": "160",
+                "name": "MOSFET",
+                "folders": {
+                  "$id": "161",
+                  "$values": []
+                },
+                "categories": {
+                  "$id": "162",
+                  "$values": []
+                }
+              }
+            ]
+          },
+          "categories": {
+            "$id": "163",
+            "$values": []
+          }
+        }
+      ]
+    },
+    "categories": {
+      "$id": "164",
+      "$values": [
+        {
+          "$id": "165",
+          "name": "Capacitors"
+        }
+      ]
+    }
+  }
+}

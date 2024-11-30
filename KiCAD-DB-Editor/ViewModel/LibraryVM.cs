@@ -21,20 +21,33 @@ namespace KiCAD_DB_Editor.ViewModel
 
         #region Notify Properties
 
-        private CategoryVM? _selectedCategoryVM = null;
-        public CategoryVM? SelectedCategoryVM
+        // Do not initialise here, do in constructor to link collection changed
+        private ObservableCollectionEx<ViewModel.ParameterVM> _parameterVMs;
+        public ObservableCollectionEx<ViewModel.ParameterVM> ParameterVMs
         {
-            get { return _selectedCategoryVM; }
+            get { return _parameterVMs; }
             set
             {
-                if (_selectedCategoryVM != value)
+                if (_parameterVMs != value)
                 {
-                    _selectedCategoryVM = value;
-                    InvokePropertyChanged();
+                    if (_parameterVMs is not null)
+                        _parameterVMs.CollectionChanged -= _parameters_CollectionChanged;
+                    _parameterVMs = value;
+                    _parameterVMs.CollectionChanged += _parameters_CollectionChanged; ;
+
+                    _parameters_CollectionChanged(this, new(NotifyCollectionChangedAction.Reset));
                 }
             }
         }
 
+        private void _parameters_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            Library.Parameters = new(this.ParameterVMs.Select(p => p.Parameter));
+
+            InvokePropertyChanged(nameof(this.ParameterVMs));
+        }
+
+        // Do not initialise here, do in constructor to link collection changed
         private ObservableCollectionEx<ViewModel.CategoryVM> _topLevelCategoryVMs;
         public ObservableCollectionEx<ViewModel.CategoryVM> TopLevelCategoryVMs
         {
@@ -60,6 +73,48 @@ namespace KiCAD_DB_Editor.ViewModel
             InvokePropertyChanged(nameof(this.TopLevelCategoryVMs));
         }
 
+        private ParameterVM? _selectedParameterVM = null;
+        public ParameterVM? SelectedParameterVM
+        {
+            get { return _selectedParameterVM; }
+            set
+            {
+                if (_selectedParameterVM != value)
+                {
+                    _selectedParameterVM = value;
+                    InvokePropertyChanged();
+                }
+            }
+        }
+
+        private string _newCategoryName = "";
+        public string NewCategoryName
+        {
+            get { return _newCategoryName; }
+            set
+            {
+                if (_newCategoryName != value)
+                {
+                    _newCategoryName = value;
+                    InvokePropertyChanged();
+                }
+            }
+        }
+
+        private string _newParameterName = "";
+        public string NewParameterName
+        {
+            get { return _newParameterName; }
+            set
+            {
+                if (_newParameterName != value)
+                {
+                    _newParameterName = value;
+                    InvokePropertyChanged();
+                }
+            }
+        }
+
         #endregion Notify Properties
 
         public LibraryVM(Model.Library library)
@@ -68,35 +123,40 @@ namespace KiCAD_DB_Editor.ViewModel
             Library = library;
 
             // Setup commands
-            NewTopLevelCategoryCommand = new BasicCommand(NewTopLevelCategoryCommandExecuted, null);
+            NewTopLevelCategoryCommand = new BasicCommand(NewTopLevelCategoryCommandExecuted, NewTopLevelCategoryCommandCanExecute);
             NewSubCategoryCommand = new BasicCommand(NewSubCategoryCommandExecuted, NewSubCategoryCommandCanExecute);
             DeleteCategoryCommand = new BasicCommand(DeleteCategoryCommandExecuted, DeleteCategoryCommandCanExecute);
+            NewParameterCommand = new BasicCommand(NewParameterCommandExecuted, NewParameterCommandCanExecute);
+            DeleteParameterCommand = new BasicCommand(DeleteParameterCommandExecuted, DeleteParameterCommandCanExecute);
 
             // Initialise collection with events
             TopLevelCategoryVMs = new(library.TopLevelCategories.OrderBy(c => c.Name).Select(c => new CategoryVM(this, null, c)));
             Debug.Assert(_topLevelCategoryVMs is not null);
+            ParameterVMs = new(library.Parameters.OrderBy(c => c.Name).Select(p => new ParameterVM(p)));
+            Debug.Assert(_parameterVMs is not null);
         }
 
-        private void newCategory(CategoryVM? parentCategoryVM, ObservableCollectionEx<CategoryVM> categoryCollection)
+        private bool canNewCategory(ObservableCollectionEx<CategoryVM> categoryVMCollection)
         {
-            const string prefix = "New Category ";
-            int newCategoryNumber = 1;
-            while (categoryCollection.Any(cVM => cVM.Name.ToLower() == $"{prefix}{newCategoryNumber}".ToLower()))
-                newCategoryNumber++;
+            if (this.NewCategoryName != "")
+                return !categoryVMCollection.Any(cVM => cVM.Name.ToLower() == this.NewCategoryName.ToLower());
+            else
+                return false;
+        }
 
-            string newName = $"{prefix}{newCategoryNumber}";
-
+        private void newCategory(CategoryVM? parentCategoryVM, ObservableCollectionEx<CategoryVM> categoryVMCollection)
+        {
             int newIndex;
-            for (newIndex = 0; newIndex < categoryCollection.Count; newIndex++)
+            for (newIndex = 0; newIndex < categoryVMCollection.Count; newIndex++)
             {
-                CategoryVM compareCategoryVM = categoryCollection[newIndex];
-                if (compareCategoryVM.Name.CompareTo(newName.ToLower()) > 0)
+                CategoryVM compareCategoryVM = categoryVMCollection[newIndex];
+                if (compareCategoryVM.Name.CompareTo(this.NewCategoryName.ToLower()) > 0)
                     break;
             }
-            if (newIndex == categoryCollection.Count)
-                categoryCollection.Add(new(this, parentCategoryVM, new(newName)));
+            if (newIndex == categoryVMCollection.Count)
+                categoryVMCollection.Add(new(this, parentCategoryVM, new(this.NewCategoryName)));
             else
-                categoryCollection.Insert(newIndex, new(this, parentCategoryVM, new(newName)));
+                categoryVMCollection.Insert(newIndex, new(this, parentCategoryVM, new(this.NewCategoryName)));
         }
 
         #region Commands
@@ -104,21 +164,30 @@ namespace KiCAD_DB_Editor.ViewModel
         public IBasicCommand NewTopLevelCategoryCommand { get; }
         public IBasicCommand NewSubCategoryCommand { get; }
         public IBasicCommand DeleteCategoryCommand { get; }
+        public IBasicCommand NewParameterCommand { get; }
+        public IBasicCommand DeleteParameterCommand { get; }
+
+        private bool NewTopLevelCategoryCommandCanExecute(object? parameter)
+        {
+            return canNewCategory(TopLevelCategoryVMs);
+        }
 
         private void NewTopLevelCategoryCommandExecuted(object? parameter)
         {
-            newCategory(null, this.TopLevelCategoryVMs);
+            newCategory(null, TopLevelCategoryVMs);
         }
 
         private bool NewSubCategoryCommandCanExecute(object? parameter)
         {
-            return parameter is not null && parameter is CategoryVM cVM;
+            if (parameter is not null && parameter is CategoryVM cVM)
+                return canNewCategory(cVM.CategoryVMs);
+            else
+                return false;
         }
 
         private void NewSubCategoryCommandExecuted(object? parameter)
         {
             CategoryVM selectedCategoryVM = (CategoryVM)parameter!;
-
             newCategory(selectedCategoryVM, selectedCategoryVM.CategoryVMs);
         }
 
@@ -134,6 +203,40 @@ namespace KiCAD_DB_Editor.ViewModel
                 this.TopLevelCategoryVMs.Remove(selectedCategoryVM);
             else
                 selectedCategoryVM.ParentCategoryVM.CategoryVMs.Remove(selectedCategoryVM);
+        }
+
+        private bool NewParameterCommandCanExecute(object? parameter)
+        {
+            if (this.NewParameterName != "")
+                return !ParameterVMs.Any(p => p.Name.ToLower() == this.NewParameterName.ToLower());
+            else
+                return false;
+        }
+
+        private void NewParameterCommandExecuted(object? parameter)
+        {
+            int newIndex;
+            for (newIndex = 0; newIndex < ParameterVMs.Count; newIndex++)
+            {
+                ParameterVM compareParameterVM = ParameterVMs[newIndex];
+                if (compareParameterVM.Name.CompareTo(this.NewParameterName.ToLower()) > 0)
+                    break;
+            }
+            if (newIndex == ParameterVMs.Count)
+                ParameterVMs.Add(new(new(this.NewParameterName)));
+            else
+                ParameterVMs.Insert(newIndex, new(new(this.NewParameterName)));
+        }
+
+        private bool DeleteParameterCommandCanExecute(object? parameter)
+        {
+            return SelectedParameterVM is not null;
+        }
+
+        private void DeleteParameterCommandExecuted(object? parameter)
+        {
+            Debug.Assert(SelectedParameterVM is not null);
+            ParameterVMs.Remove(SelectedParameterVM);
         }
 
         #endregion Commands

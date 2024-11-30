@@ -16,16 +16,28 @@
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition MinWidth="200"/>
+            <ColumnDefinition MinWidth="150"/>
             <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="3*" MinWidth="300"/>
+            <ColumnDefinition MinWidth="300"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="100*" MinWidth="300"/>
         </Grid.ColumnDefinitions>
         <DockPanel>
-            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
-                <Button Content="New Top Level Category" Command="{Binding LibraryVM.NewTopLevelCategoryCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}" Padding="3,1,3,1" />
-                <Button Content="New Sub-Category" Command="{Binding LibraryVM.NewSubCategoryCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}" CommandParameter="{Binding SelectedItem, ElementName=treeView_FoldersAndCategories, Mode=OneWay}" Padding="3,1,3,1" />
-                <Button Content="Delete Category" Command="{Binding LibraryVM.DeleteCategoryCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}" CommandParameter="{Binding SelectedItem, ElementName=treeView_FoldersAndCategories, Mode=OneWay}" Padding="3,1,3,1" />
-            </StackPanel>
+            <Button DockPanel.Dock="Bottom" Content="Add" Command="{Binding LibraryVM.NewParameterCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}" Padding="3,1,3,1" />
+            <TextBox DockPanel.Dock="Bottom" Text="{Binding LibraryVM.NewParameterName, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock DockPanel.Dock="Bottom" HorizontalAlignment="Center">New Parameter</TextBlock>
+            <Separator DockPanel.Dock="Bottom" />
+            <Button DockPanel.Dock="Bottom" Content="Delete Parameter" Command="{Binding LibraryVM.DeleteParameterCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}" Padding="3,1,3,1" />
+            <ListBox ItemsSource="{Binding LibraryVM.ParameterVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}" DisplayMemberPath="Name" MinHeight="60" SelectedItem="{Binding LibraryVM.SelectedParameterVM, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}" />
+        </DockPanel>
+        <GridSplitter Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="3,0,3,0" Width="3" />
+        <DockPanel Grid.Column="2">
+            <Button DockPanel.Dock="Bottom" Content="Add Sub-Category" Command="{Binding LibraryVM.NewSubCategoryCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}" CommandParameter="{Binding SelectedItem, ElementName=treeView_FoldersAndCategories, Mode=OneWay}" Padding="3,1,3,1" />
+            <Button DockPanel.Dock="Bottom" Content="Add Top Level Category" Command="{Binding LibraryVM.NewTopLevelCategoryCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}" Padding="3,1,3,1" />
+            <TextBox DockPanel.Dock="Bottom" Text="{Binding LibraryVM.NewCategoryName, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock DockPanel.Dock="Bottom" HorizontalAlignment="Center">New Category</TextBlock>
+            <Separator DockPanel.Dock="Bottom" />
+            <Button DockPanel.Dock="Bottom" Content="Delete Category" Command="{Binding LibraryVM.DeleteCategoryCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}" CommandParameter="{Binding SelectedItem, ElementName=treeView_FoldersAndCategories, Mode=OneWay}" Padding="3,1,3,1" />
             <TreeView x:Name="treeView_FoldersAndCategories"
                   ItemsSource="{Binding LibraryVM.TopLevelCategoryVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"
                   ItemContainerStyle="{StaticResource TreeViewItemStyle_ExpandAll}"
@@ -44,7 +56,7 @@
                 </TreeView.Resources>
             </TreeView>
         </DockPanel>
-        <GridSplitter Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="3,0,3,0" Width="3" />
-        <local:UserControl_Category Grid.Column="2" CategoryVM="{Binding SelectedItem, ElementName=treeView_FoldersAndCategories, Mode=OneWay}" Visibility="{Binding CategoryVM, Converter={StaticResource Null_to_Visibility_Converter}, Mode=OneWay, RelativeSource={RelativeSource Self}}" />
+        <GridSplitter Grid.Column="3" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="3,0,3,0" Width="3" />
+        <local:UserControl_Category Grid.Column="4" CategoryVM="{Binding SelectedItem, ElementName=treeView_FoldersAndCategories, Mode=OneWay}" Visibility="{Binding CategoryVM, Converter={StaticResource Null_to_Visibility_Converter}, Mode=OneWay, RelativeSource={RelativeSource Self}}" />
     </Grid>
 </UserControl>

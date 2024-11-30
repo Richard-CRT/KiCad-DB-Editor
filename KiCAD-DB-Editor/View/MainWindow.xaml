@@ -1,0 +1,36 @@
+﻿<Window x:Class="KiCAD_DB_Editor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:KiCAD_DB_Editor"
+        xmlns:vm="clr-namespace:KiCAD_DB_Editor.ViewModel"
+        mc:Ignorable="d"
+        Title="{Binding WindowTitle}" Height="800" Width="1600" Loaded="Window_Loaded">
+    <Window.DataContext>
+        <vm:MainWindowVM />
+    </Window.DataContext>
+    <Window.InputBindings>
+        <KeyBinding Modifiers="Control" Key="N" Command="{Binding NewLibraryCommand, Mode=OneWay}" />
+        <KeyBinding Modifiers="Control" Key="O" Command="{Binding OpenLibraryCommand, Mode=OneWay}" />
+        <KeyBinding Modifiers="Control" Key="S" Command="{Binding SaveLibraryCommand, Mode=OneWay}" />
+        <KeyBinding Key="F1" Command="{Binding HelpLibraryCommand, Mode=OneWay}" />
+    </Window.InputBindings>
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem x:Name="menuItem_FileNewLibrary" Header="_New Library" Command="{Binding NewLibraryCommand, Mode=OneWay}" InputGestureText="Ctrl+N" />
+                <MenuItem x:Name="menuItem_FileOpenLibrary" Header="_Open Library..." Command="{Binding OpenLibraryCommand, Mode=OneWay}" InputGestureText="Ctrl+O" />
+                <Separator />
+                <MenuItem x:Name="menuItem_FileSaveLibrary" Header="_Save Library" Command="{Binding SaveLibraryCommand, Mode=OneWay}" InputGestureText="Ctrl+S" />
+                <MenuItem x:Name="menuItem_FileSaveAsLibrary" Header="Save Library _As..." Command="{Binding SaveAsLibraryCommand, Mode=OneWay}" />
+                <Separator />
+                <MenuItem x:Name="menuItem_FileExit" Header="_Exit" Command="{Binding ExitLibraryCommand, Mode=OneWay}" />
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem x:Name="menuItem_HelpHelp" Header="_KiCAD DB Documentation" Command="{Binding HelpLibraryCommand, Mode=OneWay}" InputGestureText="F1" />
+            </MenuItem>
+        </Menu>
+        <local:UserControl_Library DockPanel.Dock="Top" LibraryVM="{Binding LibraryVM}" Margin="5,5,5,5" />
+    </DockPanel>
+</Window>

@@ -13,12 +13,12 @@
     <StackPanel>
         <TextBlock>Component Category</TextBlock>
         <TextBox Text="{Binding CategoryVM.Name, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" />
-        <DockPanel Height="150">
+        <DockPanel Height="200">
             <TextBlock DockPanel.Dock="Top">Inherited Parameters</TextBlock>
             <ListBox DisplayMemberPath="Name"
                 ItemsSource="{Binding CategoryVM.SpecialAndInheritedParameterVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
         </DockPanel>
-        <Grid Height="150">
+        <Grid Height="200">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition Width="Auto"/>

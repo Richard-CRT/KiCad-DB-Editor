@@ -30,4 +30,10 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Page Update="View\UserControl_Category.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
 </Project>

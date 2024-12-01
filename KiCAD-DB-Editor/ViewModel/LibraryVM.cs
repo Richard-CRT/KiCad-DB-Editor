@@ -6,6 +6,7 @@ using KiCAD_DB_Editor.View.Dialogs;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
@@ -18,6 +19,11 @@ namespace KiCAD_DB_Editor.ViewModel
     public class LibraryVM : NotifyObject
     {
         public readonly Model.Library Library;
+
+        public ReadOnlyCollection<ParameterVM> SpecialParameterVMs { get; } = new(new List<ParameterVM>() {
+            new(new("Part UID")),
+            new(new("Description")),
+        });
 
         #region Notify Properties
 
@@ -130,10 +136,11 @@ namespace KiCAD_DB_Editor.ViewModel
             DeleteParameterCommand = new BasicCommand(DeleteParameterCommandExecuted, DeleteParameterCommandCanExecute);
 
             // Initialise collection with events
-            TopLevelCategoryVMs = new(library.TopLevelCategories.OrderBy(c => c.Name).Select(c => new CategoryVM(this, null, c)));
-            Debug.Assert(_topLevelCategoryVMs is not null);
+            // Must do ParameterVMs first as CategoryVMs will use it
             ParameterVMs = new(library.Parameters.OrderBy(c => c.Name).Select(p => new ParameterVM(p)));
             Debug.Assert(_parameterVMs is not null);
+            TopLevelCategoryVMs = new(library.TopLevelCategories.OrderBy(c => c.Name).Select(c => new CategoryVM(this, null, c)));
+            Debug.Assert(_topLevelCategoryVMs is not null);
         }
 
         private bool canNewCategory(ObservableCollectionEx<CategoryVM> categoryVMCollection)

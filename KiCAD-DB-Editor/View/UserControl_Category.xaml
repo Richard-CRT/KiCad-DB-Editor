@@ -4,10 +4,44 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:KiCAD_DB_Editor"
+             xmlns:conv="clr-namespace:KiCAD_DB_Editor.View.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <conv:ParameterVMCollectionDifference_Multiconverter x:Key="ParameterVMCollectionDifference_Multiconverter" />
+    </UserControl.Resources>
     <StackPanel>
         <TextBlock>Component Category</TextBlock>
         <TextBox Text="{Binding CategoryVM.Name, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" />
+        <TextBlock>Inherited Parameters </TextBlock>
+        <ListBox DisplayMemberPath="Name" Height="150"
+            ItemsSource="{Binding CategoryVM.InheritedParameterVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
+        <Grid Height="150">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top">Unused Parameters</TextBlock>
+                <ListBox DisplayMemberPath="Name" SelectedItem="{Binding CategoryVM.SelectedUnusedParameterVM, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}">
+                    <ListBox.ItemsSource>
+                        <MultiBinding Converter="{StaticResource ParameterVMCollectionDifference_Multiconverter}">
+                            <Binding Path="ParameterVMs" RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}" />
+                            <Binding Path="CategoryVM.InheritedParameterVMs" RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}" />
+                            <Binding Path="CategoryVM.ParameterVMs" RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}" />
+                        </MultiBinding>
+                    </ListBox.ItemsSource>
+                </ListBox>
+            </DockPanel>
+            <StackPanel Grid.Column="1" Margin="5,0,5,0" VerticalAlignment="Center">
+                <Button Content="&gt;&gt;&gt;" Padding="3,1,3,1" Command="{Binding CategoryVM.AddParameterCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}"></Button>
+                <Button Content="&lt;&lt;&lt;" Padding="3,1,3,1" Margin="0,5,0,0" Command="{Binding CategoryVM.RemoveParameterCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}"></Button>
+            </StackPanel>
+            <DockPanel Grid.Column="2">
+                <TextBlock DockPanel.Dock="Top">Parameters</TextBlock>
+                <ListBox  ItemsSource="{Binding CategoryVM.ParameterVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" DisplayMemberPath="Name" SelectedItem="{Binding CategoryVM.SelectedParameterVM, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
+            </DockPanel>
+        </Grid>
     </StackPanel>
 </UserControl>

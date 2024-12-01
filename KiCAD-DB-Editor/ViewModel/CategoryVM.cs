@@ -92,6 +92,63 @@ namespace KiCAD_DB_Editor.ViewModel
             InvokePropertyChanged(nameof(this.CategoryVMs));
         }
 
+        // Do not initialise here, do in constructor to link collection changed
+        private ObservableCollectionEx<ParameterVM> _parameterVMs;
+        public ObservableCollectionEx<ParameterVM> ParameterVMs
+        {
+            get { return _parameterVMs; }
+            private set
+            {
+                if (_parameterVMs != value)
+                {
+                    if (_parameterVMs is not null)
+                        _parameterVMs.CollectionChanged -= _parameterVMs_CollectionChanged;
+                    _parameterVMs = value;
+                    _parameterVMs.CollectionChanged += _parameterVMs_CollectionChanged; ;
+
+                    _parameterVMs_CollectionChanged(this, new(NotifyCollectionChangedAction.Reset));
+                }
+            }
+        }
+
+        private void _parameterVMs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            Category.Parameters = new(this.ParameterVMs.Select(pVM => pVM.Parameter));
+
+            InvokePropertyChanged(nameof(this.ParameterVMs));
+
+            foreach (CategoryVM cVM in CategoryVMs)
+                cVM.InvokePropertyChanged_InheritedParameterVMs();
+        }
+
+        public ObservableCollectionEx<ParameterVM> InheritedParameterVMs
+        {
+            get {
+                if (ParentCategoryVM is not null)
+                {
+                    return new(ParentCategoryVM.InheritedParameterVMs.Concat(ParentCategoryVM.ParameterVMs));
+                }
+                else
+                {
+                    return new(ParentLibraryVM.SpecialParameterVMs);
+                }
+            }
+        }
+
+        private ParameterVM? _selectedUnusedParameterVM = null;
+        public ParameterVM? SelectedUnusedParameterVM
+        {
+            get { return _selectedUnusedParameterVM; }
+            set { if (_selectedUnusedParameterVM != value) { _selectedUnusedParameterVM = value; InvokePropertyChanged(); } }
+        }
+
+        private ParameterVM? _selectedParameterVM = null;
+        public ParameterVM? SelectedParameterVM
+        {
+            get { return _selectedParameterVM; }
+            set { if (_selectedParameterVM != value) { _selectedParameterVM = value; InvokePropertyChanged(); } }
+        }
+
         #endregion Notify Properties
 
         public CategoryVM(LibraryVM parentLibraryVM, CategoryVM? parentCategoryVM, Model.Category category)
@@ -102,12 +159,61 @@ namespace KiCAD_DB_Editor.ViewModel
             // Link model
             Category = category;
 
+            // Setup commands
+            AddParameterCommand = new BasicCommand(AddParameterCommandExecuted, AddParameterCommandCanExecute);
+            RemoveParameterCommand = new BasicCommand(RemoveParameterCommandExecuted, RemoveParameterCommandCanExecute);
+
             // Initialise collection with events
             CategoryVMs = new(category.Categories.OrderBy(c => c.Name).Select(c => new CategoryVM(ParentLibraryVM, this, c)));
             Debug.Assert(_categoryVMs is not null);
+            // Link to parent library instances of ParameterVM (requires Library to have already set them up)
+            ParameterVMs = new(parentLibraryVM.ParameterVMs.Where(pVM => category.Parameters.Contains(pVM.Parameter)));
+            Debug.Assert(_parameterVMs is not null);
+        }
+
+        void InvokePropertyChanged_InheritedParameterVMs()
+        {
+            InvokePropertyChanged(nameof(InheritedParameterVMs));
+
+            foreach (CategoryVM cVM in CategoryVMs)
+                cVM.InvokePropertyChanged_InheritedParameterVMs();
         }
 
         #region Commands
+
+        public IBasicCommand AddParameterCommand { get; }
+        public IBasicCommand RemoveParameterCommand { get; }
+
+        private bool AddParameterCommandCanExecute(object? parameter)
+        {
+            return SelectedUnusedParameterVM is not null;
+        }
+
+        private void AddParameterCommandExecuted(object? parameter)
+        {
+            Debug.Assert(SelectedUnusedParameterVM is not null);
+            int newIndex;
+            for (newIndex = 0; newIndex < ParameterVMs.Count; newIndex++)
+            {
+                ParameterVM compareParameterVM = ParameterVMs[newIndex];
+                if (compareParameterVM.Name.CompareTo(this.SelectedUnusedParameterVM.Name.ToLower()) > 0)
+                    break;
+            }
+            if (newIndex == ParameterVMs.Count)
+                ParameterVMs.Add(SelectedUnusedParameterVM);
+            else
+                ParameterVMs.Insert(newIndex, SelectedUnusedParameterVM);
+        }
+
+        private bool RemoveParameterCommandCanExecute(object? parameter)
+        {
+            return SelectedParameterVM is not null;
+        }
+
+        private void RemoveParameterCommandExecuted(object? parameter)
+        {
+            this.ParameterVMs.Remove(SelectedParameterVM!);
+        }
 
         #endregion Commands
     }

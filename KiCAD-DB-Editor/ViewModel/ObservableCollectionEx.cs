@@ -29,6 +29,11 @@ namespace KiCAD_DB_Editor.ViewModel
             }
         }
 
+        public void ExternalCollectionChanged(NotifyCollectionChangedEventArgs e)
+        {
+            this.OnCollectionChanged(e);
+        }
+
         protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
         {
             if (SupressNotification)

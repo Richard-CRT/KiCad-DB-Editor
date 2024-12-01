@@ -7,7 +7,7 @@
              xmlns:vm="clr-namespace:KiCAD_DB_Editor.ViewModel"
              xmlns:conv="clr-namespace:KiCAD_DB_Editor.View.Converters"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="800" FontSize="14">
     <UserControl.Resources>
         <Style x:Key="TreeViewItemStyle_ExpandAll" TargetType="{x:Type TreeViewItem}">
             <Setter Property="IsExpanded" Value="True"/>
@@ -48,11 +48,7 @@
                 <TreeView.Resources>
                     <HierarchicalDataTemplate ItemsSource="{Binding CategoryVMs}" DataType="{x:Type vm:CategoryVM}">
                         <StackPanel Orientation="Horizontal">
-                            <Rectangle Width="10" Height="10" Margin="0,0,5,0" >
-                                <Rectangle.Fill>
-                                    <SolidColorBrush Color="#00F"/>
-                                </Rectangle.Fill>
-                            </Rectangle>
+                            <Image Source="/View/Resources/Component.png" Height="18" Margin="0,0,5,0" />
                             <TextBlock Text="{Binding Name}" />
                         </StackPanel>
                     </HierarchicalDataTemplate>

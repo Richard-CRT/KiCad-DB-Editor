@@ -23,6 +23,9 @@ namespace KiCAD_DB_Editor.ViewModel
         public ReadOnlyCollection<ParameterVM> SpecialParameterVMs { get; } = new(new List<ParameterVM>() {
             new(new("Part UID")),
             new(new("Description")),
+            new(new("Manufacturer")),
+            new(new("MPN")),
+            new(new("Value")),
         });
 
         #region Notify Properties
@@ -51,6 +54,10 @@ namespace KiCAD_DB_Editor.ViewModel
             Library.Parameters = new(this.ParameterVMs.Select(p => p.Parameter));
 
             InvokePropertyChanged(nameof(this.ParameterVMs));
+
+            if (TopLevelCategoryVMs is not null)
+                foreach (CategoryVM tlcVM in TopLevelCategoryVMs)
+                    tlcVM.InvokePropertyChanged_AvailableParameterVMs();
         }
 
         // Do not initialise here, do in constructor to link collection changed
@@ -137,7 +144,7 @@ namespace KiCAD_DB_Editor.ViewModel
 
             // Initialise collection with events
             // Must do ParameterVMs first as CategoryVMs will use it
-            ParameterVMs = new(library.Parameters.OrderBy(c => c.Name).Select(p => new ParameterVM(p)));
+            ParameterVMs = new(library.Parameters.Select(p => new ParameterVM(p)));
             Debug.Assert(_parameterVMs is not null);
             TopLevelCategoryVMs = new(library.TopLevelCategories.OrderBy(c => c.Name).Select(c => new CategoryVM(this, null, c)));
             Debug.Assert(_topLevelCategoryVMs is not null);
@@ -222,17 +229,7 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private void NewParameterCommandExecuted(object? parameter)
         {
-            int newIndex;
-            for (newIndex = 0; newIndex < ParameterVMs.Count; newIndex++)
-            {
-                ParameterVM compareParameterVM = ParameterVMs[newIndex];
-                if (compareParameterVM.Name.CompareTo(this.NewParameterName.ToLower()) > 0)
-                    break;
-            }
-            if (newIndex == ParameterVMs.Count)
-                ParameterVMs.Add(new(new(this.NewParameterName)));
-            else
-                ParameterVMs.Insert(newIndex, new(new(this.NewParameterName)));
+            ParameterVMs.Add(new(new(this.NewParameterName)));
         }
 
         private bool DeleteParameterCommandCanExecute(object? parameter)
@@ -244,6 +241,8 @@ namespace KiCAD_DB_Editor.ViewModel
         {
             Debug.Assert(SelectedParameterVM is not null);
             ParameterVMs.Remove(SelectedParameterVM);
+
+            SelectedParameterVM = ParameterVMs.FirstOrDefault();
         }
 
         #endregion Commands

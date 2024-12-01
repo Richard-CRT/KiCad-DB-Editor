@@ -116,23 +116,31 @@ namespace KiCAD_DB_Editor.ViewModel
             Category.Parameters = new(this.ParameterVMs.Select(pVM => pVM.Parameter));
 
             InvokePropertyChanged(nameof(this.ParameterVMs));
+            InvokePropertyChanged(nameof(this.AvailableParameterVMs));
 
             foreach (CategoryVM cVM in CategoryVMs)
                 cVM.InvokePropertyChanged_InheritedParameterVMs();
         }
 
+        public ObservableCollectionEx<ParameterVM> SpecialAndInheritedParameterVMs
+        {
+            get { return new(ParentLibraryVM.SpecialParameterVMs.Concat(InheritedParameterVMs)); }
+        }
+
         public ObservableCollectionEx<ParameterVM> InheritedParameterVMs
         {
-            get {
+            get
+            {
                 if (ParentCategoryVM is not null)
-                {
                     return new(ParentCategoryVM.InheritedParameterVMs.Concat(ParentCategoryVM.ParameterVMs));
-                }
                 else
-                {
-                    return new(ParentLibraryVM.SpecialParameterVMs);
-                }
+                    return new();
             }
+        }
+
+        public ObservableCollectionEx<ParameterVM> AvailableParameterVMs
+        {
+            get { return new(ParentLibraryVM.ParameterVMs.Except(InheritedParameterVMs).Except(ParameterVMs)); }
         }
 
         private ParameterVM? _selectedUnusedParameterVM = null;
@@ -171,12 +179,22 @@ namespace KiCAD_DB_Editor.ViewModel
             Debug.Assert(_parameterVMs is not null);
         }
 
-        void InvokePropertyChanged_InheritedParameterVMs()
+        public void InvokePropertyChanged_InheritedParameterVMs()
         {
-            InvokePropertyChanged(nameof(InheritedParameterVMs));
+            InvokePropertyChanged(nameof(this.InheritedParameterVMs));
+            InvokePropertyChanged(nameof(this.SpecialAndInheritedParameterVMs));
+            InvokePropertyChanged(nameof(this.AvailableParameterVMs));
 
             foreach (CategoryVM cVM in CategoryVMs)
                 cVM.InvokePropertyChanged_InheritedParameterVMs();
+        }
+
+        public void InvokePropertyChanged_AvailableParameterVMs()
+        {
+            InvokePropertyChanged(nameof(this.AvailableParameterVMs));
+
+            foreach (CategoryVM cVM in CategoryVMs)
+                cVM.InvokePropertyChanged_AvailableParameterVMs();
         }
 
         #region Commands
@@ -192,17 +210,21 @@ namespace KiCAD_DB_Editor.ViewModel
         private void AddParameterCommandExecuted(object? parameter)
         {
             Debug.Assert(SelectedUnusedParameterVM is not null);
+            int indexOfSelectedUnusedParameterVMInLibrary = ParentLibraryVM.ParameterVMs.IndexOf(SelectedUnusedParameterVM);
             int newIndex;
             for (newIndex = 0; newIndex < ParameterVMs.Count; newIndex++)
             {
-                ParameterVM compareParameterVM = ParameterVMs[newIndex];
-                if (compareParameterVM.Name.CompareTo(this.SelectedUnusedParameterVM.Name.ToLower()) > 0)
+                if (indexOfSelectedUnusedParameterVMInLibrary < ParentLibraryVM.ParameterVMs.IndexOf(ParameterVMs[newIndex]))
+                {
                     break;
+                }
             }
             if (newIndex == ParameterVMs.Count)
                 ParameterVMs.Add(SelectedUnusedParameterVM);
             else
                 ParameterVMs.Insert(newIndex, SelectedUnusedParameterVM);
+
+            SelectedUnusedParameterVM = AvailableParameterVMs.FirstOrDefault();
         }
 
         private bool RemoveParameterCommandCanExecute(object? parameter)
@@ -213,6 +235,7 @@ namespace KiCAD_DB_Editor.ViewModel
         private void RemoveParameterCommandExecuted(object? parameter)
         {
             this.ParameterVMs.Remove(SelectedParameterVM!);
+            SelectedParameterVM = ParameterVMs.FirstOrDefault();
         }
 
         #endregion Commands

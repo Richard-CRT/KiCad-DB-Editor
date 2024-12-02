@@ -152,7 +152,7 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private bool canNewCategory(ObservableCollectionEx<CategoryVM> categoryVMCollection)
         {
-            if (this.NewCategoryName != "")
+            if (this.NewCategoryName != "" && !this.NewCategoryName.Contains('|'))
                 return !categoryVMCollection.Any(cVM => cVM.Name.ToLower() == this.NewCategoryName.ToLower());
             else
                 return false;

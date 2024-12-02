@@ -36,6 +36,9 @@ namespace KiCAD_DB_Editor.ViewModel
             {
                 if (Category.Name != value)
                 {
+                    if (value.Contains('|'))
+                        throw new Exceptions.ArgumentValidationException("Proposed name contains forbidden character");
+
                     ObservableCollectionEx<CategoryVM> categoryCollection;
                     if (ParentCategoryVM is null)
                         categoryCollection = ParentLibraryVM.TopLevelCategoryVMs;

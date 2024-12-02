@@ -1,4 +1,5 @@
 *.kidbe_proj
+*.kidbe_proj.bak
 *.kicad_dbl
 
 

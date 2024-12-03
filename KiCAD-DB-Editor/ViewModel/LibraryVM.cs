@@ -3,15 +3,19 @@ using KiCAD_DB_Editor.Exceptions;
 using KiCAD_DB_Editor.Model;
 using KiCAD_DB_Editor.View;
 using KiCAD_DB_Editor.View.Dialogs;
+using Microsoft.VisualBasic;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Automation.Peers;
+using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Navigation;
 
@@ -45,6 +49,7 @@ namespace KiCAD_DB_Editor.ViewModel
                     _parameterVMs = value;
                     _parameterVMs.CollectionChanged += _parameters_CollectionChanged; ;
 
+                    InvokePropertyChanged(nameof(this.ParameterVMs));
                     _parameters_CollectionChanged(this, new(NotifyCollectionChangedAction.Reset));
                 }
             }
@@ -53,8 +58,6 @@ namespace KiCAD_DB_Editor.ViewModel
         private void _parameters_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             Library.Parameters = new(this.ParameterVMs.Select(p => p.Parameter));
-
-            InvokePropertyChanged(nameof(this.ParameterVMs));
 
             if (TopLevelCategoryVMs is not null)
                 foreach (CategoryVM tlcVM in TopLevelCategoryVMs)
@@ -75,6 +78,7 @@ namespace KiCAD_DB_Editor.ViewModel
                     _topLevelCategoryVMs = value;
                     _topLevelCategoryVMs.CollectionChanged += _topLevelCategoryVMs_CollectionChanged;
 
+                    InvokePropertyChanged(nameof(this.TopLevelCategoryVMs));
                     _topLevelCategoryVMs_CollectionChanged(this, new(NotifyCollectionChangedAction.Reset));
                 }
             }
@@ -83,8 +87,6 @@ namespace KiCAD_DB_Editor.ViewModel
         private void _topLevelCategoryVMs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             Library.TopLevelCategories = new(this.TopLevelCategoryVMs.Select(tlcVM => tlcVM.Category));
-
-            InvokePropertyChanged(nameof(this.TopLevelCategoryVMs));
         }
 
         private ParameterVM? _selectedParameterVM = null;
@@ -143,6 +145,7 @@ namespace KiCAD_DB_Editor.ViewModel
                     _partVMs = value;
                     _partVMs.CollectionChanged += _partVMs_CollectionChanged; ;
 
+                    InvokePropertyChanged(nameof(this.PartVMs));
                     _partVMs_CollectionChanged(this, new(NotifyCollectionChangedAction.Reset));
                 }
             }
@@ -150,7 +153,6 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private void _partVMs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            InvokePropertyChanged(nameof(this.PartVMs));
         }
 
         #endregion Notify Properties
@@ -177,18 +179,25 @@ namespace KiCAD_DB_Editor.ViewModel
             for (int i = 0; i < 10; i++)
             {
                 Part p = new();
-                p.PartUID = "test";
-                p.Description = "test";
-                p.Manufacturer = "test";
-                p.MPN = "test";
-                p.Value = "test";
+                p.PartUID = $"test{i}";
+                p.Description = $"test{i}";
+                p.Manufacturer = $"test{i}";
+                p.MPN = $"test{i}";
+                p.Value = $"test{i}";
                 p.ExcludeFromBOM = true;
                 p.ExcludeFromBoard = false;
-                foreach (var pa in ParameterVMs)
-                    p.ParameterValues[pa.Parameter] = "test";
-                PartVMs.Add(new (this, p));
+                PartVMs.Add(new(this, p));
             }
             Debug.Assert(_partVMs is not null);
+
+            for (int i = 0; i < 3; i++)
+                TopLevelCategoryVMs[0].PartVMs.Add(PartVMs[i]);
+            for (int i = 3; i < 6; i++)
+                TopLevelCategoryVMs[1].PartVMs.Add(PartVMs[i]);
+            for (int i = 6; i < 8; i++)
+                TopLevelCategoryVMs[1].CategoryVMs[2].PartVMs.Add(PartVMs[i]);
+            for (int i = 8; i < 10; i++)
+                TopLevelCategoryVMs[1].CategoryVMs[2].CategoryVMs[0].PartVMs.Add(PartVMs[i]);
         }
 
         private bool canNewCategory(ObservableCollectionEx<CategoryVM> categoryVMCollection)

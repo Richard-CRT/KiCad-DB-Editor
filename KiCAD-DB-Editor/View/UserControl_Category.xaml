@@ -6,16 +6,16 @@
              xmlns:local="clr-namespace:KiCAD_DB_Editor"
              xmlns:conv="clr-namespace:KiCAD_DB_Editor.View.Converters"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <StackPanel>
-        <TextBlock>Component Category</TextBlock>
-        <TextBox Text="{Binding CategoryVM.Name, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" />
-        <DockPanel Height="200">
+             d:DesignHeight="700" d:DesignWidth="800">
+    <DockPanel>
+        <TextBlock DockPanel.Dock="Top">Component Category</TextBlock>
+        <TextBox DockPanel.Dock="Top" Text="{Binding CategoryVM.Name, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" />
+        <DockPanel DockPanel.Dock="Top" Height="200">
             <TextBlock DockPanel.Dock="Top">Inherited Parameters</TextBlock>
             <ListBox DisplayMemberPath="Name"
                 ItemsSource="{Binding CategoryVM.SpecialAndInheritedParameterVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
         </DockPanel>
-        <Grid Height="200">
+        <Grid DockPanel.Dock="Top" Height="200">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition Width="Auto"/>
@@ -36,5 +36,8 @@
                 <ListBox  ItemsSource="{Binding CategoryVM.ParameterVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" DisplayMemberPath="Name" SelectedItem="{Binding CategoryVM.SelectedParameterVM, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
             </DockPanel>
         </Grid>
-    </StackPanel>
+        <View:UserControl_PartGrid Grid.Row="2"
+                    ParameterVMs="{Binding CategoryVM.InheritedAndNormalParameterVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}"           
+                    PartVMs="{Binding CategoryVM.PartVMs, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
+    </DockPanel>
 </UserControl>

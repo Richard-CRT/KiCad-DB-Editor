@@ -74,7 +74,7 @@ namespace KiCAD_DB_Editor.ViewModel
         public ObservableCollectionEx<CategoryVM> CategoryVMs
         {
             get { return _categoryVMs; }
-            private set
+            set
             {
                 if (_categoryVMs != value)
                 {
@@ -83,6 +83,7 @@ namespace KiCAD_DB_Editor.ViewModel
                     _categoryVMs = value;
                     _categoryVMs.CollectionChanged += _categoryVMs_CollectionChanged;
 
+                    InvokePropertyChanged();
                     _categoryVMs_CollectionChanged(this, new(NotifyCollectionChangedAction.Reset));
                 }
             }
@@ -91,8 +92,6 @@ namespace KiCAD_DB_Editor.ViewModel
         private void _categoryVMs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             Category.Categories = new(this.CategoryVMs.Select(cVM => cVM.Category));
-
-            InvokePropertyChanged(nameof(this.CategoryVMs));
         }
 
         // Do not initialise here, do in constructor to link collection changed
@@ -100,15 +99,16 @@ namespace KiCAD_DB_Editor.ViewModel
         public ObservableCollectionEx<ParameterVM> ParameterVMs
         {
             get { return _parameterVMs; }
-            private set
+            set
             {
                 if (_parameterVMs != value)
                 {
                     if (_parameterVMs is not null)
                         _parameterVMs.CollectionChanged -= _parameterVMs_CollectionChanged;
                     _parameterVMs = value;
-                    _parameterVMs.CollectionChanged += _parameterVMs_CollectionChanged; ;
+                    _parameterVMs.CollectionChanged += _parameterVMs_CollectionChanged;
 
+                    InvokePropertyChanged();
                     _parameterVMs_CollectionChanged(this, new(NotifyCollectionChangedAction.Reset));
                 }
             }
@@ -118,32 +118,38 @@ namespace KiCAD_DB_Editor.ViewModel
         {
             Category.Parameters = new(this.ParameterVMs.Select(pVM => pVM.Parameter));
 
-            InvokePropertyChanged(nameof(this.ParameterVMs));
+            InvokePropertyChanged(nameof(this.InheritedAndNormalParameterVMs));
             InvokePropertyChanged(nameof(this.AvailableParameterVMs));
 
             foreach (CategoryVM cVM in CategoryVMs)
                 cVM.InvokePropertyChanged_InheritedParameterVMs();
         }
 
-        public ObservableCollectionEx<ParameterVM> SpecialAndInheritedParameterVMs
+        public ReadOnlyCollection<ParameterVM> SpecialAndInheritedParameterVMs
         {
-            get { return new(ParentLibraryVM.SpecialParameterVMs.Concat(InheritedParameterVMs)); }
+            get { return new(new List<ParameterVM>(ParentLibraryVM.SpecialParameterVMs.Concat(InheritedParameterVMs))); }
         }
 
-        public ObservableCollectionEx<ParameterVM> InheritedParameterVMs
+        // Should be ReadOnlyCollection really, but this binds to the Part grid view, so it needs to be ObservableCollectionEx
+        public ObservableCollectionEx<ParameterVM> InheritedAndNormalParameterVMs
+        {
+            get { return new(ParentLibraryVM.ParameterVMs.Intersect(ParameterVMs.Concat(InheritedParameterVMs))); }
+        }
+
+        public ReadOnlyCollection<ParameterVM> InheritedParameterVMs
         {
             get
             {
-                if (ParentCategoryVM is not null)
-                    return new(ParentCategoryVM.InheritedParameterVMs.Concat(ParentCategoryVM.ParameterVMs));
+                if (ParentCategoryVM is not null && ParentCategoryVM.ParameterVMs is not null)
+                    return new(new List<ParameterVM>(ParentCategoryVM.InheritedParameterVMs.Concat(ParentCategoryVM.ParameterVMs)));
                 else
-                    return new();
+                    return new(new List<ParameterVM>());
             }
         }
 
-        public ObservableCollectionEx<ParameterVM> AvailableParameterVMs
+        public ReadOnlyCollection<ParameterVM> AvailableParameterVMs
         {
-            get { return new(ParentLibraryVM.ParameterVMs.Except(InheritedParameterVMs).Except(ParameterVMs)); }
+            get { return new(new List<ParameterVM>(ParentLibraryVM.ParameterVMs.Except(ParameterVMs))); }
         }
 
         private ParameterVM? _selectedUnusedParameterVM = null;
@@ -158,6 +164,30 @@ namespace KiCAD_DB_Editor.ViewModel
         {
             get { return _selectedParameterVM; }
             set { if (_selectedParameterVM != value) { _selectedParameterVM = value; InvokePropertyChanged(); } }
+        }
+
+        private ObservableCollectionEx<PartVM> _partVMs;
+        public ObservableCollectionEx<PartVM> PartVMs
+        {
+            get { return _partVMs; }
+            set
+            {
+                if (_partVMs != value)
+                {
+                    if (_partVMs is not null)
+                        _partVMs.CollectionChanged -= _partVMs_CollectionChanged;
+                    _partVMs = value;
+                    _partVMs.CollectionChanged += _partVMs_CollectionChanged; ;
+
+                    InvokePropertyChanged();
+                    _partVMs_CollectionChanged(this, new(NotifyCollectionChangedAction.Reset));
+                }
+            }
+        }
+
+        private void _partVMs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+
         }
 
         #endregion Notify Properties
@@ -180,21 +210,41 @@ namespace KiCAD_DB_Editor.ViewModel
             // Link to parent library instances of ParameterVM (requires Library to have already set them up)
             ParameterVMs = new(parentLibraryVM.ParameterVMs.Where(pVM => category.Parameters.Contains(pVM.Parameter)));
             Debug.Assert(_parameterVMs is not null);
+            PartVMs = new();
+            Debug.Assert(_partVMs is not null);
         }
 
         public void InvokePropertyChanged_InheritedParameterVMs()
         {
             InvokePropertyChanged(nameof(this.InheritedParameterVMs));
             InvokePropertyChanged(nameof(this.SpecialAndInheritedParameterVMs));
-            InvokePropertyChanged(nameof(this.AvailableParameterVMs));
+            InvokePropertyChanged(nameof(this.InheritedAndNormalParameterVMs));
 
-            foreach (CategoryVM cVM in CategoryVMs)
-                cVM.InvokePropertyChanged_InheritedParameterVMs();
+            foreach (PartVM partVM in PartVMs)
+            {
+                var parameterVMsToBeRemoved = partVM.ParameterVMs.Except(InheritedAndNormalParameterVMs).ToArray();
+                foreach (ParameterVM parameterVMToBeRemoved in parameterVMsToBeRemoved)
+                    partVM.RemoveParameterVM(parameterVMToBeRemoved);
+                var parameterVMsToBeAdded = InheritedAndNormalParameterVMs.Except(partVM.ParameterVMs).ToArray();
+                foreach (ParameterVM parameterVMToBeAdded in parameterVMsToBeAdded)
+                    partVM.AddParameterVM(parameterVMToBeAdded);
+
+                foreach (CategoryVM cVM in CategoryVMs)
+                    cVM.InvokePropertyChanged_InheritedParameterVMs();
+            }
         }
 
         public void InvokePropertyChanged_AvailableParameterVMs()
         {
             InvokePropertyChanged(nameof(this.AvailableParameterVMs));
+
+            var pVMsToBeRemoved = ParameterVMs.Except(ParentLibraryVM.ParameterVMs).ToArray();
+            foreach (var pVMToBeRemoved in pVMsToBeRemoved)
+            {
+                foreach (PartVM pVM in PartVMs)
+                    pVM.RemoveParameterVM(pVMToBeRemoved);
+            }
+            ParameterVMs = new(ParentLibraryVM.ParameterVMs.Where(pVM => Category.Parameters.Contains(pVM.Parameter)));
 
             foreach (CategoryVM cVM in CategoryVMs)
                 cVM.InvokePropertyChanged_AvailableParameterVMs();
@@ -213,19 +263,25 @@ namespace KiCAD_DB_Editor.ViewModel
         private void AddParameterCommandExecuted(object? parameter)
         {
             Debug.Assert(SelectedUnusedParameterVM is not null);
-            int indexOfSelectedUnusedParameterVMInLibrary = ParentLibraryVM.ParameterVMs.IndexOf(SelectedUnusedParameterVM);
+
+            ParameterVM pVMToBeAdded = SelectedUnusedParameterVM;
+
+            int indexOfPVMToBeAddedInLibrary = ParentLibraryVM.ParameterVMs.IndexOf(pVMToBeAdded);
             int newIndex;
             for (newIndex = 0; newIndex < ParameterVMs.Count; newIndex++)
             {
-                if (indexOfSelectedUnusedParameterVMInLibrary < ParentLibraryVM.ParameterVMs.IndexOf(ParameterVMs[newIndex]))
+                if (indexOfPVMToBeAddedInLibrary < ParentLibraryVM.ParameterVMs.IndexOf(ParameterVMs[newIndex]))
                 {
                     break;
                 }
             }
             if (newIndex == ParameterVMs.Count)
-                ParameterVMs.Add(SelectedUnusedParameterVM);
+                ParameterVMs.Add(pVMToBeAdded);
             else
-                ParameterVMs.Insert(newIndex, SelectedUnusedParameterVM);
+                ParameterVMs.Insert(newIndex, pVMToBeAdded);
+
+            foreach (PartVM pVM in PartVMs)
+                pVM.AddParameterVM(pVMToBeAdded);
 
             SelectedUnusedParameterVM = AvailableParameterVMs.FirstOrDefault();
         }
@@ -237,7 +293,18 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private void RemoveParameterCommandExecuted(object? parameter)
         {
-            this.ParameterVMs.Remove(SelectedParameterVM!);
+            Debug.Assert(SelectedParameterVM is not null);
+
+            ParameterVM pVMToBeRemoved = SelectedParameterVM;
+
+            this.ParameterVMs.Remove(pVMToBeRemoved);
+
+            if (!InheritedParameterVMs.Contains(pVMToBeRemoved))
+            {
+                foreach (PartVM pVM in PartVMs)
+                    pVM.RemoveParameterVM(pVMToBeRemoved);
+            }
+
             SelectedParameterVM = ParameterVMs.FirstOrDefault();
         }
 

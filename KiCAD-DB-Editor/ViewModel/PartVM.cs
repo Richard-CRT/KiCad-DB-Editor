@@ -63,7 +63,7 @@ namespace KiCAD_DB_Editor.ViewModel
 
         #endregion Notify Properties
 
-        public string this[string parameterVMName]
+        public string? this[string parameterVMName]
         {
             get
             {
@@ -71,19 +71,24 @@ namespace KiCAD_DB_Editor.ViewModel
                 if (Part.ParameterValues.TryGetValue(key, out string? val))
                     return val;
                 else
-                    return "\x7F";
+                    return null;
             }
             set
             {
-                var key = ParentLibraryVM.ParameterVMs.First(pVM => pVM.Name == parameterVMName).Parameter;
-                if (Part.ParameterValues.TryGetValue(key, out string? s))
+                if (value is not null)
                 {
-                    if (s != value)
+                    var key = ParentLibraryVM.ParameterVMs.First(pVM => pVM.Name == parameterVMName).Parameter;
+                    if (Part.ParameterValues.TryGetValue(key, out string? s))
                     {
-                        Part.ParameterValues[key] = value;
-                        InvokePropertyChanged("Item[]");
+                        if (s != value)
+                        {
+                            Part.ParameterValues[key] = value;
+                            InvokePropertyChanged("Item[]");
+                        }
                     }
                 }
+                else
+                    throw new NotSupportedException();
             }
         }
 
@@ -100,14 +105,17 @@ namespace KiCAD_DB_Editor.ViewModel
             if (!Part.ParameterValues.ContainsKey(pVM.Parameter))
             {
                 Part.ParameterValues[pVM.Parameter] = "";
-                InvokePropertyChanged("Item[]");
+                InvokePropertyChanged("ParametersChanged");
             }
         }
 
         public void RemoveParameterVM(ParameterVM pVM)
         {
-            Part.ParameterValues.Remove(pVM.Parameter);
-            InvokePropertyChanged("Item[]");
+            if (Part.ParameterValues.ContainsKey(pVM.Parameter))
+            {
+                Part.ParameterValues.Remove(pVM.Parameter);
+                InvokePropertyChanged("ParametersChanged");
+            }
         }
 
         #region Commands

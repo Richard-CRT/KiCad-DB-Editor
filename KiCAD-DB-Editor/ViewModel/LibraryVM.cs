@@ -176,6 +176,7 @@ namespace KiCAD_DB_Editor.ViewModel
             TopLevelCategoryVMs = new(library.TopLevelCategories.OrderBy(c => c.Name).Select(c => new CategoryVM(this, null, c)));
             Debug.Assert(_topLevelCategoryVMs is not null);
             PartVMs = new();
+            Debug.Assert(_partVMs is not null);
             for (int i = 0; i < 10; i++)
             {
                 Part p = new();
@@ -188,7 +189,6 @@ namespace KiCAD_DB_Editor.ViewModel
                 p.ExcludeFromBoard = false;
                 PartVMs.Add(new(this, p));
             }
-            Debug.Assert(_partVMs is not null);
 
             for (int i = 0; i < 3; i++)
                 TopLevelCategoryVMs[0].PartVMs.Add(PartVMs[i]);

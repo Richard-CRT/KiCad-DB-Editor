@@ -7,7 +7,7 @@
              xmlns:vm="clr-namespace:KiCAD_DB_Editor.ViewModel"
              xmlns:conv="clr-namespace:KiCAD_DB_Editor.View.Converters"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" FontSize="14">
+             d:DesignHeight="900" d:DesignWidth="1400" FontSize="14">
     <UserControl.Resources>
         <Style x:Key="TreeViewItemStyle_ExpandAll" TargetType="{x:Type TreeViewItem}">
             <Setter Property="IsExpanded" Value="True"/>
@@ -18,11 +18,11 @@
         <TabItem Header="Structure">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition MinWidth="150"/>
+                    <ColumnDefinition Width="2*" MinWidth="150" />
                     <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition MinWidth="300"/>
+                    <ColumnDefinition Width="3*" MinWidth="160"/>
                     <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="100*" MinWidth="300"/>
+                    <ColumnDefinition Width="10*" MinWidth="500"/>
                 </Grid.ColumnDefinitions>
                 <DockPanel>
                     <TextBlock DockPanel.Dock="Top" HorizontalAlignment="Center"><Run Text="Special Parameters"/></TextBlock>

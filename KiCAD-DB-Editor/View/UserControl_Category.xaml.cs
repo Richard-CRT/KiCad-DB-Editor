@@ -35,18 +35,6 @@ namespace KiCAD_DB_Editor
             set => SetValue(CategoryVMProperty, value);
         }
 
-        public static readonly DependencyProperty ParameterVMsProperty = DependencyProperty.Register(
-            nameof(ParameterVMs),
-            typeof(ObservableCollectionEx<ParameterVM>),
-            typeof(UserControl_Category)
-            );
-
-        public ObservableCollectionEx<ParameterVM> ParameterVMs
-        {
-            get => (ObservableCollectionEx<ParameterVM>)GetValue(ParameterVMsProperty);
-            set => SetValue(ParameterVMsProperty, value);
-        }
-
         #endregion
 
         public UserControl_Category()

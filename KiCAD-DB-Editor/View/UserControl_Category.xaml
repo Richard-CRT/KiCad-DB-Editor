@@ -7,9 +7,6 @@
              xmlns:conv="clr-namespace:KiCAD_DB_Editor.View.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <UserControl.Resources>
-        <conv:ParameterVMCollectionDifference_Multiconverter x:Key="ParameterVMCollectionDifference_Multiconverter" />
-    </UserControl.Resources>
     <StackPanel>
         <TextBlock>Component Category</TextBlock>
         <TextBox Text="{Binding CategoryVM.Name, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" />

@@ -44,5 +44,16 @@ namespace KiCAD_DB_Editor
         {
             InitializeComponent();
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            LibraryVM.PartVMs[1].AddParameterVM(LibraryVM.ParameterVMs[3]);
+            LibraryVM.PartVMs[1][LibraryVM.ParameterVMs[3].Name] = "lkjlkj";
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            LibraryVM.PartVMs[1].RemoveParameterVM(LibraryVM.ParameterVMs[3]);
+        }
     }
 }

@@ -13,6 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Documents;
+using System.Windows.Navigation;
 
 namespace KiCAD_DB_Editor.ViewModel
 {
@@ -128,6 +129,30 @@ namespace KiCAD_DB_Editor.ViewModel
             }
         }
 
+        // Do not initialise here, do in constructor to link collection changed
+        private ObservableCollectionEx<ViewModel.PartVM> _partVMs;
+        public ObservableCollectionEx<ViewModel.PartVM> PartVMs
+        {
+            get { return _partVMs; }
+            set
+            {
+                if (_partVMs != value)
+                {
+                    if (_partVMs is not null)
+                        _partVMs.CollectionChanged -= _partVMs_CollectionChanged;
+                    _partVMs = value;
+                    _partVMs.CollectionChanged += _partVMs_CollectionChanged; ;
+
+                    _partVMs_CollectionChanged(this, new(NotifyCollectionChangedAction.Reset));
+                }
+            }
+        }
+
+        private void _partVMs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            InvokePropertyChanged(nameof(this.PartVMs));
+        }
+
         #endregion Notify Properties
 
         public LibraryVM(Model.Library library)
@@ -148,6 +173,22 @@ namespace KiCAD_DB_Editor.ViewModel
             Debug.Assert(_parameterVMs is not null);
             TopLevelCategoryVMs = new(library.TopLevelCategories.OrderBy(c => c.Name).Select(c => new CategoryVM(this, null, c)));
             Debug.Assert(_topLevelCategoryVMs is not null);
+            PartVMs = new();
+            for (int i = 0; i < 10; i++)
+            {
+                Part p = new();
+                p.PartUID = "test";
+                p.Description = "test";
+                p.Manufacturer = "test";
+                p.MPN = "test";
+                p.Value = "test";
+                p.ExcludeFromBOM = true;
+                p.ExcludeFromBoard = false;
+                foreach (var pa in ParameterVMs)
+                    p.ParameterValues[pa.Parameter] = "test";
+                PartVMs.Add(new (this, p));
+            }
+            Debug.Assert(_partVMs is not null);
         }
 
         private bool canNewCategory(ObservableCollectionEx<CategoryVM> categoryVMCollection)

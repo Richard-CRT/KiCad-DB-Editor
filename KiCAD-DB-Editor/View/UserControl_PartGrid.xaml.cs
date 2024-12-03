@@ -141,63 +141,10 @@ namespace KiCAD_DB_Editor.View
         {
             if (ParameterVMs is not null && PartVMs is not null)
             {
-                /*
-                HashSet<ParameterVM> uniqueParameterVMs = new();
-                foreach (PartVM partVM in PartVMs)
-                    foreach (ParameterVM parameterVM in partVM.ParameterVMs)
-                        uniqueParameterVMs.Add(parameterVM);
-
-                var orderedParameterVMs = ParameterVMs.Where(pVM => uniqueParameterVMs.Contains(pVM));
-                */
-
-                while (dataGrid_Main.Columns.Count > 1)
-                    dataGrid_Main.Columns.RemoveAt(1);
+                while (dataGrid_Main.Columns.Count > 8)
+                    dataGrid_Main.Columns.RemoveAt(8);
 
                 DataGridTextColumn dataGridTextColumn;
-                DataGridCheckBoxColumn dataGridCheckBoxColumn;
-
-                dataGridTextColumn = new()
-                {
-                    Header = "Part UID",
-                    Binding = new Binding($"PartUID")
-                };
-                dataGrid_Main.Columns.Add(dataGridTextColumn);
-                dataGridTextColumn = new()
-                {
-                    Header = "Description",
-                    Binding = new Binding($"Description")
-                };
-                dataGrid_Main.Columns.Add(dataGridTextColumn);
-                dataGridTextColumn = new()
-                {
-                    Header = "Manufacturer",
-                    Binding = new Binding($"Manufacturer")
-                };
-                dataGrid_Main.Columns.Add(dataGridTextColumn);
-                dataGridTextColumn = new()
-                {
-                    Header = "MPN",
-                    Binding = new Binding($"MPN")
-                };
-                dataGrid_Main.Columns.Add(dataGridTextColumn);
-                dataGridTextColumn = new()
-                {
-                    Header = "Value",
-                    Binding = new Binding($"Value")
-                };
-                dataGrid_Main.Columns.Add(dataGridTextColumn);
-                dataGridCheckBoxColumn = new()
-                {
-                    Header = "Exclude BOM",
-                    Binding = new Binding($"ExcludeFromBOM")
-                };
-                dataGrid_Main.Columns.Add(dataGridCheckBoxColumn);
-                dataGridCheckBoxColumn = new()
-                {
-                    Header = "Exclude Board",
-                    Binding = new Binding($"ExcludeFromBoard")
-                };
-                dataGrid_Main.Columns.Add(dataGridCheckBoxColumn);
                 foreach (ParameterVM parameterVM in ParameterVMs)
                 {
                     dataGridTextColumn = new();
@@ -209,8 +156,8 @@ namespace KiCAD_DB_Editor.View
             }
             else
             {
-                while (dataGrid_Main.Columns.Count > 1)
-                    dataGrid_Main.Columns.RemoveAt(1);
+                while (dataGrid_Main.Columns.Count > 8)
+                    dataGrid_Main.Columns.RemoveAt(8);
             }
         }
 

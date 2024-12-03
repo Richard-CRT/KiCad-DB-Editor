@@ -15,6 +15,7 @@ namespace KiCAD_DB_Editor.ViewModel
     public class ParameterVM : NotifyObject
     {
         public readonly Model.Parameter Parameter;
+        public readonly LibraryVM ParentLibraryVM;
 
         #region Notify Properties
 
@@ -25,6 +26,14 @@ namespace KiCAD_DB_Editor.ViewModel
             {
                 if (Parameter.Name != value)
                 {
+                    if (value.Length > 0 && value.All(c => c >= 0x20 && c <= 0x7A))
+                    { }
+                    else
+                        throw new Exceptions.ArgumentValidationException("Proposed name invalid");
+
+                    if (ParentLibraryVM.ParameterVMs.Any(cVM => cVM.Name.ToLower() == value.ToLower()))
+                        throw new Exceptions.ArgumentValidationException("Parent already contains parameter with proposed name");
+
                     Parameter.Name = value;
                     InvokePropertyChanged();
                 }
@@ -33,8 +42,10 @@ namespace KiCAD_DB_Editor.ViewModel
 
         #endregion Notify Properties
 
-        public ParameterVM(Model.Parameter parameter)
+        public ParameterVM(LibraryVM parentLibraryVM, Model.Parameter parameter)
         {
+            ParentLibraryVM = parentLibraryVM;
+
             // Link model
             Parameter = parameter;
         }

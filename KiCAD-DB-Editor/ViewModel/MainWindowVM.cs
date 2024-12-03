@@ -14,6 +14,7 @@ using Microsoft.Win32;
 using System.Windows.Input;
 using System.IO;
 using System.Windows.Threading;
+using SQLitePCL;
 
 namespace KiCAD_DB_Editor.ViewModel
 {
@@ -79,7 +80,14 @@ namespace KiCAD_DB_Editor.ViewModel
         private void _autoSaveTimer_Tick(object? sender, EventArgs e)
         {
             if (LibraryVM is not null && Properties.Settings.Default.OpenProjectPath != "" && Properties.Settings.Default.OpenProjectPath != "New Project")
-                LibraryVM.Library.WriteToFile($"{Properties.Settings.Default.OpenProjectPath}.bak");
+            {
+                if (!LibraryVM.Library.WriteToFile(Properties.Settings.Default.OpenProjectPath, autosave: true))
+                {
+                    // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
+                    (new View.Dialogs.Window_ErrorDialog("Save failed!")).ShowDialog();
+                    // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
+                }
+            }
         }
 
         #region Commands
@@ -125,7 +133,12 @@ namespace KiCAD_DB_Editor.ViewModel
 
             if (Properties.Settings.Default.OpenProjectPath != "" && Properties.Settings.Default.OpenProjectPath != "New Project")
             {
-                LibraryVM.Library.WriteToFile(Properties.Settings.Default.OpenProjectPath);
+                if (!LibraryVM.Library.WriteToFile(Properties.Settings.Default.OpenProjectPath))
+                {
+                    // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
+                    (new View.Dialogs.Window_ErrorDialog("Save failed!")).ShowDialog();
+                    // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
+                }
             }
             else
             {
@@ -143,11 +156,18 @@ namespace KiCAD_DB_Editor.ViewModel
             saveFileDialog.Filter = "Project file (*.kidbe_proj)|*.kidbe_proj|All files (*.*)|*.*";
             if (saveFileDialog.ShowDialog() == true)
             {
-                LibraryVM.Library.WriteToFile(saveFileDialog.FileName);
-
-                Properties.Settings.Default.OpenProjectPath = saveFileDialog.FileName;
-                Properties.Settings.Default.Save();
-                InvokePropertyChanged(nameof(WindowTitle));
+                if (LibraryVM.Library.WriteToFile(saveFileDialog.FileName))
+                {
+                    Properties.Settings.Default.OpenProjectPath = saveFileDialog.FileName;
+                    Properties.Settings.Default.Save();
+                    InvokePropertyChanged(nameof(WindowTitle));
+                }
+                else
+                {
+                    // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
+                     (new View.Dialogs.Window_ErrorDialog("Save failed!")).ShowDialog();
+                    // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
+                }
             }
         }
 

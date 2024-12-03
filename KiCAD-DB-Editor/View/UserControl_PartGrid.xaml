@@ -27,7 +27,8 @@
                                 <PriorityBinding>
                                     <!--Binding="{Binding Content.Text, RelativeSource={RelativeSource Self}}" Value="&#x007F;"-->
                                     <Binding Path="Content.Text" RelativeSource="{RelativeSource Self}" />
-                                    <Binding Source="" /> <!-- This is to prevent errors with the checkboxes etc that don't have .Text -->
+                                    <Binding Source="" />
+                                    <!-- This is to prevent errors with the checkboxes etc that don't have .Text -->
                                 </PriorityBinding>
                             </DataTrigger.Binding>
                             <Setter Property="IsEnabled" Value="False"/>
@@ -44,6 +45,13 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Part UID" Binding="{Binding PartUID}"  />
+                <DataGridTextColumn Header="Description" Binding="{Binding Description}"  />
+                <DataGridTextColumn Header="Manufacturer" Binding="{Binding Manufacturer}"  />
+                <DataGridTextColumn Header="MPN" Binding="{Binding MPN}"  />
+                <DataGridTextColumn Header="Value" Binding="{Binding Value}"  />
+                <DataGridCheckBoxColumn Header="Exclude BOM" Binding="{Binding ExcludeFromBOM}"  />
+                <DataGridCheckBoxColumn Header="Exclude Board" Binding="{Binding ExcludeFromBoard}"  />
             </DataGrid.Columns>
         </DataGrid>
     </DockPanel>

@@ -1,6 +1,7 @@
 *.kidbe_proj
-*.kidbe_proj.bak
+*.sqlite3
 *.kicad_dbl
+*.autosave
 
 
 ## Ignore Visual Studio temporary files, build results, and

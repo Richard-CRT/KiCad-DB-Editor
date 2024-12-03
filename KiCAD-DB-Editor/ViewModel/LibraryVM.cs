@@ -25,14 +25,6 @@ namespace KiCAD_DB_Editor.ViewModel
     {
         public readonly Model.Library Library;
 
-        public ReadOnlyCollection<ParameterVM> SpecialParameterVMs { get; } = new(new List<ParameterVM>() {
-            new(new("Part UID")),
-            new(new("Description")),
-            new(new("Manufacturer")),
-            new(new("MPN")),
-            new(new("Value")),
-        });
-
         #region Notify Properties
 
         // Do not initialise here, do in constructor to link collection changed
@@ -153,6 +145,7 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private void _partVMs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
+            Library.Parts = new(this.PartVMs.Select(p => p.Part));
         }
 
         #endregion Notify Properties
@@ -171,7 +164,7 @@ namespace KiCAD_DB_Editor.ViewModel
 
             // Initialise collection with events
             // Must do ParameterVMs first as CategoryVMs will use it
-            ParameterVMs = new(library.Parameters.Select(p => new ParameterVM(p)));
+            ParameterVMs = new(library.Parameters.Select(p => new ParameterVM(this, p)));
             Debug.Assert(_parameterVMs is not null);
             TopLevelCategoryVMs = new(library.TopLevelCategories.OrderBy(c => c.Name).Select(c => new CategoryVM(this, null, c)));
             Debug.Assert(_topLevelCategoryVMs is not null);
@@ -202,7 +195,7 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private bool canNewCategory(ObservableCollectionEx<CategoryVM> categoryVMCollection)
         {
-            if (this.NewCategoryName != "" && !this.NewCategoryName.Contains('|'))
+            if (this.NewCategoryName.Length > 0 && this.NewParameterName.All(c => c >= 0x20 && c <= 0x7A))
                 return !categoryVMCollection.Any(cVM => cVM.Name.ToLower() == this.NewCategoryName.ToLower());
             else
                 return false;
@@ -271,7 +264,7 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private bool NewParameterCommandCanExecute(object? parameter)
         {
-            if (this.NewParameterName != "")
+            if (this.NewParameterName.Length > 0 && this.NewParameterName.All(c => c >= 0x20 && c <= 0x7A))
                 return !ParameterVMs.Any(p => p.Name.ToLower() == this.NewParameterName.ToLower());
             else
                 return false;
@@ -279,7 +272,7 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private void NewParameterCommandExecuted(object? parameter)
         {
-            ParameterVMs.Add(new(new(this.NewParameterName)));
+            ParameterVMs.Add(new(this, new(this.NewParameterName)));
         }
 
         private bool DeleteParameterCommandCanExecute(object? parameter)

@@ -8,7 +8,7 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <DockPanel>
         <DataGrid x:Name="dataGrid_Main" AutoGenerateColumns="False"
-            ItemsSource="{Binding PartVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}" >
+            ItemsSource="{Binding PartVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}" SelectionUnit="CellOrRowHeader" >
             <DataGrid.Resources>
                 <Style TargetType="{x:Type DataGridCell}" >
                     <Setter Property="IsEnabled" Value="True" />
@@ -27,6 +27,15 @@
                     </Style.Triggers>
                 </Style>
             </DataGrid.Resources>
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Width="SizeToCells" IsReadOnly="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Image Source="/View/Resources/Component.png" Height="18" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
         </DataGrid>
     </DockPanel>
 </UserControl>

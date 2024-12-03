@@ -10,10 +10,10 @@
     <DockPanel>
         <TextBlock DockPanel.Dock="Top">Component Category</TextBlock>
         <TextBox DockPanel.Dock="Top" Text="{Binding CategoryVM.Name, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" />
-        <DockPanel DockPanel.Dock="Top" Height="200">
+        <DockPanel DockPanel.Dock="Top" Height="150">
             <TextBlock DockPanel.Dock="Top">Inherited Parameters</TextBlock>
             <ListBox DisplayMemberPath="Name"
-                ItemsSource="{Binding CategoryVM.SpecialAndInheritedParameterVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
+                ItemsSource="{Binding CategoryVM.InheritedParameterVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
         </DockPanel>
         <Grid DockPanel.Dock="Top" Height="200">
             <Grid.ColumnDefinitions>
@@ -22,7 +22,7 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <DockPanel>
-                <TextBlock DockPanel.Dock="Top" HorizontalAlignment="Center">Unused Parameters</TextBlock>
+                <TextBlock DockPanel.Dock="Top" HorizontalAlignment="Center">Available Parameters</TextBlock>
                 <ListBox DisplayMemberPath="Name"
                          ItemsSource="{Binding CategoryVM.AvailableParameterVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}"
                          SelectedItem="{Binding CategoryVM.SelectedUnusedParameterVM, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />

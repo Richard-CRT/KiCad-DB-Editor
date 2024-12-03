@@ -125,11 +125,6 @@ namespace KiCAD_DB_Editor.ViewModel
                 cVM.InvokePropertyChanged_InheritedParameterVMs();
         }
 
-        public ReadOnlyCollection<ParameterVM> SpecialAndInheritedParameterVMs
-        {
-            get { return new(new List<ParameterVM>(ParentLibraryVM.SpecialParameterVMs.Concat(InheritedParameterVMs))); }
-        }
-
         // Should be ReadOnlyCollection really, but this binds to the Part grid view, so it needs to be ObservableCollectionEx
         public ObservableCollectionEx<ParameterVM> InheritedAndNormalParameterVMs
         {
@@ -141,7 +136,7 @@ namespace KiCAD_DB_Editor.ViewModel
             get
             {
                 if (ParentCategoryVM is not null && ParentCategoryVM.ParameterVMs is not null)
-                    return new(new List<ParameterVM>(ParentCategoryVM.InheritedParameterVMs.Concat(ParentCategoryVM.ParameterVMs)));
+                    return new(new List<ParameterVM>(ParentCategoryVM.InheritedParameterVMs.Concat(ParentCategoryVM.ParameterVMs).Distinct()));
                 else
                     return new(new List<ParameterVM>());
             }
@@ -217,7 +212,6 @@ namespace KiCAD_DB_Editor.ViewModel
         public void InvokePropertyChanged_InheritedParameterVMs()
         {
             InvokePropertyChanged(nameof(this.InheritedParameterVMs));
-            InvokePropertyChanged(nameof(this.SpecialAndInheritedParameterVMs));
             InvokePropertyChanged(nameof(this.InheritedAndNormalParameterVMs));
 
             foreach (PartVM partVM in PartVMs)

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -17,6 +18,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Xml;
 
 namespace KiCAD_DB_Editor.View
 {
@@ -148,10 +150,12 @@ namespace KiCAD_DB_Editor.View
                 var orderedParameterVMs = ParameterVMs.Where(pVM => uniqueParameterVMs.Contains(pVM));
                 */
 
-                dataGrid_Main.Columns.Clear();
+                while (dataGrid_Main.Columns.Count > 1)
+                    dataGrid_Main.Columns.RemoveAt(1);
 
                 DataGridTextColumn dataGridTextColumn;
                 DataGridCheckBoxColumn dataGridCheckBoxColumn;
+
                 dataGridTextColumn = new()
                 {
                     Header = "Part UID",
@@ -205,7 +209,8 @@ namespace KiCAD_DB_Editor.View
             }
             else
             {
-                dataGrid_Main.Columns.Clear();
+                while (dataGrid_Main.Columns.Count > 1)
+                    dataGrid_Main.Columns.RemoveAt(1);
             }
         }
 

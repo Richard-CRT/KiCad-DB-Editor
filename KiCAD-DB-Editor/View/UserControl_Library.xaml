@@ -34,9 +34,10 @@
                         <ListBoxItem Content="Value"/>
                     </ListBox>
                     <TextBlock DockPanel.Dock="Top" HorizontalAlignment="Center"><Run Text="Custom Parameters"/></TextBlock>
+                    <Button DockPanel.Dock="Bottom" Content="Rename" Command="{Binding LibraryVM.RenameParameterCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" Padding="3,1,3,1" />
                     <Button DockPanel.Dock="Bottom" Content="Add" Command="{Binding LibraryVM.NewParameterCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" Padding="3,1,3,1" />
                     <TextBox DockPanel.Dock="Bottom" Text="{Binding LibraryVM.NewParameterName, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock DockPanel.Dock="Bottom" HorizontalAlignment="Center"><Run Text="New Parameter"/></TextBlock>
+                    <TextBlock DockPanel.Dock="Bottom" HorizontalAlignment="Center"><Run Text="Parameter"/></TextBlock>
                     <Separator DockPanel.Dock="Bottom" />
                     <Button DockPanel.Dock="Bottom" Content="Delete Parameter" Command="{Binding LibraryVM.DeleteParameterCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" Padding="3,1,3,1" />
                     <ListBox ItemsSource="{Binding LibraryVM.ParameterVMs, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" DisplayMemberPath="Name" MinHeight="60" SelectedItem="{Binding LibraryVM.SelectedParameterVM, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />

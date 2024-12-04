@@ -148,7 +148,7 @@ namespace KiCAD_DB_Editor.View
                 foreach (ParameterVM parameterVM in ParameterVMs)
                 {
                     dataGridTextColumn = new();
-                    dataGridTextColumn.Header = parameterVM.Name;
+                    dataGridTextColumn.Header = parameterVM.Name.Replace("_", "__"); ;
                     dataGridTextColumn.Binding = new Binding($"[{parameterVM.Name}]");
                     dataGridTextColumn.Binding.TargetNullValue = "\x7F";
                     dataGrid_Main.Columns.Add(dataGridTextColumn);

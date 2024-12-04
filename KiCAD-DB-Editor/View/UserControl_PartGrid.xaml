@@ -7,8 +7,10 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <DockPanel>
-        <DataGrid x:Name="dataGrid_Main" AutoGenerateColumns="False"
-            ItemsSource="{Binding PartVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}" SelectionUnit="CellOrRowHeader" >
+        <DataGrid x:Name="dataGrid_Main" AutoGenerateColumns="False" SelectionUnit="CellOrRowHeader"
+            ItemsSource="{Binding PartVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}"
+            d:ItemsSource="{d:SampleData}"
+                  >
             <DataGrid.Resources>
                 <Style TargetType="{x:Type DataGridCell}" >
                     <Setter Property="Template">

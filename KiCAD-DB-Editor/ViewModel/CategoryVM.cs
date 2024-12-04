@@ -36,7 +36,7 @@ namespace KiCAD_DB_Editor.ViewModel
             {
                 if (Category.Name != value)
                 {
-                    if (value.Length > 0 && value.All(c => Utilities.SafeCharacters.Contains(c)))
+                    if (value.Length > 0 && value.All(c => Utilities.SafeCategoryCharacters.Contains(c)))
                     {}
                     else
                         throw new Exceptions.ArgumentValidationException("Proposed name invalid");
@@ -200,6 +200,7 @@ namespace KiCAD_DB_Editor.ViewModel
             // Setup commands
             AddParameterCommand = new BasicCommand(AddParameterCommandExecuted, AddParameterCommandCanExecute);
             RemoveParameterCommand = new BasicCommand(RemoveParameterCommandExecuted, RemoveParameterCommandCanExecute);
+            NewPartCommand = new BasicCommand(NewPartCommandExecuted, NewPartCommandCanExecute);
 
             // Initialise collection with events
             CategoryVMs = new(category.Categories.OrderBy(c => c.Name).Select(c => new CategoryVM(ParentLibraryVM, this, c)));
@@ -251,6 +252,7 @@ namespace KiCAD_DB_Editor.ViewModel
 
         public IBasicCommand AddParameterCommand { get; }
         public IBasicCommand RemoveParameterCommand { get; }
+        public IBasicCommand NewPartCommand { get; }
 
         private bool AddParameterCommandCanExecute(object? parameter)
         {
@@ -303,6 +305,19 @@ namespace KiCAD_DB_Editor.ViewModel
             }
 
             SelectedParameterVM = ParameterVMs.FirstOrDefault();
+        }
+
+        private bool NewPartCommandCanExecute(object? parameter)
+        {
+            return true;
+        }
+
+        private void NewPartCommandExecuted(object? parameter)
+        {
+            Part p = new();
+            PartVM pVM = new(ParentLibraryVM, p);
+            PartVMs.Add(pVM);
+            ParentLibraryVM.PartVMs.Add(pVM);
         }
 
         #endregion Commands

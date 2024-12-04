@@ -91,6 +91,9 @@ namespace KiCAD_DB_Editor.ViewModel
                 {
                     _selectedParameterVM = value;
                     InvokePropertyChanged();
+
+                    if (SelectedParameterVM is not null)
+                        NewParameterName = SelectedParameterVM.Name;
                 }
             }
         }
@@ -160,6 +163,7 @@ namespace KiCAD_DB_Editor.ViewModel
             NewSubCategoryCommand = new BasicCommand(NewSubCategoryCommandExecuted, NewSubCategoryCommandCanExecute);
             DeleteCategoryCommand = new BasicCommand(DeleteCategoryCommandExecuted, DeleteCategoryCommandCanExecute);
             NewParameterCommand = new BasicCommand(NewParameterCommandExecuted, NewParameterCommandCanExecute);
+            RenameParameterCommand = new BasicCommand(RenameParameterCommandExecuted, RenameParameterCommandCanExecute);
             DeleteParameterCommand = new BasicCommand(DeleteParameterCommandExecuted, DeleteParameterCommandCanExecute);
 
             // Initialise collection with events
@@ -198,7 +202,7 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private bool canNewCategory(ObservableCollectionEx<CategoryVM> categoryVMCollection)
         {
-            if (this.NewCategoryName.Length > 0 && this.NewParameterName.All(c => Utilities.SafeCharacters.Contains(c)))
+            if (this.NewCategoryName.Length > 0 && this.NewParameterName.All(c => Utilities.SafeCategoryCharacters.Contains(c)))
                 return !categoryVMCollection.Any(cVM => cVM.Name.ToLower() == this.NewCategoryName.ToLower());
             else
                 return false;
@@ -225,6 +229,7 @@ namespace KiCAD_DB_Editor.ViewModel
         public IBasicCommand NewSubCategoryCommand { get; }
         public IBasicCommand DeleteCategoryCommand { get; }
         public IBasicCommand NewParameterCommand { get; }
+        public IBasicCommand RenameParameterCommand { get; }
         public IBasicCommand DeleteParameterCommand { get; }
 
         private bool NewTopLevelCategoryCommandCanExecute(object? parameter)
@@ -267,7 +272,7 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private bool NewParameterCommandCanExecute(object? parameter)
         {
-            if (this.NewParameterName.Length > 0 && this.NewParameterName.All(c => Utilities.SafeCharacters.Contains(c)))
+            if (this.NewParameterName.Length > 0 && this.NewParameterName.All(c => Utilities.SafeParameterCharacters.Contains(c)))
                 return !ParameterVMs.Any(p => p.Name.ToLower() == this.NewParameterName.ToLower());
             else
                 return false;
@@ -276,6 +281,21 @@ namespace KiCAD_DB_Editor.ViewModel
         private void NewParameterCommandExecuted(object? parameter)
         {
             ParameterVMs.Add(new(this, new(this.NewParameterName)));
+            this.NewParameterName = "";
+        }
+
+        private bool RenameParameterCommandCanExecute(object? parameter)
+        {
+            if (SelectedParameterVM is not null && this.NewParameterName.Length > 0 && this.NewParameterName.All(c => Utilities.SafeParameterCharacters.Contains(c)))
+                return !ParameterVMs.Any(p => p.Name.ToLower() == this.NewParameterName.ToLower());
+            else
+                return false;
+        }
+
+        private void RenameParameterCommandExecuted(object? parameter)
+        {
+            Debug.Assert(SelectedParameterVM is not null);
+            SelectedParameterVM.Name = this.NewParameterName;
         }
 
         private bool DeleteParameterCommandCanExecute(object? parameter)

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -8,6 +9,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using System.Windows.Documents;
 
 namespace KiCAD_DB_Editor.Model
 {
@@ -20,12 +22,20 @@ namespace KiCAD_DB_Editor.Model
             return library;
         }
 
-        public static Library FromFile(string filePath)
+        public static Library FromFile(string projectFilePath)
         {
             Library library;
             try
             {
-                var jsonString = File.ReadAllText(filePath);
+                string? projectDirectory = Path.GetDirectoryName(projectFilePath);
+                string? projectName = Path.GetFileNameWithoutExtension(projectFilePath);
+                if (projectDirectory is null || projectDirectory == "" || projectName is null || projectName == "")
+                    throw new InvalidOperationException();
+
+                string componentsFilePath = Path.Combine(projectDirectory, projectName);
+                componentsFilePath += ".sqlite3";
+
+                var jsonString = File.ReadAllText(projectFilePath);
 
                 Library? o;
                 o = (Library?)JsonSerializer.Deserialize(jsonString, typeof(Library), new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve });
@@ -34,6 +44,98 @@ namespace KiCAD_DB_Editor.Model
                 if (o is null) throw new ArgumentNullException("Library is null");
 
                 library = (Library)o!;
+
+                List<string> dbPartColumnNames = new();
+                List<Type> dbPartColumnTypes = new();
+                List<List<object>> dbParts = new();
+                using (var connection = new SqliteConnection($"Data Source={componentsFilePath}"))
+                {
+                    connection.Open();
+
+                    // Worse DB structure but simpler for humans
+                    string selectPartsSql = "SELECT * FROM \"Components\"";
+                    var selectPartsCommand = connection.CreateCommand();
+                    selectPartsCommand.CommandText = selectPartsSql;
+                    using (var reader = selectPartsCommand.ExecuteReader())
+                    {
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        {
+                            dbPartColumnNames.Add(reader.GetName(i));
+                            dbPartColumnTypes.Add(reader.GetFieldType(i));
+                        }
+                        while (reader.Read())
+                        {
+                            List<object> part = new();
+                            for (int i = 0; i < reader.FieldCount; i++)
+                                part.Add(reader[i]);
+                            dbParts.Add(part);
+                        }
+                    }
+                }
+                SqliteConnection.ClearAllPools();
+
+                if (
+                    dbPartColumnNames.Count < 8 ||
+                    dbPartColumnTypes[0] != typeof(string) ||
+                    dbPartColumnNames[0] != "Category" ||
+                    dbPartColumnTypes[1] != typeof(string) ||
+                    dbPartColumnNames[1] != "Part UID" ||
+                    dbPartColumnTypes[2] != typeof(string) ||
+                    dbPartColumnNames[2] != "Description" ||
+                    dbPartColumnTypes[3] != typeof(string) ||
+                    dbPartColumnNames[3] != "Manufacturer" ||
+                    dbPartColumnTypes[4] != typeof(string) ||
+                    dbPartColumnNames[4] != "MPN" ||
+                    dbPartColumnTypes[5] != typeof(string) ||
+                    dbPartColumnNames[5] != "Value" ||
+                    dbPartColumnTypes[6] != typeof(Int64) ||
+                    dbPartColumnNames[6] != "Exclude from BOM" ||
+                    dbPartColumnTypes[7] != typeof(Int64) ||
+                    dbPartColumnNames[7] != "Exclude from Board"
+                    )
+                    throw new InvalidDataException("Special columns not found or wrong type");
+                for (int i = 8; i < dbPartColumnTypes.Count; i++)
+                {
+                    if (dbPartColumnTypes[i] != typeof(string))
+                        throw new InvalidDataException($"Columns {i} wrong type");
+                }
+
+                Dictionary<int, Parameter> columnIndexToParameterMap = new();
+                for (int i = 8; i < dbPartColumnNames.Count; i++)
+                {
+                    string columnName = dbPartColumnNames[i];
+
+                    bool match = false;
+                    foreach (Parameter parameter in library.Parameters)
+                    {
+                        if (parameter.Name == columnName)
+                        {
+                            columnIndexToParameterMap[i] = parameter;
+                            match = true;
+                            break;
+                        }
+                    }
+                    if (!match)
+                        throw new InvalidDataException("Could not find a parameter to correspond to database column name");
+                }
+
+                foreach (List<object> dbPart in dbParts)
+                {
+                    Part part = new();
+                    part.PartUID = (string)dbPart[1];
+                    part.Description = (string)dbPart[2];
+                    part.Manufacturer = (string)dbPart[3];
+                    part.MPN = (string)dbPart[4];
+                    part.Value = (string)dbPart[5];
+                    part.ExcludeFromBOM = (Int64)dbPart[6] == 1 ? true : false;
+                    part.ExcludeFromBoard = (Int64)dbPart[7] == 1 ? true : false;
+                    for (int i = 8; i < dbPart.Count; i++)
+                    {
+                        if (dbPart[i] is not System.DBNull)
+                            part.ParameterValues[columnIndexToParameterMap[i]] = (string)dbPart[i];
+                    }
+                    library.Parts.Add(part);
+                }
             }
             catch (FileNotFoundException)
             {
@@ -77,108 +179,40 @@ namespace KiCAD_DB_Editor.Model
                 File.WriteAllText(tempProjectPath, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true, ReferenceHandler = ReferenceHandler.Preserve }));
                 //File.WriteAllText(tempProjectPath, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
 
+                List<Category> allCategories = new();
+                Dictionary<Category, string> categoryToCategoryStringMap = new();
+                allCategories.AddRange(TopLevelCategories);
+                foreach (Category category in TopLevelCategories)
+                    categoryToCategoryStringMap[category] = $"/{category.Name}";
+                int i = 0;
+                while (i < allCategories.Count)
+                {
+                    allCategories.AddRange(allCategories[i].Categories);
+                    foreach (Category category in allCategories[i].Categories)
+                        categoryToCategoryStringMap[category] = $"{categoryToCategoryStringMap[allCategories[i]]}/{category.Name}";
+                    i++;
+                }
+
+                Dictionary<Part, string> partToCategoryStringMap = new();
+                foreach (Category category in allCategories)
+                {
+                    foreach (Part part in category.Parts)
+                    {
+                        if (!partToCategoryStringMap.ContainsKey(part))
+                            partToCategoryStringMap[part] = categoryToCategoryStringMap[category];
+                        else
+                            throw new InvalidOperationException("Part exists in multiple categories");
+                    }
+                }
+
                 File.Delete(tempComponentsPath);
                 using (var connection = new SqliteConnection($"Data Source={tempComponentsPath}"))
                 {
                     connection.Open();
 
-                    /* // Better DB Structure but harder for humans
-
-                    string createTablesSql = """
-                        CREATE TABLE "Parts" (
-                            "Part UID" TEXT,
-                            "Description" TEXT,
-                            "Manufacturer" TEXT,
-                            "MPN" TEXT,
-                            "Value" TEXT,
-                            "Exclude from BOM" INTEGER,
-                            "Exclude from Board" INTEGER,
-                            PRIMARY KEY("Part UID")
-                            );
-                           
-                        CREATE TABLE "Parameters" (
-                            "Part UID" TEXT,
-                            "Parameter Name" TEXT,
-                            "Value" TEXT,
-                            PRIMARY KEY("Part UID", "Parameter Name")
-                            );
-                        """;
-
-                    var createTablesCommand = connection.CreateCommand();
-                    createTablesCommand.CommandText = createTablesSql;
-                    createTablesCommand.ExecuteNonQuery();
-
-                    foreach (Part part in Parts)
-                    {
-                        string insertPartSql = """
-                            INSERT INTO "Parts" (
-                                "Part UID",
-                                "Description",
-                                "Manufacturer",
-                                "MPN",
-                                "Value",
-                                "Exclude from BOM",
-                                "Exclude from Board") VALUES (
-                                $partUID, $description, $manufacturer, $mpn, $value, $excludeFromBOM, $excludeFromBoard);
-                            """;
-                        var insertPartCommand = connection.CreateCommand();
-                        insertPartCommand.CommandText = insertPartSql;
-                        insertPartCommand.Parameters.AddWithValue("$partUID", part.PartUID);
-                        insertPartCommand.Parameters.AddWithValue("$description", part.Description);
-                        insertPartCommand.Parameters.AddWithValue("$manufacturer", part.Manufacturer);
-                        insertPartCommand.Parameters.AddWithValue("$mpn", part.MPN);
-                        insertPartCommand.Parameters.AddWithValue("$value", part.Value);
-                        insertPartCommand.Parameters.AddWithValue("$excludeFromBOM", part.ExcludeFromBOM);
-                        insertPartCommand.Parameters.AddWithValue("$excludeFromBoard", part.ExcludeFromBoard);
-
-                        insertPartCommand.ExecuteNonQuery();
-                    }
-
-
-                    string insertParameterSql = """INSERT INTO "Parameters" ("Part UID", "Parameter Name", "Value") VALUES """;
-                    bool anyInsertions = false;
-                    Dictionary<Part, string> partToPreparedKeyMap = new();
-                    Dictionary<Parameter, string> parameterToPreparedKeyMap = new();
-                    Dictionary<string, string> preparedKeyToValueMap = new();
-                    foreach (Part part in Parts)
-                    {
-                        string partUIDPrepared = $"$pUID{partToPreparedKeyMap.Count}";
-                        partToPreparedKeyMap[part] = partUIDPrepared;
-
-                        foreach ((Parameter parameter, string parameterValue) in part.ParameterValues)
-                        {
-                            if (!parameterToPreparedKeyMap.TryGetValue(parameter, out string? parameterPrepared))
-                            {
-                                parameterPrepared = $"$p{parameterToPreparedKeyMap.Count}";
-                                parameterToPreparedKeyMap[parameter] = parameterPrepared;
-                            }
-
-                            string preparedValueString = $"$v{preparedKeyToValueMap.Count}";
-                            preparedKeyToValueMap[preparedValueString] = parameterValue;
-
-                            insertParameterSql += $"\n({partUIDPrepared}, {parameterPrepared}, {preparedValueString}),";
-                            anyInsertions = true;
-                        }
-                    }
-
-                    if (anyInsertions)
-                    {
-                        insertParameterSql = insertParameterSql[..^1];
-                        var insertParameterCommand = connection.CreateCommand();
-                        insertParameterCommand.CommandText = insertParameterSql;
-                        foreach ((Part part, string preparedKey) in partToPreparedKeyMap)
-                            insertParameterCommand.Parameters.AddWithValue(preparedKey, part.PartUID);
-                        foreach ((Parameter parameter, string preparedKey) in parameterToPreparedKeyMap)
-                            insertParameterCommand.Parameters.AddWithValue(preparedKey, parameter.Name);
-                        foreach ((string preparedKey, string value) in preparedKeyToValueMap)
-                            insertParameterCommand.Parameters.AddWithValue(preparedKey, value);
-
-                        insertParameterCommand.ExecuteNonQuery();
-                    }
-                    */
-
                     // Worse DB structure but simpler for humans
-                    string createTableCommandString = "CREATE TABLE \"Components\" (" +
+                    string createTableSql = "CREATE TABLE \"Components\" (" +
+                        "\"Category\" TEXT, " +
                         "\"Part UID\" TEXT, " +
                         "\"Description\" TEXT, " +
                         "\"Manufacturer\" TEXT, " +
@@ -187,15 +221,16 @@ namespace KiCAD_DB_Editor.Model
                         "\"Exclude from BOM\" INTEGER, " +
                         "\"Exclude from Board\" INTEGER, ";
                     foreach (Parameter parameter in Parameters)
-                        createTableCommandString += $"\"{parameter.Name.Replace("\"", "\"\"")}\" TEXT, ";
-                    createTableCommandString = createTableCommandString[..^2];
-                    createTableCommandString += ")";
+                        createTableSql += $"\"{parameter.Name.Replace("\"", "\"\"")}\" TEXT, ";
+                    createTableSql = createTableSql[..^2];
+                    createTableSql += ")";
 
                     var createTableCommand = connection.CreateCommand();
-                    createTableCommand.CommandText = createTableCommandString;
+                    createTableCommand.CommandText = createTableSql;
 
 
-                    string insertPartsCommandString = "INSERT INTO \"Components\" (" +
+                    string insertPartsSql = "INSERT INTO \"Components\" (" +
+                        "\"Category\", " +
                         "\"Part UID\", " +
                         "\"Description\", " +
                         "\"Manufacturer\", " +
@@ -204,12 +239,13 @@ namespace KiCAD_DB_Editor.Model
                         "\"Exclude from BOM\", " +
                         "\"Exclude from Board\", ";
                     foreach (Parameter parameter in Parameters)
-                        insertPartsCommandString += $"\"{parameter.Name.Replace("\"", "\"\"")}\", ";
-                    insertPartsCommandString = insertPartsCommandString[..^2];
-                    insertPartsCommandString += ") VALUES ";
+                        insertPartsSql += $"\"{parameter.Name.Replace("\"", "\"\"")}\", ";
+                    insertPartsSql = insertPartsSql[..^2];
+                    insertPartsSql += ") VALUES ";
                     foreach (Part part in Parts)
                     {
-                        insertPartsCommandString += "(" +
+                        insertPartsSql += "(" +
+                                $"'{partToCategoryStringMap[part]}', " +
                                 $"'{part.PartUID.Replace("'", "''")}', " +
                                 $"'{part.Description.Replace("'", "''")}', " +
                                 $"'{part.Manufacturer.Replace("'", "''")}', " +
@@ -220,17 +256,17 @@ namespace KiCAD_DB_Editor.Model
                         foreach (Parameter parameter in Parameters)
                         {
                             if (part.ParameterValues.TryGetValue(parameter, out string? value))
-                                insertPartsCommandString += $"'{value.Replace("'", "''")}', ";
+                                insertPartsSql += $"'{value.Replace("'", "''")}', ";
                             else
-                                insertPartsCommandString += $"NULL, ";
+                                insertPartsSql += $"NULL, ";
                         }
-                        insertPartsCommandString = insertPartsCommandString[..^2];
-                        insertPartsCommandString += "), ";
+                        insertPartsSql = insertPartsSql[..^2];
+                        insertPartsSql += "), ";
                     }
-                    insertPartsCommandString = insertPartsCommandString[..^2];
+                    insertPartsSql = insertPartsSql[..^2];
 
                     var insertPartsCommand = connection.CreateCommand();
-                    insertPartsCommand.CommandText = insertPartsCommandString;
+                    insertPartsCommand.CommandText = insertPartsSql;
 
                     createTableCommand.ExecuteNonQuery();
                     insertPartsCommand.ExecuteNonQuery();

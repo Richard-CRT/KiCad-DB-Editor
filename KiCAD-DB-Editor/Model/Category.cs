@@ -18,6 +18,9 @@ namespace KiCAD_DB_Editor.Model
         [JsonPropertyName("categories"), JsonPropertyOrder(4)]
         public List<Model.Category> Categories { get; set; } = new();
 
+        [JsonIgnore]
+        public List<Model.Part> Parts { get; set; } = new();
+
         [JsonConstructor]
         private Category()
         {

@@ -36,7 +36,7 @@ namespace KiCAD_DB_Editor.ViewModel
             {
                 if (Category.Name != value)
                 {
-                    if (value.Length > 0 && value.All(c => c >= 0x20 && c <= 0x7A))
+                    if (value.Length > 0 && value.All(c => Utilities.SafeCharacters.Contains(c)))
                     {}
                     else
                         throw new Exceptions.ArgumentValidationException("Proposed name invalid");
@@ -184,7 +184,7 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private void _partVMs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-
+            Category.Parts = new(this.PartVMs.Select(pVM => pVM.Part));
         }
 
         #endregion Notify Properties

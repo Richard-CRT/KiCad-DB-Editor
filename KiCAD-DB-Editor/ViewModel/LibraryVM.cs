@@ -168,7 +168,8 @@ namespace KiCAD_DB_Editor.ViewModel
             Debug.Assert(_parameterVMs is not null);
             TopLevelCategoryVMs = new(library.TopLevelCategories.OrderBy(c => c.Name).Select(c => new CategoryVM(this, null, c)));
             Debug.Assert(_topLevelCategoryVMs is not null);
-            PartVMs = new();
+            PartVMs = new(library.Parts.Select(p => new PartVM(this, p)));
+            /*
             Debug.Assert(_partVMs is not null);
             for (int i = 0; i < 10; i++)
             {
@@ -191,11 +192,12 @@ namespace KiCAD_DB_Editor.ViewModel
                 TopLevelCategoryVMs[1].CategoryVMs[2].PartVMs.Add(PartVMs[i]);
             for (int i = 8; i < 10; i++)
                 TopLevelCategoryVMs[1].CategoryVMs[2].CategoryVMs[0].PartVMs.Add(PartVMs[i]);
+            */
         }
 
         private bool canNewCategory(ObservableCollectionEx<CategoryVM> categoryVMCollection)
         {
-            if (this.NewCategoryName.Length > 0 && this.NewParameterName.All(c => c >= 0x20 && c <= 0x7A))
+            if (this.NewCategoryName.Length > 0 && this.NewParameterName.All(c => Utilities.SafeCharacters.Contains(c)))
                 return !categoryVMCollection.Any(cVM => cVM.Name.ToLower() == this.NewCategoryName.ToLower());
             else
                 return false;
@@ -264,7 +266,7 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private bool NewParameterCommandCanExecute(object? parameter)
         {
-            if (this.NewParameterName.Length > 0 && this.NewParameterName.All(c => c >= 0x20 && c <= 0x7A))
+            if (this.NewParameterName.Length > 0 && this.NewParameterName.All(c => Utilities.SafeCharacters.Contains(c)))
                 return !ParameterVMs.Any(p => p.Name.ToLower() == this.NewParameterName.ToLower());
             else
                 return false;

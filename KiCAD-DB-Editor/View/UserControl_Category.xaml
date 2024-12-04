@@ -11,7 +11,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="1*" MinHeight="200"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="100*"/>
+            <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
         <DockPanel>
             <TextBlock DockPanel.Dock="Top">Component Category</TextBlock>

@@ -163,14 +163,15 @@ namespace KiCAD_DB_Editor.ViewModel
             DeleteParameterCommand = new BasicCommand(DeleteParameterCommandExecuted, DeleteParameterCommandCanExecute);
 
             // Initialise collection with events
+            // Must do PartVMs first as CategoryVMs will use it
+            PartVMs = new(library.Parts.Select(p => new PartVM(this, p)));
+            Debug.Assert(_partVMs is not null);
             // Must do ParameterVMs first as CategoryVMs will use it
             ParameterVMs = new(library.Parameters.Select(p => new ParameterVM(this, p)));
             Debug.Assert(_parameterVMs is not null);
             TopLevelCategoryVMs = new(library.TopLevelCategories.OrderBy(c => c.Name).Select(c => new CategoryVM(this, null, c)));
             Debug.Assert(_topLevelCategoryVMs is not null);
-            PartVMs = new(library.Parts.Select(p => new PartVM(this, p)));
             /*
-            Debug.Assert(_partVMs is not null);
             for (int i = 0; i < 10; i++)
             {
                 Part p = new();

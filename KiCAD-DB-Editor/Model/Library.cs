@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Documents;
 
@@ -100,7 +101,8 @@ namespace KiCAD_DB_Editor.Model
                         throw new InvalidDataException($"Columns {i} wrong type");
                 }
 
-                Dictionary<int, Parameter> columnIndexToParameterMap = new();
+                //Dictionary<int, Parameter> columnIndexToParameterMap = new();
+                Dictionary<Parameter, int> parameterToColumnIndexToMap = new();
                 for (int i = 8; i < dbPartColumnNames.Count; i++)
                 {
                     string columnName = dbPartColumnNames[i];
@@ -110,7 +112,8 @@ namespace KiCAD_DB_Editor.Model
                     {
                         if (parameter.Name == columnName)
                         {
-                            columnIndexToParameterMap[i] = parameter;
+                            //columnIndexToParameterMap[i] = parameter;
+                            parameterToColumnIndexToMap[parameter] = i;
                             match = true;
                             break;
                         }
@@ -121,6 +124,34 @@ namespace KiCAD_DB_Editor.Model
 
                 foreach (List<object> dbPart in dbParts)
                 {
+                    string categoryString = (string)dbPart[0];
+                    string[] categoryStringParts = categoryString.Split('/');
+                    Category? workingCategory = null;
+                    for (int i = 1; i < categoryStringParts.Length; i++)
+                    {
+                        IEnumerable<Category> collectionOfCategories;
+                        if (workingCategory is null)
+                            collectionOfCategories = library.TopLevelCategories;
+                        else
+                            collectionOfCategories = workingCategory.Categories;
+
+                        bool match = false;
+                        foreach (Category category in collectionOfCategories)
+                        {
+                            if (category.Name == categoryStringParts[i])
+                            {
+                                workingCategory = category;
+                                match = true;
+                                break;
+                            }
+                        }
+                        if (!match)
+                            throw new InvalidDataException("Could not match part category in database to library category");
+                    }
+                    if (workingCategory is null)
+                        throw new InvalidDataException("Could not match part category in database to library category");
+                    Category partCategory = workingCategory;
+
                     Part part = new();
                     part.PartUID = (string)dbPart[1];
                     part.Description = (string)dbPart[2];
@@ -129,12 +160,23 @@ namespace KiCAD_DB_Editor.Model
                     part.Value = (string)dbPart[5];
                     part.ExcludeFromBOM = (Int64)dbPart[6] == 1 ? true : false;
                     part.ExcludeFromBoard = (Int64)dbPart[7] == 1 ? true : false;
+                    foreach (Parameter p in partCategory.Parameters)
+                    {
+                        object value = dbPart[parameterToColumnIndexToMap[p]];
+                        if (value is System.DBNull)
+                            part.ParameterValues[p] = "";
+                        else
+                            part.ParameterValues[p] = (string)value;
+                    }
+                    /*
                     for (int i = 8; i < dbPart.Count; i++)
                     {
                         if (dbPart[i] is not System.DBNull)
                             part.ParameterValues[columnIndexToParameterMap[i]] = (string)dbPart[i];
                     }
+                    */
                     library.Parts.Add(part);
+                    partCategory.Parts.Add(part);
                 }
             }
             catch (FileNotFoundException)

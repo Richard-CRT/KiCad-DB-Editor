@@ -207,7 +207,8 @@ namespace KiCAD_DB_Editor.ViewModel
             // Link to parent library instances of ParameterVM (requires Library to have already set them up)
             ParameterVMs = new(parentLibraryVM.ParameterVMs.Where(pVM => category.Parameters.Contains(pVM.Parameter)));
             Debug.Assert(_parameterVMs is not null);
-            PartVMs = new();
+            // Link to parent library instances of PartVM (requires Library to have already set them up)
+            PartVMs = new(parentLibraryVM.PartVMs.Where(pVM => category.Parts.Contains(pVM.Part)));
             Debug.Assert(_partVMs is not null);
         }
 

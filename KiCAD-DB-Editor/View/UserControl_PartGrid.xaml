@@ -7,9 +7,10 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <DockPanel>
-        <DataGrid x:Name="dataGrid_Main" AutoGenerateColumns="False" SelectionUnit="CellOrRowHeader"
-            ItemsSource="{Binding PartVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}"
-            d:ItemsSource="{d:SampleData}" CanUserResizeRows="False"
+        <DataGrid x:Name="dataGrid_Main" AutoGenerateColumns="False" SelectionUnit="CellOrRowHeader" CanUserResizeRows="False"
+                  ItemsSource="{Binding PartVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}"
+                  d:ItemsSource="{d:SampleData}"
+                  SelectedCellsChanged="dataGrid_Main_SelectedCellsChanged"
                   >
             <DataGrid.Resources>
                 <Style TargetType="{x:Type DataGridCell}" >
@@ -43,6 +44,11 @@
                             </DataTrigger.Binding>
                             <Setter Property="IsEnabled" Value="False"/>
                             <Setter Property="Background" Value="LightGray"/>
+                        </DataTrigger>
+                        <DataTrigger Value="True" Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}">
+                            <Setter Property="Background" Value="{x:Static SystemColors.HighlightBrush}" />
+                            <Setter Property="Foreground" Value="{x:Static SystemColors.HighlightTextBrush}" />
+                            <Setter Property="BorderBrush" Value="{x:Static SystemColors.HighlightBrush}"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>

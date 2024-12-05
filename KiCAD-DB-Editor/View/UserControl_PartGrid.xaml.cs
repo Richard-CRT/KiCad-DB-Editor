@@ -29,6 +29,27 @@ namespace KiCAD_DB_Editor.View
     {
         #region Dependency Properties
 
+        public static readonly DependencyProperty SelectedPartVMsProperty = DependencyProperty.Register(
+            nameof(SelectedPartVMs),
+            typeof(PartVM[]),
+            typeof(UserControl_PartGrid),
+            new PropertyMetadata(new PropertyChangedCallback(SelectedPartVMsPropertyChangedCallback))
+            );
+
+        public PartVM[] SelectedPartVMs
+        {
+            get => (PartVM[])GetValue(SelectedPartVMsProperty);
+            set => SetValue(SelectedPartVMsProperty, value);
+        }
+
+        private static void SelectedPartVMsPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is UserControl_PartGrid uc_pg)
+            {
+                uc_pg.SelectedPartVMsPropertyChanged();
+            }
+        }
+
         public static readonly DependencyProperty ParameterVMsProperty = DependencyProperty.Register(
             nameof(ParameterVMs),
             typeof(ObservableCollectionEx<ParameterVM>),
@@ -135,6 +156,17 @@ namespace KiCAD_DB_Editor.View
                 redoColumns();
         }
 
+        bool internalSelectedPartVMsPropertyChanged = false;
+        protected void SelectedPartVMsPropertyChanged()
+        {
+            if (!internalSelectedPartVMsPropertyChanged)
+            {
+                dataGrid_Main.SelectedItems.Clear();
+                foreach (PartVM selectedPartVM in SelectedPartVMs)
+                    dataGrid_Main.SelectedItems.Add(selectedPartVM);
+            }
+        }
+
         #endregion
 
         private void redoColumns()
@@ -164,6 +196,16 @@ namespace KiCAD_DB_Editor.View
         public UserControl_PartGrid()
         {
             InitializeComponent();
+        }
+
+        private void dataGrid_Main_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
+        {
+            if (sender is DataGrid dG)
+            {
+                internalSelectedPartVMsPropertyChanged = true;
+                SelectedPartVMs = dG.SelectedCells.DistinctBy(c => c.Item).Select(c => (PartVM)c.Item).ToArray();
+                internalSelectedPartVMsPropertyChanged = false;
+            }
         }
     }
 }

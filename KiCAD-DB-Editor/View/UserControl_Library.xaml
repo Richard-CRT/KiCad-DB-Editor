@@ -34,22 +34,29 @@
                         <ListBoxItem Content="Value"/>
                     </ListBox>
                     <TextBlock DockPanel.Dock="Top" HorizontalAlignment="Center"><Run Text="Custom Parameters"/></TextBlock>
-                    <Button DockPanel.Dock="Bottom" Content="Rename" Command="{Binding LibraryVM.RenameParameterCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" Padding="3,1,3,1" />
-                    <Button DockPanel.Dock="Bottom" Content="Add" Command="{Binding LibraryVM.NewParameterCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" Padding="3,1,3,1" />
+                    <Button DockPanel.Dock="Bottom" Content="Rename" Padding="5,1,5,1"
+                            Command="{Binding LibraryVM.RenameParameterCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />
+                    <Button DockPanel.Dock="Bottom" Content="Add" Padding="5,1,5,1"
+                            Command="{Binding LibraryVM.NewParameterCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />
                     <TextBox DockPanel.Dock="Bottom" Text="{Binding LibraryVM.NewParameterName, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBlock DockPanel.Dock="Bottom" HorizontalAlignment="Center"><Run Text="Parameter"/></TextBlock>
                     <Separator DockPanel.Dock="Bottom" />
-                    <Button DockPanel.Dock="Bottom" Content="Delete Parameter" Command="{Binding LibraryVM.DeleteParameterCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" Padding="3,1,3,1" />
+                    <Button DockPanel.Dock="Bottom" Content="Delete Parameter" Padding="5,1,5,1"
+                            Command="{Binding LibraryVM.DeleteParameterCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />
                     <ListBox ItemsSource="{Binding LibraryVM.ParameterVMs, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" DisplayMemberPath="Name" MinHeight="60" SelectedItem="{Binding LibraryVM.SelectedParameterVM, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />
                 </DockPanel>
                 <GridSplitter Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="3,0,3,0" Width="3" />
                 <DockPanel Grid.Column="2">
-                    <Button DockPanel.Dock="Bottom" Content="Add Sub-Category" Command="{Binding LibraryVM.NewSubCategoryCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" CommandParameter="{Binding SelectedItem, ElementName=treeView_FoldersAndCategories, Mode=OneWay}" Padding="3,1,3,1" />
-                    <Button DockPanel.Dock="Bottom" Content="Add Top Level Category" Command="{Binding LibraryVM.NewTopLevelCategoryCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" Padding="3,1,3,1" />
+                    <Button DockPanel.Dock="Bottom" Content="Add Sub-Category" Padding="5,1,5,1" 
+                            Command="{Binding LibraryVM.NewSubCategoryCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
+                            CommandParameter="{Binding SelectedItem, ElementName=treeView_FoldersAndCategories, Mode=OneWay}" />
+                    <Button DockPanel.Dock="Bottom" Content="Add Top Level Category" Padding="5,1,5,1"
+                            Command="{Binding LibraryVM.NewTopLevelCategoryCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />
                     <TextBox DockPanel.Dock="Bottom" Text="{Binding LibraryVM.NewCategoryName, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBlock DockPanel.Dock="Bottom" HorizontalAlignment="Center"><Run Text="New Category"/></TextBlock>
                     <Separator DockPanel.Dock="Bottom" />
-                    <Button DockPanel.Dock="Bottom" Content="Delete Category" Command="{Binding LibraryVM.DeleteCategoryCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" CommandParameter="{Binding SelectedItem, ElementName=treeView_FoldersAndCategories, Mode=OneWay}" Padding="3,1,3,1" />
+                    <Button DockPanel.Dock="Bottom" Content="Delete Category" Padding="5,1,5,1"
+                            Command="{Binding LibraryVM.DeleteCategoryCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" CommandParameter="{Binding SelectedItem, ElementName=treeView_FoldersAndCategories, Mode=OneWay}" />
                     <TreeView x:Name="treeView_FoldersAndCategories"
                   ItemsSource="{Binding LibraryVM.TopLevelCategoryVMs, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
                   >

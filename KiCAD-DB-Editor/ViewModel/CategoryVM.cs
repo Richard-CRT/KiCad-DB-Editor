@@ -185,6 +185,21 @@ namespace KiCAD_DB_Editor.ViewModel
             Category.Parts = new(this.PartVMs.Select(pVM => pVM.Part));
         }
 
+        private PartVM[] _selectedPartVMs = Array.Empty<PartVM>();
+        public PartVM[] SelectedPartVMs
+        {
+            // For some reason I can't do OneWayToSource :(
+            get { return _selectedPartVMs; }
+            set
+            {
+                if (_selectedPartVMs != value)
+                {
+                    _selectedPartVMs = value;
+                    InvokePropertyChanged();
+                }
+            }
+        }
+
         #endregion Notify Properties
 
         public CategoryVM(LibraryVM parentLibraryVM, CategoryVM? parentCategoryVM, Model.Category category)
@@ -198,7 +213,8 @@ namespace KiCAD_DB_Editor.ViewModel
             // Setup commands
             AddParameterCommand = new BasicCommand(AddParameterCommandExecuted, AddParameterCommandCanExecute);
             RemoveParameterCommand = new BasicCommand(RemoveParameterCommandExecuted, RemoveParameterCommandCanExecute);
-            NewPartCommand = new BasicCommand(NewPartCommandExecuted, NewPartCommandCanExecute);
+            NewPartCommand = new BasicCommand(NewPartCommandExecuted, null);
+            DeletePartsCommand = new BasicCommand(DeletePartCommandExecuted, DeletePartsCommandCanExecute);
 
             // Initialise collection with events
             CategoryVMs = new(category.Categories.OrderBy(c => c.Name).Select(c => new CategoryVM(ParentLibraryVM, this, c)));
@@ -251,6 +267,7 @@ namespace KiCAD_DB_Editor.ViewModel
         public IBasicCommand AddParameterCommand { get; }
         public IBasicCommand RemoveParameterCommand { get; }
         public IBasicCommand NewPartCommand { get; }
+        public IBasicCommand DeletePartsCommand { get; }
 
         private bool AddParameterCommandCanExecute(object? parameter)
         {
@@ -305,18 +322,31 @@ namespace KiCAD_DB_Editor.ViewModel
             SelectedParameterVM = ParameterVMs.FirstOrDefault();
         }
 
-        private bool NewPartCommandCanExecute(object? parameter)
-        {
-            return true;
-        }
-
         private void NewPartCommandExecuted(object? parameter)
         {
             string partUID = Utilities.GeneratePartUID(ParentLibraryVM.PartUIDScheme);
-            Part p = new(partUID);
-            PartVM pVM = new(ParentLibraryVM, p);
-            PartVMs.Add(pVM);
-            ParentLibraryVM.PartVMs.Add(pVM);
+            Part part = new(partUID);
+            PartVM partVM = new(ParentLibraryVM, part);
+            foreach (ParameterVM parameterVM in ParameterVMs)
+                partVM.AddParameterVM(parameterVM);
+            PartVMs.Add(partVM);
+            ParentLibraryVM.PartVMs.Add(partVM);
+        }
+
+        private bool DeletePartsCommandCanExecute(object? parameter)
+        {
+            return SelectedPartVMs.Length > 0;
+        }
+
+        private void DeletePartCommandExecuted(object? parameter)
+        {
+            Debug.Assert(SelectedPartVMs.Length > 0);
+            List<PartVM> pVMsToBeRemoved = new(SelectedPartVMs);
+            foreach (PartVM pVMToBeRemoved in pVMsToBeRemoved)
+            {
+                PartVMs.Remove(pVMToBeRemoved);
+                ParentLibraryVM.PartVMs.Remove(pVMToBeRemoved);
+            }
         }
 
         #endregion Commands

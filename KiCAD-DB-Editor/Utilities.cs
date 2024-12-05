@@ -88,26 +88,31 @@ namespace KiCAD_DB_Editor
 
         private static Random random = new Random();
 
-        public const int PartUIDSchemeNumberOfWildcards = 10;
+        public const int PartUIDSchemeNumberOfWildcards = 11;
         public static string GeneratePartUID(string partUIDScheme)
         {
             if (partUIDScheme.Count(c => c == '#') != Utilities.PartUIDSchemeNumberOfWildcards)
                 throw new InvalidDataException("Part UID scheme does not contain the necessary wildcard characters");
 
-            // Type [49:45]
-            // Second Epoch [44:10]
+            // Seconds Epoch [54:20]
+            // Milliseconds [19:10]
             // Random [9:0]
-            const int typeShift = 45;
-            const int typeBits = 5;
-            const int secondsEpochShift = 10;
+            const int secondsEpochShift = 20;
             const int secondsEpochBits = 35;
+            const int millisecondsShift = 10;
+            const int millisecondsBits = 10;
             const int randomShift = 0;
             const int randomBits = 10;
 
-            const byte type = 0 & ((1 << typeBits) - 1);
-            UInt64 secondsSinceEpoch = (UInt64)(DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds) & (((UInt64)1 << secondsEpochBits) - 1);
+            DateTime utcNow = DateTime.UtcNow;
+            TimeSpan epoch = utcNow.Subtract(DateTime.UnixEpoch);
+
+            UInt64 secondsSinceEpoch = (UInt64)(epoch.TotalSeconds) & (((UInt64)1 << secondsEpochBits) - 1);
+            uint milliseconds = (uint)utcNow.Millisecond & ((1 << millisecondsBits) - 1);
             uint randomValue = (uint)(random.Next(1 << 10)) & ((1 << randomBits) - 1);
-            UInt64 uid = ((UInt64)type << typeShift) | (secondsSinceEpoch << secondsEpochShift) | ((UInt64)randomValue << randomShift);
+            UInt64 uid = (secondsSinceEpoch << secondsEpochShift) |
+                ((UInt64)milliseconds << millisecondsShift) |
+                ((UInt64)randomValue << randomShift);
             string base32UID = Utilities.UInt64ToBase32(uid).PadLeft(Utilities.PartUIDSchemeNumberOfWildcards, Base32EncodeBook[0]);
             char[] partUIDArray = partUIDScheme.ToCharArray();
             for (int i = 0; i < base32UID.Length; i++)

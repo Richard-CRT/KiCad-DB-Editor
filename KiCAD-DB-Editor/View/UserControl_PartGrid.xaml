@@ -9,19 +9,27 @@
     <DockPanel>
         <DataGrid x:Name="dataGrid_Main" AutoGenerateColumns="False" SelectionUnit="CellOrRowHeader"
             ItemsSource="{Binding PartVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}"
-            d:ItemsSource="{d:SampleData}"
+            d:ItemsSource="{d:SampleData}" CanUserResizeRows="False"
                   >
             <DataGrid.Resources>
                 <Style TargetType="{x:Type DataGridCell}" >
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="{x:Type DataGridCell}">
-                                <Grid Background="{TemplateBinding Background}">
-                                    <ContentPresenter VerticalAlignment="Center" Margin="0,4,0,4" />
-                                </Grid>
+                                <Border
+                                    Padding="3,3,3,3"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    Background="{TemplateBinding Background}"
+                                    SnapsToDevicePixels="True">
+                                    <ContentPresenter 
+                                        VerticalAlignment="Center"
+                                        SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                </Border>
                             </ControlTemplate>
                         </Setter.Value>
                     </Setter>
+                    <Setter Property="FontFamily" Value="Consolas" />
                     <Setter Property="IsEnabled" Value="True" />
                     <Style.Triggers>
                         <DataTrigger Value="&#x007F;">

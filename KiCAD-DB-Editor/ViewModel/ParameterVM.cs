@@ -26,9 +26,7 @@ namespace KiCAD_DB_Editor.ViewModel
             {
                 if (Parameter.Name != value)
                 {
-                    if (value.Length > 0 && value.All(c => Utilities.SafeParameterCharacters.Contains(c)))
-                    { }
-                    else
+                    if (value.Length == 0 || value.Any(c => !Utilities.SafeParameterCharacters.Contains(c)))
                         throw new Exceptions.ArgumentValidationException("Proposed name invalid");
 
                     if (ParentLibraryVM.ParameterVMs.Any(cVM => cVM.Name.ToLower() == value.ToLower()))

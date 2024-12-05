@@ -10,7 +10,7 @@ namespace KiCAD_DB_Editor.Model
 {
     public class Part
     {
-        public string PartUID { get; set; } = "";
+        public string PartUID { get; set; }
         public string Description { get; set; } = "";
         public string Manufacturer { get; set; } = "";
         public string MPN { get; set; } = "";
@@ -19,8 +19,9 @@ namespace KiCAD_DB_Editor.Model
         public bool ExcludeFromBoard { get; set; } = false;
         public Dictionary<Model.Parameter, string> ParameterValues { get; set; } = new();
 
-        public Part()
+        public Part(string partUID)
         {
+            PartUID = partUID;
         }
     }
 }

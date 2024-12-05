@@ -152,8 +152,8 @@ namespace KiCAD_DB_Editor.Model
                         throw new InvalidDataException("Could not match part category in database to library category");
                     Category partCategory = workingCategory;
 
-                    Part part = new();
-                    part.PartUID = (string)dbPart[1];
+                    string partUID = (string)dbPart[1];
+                    Part part = new(partUID);
                     part.Description = (string)dbPart[2];
                     part.Manufacturer = (string)dbPart[3];
                     part.MPN = (string)dbPart[4];
@@ -189,11 +189,15 @@ namespace KiCAD_DB_Editor.Model
 
         // ======================================================================
 
-        [JsonPropertyName("parameters"), JsonPropertyOrder(1)]
+        [JsonPropertyName("part_uid_scheme"), JsonPropertyOrder(1)]
+        public string PartUIDScheme { get; set; } = "CMP-#####-#####";
+
+        [JsonPropertyName("parameters"), JsonPropertyOrder(2)]
         public List<Model.Parameter> Parameters { get; set; } = new();
 
-        [JsonPropertyName("top_level_categories"), JsonPropertyOrder(2)]
+        [JsonPropertyName("top_level_categories"), JsonPropertyOrder(3)]
         public List<Model.Category> TopLevelCategories { get; set; } = new();
+
         [JsonIgnore]
         public List<Model.Part> Parts { get; set; } = new();
 

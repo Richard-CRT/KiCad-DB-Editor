@@ -27,6 +27,22 @@ namespace KiCAD_DB_Editor.ViewModel
 
         #region Notify Properties
 
+        public string PartUIDScheme
+        {
+            get { return Library.PartUIDScheme; }
+            set
+            {
+                if (Library.PartUIDScheme != value)
+                {
+                    if (value.Count(c => c == '#') != Utilities.PartUIDSchemeNumberOfWildcards)
+                        throw new Exceptions.ArgumentValidationException("Proposed scheme does not contain the necessary wildcard characters");
+
+                    Library.PartUIDScheme = value;
+                    InvokePropertyChanged();
+                }
+            }
+        }
+
         // Do not initialise here, do in constructor to link collection changed
         private ObservableCollectionEx<ViewModel.ParameterVM> _parameterVMs;
         public ObservableCollectionEx<ViewModel.ParameterVM> ParameterVMs

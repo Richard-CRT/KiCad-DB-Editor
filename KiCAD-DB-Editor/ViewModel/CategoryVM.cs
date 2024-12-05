@@ -36,9 +36,7 @@ namespace KiCAD_DB_Editor.ViewModel
             {
                 if (Category.Name != value)
                 {
-                    if (value.Length > 0 && value.All(c => Utilities.SafeCategoryCharacters.Contains(c)))
-                    {}
-                    else
+                    if (value.Length == 0 || value.Any(c => !Utilities.SafeCategoryCharacters.Contains(c)))
                         throw new Exceptions.ArgumentValidationException("Proposed name invalid");
 
                     ObservableCollectionEx<CategoryVM> categoryCollection;
@@ -314,7 +312,8 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private void NewPartCommandExecuted(object? parameter)
         {
-            Part p = new();
+            string partUID = Utilities.GeneratePartUID(ParentLibraryVM.PartUIDScheme);
+            Part p = new(partUID);
             PartVM pVM = new(ParentLibraryVM, p);
             PartVMs.Add(pVM);
             ParentLibraryVM.PartVMs.Add(pVM);

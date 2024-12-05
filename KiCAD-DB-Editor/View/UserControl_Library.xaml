@@ -79,5 +79,11 @@
                     PartVMs="{Binding LibraryVM.PartVMs, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}" />
             </Grid>
         </TabItem>
+        <TabItem Header="Settings">
+            <StackPanel Orientation="Vertical">
+                <TextBlock>Part UID Scheme</TextBlock>
+                <TextBox Text="{Binding LibraryVM.PartUIDScheme, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" />
+            </StackPanel>
+        </TabItem>
     </TabControl>
 </UserControl>

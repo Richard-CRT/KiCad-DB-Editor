@@ -19,7 +19,7 @@
                         <Setter.Value>
                             <ControlTemplate TargetType="{x:Type DataGridCell}">
                                 <Border
-                                    Padding="3,3,3,3"
+                                    Padding="3,2,3,2"
                                     BorderBrush="{TemplateBinding BorderBrush}"
                                     BorderThickness="{TemplateBinding BorderThickness}"
                                     Background="{TemplateBinding Background}"
@@ -73,8 +73,32 @@
                 <DataGridTextColumn Header="Manufacturer" Binding="{Binding Manufacturer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
                 <DataGridTextColumn Header="MPN" Binding="{Binding MPN, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
                 <DataGridTextColumn Header="Value" Binding="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
-                <DataGridCheckBoxColumn Header="Exclude BOM" Binding="{Binding ExcludeFromBOM, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
-                <DataGridCheckBoxColumn Header="Exclude Board" Binding="{Binding ExcludeFromBoard, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
+                <DataGridCheckBoxColumn Header="Excl. BOM" Binding="{Binding ExcludeFromBOM, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <DataGridCheckBoxColumn.ElementStyle>
+                        <Style TargetType="{x:Type CheckBox}">
+                            <Setter Property="Padding" Value="0,0,0,0" />
+                            <Setter Property="HorizontalAlignment" Value="Center" />
+                            <Setter Property="LayoutTransform">
+                                <Setter.Value>
+                                    <ScaleTransform ScaleX="1.2" ScaleY="1.2" />
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </DataGridCheckBoxColumn.ElementStyle>
+                </DataGridCheckBoxColumn>
+                <DataGridCheckBoxColumn Header="Excl. Board" Binding="{Binding ExcludeFromBoard, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <DataGridCheckBoxColumn.ElementStyle>
+                        <Style TargetType="{x:Type CheckBox}">
+                            <Setter Property="Padding" Value="0,0,0,0" />
+                            <Setter Property="HorizontalAlignment" Value="Center" />
+                            <Setter Property="LayoutTransform">
+                                <Setter.Value>
+                                    <ScaleTransform ScaleX="1.2" ScaleY="1.2" />
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </DataGridCheckBoxColumn.ElementStyle>
+                </DataGridCheckBoxColumn>
             </DataGrid.Columns>
         </DataGrid>
     </DockPanel>

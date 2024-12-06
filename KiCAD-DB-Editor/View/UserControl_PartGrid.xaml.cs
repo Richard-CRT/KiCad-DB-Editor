@@ -181,8 +181,11 @@ namespace KiCAD_DB_Editor.View
                 {
                     dataGridTextColumn = new();
                     dataGridTextColumn.Header = parameterVM.Name.Replace("_", "__"); ;
-                    dataGridTextColumn.Binding = new Binding($"[{parameterVM.Name}]");
-                    dataGridTextColumn.Binding.TargetNullValue = "\x7F";
+                    Binding binding = new($"[{parameterVM.Name}]");
+                    binding.Mode = BindingMode.TwoWay;
+                    binding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+                    binding.TargetNullValue = "\x7F";
+                    dataGridTextColumn.Binding = binding;
                     dataGrid_Main.Columns.Add(dataGridTextColumn);
                 }
             }
@@ -205,6 +208,91 @@ namespace KiCAD_DB_Editor.View
                 internalSelectedPartVMsPropertyChanged = true;
                 SelectedPartVMs = dG.SelectedCells.DistinctBy(c => c.Item).Select(c => (PartVM)c.Item).ToArray();
                 internalSelectedPartVMsPropertyChanged = false;
+            }
+        }
+
+        private void dataGrid_Main_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.V && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                if (Clipboard.ContainsText())
+                {
+                    string clipboardText = Clipboard.GetText(TextDataFormat.Text);
+                    string[] lines = clipboardText.Split(Environment.NewLine);
+
+                    // This behaviour is quite hard to reverse engineer
+                    // Excel seems to ignore the last line if it's empty when coming from C# DataGrid
+                    // Coming from DB Browser it doesn't, so it does something different there, but not sure what
+                    if (lines.Length > 1 && lines.Last() == "")
+                        lines = lines[..^1];
+
+                    bool allLinesSameColumnCount = true;
+                    int columnCount = -1;
+                    List<string[]> sourceData = new();
+                    foreach (string line in lines)
+                    {
+                        string[] lineValues = line.Split('\t');
+                        if (columnCount == -1)
+                            columnCount = lineValues.Length;
+                        if (lineValues.Length != columnCount)
+                        {
+                            allLinesSameColumnCount = false;
+                            break;
+                        }
+                        sourceData.Add(lineValues);
+                    }
+                    if (allLinesSameColumnCount)
+                    {
+                        // Check selection is continuous rectangle and matches clipboard rectangle
+                        int sourceWidth = sourceData[0].Length;
+                        int sourceHeight = sourceData.Count;
+
+                        HashSet<(int, int)> selectedCellCoords = new();
+                        var selectedCells = dataGrid_Main.SelectedCells;
+                        foreach (var selectedCell in selectedCells)
+                        {
+                            DataGridColumn column = selectedCell.Column;
+                            int columnIndex = column.DisplayIndex;
+                            DataGridRow row = DataGridRow.GetRowContainingElement(column.GetCellContent(selectedCell.Item));
+                            int rowIndex = row.GetIndex();
+                            selectedCellCoords.Add((columnIndex, rowIndex));
+                        }
+                        int minX = selectedCellCoords.MinBy(c => c.Item1).Item1;
+                        int minY = selectedCellCoords.MinBy(c => c.Item2).Item2;
+                        int maxX = selectedCellCoords.MaxBy(c => c.Item1).Item1;
+                        int maxY = selectedCellCoords.MaxBy(c => c.Item2).Item2;
+                        int destWidth = maxX - minX + 1;
+                        int destHeight = maxY - minY + 1;
+                        if (sourceWidth == destWidth && sourceHeight == destHeight)
+                        {
+                            int area = destWidth * destHeight;
+                            if (area == selectedCellCoords.Count)
+                            {
+                                for (int srcY = 0; srcY < sourceHeight; srcY++)
+                                {
+                                    for (int srcX = 0; srcX < sourceWidth; srcX++)
+                                    {
+                                        int destX = minX + srcX;
+                                        int destY = minY + srcY;
+                                        DataGridColumn column = dataGrid_Main.Columns[destX];
+                                        object item = dataGrid_Main.Items[destY];
+                                        FrameworkElement frameworkElement = column.GetCellContent(item);
+                                        // Updating the data via the frameworkElement requires Mode=TwoWay && UpdateSourceTrigger=PropertyChanged
+                                        if (frameworkElement is TextBlock textBlock)
+                                        {
+                                            textBlock.Text = sourceData[srcY][srcX];
+                                        }
+                                        else if (frameworkElement is CheckBox checkBox)
+                                        {
+                                            string s = sourceData[srcY][srcX];
+                                            checkBox.IsChecked = s.ToLower() == "true" || s == "1";
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

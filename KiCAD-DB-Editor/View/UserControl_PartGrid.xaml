@@ -8,9 +8,10 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <DockPanel>
         <DataGrid x:Name="dataGrid_Main" AutoGenerateColumns="False" SelectionUnit="CellOrRowHeader" CanUserResizeRows="False"
-                  ItemsSource="{Binding PartVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}"
+                  ItemsSource="{Binding PartVMs, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}, UpdateSourceTrigger=PropertyChanged}"
                   d:ItemsSource="{d:SampleData}"
                   SelectedCellsChanged="dataGrid_Main_SelectedCellsChanged"
+                  KeyDown="dataGrid_Main_KeyDown"
                   >
             <DataGrid.Resources>
                 <Style TargetType="{x:Type DataGridCell}" >
@@ -36,16 +37,22 @@
                         <DataTrigger Value="&#x007F;">
                             <DataTrigger.Binding>
                                 <PriorityBinding>
-                                    <!--Binding="{Binding Content.Text, RelativeSource={RelativeSource Self}}" Value="&#x007F;"-->
                                     <Binding Path="Content.Text" RelativeSource="{RelativeSource Self}" />
-                                    <Binding Source="" />
                                     <!-- This is to prevent errors with the checkboxes etc that don't have .Text -->
+                                    <Binding Source="" />
                                 </PriorityBinding>
                             </DataTrigger.Binding>
                             <Setter Property="IsEnabled" Value="False"/>
                             <Setter Property="Background" Value="LightGray"/>
                         </DataTrigger>
-                        <DataTrigger Value="True" Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}">
+                        <!-- For row selection to make it blue regardless of focus -->
+                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="True">
+                            <Setter Property="Background" Value="{x:Static SystemColors.HighlightBrush}" />
+                            <Setter Property="Foreground" Value="{x:Static SystemColors.HighlightTextBrush}" />
+                            <Setter Property="BorderBrush" Value="{x:Static SystemColors.HighlightBrush}"/>
+                        </DataTrigger>
+                        <!-- For cell selection to make it blue regardless of focus -->
+                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource Self}}" Value="True">
                             <Setter Property="Background" Value="{x:Static SystemColors.HighlightBrush}" />
                             <Setter Property="Foreground" Value="{x:Static SystemColors.HighlightTextBrush}" />
                             <Setter Property="BorderBrush" Value="{x:Static SystemColors.HighlightBrush}"/>
@@ -61,13 +68,13 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="Part UID" Binding="{Binding PartUID}"  />
-                <DataGridTextColumn Header="Description" Binding="{Binding Description}"  />
-                <DataGridTextColumn Header="Manufacturer" Binding="{Binding Manufacturer}"  />
-                <DataGridTextColumn Header="MPN" Binding="{Binding MPN}"  />
-                <DataGridTextColumn Header="Value" Binding="{Binding Value}"  />
-                <DataGridCheckBoxColumn Header="Exclude BOM" Binding="{Binding ExcludeFromBOM}"  />
-                <DataGridCheckBoxColumn Header="Exclude Board" Binding="{Binding ExcludeFromBoard}"  />
+                <DataGridTextColumn Header="Part UID" Binding="{Binding PartUID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
+                <DataGridTextColumn Header="Description" Binding="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
+                <DataGridTextColumn Header="Manufacturer" Binding="{Binding Manufacturer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
+                <DataGridTextColumn Header="MPN" Binding="{Binding MPN, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
+                <DataGridTextColumn Header="Value" Binding="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
+                <DataGridCheckBoxColumn Header="Exclude BOM" Binding="{Binding ExcludeFromBOM, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
+                <DataGridCheckBoxColumn Header="Exclude Board" Binding="{Binding ExcludeFromBoard, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
             </DataGrid.Columns>
         </DataGrid>
     </DockPanel>

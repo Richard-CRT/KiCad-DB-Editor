@@ -25,7 +25,7 @@
                     <ColumnDefinition Width="10*" MinWidth="500"/>
                 </Grid.ColumnDefinitions>
                 <DockPanel>
-                    <TextBlock DockPanel.Dock="Top" HorizontalAlignment="Center"><Run Text="Special Parameters"/></TextBlock>
+                    <TextBlock DockPanel.Dock="Top" HorizontalAlignment="Center">Special Parameters</TextBlock>
                     <ListBox DockPanel.Dock="Top" >
                         <ListBoxItem Content="Part UID"/>
                         <ListBoxItem Content="Description"/>
@@ -33,13 +33,13 @@
                         <ListBoxItem Content="MPN"/>
                         <ListBoxItem Content="Value"/>
                     </ListBox>
-                    <TextBlock DockPanel.Dock="Top" HorizontalAlignment="Center"><Run Text="Custom Parameters"/></TextBlock>
+                    <TextBlock DockPanel.Dock="Top" HorizontalAlignment="Center">Custom Parameters</TextBlock>
                     <Button DockPanel.Dock="Bottom" Content="Rename" Padding="5,1,5,1"
                             Command="{Binding LibraryVM.RenameParameterCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />
                     <Button DockPanel.Dock="Bottom" Content="Add" Padding="5,1,5,1"
                             Command="{Binding LibraryVM.NewParameterCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />
                     <TextBox DockPanel.Dock="Bottom" Text="{Binding LibraryVM.NewParameterName, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock DockPanel.Dock="Bottom" HorizontalAlignment="Center"><Run Text="Parameter"/></TextBlock>
+                    <TextBlock DockPanel.Dock="Bottom" HorizontalAlignment="Center">Parameter</TextBlock>
                     <Separator DockPanel.Dock="Bottom" />
                     <Button DockPanel.Dock="Bottom" Content="Delete Parameter" Padding="5,1,5,1"
                             Command="{Binding LibraryVM.DeleteParameterCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />
@@ -53,7 +53,7 @@
                     <Button DockPanel.Dock="Bottom" Content="Add Top Level Category" Padding="5,1,5,1"
                             Command="{Binding LibraryVM.NewTopLevelCategoryCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />
                     <TextBox DockPanel.Dock="Bottom" Text="{Binding LibraryVM.NewCategoryName, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock DockPanel.Dock="Bottom" HorizontalAlignment="Center"><Run Text="New Category"/></TextBlock>
+                    <TextBlock DockPanel.Dock="Bottom" HorizontalAlignment="Center">New Category</TextBlock>
                     <Separator DockPanel.Dock="Bottom" />
                     <Button DockPanel.Dock="Bottom" Content="Delete Category" Padding="5,1,5,1"
                             Command="{Binding LibraryVM.DeleteCategoryCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" CommandParameter="{Binding SelectedItem, ElementName=treeView_FoldersAndCategories, Mode=OneWay}" />
@@ -105,6 +105,8 @@
                         </GridView>
                     </ListView.View>
                 </ListView>
+                <TextBlock>KiCAD Schematic Libraries</TextBlock>
+                <TextBox Text="{Binding LibraryVM.NewParameterName, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
         </TabItem>
     </TabControl>

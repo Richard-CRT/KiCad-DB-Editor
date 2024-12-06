@@ -370,7 +370,12 @@ namespace KiCAD_DB_Editor.View
                         object item = dataGrid_Main.Items[rowIndex];
                         FrameworkElement frameworkElement = column.GetCellContent(item);
                         if (frameworkElement is TextBlock textBlock)
-                            selectedCellCoords[coord] = textBlock.Text;
+                        {
+                            if (textBlock.Text == "\x7F")
+                                selectedCellCoords[coord] = "";
+                            else
+                                selectedCellCoords[coord] = textBlock.Text;
+                        }
                         else if (frameworkElement is CheckBox checkBox)
                         {
                             if (checkBox.IsChecked is null)

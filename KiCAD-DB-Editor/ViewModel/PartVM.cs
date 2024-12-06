@@ -127,8 +127,6 @@ namespace KiCAD_DB_Editor.ViewModel
                         }
                     }
                 }
-                else
-                    throw new NotSupportedException();
             }
         }
 

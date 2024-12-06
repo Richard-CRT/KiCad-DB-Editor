@@ -78,6 +78,15 @@ namespace KiCAD_DB_Editor.ViewModel
             }
         }
 
+        public string[] foos
+        {
+            get { return new string[] { "WWWWWWWWWWWWWWWWWWWWW", "bbbb", "cccc" }; }
+            set
+            {
+
+            }
+        }
+
         #endregion Notify Properties
 
         public string? this[string parameterVMName]

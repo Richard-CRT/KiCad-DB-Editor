@@ -19,7 +19,7 @@
                         <Setter.Value>
                             <ControlTemplate TargetType="{x:Type DataGridCell}">
                                 <Border
-                                    Padding="3,2,3,2"
+                                    Padding="3,0,3,0"
                                     BorderBrush="{TemplateBinding BorderBrush}"
                                     BorderThickness="{TemplateBinding BorderThickness}"
                                     Background="{TemplateBinding Background}"
@@ -64,7 +64,7 @@
                 <DataGridTemplateColumn Width="SizeToCells" IsReadOnly="True">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Image Source="/View/Resources/Component.png" Height="18" />
+                            <Image Source="/View/Resources/Component.png" Height="18" Margin="0,3,0,3" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
@@ -73,8 +73,36 @@
                 <DataGridTextColumn Header="Manufacturer" Binding="{Binding Manufacturer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
                 <DataGridTextColumn Header="MPN" Binding="{Binding MPN, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
                 <DataGridTextColumn Header="Value" Binding="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
-                <DataGridTextColumn Header="Sch. Library" Binding="{Binding SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
-                <DataGridTextColumn Header="Sch. Name" Binding="{Binding SymbolName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
+                <!--<DataGridTextColumn Header="Sch. Library" Binding="{Binding SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />-->
+                <DataGridTemplateColumn Header="Sym. Library">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding SymbolLibraryName, Mode=OneWay}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                        <ComboBox IsEditable="True" 
+                                  Text="{Binding SymbolLibraryName, Mode=TwoWay}" 
+                                  ItemsSource="{Binding foos}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+                <!--<DataGridTextColumn Header="Sch. Name" Binding="{Binding SymbolName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />-->
+                <DataGridTemplateColumn Header="Sym. Name">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding SymbolName, Mode=OneWay}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <ComboBox IsEditable="True" 
+                  Text="{Binding SymbolName, Mode=TwoWay}" 
+                  ItemsSource="{Binding foos}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
                 <DataGridCheckBoxColumn Header="Excl. BOM" Binding="{Binding ExcludeFromBOM, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                     <DataGridCheckBoxColumn.ElementStyle>
                         <Style TargetType="{x:Type CheckBox}">

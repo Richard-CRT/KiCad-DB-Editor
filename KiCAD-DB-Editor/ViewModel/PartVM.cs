@@ -80,7 +80,7 @@ namespace KiCAD_DB_Editor.ViewModel
 
         public string[] foos
         {
-            get { return new string[] { "WWWWWWWWWWWWWWWWWWWWW", "bbbb", "cccc" }; }
+            get { return new string[] { "aaaa", "bbbb", "cccc" }; }
             set
             {
 

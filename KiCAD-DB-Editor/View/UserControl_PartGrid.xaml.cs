@@ -217,7 +217,7 @@ namespace KiCAD_DB_Editor.View
 
         private void dataGrid_Main_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.V && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            if (e.Key == Key.V && Keyboard.Modifiers == ModifierKeys.Control)
             {
                 if (Clipboard.ContainsText())
                 {
@@ -300,6 +300,40 @@ namespace KiCAD_DB_Editor.View
                     }
                 }
             }
+        }
+
+        private void dataGrid_Main_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Delete && Keyboard.Modifiers == ModifierKeys.None && !editing)
+            {
+                var selectedCells = dataGrid_Main.SelectedCells;
+                foreach (var selectedCell in selectedCells)
+                {
+                    DataGridColumn column = selectedCell.Column;
+                    FrameworkElement frameworkElement = column.GetCellContent(selectedCell.Item);
+                    if (frameworkElement is TextBlock textBlock)
+                    {
+                        textBlock.Text = "";
+                        e.Handled = true;
+                    }
+                }
+            }
+        }
+
+        private bool editing = false;
+        private void dataGrid_Main_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
+        {
+            editing = true;
+        }
+
+        private void dataGrid_Main_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        {
+            editing = false;
+        }
+
+        private void dataGrid_Main_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
+        {
+            editing = false;
         }
     }
 }

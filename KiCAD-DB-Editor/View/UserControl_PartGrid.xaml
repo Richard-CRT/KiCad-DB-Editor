@@ -12,6 +12,9 @@
                   d:ItemsSource="{d:SampleData}"
                   SelectedCellsChanged="dataGrid_Main_SelectedCellsChanged"
                   KeyDown="dataGrid_Main_KeyDown"
+                  PreviewKeyDown="dataGrid_Main_PreviewKeyDown"
+                  BeginningEdit="dataGrid_Main_BeginningEdit"
+                  CellEditEnding="dataGrid_Main_CellEditEnding"
                   >
             <DataGrid.Resources>
                 <Style TargetType="{x:Type DataGridCell}" >

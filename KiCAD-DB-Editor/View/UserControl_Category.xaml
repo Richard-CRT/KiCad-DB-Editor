@@ -14,8 +14,9 @@
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
         <DockPanel>
-            <TextBlock DockPanel.Dock="Top">Component Category</TextBlock>
+            <TextBlock DockPanel.Dock="Top">Part Category</TextBlock>
             <TextBox DockPanel.Dock="Top" Text="{Binding CategoryVM.Name, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" />
+            <Separator DockPanel.Dock="Top" Margin="0,10,0,10" />
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="1*"/>

@@ -16,6 +16,7 @@ namespace KiCAD_DB_Editor.ViewModel
     public class KiCADSymbolLibraryVM : NotifyObject
     {
         public readonly Model.KiCADSymbolLibrary KiCADSymbolLibrary;
+        public readonly LibraryVM ParentLibraryVM;
 
         #region Notify Properties
 
@@ -26,6 +27,12 @@ namespace KiCAD_DB_Editor.ViewModel
             {
                 if (KiCADSymbolLibrary.Nickname != value)
                 {
+                    if (value.Length == 0)
+                        throw new Exceptions.ArgumentValidationException("Proposed name invalid");
+
+                    if (ParentLibraryVM.KiCADSymbolLibraryVMs.Any(p => p.Nickname.ToLower() == value.ToLower()))
+                        throw new Exceptions.ArgumentValidationException("Parent already contains KiCAD symbol library with proposed name");
+
                     KiCADSymbolLibrary.Nickname = value;
                     InvokePropertyChanged();
                 }
@@ -39,6 +46,12 @@ namespace KiCAD_DB_Editor.ViewModel
             {
                 if (KiCADSymbolLibrary.RelativePath != value)
                 {
+                    if (value.Length == 0)
+                        throw new Exceptions.ArgumentValidationException("Proposed name invalid");
+
+                    if (ParentLibraryVM.KiCADSymbolLibraryVMs.Any(p => p.RelativePath.ToLower() == value.ToLower()))
+                        throw new Exceptions.ArgumentValidationException("Parent already contains KiCAD symbol library with proposed relative path");
+
                     KiCADSymbolLibrary.RelativePath = value;
                     InvokePropertyChanged();
                 }
@@ -62,8 +75,10 @@ namespace KiCAD_DB_Editor.ViewModel
 
         #endregion Notify Properties
 
-        public KiCADSymbolLibraryVM(KiCADSymbolLibrary kiCADSymbolLibrary)
+        public KiCADSymbolLibraryVM(LibraryVM parentLibraryVM, KiCADSymbolLibrary kiCADSymbolLibrary)
         {
+            ParentLibraryVM = parentLibraryVM;
+
             // Link model
             KiCADSymbolLibrary = kiCADSymbolLibrary;
 

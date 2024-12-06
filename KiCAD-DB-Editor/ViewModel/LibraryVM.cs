@@ -193,6 +193,54 @@ namespace KiCAD_DB_Editor.ViewModel
             Library.KiCADSymbolLibraries = new(this.KiCADSymbolLibraryVMs.Select(kSLVM => kSLVM.KiCADSymbolLibrary));
         }
 
+        private string _newKiCADSymbolLibraryName = "";
+        public string NewKiCADSymbolLibraryName
+        {
+            get { return _newKiCADSymbolLibraryName; }
+            set
+            {
+                if (_newKiCADSymbolLibraryName != value)
+                {
+                    _newKiCADSymbolLibraryName = value;
+                    InvokePropertyChanged();
+                }
+            }
+        }
+
+        private string _newKiCADSymbolLibraryRelativePath = "";
+        public string NewKiCADSymbolLibraryRelativePath
+        {
+            get { return _newKiCADSymbolLibraryRelativePath; }
+            set
+            {
+                if (_newKiCADSymbolLibraryRelativePath != value)
+                {
+                    _newKiCADSymbolLibraryRelativePath = value;
+                    InvokePropertyChanged();
+                }
+            }
+        }
+
+        private KiCADSymbolLibraryVM? _selectedKiCADSymbolLibraryVM = null;
+        public KiCADSymbolLibraryVM? SelectedKiCADSymbolLibraryVM
+        {
+            get { return _selectedKiCADSymbolLibraryVM; }
+            set
+            {
+                if (_selectedKiCADSymbolLibraryVM != value)
+                {
+                    _selectedKiCADSymbolLibraryVM = value;
+                    InvokePropertyChanged();
+
+                    if (SelectedKiCADSymbolLibraryVM is not null)
+                    {
+                        NewKiCADSymbolLibraryName = SelectedKiCADSymbolLibraryVM.Nickname;
+                        NewKiCADSymbolLibraryRelativePath = SelectedKiCADSymbolLibraryVM.RelativePath;
+                    }
+                }
+            }
+        }
+
         #endregion Notify Properties
 
         public LibraryVM(Model.Library library)
@@ -207,6 +255,9 @@ namespace KiCAD_DB_Editor.ViewModel
             NewParameterCommand = new BasicCommand(NewParameterCommandExecuted, NewParameterCommandCanExecute);
             RenameParameterCommand = new BasicCommand(RenameParameterCommandExecuted, RenameParameterCommandCanExecute);
             DeleteParameterCommand = new BasicCommand(DeleteParameterCommandExecuted, DeleteParameterCommandCanExecute);
+            NewKiCADSymbolLibraryCommand = new BasicCommand(NewKiCADSymbolLibraryCommandExecuted, NewKiCADSymbolLibraryCommandCanExecute);
+            UpdateKiCADSymbolLibraryCommand = new BasicCommand(UpdateKiCADSymbolLibraryCommandExecuted, UpdateKiCADSymbolLibraryCommandCanExecute);
+            DeleteKiCADSymbolLibraryCommand = new BasicCommand(DeleteKiCADSymbolLibraryCommandExecuted, DeleteKiCADSymbolLibraryCommandCanExecute);
 
             // Initialise collection with events
             // Must do PartVMs first as CategoryVMs will use it
@@ -217,7 +268,7 @@ namespace KiCAD_DB_Editor.ViewModel
             Debug.Assert(_parameterVMs is not null);
             TopLevelCategoryVMs = new(library.TopLevelCategories.OrderBy(c => c.Name).Select(c => new CategoryVM(this, null, c)));
             Debug.Assert(_topLevelCategoryVMs is not null);
-            KiCADSymbolLibraryVMs = new(library.KiCADSymbolLibraries.Select(kSL => new KiCADSymbolLibraryVM(kSL)));
+            KiCADSymbolLibraryVMs = new(library.KiCADSymbolLibraries.Select(kSL => new KiCADSymbolLibraryVM(this, kSL)));
             Debug.Assert(_kiCADSymbolLibraryVMs is not null);
         }
 
@@ -252,6 +303,9 @@ namespace KiCAD_DB_Editor.ViewModel
         public IBasicCommand NewParameterCommand { get; }
         public IBasicCommand RenameParameterCommand { get; }
         public IBasicCommand DeleteParameterCommand { get; }
+        public IBasicCommand NewKiCADSymbolLibraryCommand { get; }
+        public IBasicCommand UpdateKiCADSymbolLibraryCommand { get; }
+        public IBasicCommand DeleteKiCADSymbolLibraryCommand { get; }
 
         private bool NewTopLevelCategoryCommandCanExecute(object? parameter)
         {
@@ -330,6 +384,56 @@ namespace KiCAD_DB_Editor.ViewModel
             ParameterVMs.Remove(SelectedParameterVM);
 
             SelectedParameterVM = ParameterVMs.FirstOrDefault();
+        }
+
+        private bool NewKiCADSymbolLibraryCommandCanExecute(object? parameter)
+        {
+            if (this.NewKiCADSymbolLibraryName.Length > 0 && this.NewKiCADSymbolLibraryRelativePath.Length > 0)
+                return !(KiCADSymbolLibraryVMs.Any(p => p.Nickname.ToLower() == this.NewKiCADSymbolLibraryName.ToLower()) ||
+                         KiCADSymbolLibraryVMs.Any(p => p.RelativePath.ToLower() == this.NewKiCADSymbolLibraryRelativePath.ToLower()));
+            else
+                return false;
+        }
+
+        private void NewKiCADSymbolLibraryCommandExecuted(object? parameter)
+        {
+            KiCADSymbolLibraryVMs.Add(new(this, new(this.NewKiCADSymbolLibraryName, this.NewKiCADSymbolLibraryRelativePath)));
+            this.NewKiCADSymbolLibraryName = "";
+            this.NewKiCADSymbolLibraryRelativePath = "";
+        }
+
+        private bool UpdateKiCADSymbolLibraryCommandCanExecute(object? parameter)
+        {
+            if (SelectedKiCADSymbolLibraryVM is not null && this.NewKiCADSymbolLibraryName.Length > 0 && this.NewKiCADSymbolLibraryRelativePath.Length > 0)
+            {
+                var kiCADSymbolLibraryVMsWithSameName = KiCADSymbolLibraryVMs.Where(p => p.Nickname.ToLower() == this.NewKiCADSymbolLibraryName.ToLower()).ToArray();
+                var kiCADSymbolLibraryVMsWithSameRelativePath = KiCADSymbolLibraryVMs.Where(p => p.RelativePath.ToLower() == this.NewKiCADSymbolLibraryRelativePath.ToLower()).ToArray();
+                return (kiCADSymbolLibraryVMsWithSameName.Length == 0 && kiCADSymbolLibraryVMsWithSameRelativePath.Length == 0) ||
+                       (kiCADSymbolLibraryVMsWithSameName.Length == 1 && kiCADSymbolLibraryVMsWithSameName[0] == SelectedKiCADSymbolLibraryVM && kiCADSymbolLibraryVMsWithSameRelativePath.Length == 0) ||
+                       (kiCADSymbolLibraryVMsWithSameName.Length == 0 && kiCADSymbolLibraryVMsWithSameRelativePath.Length == 1 && kiCADSymbolLibraryVMsWithSameRelativePath[0] == SelectedKiCADSymbolLibraryVM);
+            }
+            else
+                return false;
+        }
+
+        private void UpdateKiCADSymbolLibraryCommandExecuted(object? parameter)
+        {
+            Debug.Assert(SelectedKiCADSymbolLibraryVM is not null);
+            SelectedKiCADSymbolLibraryVM.Nickname = this.NewKiCADSymbolLibraryName;
+            SelectedKiCADSymbolLibraryVM.RelativePath = this.NewKiCADSymbolLibraryRelativePath;
+        }
+
+        private bool DeleteKiCADSymbolLibraryCommandCanExecute(object? parameter)
+        {
+            return SelectedKiCADSymbolLibraryVM is not null;
+        }
+
+        private void DeleteKiCADSymbolLibraryCommandExecuted(object? parameter)
+        {
+            Debug.Assert(SelectedKiCADSymbolLibraryVM is not null);
+            KiCADSymbolLibraryVMs.Remove(SelectedKiCADSymbolLibraryVM);
+
+            SelectedKiCADSymbolLibraryVM = KiCADSymbolLibraryVMs.FirstOrDefault();
         }
 
         #endregion Commands

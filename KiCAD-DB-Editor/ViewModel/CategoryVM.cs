@@ -183,6 +183,9 @@ namespace KiCAD_DB_Editor.ViewModel
         private void _partVMs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             Category.Parts = new(this.PartVMs.Select(pVM => pVM.Part));
+
+            foreach(PartVM pVM in this.PartVMs)
+                pVM.ParentCategoryVM = this;
         }
 
         private PartVM[] _selectedPartVMs = Array.Empty<PartVM>();

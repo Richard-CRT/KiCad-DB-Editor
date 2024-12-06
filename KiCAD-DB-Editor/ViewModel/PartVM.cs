@@ -77,12 +77,6 @@ namespace KiCAD_DB_Editor.ViewModel
             set { if (Part.SymbolName != value) { Part.SymbolName = value; InvokePropertyChanged(); } }
         }
 
-        public KiCADSymbolLibraryVM? SelectedKiCADSymbolLibraryVM
-        {
-            // Have to do ! as FirstOrDefault needs to think kSLVM could be null in order for me to return null
-            get { return ParentLibraryVM.KiCADSymbolLibraryVMs.FirstOrDefault(kSLVM => kSLVM!.Nickname == SymbolLibraryName, null); }
-        }
-
         public ParameterVM[] ParameterVMs
         {
             get
@@ -90,6 +84,21 @@ namespace KiCAD_DB_Editor.ViewModel
                 var keys = Part.ParameterValues.Keys;
                 return ParentLibraryVM.ParameterVMs.Where(pVM => keys.Contains(pVM.Parameter)).ToArray();
             }
+        }
+
+        // Included so the KiCAD symbol name drop down has a source
+        public KiCADSymbolLibraryVM? SelectedKiCADSymbolLibraryVM
+        {
+            // Have to do ! as FirstOrDefault needs to think kSLVM could be null in order for me to return null
+            get { return ParentLibraryVM.KiCADSymbolLibraryVMs.FirstOrDefault(kSLVM => kSLVM!.Nickname == SymbolLibraryName, null); }
+        }
+
+        // Included so I can get a category string for the all parts grid
+        private CategoryVM? _parentCategoryVM;
+        public CategoryVM? ParentCategoryVM
+        {
+            get { return _parentCategoryVM; }
+            set { if (_parentCategoryVM != value) { _parentCategoryVM = value; InvokePropertyChanged(); } }
         }
 
         #endregion Notify Properties

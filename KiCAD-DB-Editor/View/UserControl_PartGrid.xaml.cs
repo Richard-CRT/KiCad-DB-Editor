@@ -281,11 +281,13 @@ namespace KiCAD_DB_Editor.View
                                         if (frameworkElement is TextBlock textBlock)
                                         {
                                             textBlock.Text = sourceData[srcY][srcX];
+                                            e.Handled = true;
                                         }
                                         else if (frameworkElement is CheckBox checkBox)
                                         {
                                             string s = sourceData[srcY][srcX];
                                             checkBox.IsChecked = s.ToLower() == "true" || s == "1";
+                                            e.Handled = true;
                                         }
                                     }
                                 }

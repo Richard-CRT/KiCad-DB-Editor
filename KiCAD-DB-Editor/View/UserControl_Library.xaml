@@ -82,14 +82,29 @@
         <TabItem Header="Parts">
             <Grid>
                 <View:UserControl_PartGrid Grid.Row="2"
-                    ParameterVMs="{Binding LibraryVM.ParameterVMs, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"           
-                    PartVMs="{Binding LibraryVM.PartVMs, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}" />
+                                           KiCADSymbolLibraryVMs="{Binding LibraryVM.KiCADSymbolLibraryVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"
+                                           ParameterVMs="{Binding LibraryVM.ParameterVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"           
+                                           PartVMs="{Binding LibraryVM.PartVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}" />
             </Grid>
         </TabItem>
         <TabItem Header="Settings">
             <StackPanel Orientation="Vertical">
                 <TextBlock>Part UID Scheme</TextBlock>
                 <TextBox Text="{Binding LibraryVM.PartUIDScheme, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" />
+                <TextBlock>KiCAD Schematic Libraries</TextBlock>
+                <!--<ListBox ItemsSource="{Binding LibraryVM.KiCADSymbolLibraryVMs, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" DisplayMemberPath="RelativePath" Height="150" />-->
+                <ListView Height="150"
+                          ItemsSource="{Binding LibraryVM.KiCADSymbolLibraryVMs, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
+                          >
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Name"
+                            DisplayMemberBinding="{Binding Nickname}"/>
+                            <GridViewColumn Header="Path"
+                            DisplayMemberBinding="{Binding RelativePath}"/>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
             </StackPanel>
         </TabItem>
     </TabControl>

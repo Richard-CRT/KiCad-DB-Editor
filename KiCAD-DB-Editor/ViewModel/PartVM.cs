@@ -61,12 +61,26 @@ namespace KiCAD_DB_Editor.ViewModel
         public string SymbolLibraryName
         {
             get { return Part.SymbolLibraryName; }
-            set { if (Part.SymbolLibraryName != value) { Part.SymbolLibraryName = value; InvokePropertyChanged(); } }
+            set
+            {
+                if (Part.SymbolLibraryName != value)
+                {
+                    Part.SymbolLibraryName = value;
+                    InvokePropertyChanged();
+                    InvokePropertyChanged(nameof(this.SelectedKiCADSymbolLibraryVM));
+                }
+            }
         }
         public string SymbolName
         {
             get { return Part.SymbolName; }
             set { if (Part.SymbolName != value) { Part.SymbolName = value; InvokePropertyChanged(); } }
+        }
+
+        public KiCADSymbolLibraryVM? SelectedKiCADSymbolLibraryVM
+        {
+            // Have to do ! as FirstOrDefault needs to think kSLVM could be null in order for me to return null
+            get { return ParentLibraryVM.KiCADSymbolLibraryVMs.FirstOrDefault(kSLVM => kSLVM!.Nickname == SymbolLibraryName, null); }
         }
 
         public ParameterVM[] ParameterVMs
@@ -75,15 +89,6 @@ namespace KiCAD_DB_Editor.ViewModel
             {
                 var keys = Part.ParameterValues.Keys;
                 return ParentLibraryVM.ParameterVMs.Where(pVM => keys.Contains(pVM.Parameter)).ToArray();
-            }
-        }
-
-        public string[] foos
-        {
-            get { return new string[] { "aaaa", "bbbb", "cccc" }; }
-            set
-            {
-
             }
         }
 

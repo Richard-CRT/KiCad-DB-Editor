@@ -58,9 +58,11 @@
                         Command="{Binding CategoryVM.DeletePartsCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
             </StackPanel>
             <View:UserControl_PartGrid Grid.Row="2"
-                    SelectedPartVMs="{Binding CategoryVM.SelectedPartVMs, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}, UpdateSourceTrigger=PropertyChanged}"
-                    ParameterVMs="{Binding CategoryVM.InheritedAndNormalParameterVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}"           
-                    PartVMs="{Binding CategoryVM.PartVMs, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}"/>
+                                       KiCADSymbolLibraryVMs="{Binding CategoryVM.ParentLibraryVM.KiCADSymbolLibraryVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}"
+                                       SelectedPartVMs="{Binding CategoryVM.SelectedPartVMs, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}, UpdateSourceTrigger=PropertyChanged}"
+                                       ParameterVMs="{Binding CategoryVM.InheritedAndNormalParameterVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}"           
+                                       PartVMs="{Binding CategoryVM.PartVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}"
+                                       />
         </DockPanel>
     </Grid>
 </UserControl>

@@ -18,6 +18,7 @@ using System.Windows.Automation.Peers;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Navigation;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace KiCAD_DB_Editor.ViewModel
 {
@@ -167,6 +168,31 @@ namespace KiCAD_DB_Editor.ViewModel
             Library.Parts = new(this.PartVMs.Select(p => p.Part));
         }
 
+        // Do not initialise here, do in constructor to link collection changed
+        private ObservableCollectionEx<KiCADSymbolLibraryVM> _kiCADSymbolLibraryVMs;
+        public ObservableCollectionEx<KiCADSymbolLibraryVM> KiCADSymbolLibraryVMs
+        {
+            get { return _kiCADSymbolLibraryVMs; }
+            set
+            {
+                if (_kiCADSymbolLibraryVMs != value)
+                {
+                    if (_kiCADSymbolLibraryVMs is not null)
+                        _kiCADSymbolLibraryVMs.CollectionChanged -= _kiCADSymbolLibraryVMs_CollectionChanged;
+                    _kiCADSymbolLibraryVMs = value;
+                    _kiCADSymbolLibraryVMs.CollectionChanged += _kiCADSymbolLibraryVMs_CollectionChanged;
+
+                    InvokePropertyChanged(nameof(this.KiCADSymbolLibraryVMs));
+                    _kiCADSymbolLibraryVMs_CollectionChanged(this, new(NotifyCollectionChangedAction.Reset));
+                }
+            }
+        }
+
+        private void _kiCADSymbolLibraryVMs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            Library.KiCADSymbolLibraries = new(this.KiCADSymbolLibraryVMs.Select(kSLVM => kSLVM.KiCADSymbolLibrary));
+        }
+
         #endregion Notify Properties
 
         public LibraryVM(Model.Library library)
@@ -191,29 +217,8 @@ namespace KiCAD_DB_Editor.ViewModel
             Debug.Assert(_parameterVMs is not null);
             TopLevelCategoryVMs = new(library.TopLevelCategories.OrderBy(c => c.Name).Select(c => new CategoryVM(this, null, c)));
             Debug.Assert(_topLevelCategoryVMs is not null);
-            /*
-            for (int i = 0; i < 10; i++)
-            {
-                Part p = new();
-                p.PartUID = $"test{i}";
-                p.Description = $"test{i}";
-                p.Manufacturer = $"test{i}";
-                p.MPN = $"test{i}";
-                p.Value = $"test{i}";
-                p.ExcludeFromBOM = true;
-                p.ExcludeFromBoard = false;
-                PartVMs.Add(new(this, p));
-            }
-
-            for (int i = 0; i < 3; i++)
-                TopLevelCategoryVMs[0].PartVMs.Add(PartVMs[i]);
-            for (int i = 3; i < 6; i++)
-                TopLevelCategoryVMs[1].PartVMs.Add(PartVMs[i]);
-            for (int i = 6; i < 8; i++)
-                TopLevelCategoryVMs[1].CategoryVMs[2].PartVMs.Add(PartVMs[i]);
-            for (int i = 8; i < 10; i++)
-                TopLevelCategoryVMs[1].CategoryVMs[2].CategoryVMs[0].PartVMs.Add(PartVMs[i]);
-            */
+            KiCADSymbolLibraryVMs = new(library.KiCADSymbolLibraries.Select(kSL => new KiCADSymbolLibraryVM(kSL)));
+            Debug.Assert(_kiCADSymbolLibraryVMs is not null);
         }
 
         private bool canNewCategory(ObservableCollectionEx<CategoryVM> categoryVMCollection)

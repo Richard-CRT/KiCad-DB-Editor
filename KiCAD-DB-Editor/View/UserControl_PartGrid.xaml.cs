@@ -50,6 +50,18 @@ namespace KiCAD_DB_Editor.View
             }
         }
 
+        public static readonly DependencyProperty KiCADSymbolLibraryVMsProperty = DependencyProperty.Register(
+            nameof(KiCADSymbolLibraryVMs),
+            typeof(ObservableCollectionEx<KiCADSymbolLibraryVM>),
+            typeof(UserControl_PartGrid)
+            );
+
+        public ObservableCollectionEx<KiCADSymbolLibraryVM> KiCADSymbolLibraryVMs
+        {
+            get => (ObservableCollectionEx<KiCADSymbolLibraryVM>)GetValue(KiCADSymbolLibraryVMsProperty);
+            set => SetValue(KiCADSymbolLibraryVMsProperty, value);
+        }
+
         public static readonly DependencyProperty ParameterVMsProperty = DependencyProperty.Register(
             nameof(ParameterVMs),
             typeof(ObservableCollectionEx<ParameterVM>),

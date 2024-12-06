@@ -104,12 +104,15 @@ namespace KiCAD_DB_Editor.ViewModel
             LibraryVM = new(Library.FromScratch());
 
             Properties.Settings.Default.OpenProjectPath = "New Project";
+            Properties.Settings.Default.Save();
             InvokePropertyChanged(nameof(WindowTitle));
         }
 
         private void OpenLibraryCommandExecuted(object? parameter)
         {
+            // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
             OpenFileDialog openFileDialog = new();
+            // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
             openFileDialog.Title = "Open KiCAD DB Editor Project File";
             openFileDialog.Filter = "Project file (*.kidbe_proj)|*.kidbe_proj|All files (*.*)|*.*";
             if (openFileDialog.ShowDialog() == true)
@@ -151,7 +154,9 @@ namespace KiCAD_DB_Editor.ViewModel
         {
             Debug.Assert(LibraryVM is not null);
 
+            // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
             SaveFileDialog saveFileDialog = new();
+            // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
             saveFileDialog.Title = "Save KiCAD DB Editor Project File";
             saveFileDialog.Filter = "Project file (*.kidbe_proj)|*.kidbe_proj|All files (*.*)|*.*";
             if (saveFileDialog.ShowDialog() == true)

@@ -23,8 +23,8 @@ namespace KiCAD_DB_Editor.ViewModel
 {
     public class CategoryVM : NotifyObject
     {
+        public LibraryVM ParentLibraryVM { get; }
         public readonly Model.Category Category;
-        public readonly LibraryVM ParentLibraryVM;
         public readonly CategoryVM? ParentCategoryVM;
 
         #region Notify Properties

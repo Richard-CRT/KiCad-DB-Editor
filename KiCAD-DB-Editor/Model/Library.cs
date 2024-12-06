@@ -46,6 +46,9 @@ namespace KiCAD_DB_Editor.Model
 
                 library = (Library)o!;
 
+                library.ProjectDirectoryPath = projectDirectory;
+                library.ProjectName = projectName;
+
                 List<string> dbPartColumnNames = new();
                 List<Type> dbPartColumnTypes = new();
                 List<List<object>> dbParts = new();
@@ -193,6 +196,12 @@ namespace KiCAD_DB_Editor.Model
 
         // ======================================================================
 
+        [JsonIgnore]
+        public string ProjectDirectoryPath { get; set; } = "";
+
+        [JsonIgnore]
+        public string ProjectName { get; set; } = "";
+
         [JsonPropertyName("part_uid_scheme"), JsonPropertyOrder(1)]
         public string PartUIDScheme { get; set; } = "CMP-#######-####";
 
@@ -201,6 +210,9 @@ namespace KiCAD_DB_Editor.Model
 
         [JsonPropertyName("top_level_categories"), JsonPropertyOrder(3)]
         public List<Model.Category> TopLevelCategories { get; set; } = new();
+
+        [JsonPropertyName("kicad_symbol_libraries"), JsonPropertyOrder(4)]
+        public List<Model.KiCADSymbolLibrary> KiCADSymbolLibraries { get; set; } = new();
 
         [JsonIgnore]
         public List<Model.Part> Parts { get; set; } = new();
@@ -211,10 +223,14 @@ namespace KiCAD_DB_Editor.Model
             {
                 string? projectDirectory = Path.GetDirectoryName(projectFilePath);
                 string? projectName = Path.GetFileNameWithoutExtension(projectFilePath);
+
                 if (projectDirectory is null || projectDirectory == "" || projectName is null || projectName == "")
                     throw new InvalidOperationException();
 
-                string componentsFilePath = Path.Combine(projectDirectory, projectName);
+                this.ProjectDirectoryPath = projectDirectory;
+                this.ProjectName = projectName;
+
+                string componentsFilePath = Path.Combine(this.ProjectDirectoryPath, this.ProjectName);
                 componentsFilePath += ".sqlite3";
 
                 if (autosave)

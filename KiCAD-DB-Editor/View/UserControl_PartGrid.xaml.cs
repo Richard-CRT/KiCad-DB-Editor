@@ -179,10 +179,11 @@ namespace KiCAD_DB_Editor.View
 
         private void redoColumns()
         {
+            const int numberSpecialColumns = 11;
+            while (dataGrid_Main.Columns.Count > numberSpecialColumns)
+                dataGrid_Main.Columns.RemoveAt(numberSpecialColumns);
             if (ParameterVMs is not null && PartVMs is not null)
             {
-                while (dataGrid_Main.Columns.Count > 8)
-                    dataGrid_Main.Columns.RemoveAt(8);
 
                 DataGridTextColumn dataGridTextColumn;
                 foreach (ParameterVM parameterVM in ParameterVMs)
@@ -196,11 +197,6 @@ namespace KiCAD_DB_Editor.View
                     dataGridTextColumn.Binding = binding;
                     dataGrid_Main.Columns.Add(dataGridTextColumn);
                 }
-            }
-            else
-            {
-                while (dataGrid_Main.Columns.Count > 8)
-                    dataGrid_Main.Columns.RemoveAt(8);
             }
         }
 

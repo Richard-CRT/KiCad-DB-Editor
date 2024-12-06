@@ -75,8 +75,9 @@ namespace KiCAD_DB_Editor.Model
                 }
                 SqliteConnection.ClearAllPools();
 
+                const int numberSpecialColumns = 11;
                 if (
-                    dbPartColumnNames.Count < 8 ||
+                    dbPartColumnNames.Count < numberSpecialColumns ||
                     dbPartColumnTypes[0] != typeof(string) ||
                     dbPartColumnNames[0] != "Category" ||
                     dbPartColumnTypes[1] != typeof(string) ||
@@ -89,13 +90,19 @@ namespace KiCAD_DB_Editor.Model
                     dbPartColumnNames[4] != "MPN" ||
                     dbPartColumnTypes[5] != typeof(string) ||
                     dbPartColumnNames[5] != "Value" ||
-                    dbPartColumnTypes[6] != typeof(Int64) ||
-                    dbPartColumnNames[6] != "Exclude from BOM" ||
-                    dbPartColumnTypes[7] != typeof(Int64) ||
-                    dbPartColumnNames[7] != "Exclude from Board"
+                    dbPartColumnTypes[6] != typeof(string) ||
+                    dbPartColumnNames[6] != "Symbol Library Name" ||
+                    dbPartColumnTypes[7] != typeof(string) ||
+                    dbPartColumnNames[7] != "Symbol Name" ||
+                    dbPartColumnTypes[8] != typeof(Int64) ||
+                    dbPartColumnNames[8] != "Exclude from BOM" ||
+                    dbPartColumnTypes[9] != typeof(Int64) ||
+                    dbPartColumnNames[9] != "Exclude from Board" ||
+                    dbPartColumnTypes[10] != typeof(Int64) ||
+                    dbPartColumnNames[10] != "Exclude from Sim"
                     )
                     throw new InvalidDataException("Special columns not found or wrong type");
-                for (int i = 8; i < dbPartColumnTypes.Count; i++)
+                for (int i = numberSpecialColumns; i < dbPartColumnTypes.Count; i++)
                 {
                     if (dbPartColumnTypes[i] != typeof(string))
                         throw new InvalidDataException($"Columns {i} wrong type");
@@ -103,7 +110,7 @@ namespace KiCAD_DB_Editor.Model
 
                 //Dictionary<int, Parameter> columnIndexToParameterMap = new();
                 Dictionary<Parameter, int> parameterToColumnIndexToMap = new();
-                for (int i = 8; i < dbPartColumnNames.Count; i++)
+                for (int i = numberSpecialColumns; i < dbPartColumnNames.Count; i++)
                 {
                     string columnName = dbPartColumnNames[i];
 
@@ -152,14 +159,18 @@ namespace KiCAD_DB_Editor.Model
                         throw new InvalidDataException("Could not match part category in database to library category");
                     Category partCategory = workingCategory;
 
-                    string partUID = (string)dbPart[1];
+                    int j = 1;
+                    string partUID = (string)dbPart[j++];
                     Part part = new(partUID);
-                    part.Description = (string)dbPart[2];
-                    part.Manufacturer = (string)dbPart[3];
-                    part.MPN = (string)dbPart[4];
-                    part.Value = (string)dbPart[5];
-                    part.ExcludeFromBOM = (Int64)dbPart[6] == 1 ? true : false;
-                    part.ExcludeFromBoard = (Int64)dbPart[7] == 1 ? true : false;
+                    part.Description = (string)dbPart[j++];
+                    part.Manufacturer = (string)dbPart[j++];
+                    part.MPN = (string)dbPart[j++];
+                    part.Value = (string)dbPart[j++];
+                    part.SymbolLibraryName = (string)dbPart[j++];
+                    part.SymbolName = (string)dbPart[j++];
+                    part.ExcludeFromBOM = (Int64)dbPart[j++] == 1;
+                    part.ExcludeFromBoard = (Int64)dbPart[j++] == 1;
+                    part.ExcludeFromSim = (Int64)dbPart[j++] == 1;
                     foreach (Parameter p in partCategory.Parameters)
                     {
                         object value = dbPart[parameterToColumnIndexToMap[p]];
@@ -168,13 +179,6 @@ namespace KiCAD_DB_Editor.Model
                         else
                             part.ParameterValues[p] = (string)value;
                     }
-                    /*
-                    for (int i = 8; i < dbPart.Count; i++)
-                    {
-                        if (dbPart[i] is not System.DBNull)
-                            part.ParameterValues[columnIndexToParameterMap[i]] = (string)dbPart[i];
-                    }
-                    */
                     library.Parts.Add(part);
                     partCategory.Parts.Add(part);
                 }
@@ -190,7 +194,7 @@ namespace KiCAD_DB_Editor.Model
         // ======================================================================
 
         [JsonPropertyName("part_uid_scheme"), JsonPropertyOrder(1)]
-        public string PartUIDScheme { get; set; } = "CMP-#####-#####";
+        public string PartUIDScheme { get; set; } = "CMP-#######-####";
 
         [JsonPropertyName("parameters"), JsonPropertyOrder(2)]
         public List<Model.Parameter> Parameters { get; set; } = new();
@@ -264,8 +268,12 @@ namespace KiCAD_DB_Editor.Model
                         "\"Manufacturer\" TEXT, " +
                         "\"MPN\" TEXT, " +
                         "\"Value\" TEXT, " +
+                        "\"Symbol Library Name\" TEXT, " +
+                        "\"Symbol Name\" TEXT, " +
                         "\"Exclude from BOM\" INTEGER, " +
-                        "\"Exclude from Board\" INTEGER, ";
+                        "\"Exclude from Board\" INTEGER, " +
+                        "\"Exclude from Sim\" INTEGER, "
+                        ;
                     foreach (Parameter parameter in Parameters)
                         createTableSql += $"\"{parameter.Name.Replace("\"", "\"\"")}\" TEXT, ";
                     createTableSql = createTableSql[..^2];
@@ -282,8 +290,11 @@ namespace KiCAD_DB_Editor.Model
                         "\"Manufacturer\", " +
                         "\"MPN\", " +
                         "\"Value\", " +
+                        "\"Symbol Library Name\", " +
+                        "\"Symbol Name\", " +
                         "\"Exclude from BOM\", " +
-                        "\"Exclude from Board\", ";
+                        "\"Exclude from Board\", " +
+                        "\"Exclude from Sim\", ";
                     foreach (Parameter parameter in Parameters)
                         insertPartsSql += $"\"{parameter.Name.Replace("\"", "\"\"")}\", ";
                     insertPartsSql = insertPartsSql[..^2];
@@ -297,8 +308,11 @@ namespace KiCAD_DB_Editor.Model
                                 $"'{part.Manufacturer.Replace("'", "''")}', " +
                                 $"'{part.MPN.Replace("'", "''")}', " +
                                 $"'{part.Value.Replace("'", "''")}', " +
+                                $"'{part.SymbolLibraryName.Replace("'", "''")}', " +
+                                $"'{part.SymbolName.Replace("'", "''")}', " +
                                 $"{(part.ExcludeFromBOM ? 1 : 0)}, " +
-                                $"{(part.ExcludeFromBoard ? 1 : 0)}, ";
+                                $"{(part.ExcludeFromBoard ? 1 : 0)}, " +
+                                $"{(part.ExcludeFromSim ? 1 : 0)}, ";
                         foreach (Parameter parameter in Parameters)
                         {
                             if (part.ParameterValues.TryGetValue(parameter, out string? value))

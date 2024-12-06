@@ -53,6 +53,21 @@ namespace KiCAD_DB_Editor.ViewModel
             get { return Part.ExcludeFromBoard; }
             set { if (Part.ExcludeFromBoard != value) { Part.ExcludeFromBoard = value; InvokePropertyChanged(); } }
         }
+        public bool ExcludeFromSim
+        {
+            get { return Part.ExcludeFromSim; }
+            set { if (Part.ExcludeFromSim != value) { Part.ExcludeFromSim = value; InvokePropertyChanged(); } }
+        }
+        public string SymbolLibraryName
+        {
+            get { return Part.SymbolLibraryName; }
+            set { if (Part.SymbolLibraryName != value) { Part.SymbolLibraryName = value; InvokePropertyChanged(); } }
+        }
+        public string SymbolName
+        {
+            get { return Part.SymbolName; }
+            set { if (Part.SymbolName != value) { Part.SymbolName = value; InvokePropertyChanged(); } }
+        }
 
         public ParameterVM[] ParameterVMs
         {

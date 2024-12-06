@@ -15,8 +15,11 @@ namespace KiCAD_DB_Editor.Model
         public string Manufacturer { get; set; } = "";
         public string MPN { get; set; } = "";
         public string Value { get; set; } = "";
+        public string SymbolLibraryName { get; set; } = "";
+        public string SymbolName { get; set; } = "";
         public bool ExcludeFromBOM { get; set; } = false;
         public bool ExcludeFromBoard { get; set; } = false;
+        public bool ExcludeFromSim { get; set; } = false;
         public Dictionary<Model.Parameter, string> ParameterValues { get; set; } = new();
 
         public Part(string partUID)

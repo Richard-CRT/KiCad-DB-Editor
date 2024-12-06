@@ -148,6 +148,14 @@ namespace KiCAD_DB_Editor.View
             foreach (PartVM pVM in oldPartVMsCopy)
                 pVM.PropertyChanged += PartVM_PropertyChanged;
             redoColumns();
+
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                if (VisualTreeHelper.GetChildrenCount(dataGrid_Main) > 0 && VisualTreeHelper.GetChild(dataGrid_Main, 0) is Decorator border)
+                {
+                    if (border.Child is ScrollViewer scroll) scroll.ScrollToEnd();
+                }
+            }
         }
 
         private void PartVM_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)

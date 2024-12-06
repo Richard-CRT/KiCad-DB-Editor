@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -19,6 +20,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace KiCAD_DB_Editor.View
 {
@@ -305,6 +307,16 @@ namespace KiCAD_DB_Editor.View
                                             checkBox.IsChecked = s.ToLower() == "true" || s == "1";
                                             e.Handled = true;
                                         }
+                                        else if (frameworkElement is ContentPresenter contentPresenter && VisualTreeHelper.GetChildrenCount(contentPresenter) == 1 &&
+                                                VisualTreeHelper.GetChild(contentPresenter, 0) is FrameworkElement frameworkElementSubsidiary
+                                                )
+                                        {
+                                            if (frameworkElementSubsidiary is TextBlock textBlockSubsidiary)
+                                            {
+                                                textBlockSubsidiary.Text = sourceData[srcY][srcX];
+                                                e.Handled = true;
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -328,7 +340,76 @@ namespace KiCAD_DB_Editor.View
                         textBlock.Text = "";
                         e.Handled = true;
                     }
+                    else if (frameworkElement is ComboBox comboBox)
+                    {
+                        comboBox.Text = "";
+                        e.Handled = true;
+                    }
+                    else if (frameworkElement is ContentPresenter contentPresenter && VisualTreeHelper.GetChildrenCount(contentPresenter) == 1 &&
+                            VisualTreeHelper.GetChild(contentPresenter, 0) is FrameworkElement frameworkElementSubsidiary
+                            )
+                    {
+                        if (frameworkElementSubsidiary is TextBlock textBlockSubsidiary)
+                            textBlockSubsidiary.Text = "";
+                    }
                 }
+            }
+            else if (e.Key == Key.C && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                Dictionary<(int, int), string> selectedCellCoords = new();
+                var selectedCells = dataGrid_Main.SelectedCells;
+                foreach (var selectedCell in selectedCells)
+                {
+                    DataGridColumn column = selectedCell.Column;
+                    int columnIndex = column.DisplayIndex;
+                    DataGridRow row = DataGridRow.GetRowContainingElement(column.GetCellContent(selectedCell.Item));
+                    int rowIndex = row.GetIndex();
+                    (int, int) coord = (columnIndex, rowIndex);
+                    if (!selectedCellCoords.ContainsKey(coord))
+                    {
+                        object item = dataGrid_Main.Items[rowIndex];
+                        FrameworkElement frameworkElement = column.GetCellContent(item);
+                        if (frameworkElement is TextBlock textBlock)
+                            selectedCellCoords[coord] = textBlock.Text;
+                        else if (frameworkElement is CheckBox checkBox)
+                        {
+                            if (checkBox.IsChecked is null)
+                                selectedCellCoords[coord] = "";
+                            else
+                                selectedCellCoords[coord] = (bool)checkBox.IsChecked ? "True" : "False";
+                        }
+                        else if (frameworkElement is ContentPresenter contentPresenter && VisualTreeHelper.GetChildrenCount(contentPresenter) == 1 &&
+                                VisualTreeHelper.GetChild(contentPresenter, 0) is FrameworkElement frameworkElementSubsidiary
+                                )
+                        {
+                            if (frameworkElementSubsidiary is TextBlock textBlockSubsidiary)
+                                selectedCellCoords[coord] = textBlockSubsidiary.Text;
+                            else
+                                selectedCellCoords[coord] = "";
+                        }
+                        else
+                            selectedCellCoords[coord] = "";
+                    }
+                }
+                int minX = selectedCellCoords.Keys.MinBy(c => c.Item1).Item1;
+                int minY = selectedCellCoords.Keys.MinBy(c => c.Item2).Item2;
+                int maxX = selectedCellCoords.Keys.MaxBy(c => c.Item1).Item1;
+                int maxY = selectedCellCoords.Keys.MaxBy(c => c.Item2).Item2;
+                int sourceWidth = maxX - minX + 1;
+                int sourceHeight = maxY - minY + 1;
+                string[][] data = new string[sourceHeight][];
+                for (int y = 0; y < sourceHeight; y++)
+                {
+                    data[y] = new string[sourceWidth];
+                    for (int x = 0; x < sourceWidth; x++)
+                        data[y][x] = "";
+                }
+                foreach (((int x, int y), string value) in selectedCellCoords)
+                    data[y - minY][x - minX] = value;
+
+                string clipboardText = string.Join(Environment.NewLine, data.Select(s => string.Join('\t', s)));
+                Clipboard.SetText(clipboardText);
+                e.Handled = true;
             }
         }
 

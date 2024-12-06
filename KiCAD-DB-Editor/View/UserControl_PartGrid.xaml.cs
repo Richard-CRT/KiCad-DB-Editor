@@ -331,26 +331,29 @@ namespace KiCAD_DB_Editor.View
             if (e.Key == Key.Delete && Keyboard.Modifiers == ModifierKeys.None && !editing)
             {
                 var selectedCells = dataGrid_Main.SelectedCells;
-                foreach (var selectedCell in selectedCells)
+                if (selectedCells.Count > 0)
                 {
-                    DataGridColumn column = selectedCell.Column;
-                    FrameworkElement frameworkElement = column.GetCellContent(selectedCell.Item);
-                    if (frameworkElement is TextBlock textBlock)
+                    foreach (var selectedCell in selectedCells)
                     {
-                        textBlock.Text = "";
-                        e.Handled = true;
-                    }
-                    else if (frameworkElement is ComboBox comboBox)
-                    {
-                        comboBox.Text = "";
-                        e.Handled = true;
-                    }
-                    else if (frameworkElement is ContentPresenter contentPresenter && VisualTreeHelper.GetChildrenCount(contentPresenter) == 1 &&
-                            VisualTreeHelper.GetChild(contentPresenter, 0) is FrameworkElement frameworkElementSubsidiary
-                            )
-                    {
-                        if (frameworkElementSubsidiary is TextBlock textBlockSubsidiary)
-                            textBlockSubsidiary.Text = "";
+                        DataGridColumn column = selectedCell.Column;
+                        FrameworkElement frameworkElement = column.GetCellContent(selectedCell.Item);
+                        if (frameworkElement is TextBlock textBlock)
+                        {
+                            textBlock.Text = "";
+                            e.Handled = true;
+                        }
+                        else if (frameworkElement is ComboBox comboBox)
+                        {
+                            comboBox.Text = "";
+                            e.Handled = true;
+                        }
+                        else if (frameworkElement is ContentPresenter contentPresenter && VisualTreeHelper.GetChildrenCount(contentPresenter) == 1 &&
+                                VisualTreeHelper.GetChild(contentPresenter, 0) is FrameworkElement frameworkElementSubsidiary
+                                )
+                        {
+                            if (frameworkElementSubsidiary is TextBlock textBlockSubsidiary)
+                                textBlockSubsidiary.Text = "";
+                        }
                     }
                 }
             }

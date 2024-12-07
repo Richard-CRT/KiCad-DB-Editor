@@ -207,7 +207,7 @@ namespace KiCAD_DB_Editor.View
                 {
                     dataGridTextColumn = new();
                     dataGridTextColumn.Header = parameterVM.Name.Replace("_", "__"); ;
-                    Binding binding = new($"[{parameterVM.Name}]");
+                    Binding binding = new($"ParameterAccessor[{parameterVM.Name}]");
                     binding.Mode = BindingMode.TwoWay;
                     binding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
                     dataGridTextColumn.Binding = binding;

@@ -13,6 +13,7 @@ namespace KiCAD_DB_Editor.ViewModel
 {
     public class PartVM : NotifyObject
     {
+        public ParameterAccessor ParameterAccessor { get; }
         public readonly Model.Part Part;
         public readonly LibraryVM ParentLibraryVM;
 
@@ -103,39 +104,14 @@ namespace KiCAD_DB_Editor.ViewModel
 
         #endregion Notify Properties
 
-        public string? this[string parameterVMName]
-        {
-            get
-            {
-                var key = ParentLibraryVM.ParameterVMs.First(pVM => pVM.Name == parameterVMName).Parameter;
-                if (Part.ParameterValues.TryGetValue(key, out string? val))
-                    return val;
-                else
-                    return null;
-            }
-            set
-            {
-                if (value is not null)
-                {
-                    var key = ParentLibraryVM.ParameterVMs.First(pVM => pVM.Name == parameterVMName).Parameter;
-                    if (Part.ParameterValues.TryGetValue(key, out string? s))
-                    {
-                        if (s != value)
-                        {
-                            Part.ParameterValues[key] = value;
-                            InvokePropertyChanged("Item[]");
-                        }
-                    }
-                }
-            }
-        }
-
         public PartVM(LibraryVM parentLibraryVM, Model.Part part)
         {
             ParentLibraryVM = parentLibraryVM;
 
             // Link model
             Part = part;
+
+            this.ParameterAccessor = new(this);
         }
 
         public void AddParameterVM(ParameterVM pVM)
@@ -161,5 +137,47 @@ namespace KiCAD_DB_Editor.ViewModel
 
 
         #endregion Commands
+
+    }
+
+    public class ParameterAccessor : NotifyObject
+    {
+        public readonly PartVM OwnerPartVM;
+
+        #region Notify Properties
+
+        public string? this[string parameterVMName]
+        {
+            get
+            {
+                var key = OwnerPartVM.ParentLibraryVM.ParameterVMs.First(pVM => pVM.Name == parameterVMName).Parameter;
+                if (OwnerPartVM.Part.ParameterValues.TryGetValue(key, out string? val))
+                    return val;
+                else
+                    return null;
+            }
+            set
+            {
+                if (value is not null)
+                {
+                    var key = OwnerPartVM.ParentLibraryVM.ParameterVMs.First(pVM => pVM.Name == parameterVMName).Parameter;
+                    if (OwnerPartVM.Part.ParameterValues.TryGetValue(key, out string? s))
+                    {
+                        if (s != value)
+                        {
+                            OwnerPartVM.Part.ParameterValues[key] = value;
+                            InvokePropertyChanged("Item[]");
+                        }
+                    }
+                }
+            }
+        }
+
+        #endregion Notify Properties
+
+        public ParameterAccessor(PartVM ownerPVM)
+        {
+            OwnerPartVM = ownerPVM;
+        }
     }
 }

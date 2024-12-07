@@ -11,8 +11,24 @@ namespace KiCAD_DB_Editor
 {
     public static class Utilities
     {
-        public static HashSet<char> SafeCategoryCharacters = new HashSet<char>("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghjiklmnopqrstuvwxyz0123456789_-& ");
-        public static HashSet<char> SafeParameterCharacters = new HashSet<char>("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghjiklmnopqrstuvwxyz0123456789_-& ");
+        public static HashSet<string> ReservedParameterNames = new HashSet<string>()
+        {
+            "part uid",
+            "description",
+            "manufacturer",
+            "mpn",
+            "value",
+            "exclude from bom",
+            "exclude from board",
+            "exclude from sim",
+        };
+        public static string[] ReservedParameterNameStarts = new string[] 
+        {
+            "symbol",
+            "footprint",
+        };
+        public static HashSet<char> SafeCategoryCharacters = new HashSet<char>("abcdefghjiklmnopqrstuvwxyz0123456789_-& ");
+        public static HashSet<char> SafeParameterCharacters = new HashSet<char>("abcdefghjiklmnopqrstuvwxyz0123456789_-& ");
 
         public static Dictionary<byte, char> Base32EncodeBook = new()
         {

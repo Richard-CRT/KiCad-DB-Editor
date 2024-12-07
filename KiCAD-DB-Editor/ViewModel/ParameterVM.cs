@@ -26,10 +26,14 @@ namespace KiCAD_DB_Editor.ViewModel
             {
                 if (Parameter.Name != value)
                 {
-                    if (value.Length == 0 || value.Any(c => !Utilities.SafeParameterCharacters.Contains(c)))
+                    string lowerValue = value.ToLower();
+                    if (value.Length == 0 || lowerValue.Any(c => !Utilities.SafeParameterCharacters.Contains(c)))
                         throw new Exceptions.ArgumentValidationException("Proposed name invalid");
 
-                    if (ParentLibraryVM.ParameterVMs.Any(cVM => cVM.Name.ToLower() == value.ToLower()))
+                    if (Utilities.ReservedParameterNames.Contains(lowerValue) || Utilities.ReservedParameterNameStarts.Any(s => lowerValue.StartsWith(s)))
+                        throw new Exceptions.ArgumentValidationException("Proposed name not permitted");
+
+                    if (ParentLibraryVM.ParameterVMs.Any(cVM => cVM.Name.ToLower() == lowerValue))
                         throw new Exceptions.ArgumentValidationException("Parent already contains parameter with proposed name");
 
                     Parameter.Name = value;

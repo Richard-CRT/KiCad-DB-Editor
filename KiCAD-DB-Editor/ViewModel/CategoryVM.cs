@@ -36,7 +36,8 @@ namespace KiCAD_DB_Editor.ViewModel
             {
                 if (Category.Name != value)
                 {
-                    if (value.Length == 0 || value.Any(c => !Utilities.SafeCategoryCharacters.Contains(c)))
+                    string lowerValue = value.ToLower();
+                    if (value.Length == 0 || lowerValue.Any(c => !Utilities.SafeCategoryCharacters.Contains(c)))
                         throw new Exceptions.ArgumentValidationException("Proposed name invalid");
 
                     ObservableCollectionEx<CategoryVM> categoryCollection;
@@ -45,7 +46,7 @@ namespace KiCAD_DB_Editor.ViewModel
                     else
                         categoryCollection = ParentCategoryVM.CategoryVMs;
 
-                    if (categoryCollection.Any(cVM => cVM.Name.ToLower() == value.ToLower()))
+                    if (categoryCollection.Any(cVM => cVM.Name.ToLower() == lowerValue))
                         throw new Exceptions.ArgumentValidationException("Parent already contains category with proposed name");
 
                     Category.Name = value;

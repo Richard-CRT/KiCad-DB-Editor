@@ -274,19 +274,25 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private bool canNewCategory(ObservableCollectionEx<CategoryVM> categoryVMCollection)
         {
-            if (this.NewCategoryName.Length > 0 && this.NewParameterName.All(c => Utilities.SafeCategoryCharacters.Contains(c)))
-                return !categoryVMCollection.Any(cVM => cVM.Name.ToLower() == this.NewCategoryName.ToLower());
-            else
-                return false;
+            string lowerValue = this.NewCategoryName.ToLower();
+            if (this.NewCategoryName.Length > 0 && lowerValue.All(c => Utilities.SafeCategoryCharacters.Contains(c)))
+            {
+                if (!categoryVMCollection.Any(cVM => cVM.Name.ToLower() == lowerValue))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private void newCategory(CategoryVM? parentCategoryVM, ObservableCollectionEx<CategoryVM> categoryVMCollection)
         {
+            string lowerValue = this.NewCategoryName.ToLower();
             int newIndex;
             for (newIndex = 0; newIndex < categoryVMCollection.Count; newIndex++)
             {
                 CategoryVM compareCategoryVM = categoryVMCollection[newIndex];
-                if (compareCategoryVM.Name.CompareTo(this.NewCategoryName.ToLower()) > 0)
+                if (compareCategoryVM.Name.CompareTo(lowerValue) > 0)
                     break;
             }
             if (newIndex == categoryVMCollection.Count)
@@ -347,10 +353,18 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private bool NewParameterCommandCanExecute(object? parameter)
         {
-            if (this.NewParameterName.Length > 0 && this.NewParameterName.All(c => Utilities.SafeParameterCharacters.Contains(c)))
-                return !ParameterVMs.Any(p => p.Name.ToLower() == this.NewParameterName.ToLower());
-            else
-                return false;
+            string lowerValue = this.NewParameterName.ToLower();
+            if (this.NewParameterName.Length > 0 && lowerValue.All(c => Utilities.SafeParameterCharacters.Contains(c)))
+            {
+                if (!Utilities.ReservedParameterNames.Contains(lowerValue) && Utilities.ReservedParameterNameStarts.All(s => !lowerValue.StartsWith(s)))
+                {
+                    if (!ParameterVMs.Any(p => p.Name.ToLower() == lowerValue))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         private void NewParameterCommandExecuted(object? parameter)
@@ -361,10 +375,18 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private bool RenameParameterCommandCanExecute(object? parameter)
         {
-            if (SelectedParameterVM is not null && this.NewParameterName.Length > 0 && this.NewParameterName.All(c => Utilities.SafeParameterCharacters.Contains(c)))
-                return !ParameterVMs.Any(p => p.Name.ToLower() == this.NewParameterName.ToLower());
-            else
-                return false;
+            string lowerValue = this.NewParameterName.ToLower();
+            if (SelectedParameterVM is not null && this.NewParameterName.Length > 0 && lowerValue.All(c => Utilities.SafeParameterCharacters.Contains(c)))
+            {
+                if (!Utilities.ReservedParameterNames.Contains(lowerValue) && Utilities.ReservedParameterNameStarts.All(s => !lowerValue.StartsWith(s)))
+                {
+                    if (!ParameterVMs.Any(p => p.Name.ToLower() == lowerValue))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         private void RenameParameterCommandExecuted(object? parameter)

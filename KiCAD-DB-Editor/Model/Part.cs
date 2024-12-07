@@ -17,6 +17,8 @@ namespace KiCAD_DB_Editor.Model
         public string Value { get; set; } = "";
         public string SymbolLibraryName { get; set; } = "";
         public string SymbolName { get; set; } = "";
+        public List<string> FootprintLibraryNames { get; set; } = new();
+        public List<string> FootprintNames { get; set; } = new();
         public bool ExcludeFromBOM { get; set; } = false;
         public bool ExcludeFromBoard { get; set; } = false;
         public bool ExcludeFromSim { get; set; } = false;

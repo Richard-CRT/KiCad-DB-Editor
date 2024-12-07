@@ -14,6 +14,8 @@ namespace KiCAD_DB_Editor.ViewModel
     public class PartVM : NotifyObject
     {
         public ParameterAccessor ParameterAccessor { get; }
+        public FootprintLibraryNameAccessor FootprintLibraryNameAccessor { get; }
+        public FootprintNameAccessor FootprintNameAccessor { get; }
         public readonly Model.Part Part;
         public readonly LibraryVM ParentLibraryVM;
 
@@ -111,7 +113,9 @@ namespace KiCAD_DB_Editor.ViewModel
             // Link model
             Part = part;
 
-            this.ParameterAccessor = new(this);
+            ParameterAccessor = new(this);
+            FootprintLibraryNameAccessor = new(this);
+            FootprintNameAccessor = new(this);
         }
 
         public void AddParameterVM(ParameterVM pVM)
@@ -176,6 +180,72 @@ namespace KiCAD_DB_Editor.ViewModel
         #endregion Notify Properties
 
         public ParameterAccessor(PartVM ownerPVM)
+        {
+            OwnerPartVM = ownerPVM;
+        }
+    }
+
+    public class FootprintLibraryNameAccessor : NotifyObject
+    {
+        public readonly PartVM OwnerPartVM;
+
+        #region Notify Properties
+
+        public string? this[int index]
+        {
+            get
+            {
+                if (OwnerPartVM.Part.FootprintLibraryNames.Count > index)
+                    return OwnerPartVM.Part.FootprintLibraryNames[index];
+                else
+                    return null;
+            }
+            set
+            {
+                if (value is not null)
+                {
+                    if (OwnerPartVM.Part.FootprintLibraryNames.Count > index)
+                        OwnerPartVM.Part.FootprintLibraryNames[index] = value;
+                }
+            }
+        }
+
+        #endregion Notify Properties
+
+        public FootprintLibraryNameAccessor(PartVM ownerPVM)
+        {
+            OwnerPartVM = ownerPVM;
+        }
+    }
+
+    public class FootprintNameAccessor : NotifyObject
+    {
+        public readonly PartVM OwnerPartVM;
+
+        #region Notify Properties
+
+        public string? this[int index]
+        {
+            get
+            {
+                if (OwnerPartVM.Part.FootprintNames.Count > index)
+                    return OwnerPartVM.Part.FootprintNames[index];
+                else
+                    return null;
+            }
+            set
+            {
+                if (value is not null)
+                {
+                    if (OwnerPartVM.Part.FootprintNames.Count > index)
+                        OwnerPartVM.Part.FootprintNames[index] = value;
+                }
+            }
+        }
+
+        #endregion Notify Properties
+
+        public FootprintNameAccessor(PartVM ownerPVM)
         {
             OwnerPartVM = ownerPVM;
         }

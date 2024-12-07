@@ -178,14 +178,17 @@ namespace KiCAD_DB_Editor.View
                 redoColumns();
         }
 
+        bool externalSelectedPartVMsPropertyChanged = false;
         bool internalSelectedPartVMsPropertyChanged = false;
         protected void SelectedPartVMsPropertyChanged()
         {
             if (!internalSelectedPartVMsPropertyChanged)
             {
+                externalSelectedPartVMsPropertyChanged = true;
                 dataGrid_Main.SelectedItems.Clear();
                 foreach (PartVM selectedPartVM in SelectedPartVMs)
                     dataGrid_Main.SelectedItems.Add(selectedPartVM);
+                externalSelectedPartVMsPropertyChanged = false;
             }
         }
 
@@ -233,9 +236,12 @@ namespace KiCAD_DB_Editor.View
         {
             if (sender is DataGrid dG)
             {
-                internalSelectedPartVMsPropertyChanged = true;
-                SelectedPartVMs = dG.SelectedCells.DistinctBy(c => c.Item).Select(c => (PartVM)c.Item).ToArray();
-                internalSelectedPartVMsPropertyChanged = false;
+                if (!externalSelectedPartVMsPropertyChanged)
+                {
+                    internalSelectedPartVMsPropertyChanged = true;
+                    SelectedPartVMs = dG.SelectedCells.DistinctBy(c => c.Item).Select(c => (PartVM)c.Item).ToArray();
+                    internalSelectedPartVMsPropertyChanged = false;
+                }
             }
         }
 

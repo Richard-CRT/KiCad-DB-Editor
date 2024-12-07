@@ -80,12 +80,15 @@
             </Grid>
         </TabItem>
         <TabItem Header="Parts">
-            <Grid>
-                <View:UserControl_PartGrid Grid.Row="2"
-                                           KiCADSymbolLibraryVMs="{Binding LibraryVM.KiCADSymbolLibraryVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"
-                                           ParameterVMs="{Binding LibraryVM.ParameterVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"           
-                                           PartVMs="{Binding LibraryVM.PartVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}" />
-            </Grid>
+            <DockPanel>
+                <TextBox DockPanel.Dock="Top"></TextBox>
+                <View:UserControl_PartGrid 
+                    Grid.Row="2"
+                    KiCADSymbolLibraryVMs="{Binding LibraryVM.KiCADSymbolLibraryVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"
+                    ParameterVMs="{Binding LibraryVM.ParameterVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"           
+                    PartVMs="{Binding LibraryVM.PartVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"
+                    />
+            </DockPanel>
         </TabItem>
         <TabItem Header="Settings">
             <StackPanel Orientation="Vertical" Width="500" HorizontalAlignment="Left">

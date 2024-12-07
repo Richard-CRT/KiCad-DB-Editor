@@ -44,9 +44,15 @@
                                             <Style TargetType="Border">
                                                 <Setter Property="Visibility" Value="Hidden" />
                                                 <Style.Triggers>
+                                                    <!-- This is bound to the Border, not the DataGridCell, only works because IsEnabled seems to inherit -->
                                                     <Trigger Property="IsEnabled" Value="False">
                                                         <Setter Property="Visibility" Value="Visible" />
                                                     </Trigger>
+                                                    <!--
+                                                    <DataTrigger Binding="{Binding IsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridCell}}}" Value="False" >
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                    -->
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>

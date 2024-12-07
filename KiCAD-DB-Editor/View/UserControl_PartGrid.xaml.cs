@@ -174,7 +174,7 @@ namespace KiCAD_DB_Editor.View
 
         private void PartVM_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == "ParametersChanged")
+            if (e.PropertyName == nameof(PartVM.ParameterVMs) || e.PropertyName == nameof(PartVM.FootprintCount))
                 redoColumns();
         }
 
@@ -194,37 +194,56 @@ namespace KiCAD_DB_Editor.View
 
         #endregion
 
+        private List<DataGridColumn> columnsToRemoveWhenRedoing = new();
+
+        private void addColumn(string header, string bindingTarget, int index=-1)
+        {
+            DataGridTextColumn dataGridTextColumn;
+            dataGridTextColumn = new();
+            dataGridTextColumn.Header = header.Replace("_", "__"); ;
+            Binding binding = new(bindingTarget);
+            binding.Mode = BindingMode.TwoWay;
+            binding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+            dataGridTextColumn.Binding = binding;
+
+            Style defaultStyle = (Style)dataGrid_Main.FindResource(typeof(DataGridCell));
+
+            // Use as a baseline the style I defined in XAML
+            Style cellStyle = new(typeof(DataGridCell), defaultStyle);
+            DataTrigger dataTrigger = new();
+            dataTrigger.Value = null;
+            dataTrigger.Binding = binding;
+            dataTrigger.Setters.Add(new Setter(DataGridCell.IsEnabledProperty, false));
+            cellStyle.Triggers.Add(dataTrigger);
+            dataGridTextColumn.CellStyle = cellStyle;
+
+            columnsToRemoveWhenRedoing.Add(dataGridTextColumn);
+            if (index == -1)
+                dataGrid_Main.Columns.Add(dataGridTextColumn);
+            else
+                dataGrid_Main.Columns.Insert(index, dataGridTextColumn);
+        }
+
         private void redoColumns()
         {
-            const int numberSpecialColumns = 11;
-            while (dataGrid_Main.Columns.Count > numberSpecialColumns)
-                dataGrid_Main.Columns.RemoveAt(numberSpecialColumns);
+            foreach (DataGridColumn columnToRemove in columnsToRemoveWhenRedoing)
+                dataGrid_Main.Columns.Remove(columnToRemove);
+            columnsToRemoveWhenRedoing.Clear();
             if (ParameterVMs is not null && PartVMs is not null)
             {
+                int maxFootprints = 0;
+                foreach (PartVM partVM in PartVMs)
+                    maxFootprints = Math.Max(maxFootprints, partVM.FootprintCount);
 
-                DataGridTextColumn dataGridTextColumn;
-                foreach (ParameterVM parameterVM in ParameterVMs)
+                for (int i = 0; i < maxFootprints; i++)
                 {
-                    dataGridTextColumn = new();
-                    dataGridTextColumn.Header = parameterVM.Name.Replace("_", "__"); ;
-                    Binding binding = new($"ParameterAccessor[{parameterVM.Name}]");
-                    binding.Mode = BindingMode.TwoWay;
-                    binding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-                    dataGridTextColumn.Binding = binding;
-
-                    Style defaultStyle = (Style)dataGrid_Main.FindResource(typeof(DataGridCell));
-
-                    // Use as a baseline the style I defined in XAML
-                    Style cellStyle = new(typeof(DataGridCell), defaultStyle);
-                    DataTrigger dataTrigger = new();
-                    dataTrigger.Value = null;
-                    dataTrigger.Binding = binding;
-                    dataTrigger.Setters.Add(new Setter(DataGridCell.IsEnabledProperty, false));
-                    cellStyle.Triggers.Add(dataTrigger);
-                    dataGridTextColumn.CellStyle = cellStyle;
-                    
-                    dataGrid_Main.Columns.Add(dataGridTextColumn);
+                    addColumn($"Fprt. {i + 1} Library", $"FootprintLibraryNameAccessor[{i}]");
+                    addColumn($"Fprt. {i + 1} Name", $"FootprintNameAccessor[{i}]");
                 }
+
+                int indexToInsertAt = 6;
+                foreach (ParameterVM parameterVM in ParameterVMs)
+                    addColumn(parameterVM.Name, $"ParameterAccessor[{parameterVM.Name}]", index: indexToInsertAt++);
             }
         }
 

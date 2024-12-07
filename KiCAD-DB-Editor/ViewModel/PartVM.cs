@@ -89,6 +89,11 @@ namespace KiCAD_DB_Editor.ViewModel
             }
         }
 
+        public int FootprintCount
+        {
+            get { return Part.FootprintLibraryNames.Count; }
+        }
+
         // Included so the KiCAD symbol name drop down has a source
         public KiCADSymbolLibraryVM? SelectedKiCADSymbolLibraryVM
         {
@@ -123,7 +128,7 @@ namespace KiCAD_DB_Editor.ViewModel
             if (!Part.ParameterValues.ContainsKey(pVM.Parameter))
             {
                 Part.ParameterValues[pVM.Parameter] = "";
-                InvokePropertyChanged("ParametersChanged");
+                InvokePropertyChanged(nameof(ParameterVMs));
             }
         }
 
@@ -132,8 +137,24 @@ namespace KiCAD_DB_Editor.ViewModel
             if (Part.ParameterValues.ContainsKey(pVM.Parameter))
             {
                 Part.ParameterValues.Remove(pVM.Parameter);
-                InvokePropertyChanged("ParametersChanged");
+                InvokePropertyChanged(nameof(ParameterVMs));
             }
+        }
+
+        public void AddFootprint()
+        {
+            // Always needs to be done in tandem
+            Part.FootprintLibraryNames.Add("");
+            Part.FootprintNames.Add("");
+            InvokePropertyChanged(nameof(FootprintCount));
+        }
+
+        public void RemoveFootprint()
+        {
+            // Always needs to be done in tandem
+            Part.FootprintLibraryNames.RemoveAt(Part.FootprintLibraryNames.Count - 1);
+            Part.FootprintNames.RemoveAt(Part.FootprintNames.Count - 1);
+            InvokePropertyChanged(nameof(FootprintCount));
         }
 
         #region Commands

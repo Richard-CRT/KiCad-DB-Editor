@@ -212,8 +212,10 @@ namespace KiCAD_DB_Editor.View
                     binding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
                     dataGridTextColumn.Binding = binding;
 
+                    Style defaultStyle = (Style)dataGrid_Main.FindResource(typeof(DataGridCell));
+
                     // Use as a baseline the style I defined in XAML
-                    Style cellStyle = new(typeof(DataGridCell), (Style)dataGrid_Main.Resources["style_DataGridCell_General"]);
+                    Style cellStyle = new(typeof(DataGridCell), defaultStyle);
                     DataTrigger dataTrigger = new();
                     dataTrigger.Value = null;
                     dataTrigger.Binding = binding;

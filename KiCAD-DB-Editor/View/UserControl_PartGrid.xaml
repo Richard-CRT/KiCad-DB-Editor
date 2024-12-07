@@ -18,14 +18,12 @@
                   >
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="LightGray"/>
-                <Style x:Key="style_DataGridCell_General" TargetType="{x:Type DataGridCell}" >
+                <Style TargetType="{x:Type DataGridCell}" >
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="{x:Type DataGridCell}">
                                 <Grid>
                                     <Border Padding="3,0,3,0"
-                                            BorderBrush="{TemplateBinding BorderBrush}"
-                                            BorderThickness="{TemplateBinding BorderThickness}"
                                             Background="{TemplateBinding Background}"
                                             SnapsToDevicePixels="True"
                                             >
@@ -33,10 +31,18 @@
                                                           SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
                                                           />
                                     </Border>
-                                    <Border Background="#33000000">
+                                    <Border>
+                                        <Border.Background>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="6,6" MappingMode="Absolute" SpreadMethod="Repeat">
+                                                <GradientStop Offset="0" Color="Transparent"/>
+                                                <GradientStop Offset="0.7" Color="Transparent"/>
+                                                <GradientStop Offset="0.7" Color="Coral"/>
+                                                <GradientStop Offset="1" Color="Coral"/>
+                                            </LinearGradientBrush>
+                                        </Border.Background>
                                         <Border.Style>
                                             <Style TargetType="Border">
-                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Setter Property="Visibility" Value="Hidden" />
                                                 <Style.Triggers>
                                                     <Trigger Property="IsEnabled" Value="False">
                                                         <Setter Property="Visibility" Value="Visible" />
@@ -45,6 +51,10 @@
                                             </Style>
                                         </Border.Style>
                                     </Border>
+                                    <Border BorderBrush="{TemplateBinding BorderBrush}"
+                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                            SnapsToDevicePixels="True"
+                                            />
                                 </Grid>
                             </ControlTemplate>
                         </Setter.Value>
@@ -58,7 +68,6 @@
             <DataGrid.Columns>
                 <DataGridTemplateColumn Width="SizeToCells"
                                         IsReadOnly="True"
-                                        CellStyle="{StaticResource style_DataGridCell_General}"
                                         >
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -68,27 +77,21 @@
                 </DataGridTemplateColumn>
                 <DataGridTextColumn Header="Part UID"
                                     Binding="{Binding PartUID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    CellStyle="{StaticResource style_DataGridCell_General}"
                                     />
                 <DataGridTextColumn Header="Description"
                                     Binding="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    CellStyle="{StaticResource style_DataGridCell_General}"
                                     />
                 <DataGridTextColumn Header="Manufacturer"
                                     Binding="{Binding Manufacturer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                    CellStyle="{StaticResource style_DataGridCell_General}"
                                     />
                 <DataGridTextColumn Header="MPN"
                                     Binding="{Binding MPN, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                    CellStyle="{StaticResource style_DataGridCell_General}"
                                     />
                 <DataGridTextColumn Header="Value"
                                     Binding="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                    CellStyle="{StaticResource style_DataGridCell_General}"
                                     />
                 <DataGridTemplateColumn Header="Sym. Library"
                                         SortMemberPath="SymbolLibraryName"
-                                        CellStyle="{StaticResource style_DataGridCell_General}"
                                         >
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -107,7 +110,6 @@
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="Sym. Name"
                                         SortMemberPath="SymbolName"
-                                        CellStyle="{StaticResource style_DataGridCell_General}"
                                         >
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -124,7 +126,6 @@
                 </DataGridTemplateColumn>
                 <DataGridCheckBoxColumn Header="Excl. BOM"
                                         Binding="{Binding ExcludeFromBOM, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                        CellStyle="{StaticResource style_DataGridCell_General}"
                                         >
                     <DataGridCheckBoxColumn.ElementStyle>
                         <Style TargetType="{x:Type CheckBox}">
@@ -140,7 +141,6 @@
                 </DataGridCheckBoxColumn>
                 <DataGridCheckBoxColumn Header="Excl. Board"
                                         Binding="{Binding ExcludeFromBoard, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                        CellStyle="{StaticResource style_DataGridCell_General}"
                                         >
                     <DataGridCheckBoxColumn.ElementStyle>
                         <Style TargetType="{x:Type CheckBox}">
@@ -156,7 +156,6 @@
                 </DataGridCheckBoxColumn>
                 <DataGridCheckBoxColumn Header="Excl. Sim"
                                         Binding="{Binding ExcludeFromSim, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                        CellStyle="{StaticResource style_DataGridCell_General}"
                                         >
                     <DataGridCheckBoxColumn.ElementStyle>
                         <Style TargetType="{x:Type CheckBox}">

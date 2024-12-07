@@ -17,7 +17,7 @@
                   CellEditEnding="dataGrid_Main_CellEditEnding"
                   >
             <DataGrid.Resources>
-                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="DarkGray"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="LightGray"/>
                 <Style x:Key="style_DataGridCell_General" TargetType="{x:Type DataGridCell}" >
                     <Setter Property="Template">
                         <Setter.Value>

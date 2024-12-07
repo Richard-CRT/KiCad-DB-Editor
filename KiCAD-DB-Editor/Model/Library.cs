@@ -110,8 +110,6 @@ namespace KiCAD_DB_Editor.Model
 
                 int numberOfFootprintColumns = 0;
                 for (int i = numberSpecialColumns; dbPartColumnNames[i].StartsWith("Footprint"); i++, numberOfFootprintColumns++) ;
-                if (numberOfFootprintColumns == 0)
-                    throw new InvalidDataException("No footprint columns found");
                 if (numberOfFootprintColumns % 2 != 0)
                     throw new InvalidDataException("Footprint columns not an even number");
 

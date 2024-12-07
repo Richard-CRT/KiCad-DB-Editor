@@ -359,9 +359,9 @@ namespace KiCAD_DB_Editor.View
                             textBlock.Text = "";
                             e.Handled = true;
                         }
-                        else if (frameworkElement is ComboBox comboBox)
+                        else if (frameworkElement is CheckBox checkBox)
                         {
-                            comboBox.Text = "";
+                            checkBox.IsChecked = false;
                             e.Handled = true;
                         }
                         else if (frameworkElement is ContentPresenter contentPresenter && VisualTreeHelper.GetChildrenCount(contentPresenter) == 1 &&

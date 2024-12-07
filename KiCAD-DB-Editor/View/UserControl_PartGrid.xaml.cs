@@ -218,7 +218,6 @@ namespace KiCAD_DB_Editor.View
                     dataTrigger.Value = null;
                     dataTrigger.Binding = binding;
                     dataTrigger.Setters.Add(new Setter(DataGridCell.IsEnabledProperty, false));
-                    dataTrigger.Setters.Add(new Setter(DataGridCell.BackgroundProperty, System.Windows.Media.Brushes.LightGray));
                     cellStyle.Triggers.Add(dataTrigger);
                     dataGridTextColumn.CellStyle = cellStyle;
                     

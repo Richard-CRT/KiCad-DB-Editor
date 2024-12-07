@@ -17,7 +17,8 @@
                   CellEditEnding="dataGrid_Main_CellEditEnding"
                   >
             <DataGrid.Resources>
-                <Style TargetType="{x:Type DataGridCell}" >
+                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="DarkGray"/>
+                <Style x:Key="style_DataGridCell_General" TargetType="{x:Type DataGridCell}" >
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="{x:Type DataGridCell}">
@@ -37,47 +38,40 @@
                     <Setter Property="FontFamily" Value="Consolas" />
                     <Setter Property="IsEnabled" Value="True" />
                     <Style.Triggers>
-                        <DataTrigger Value="&#x007F;">
-                            <DataTrigger.Binding>
-                                <PriorityBinding>
-                                    <Binding Path="Content.Text" RelativeSource="{RelativeSource Self}" />
-                                    <!-- This is to prevent errors with the checkboxes etc that don't have .Text -->
-                                    <Binding Source="" />
-                                </PriorityBinding>
-                            </DataTrigger.Binding>
-                            <Setter Property="IsEnabled" Value="False"/>
-                            <Setter Property="Background" Value="LightGray"/>
-                        </DataTrigger>
-                        <!-- For row selection to make it blue regardless of focus -->
-                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="True">
-                            <Setter Property="Background" Value="{x:Static SystemColors.HighlightBrush}" />
-                            <Setter Property="Foreground" Value="{x:Static SystemColors.HighlightTextBrush}" />
-                            <Setter Property="BorderBrush" Value="{x:Static SystemColors.HighlightBrush}"/>
-                        </DataTrigger>
-                        <!-- For cell selection to make it blue regardless of focus -->
-                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource Self}}" Value="True">
-                            <Setter Property="Background" Value="{x:Static SystemColors.HighlightBrush}" />
-                            <Setter Property="Foreground" Value="{x:Static SystemColors.HighlightTextBrush}" />
-                            <Setter Property="BorderBrush" Value="{x:Static SystemColors.HighlightBrush}"/>
-                        </DataTrigger>
                     </Style.Triggers>
                 </Style>
             </DataGrid.Resources>
             <DataGrid.Columns>
-                <DataGridTemplateColumn Width="SizeToCells" IsReadOnly="True">
+                <DataGridTemplateColumn Width="SizeToCells" IsReadOnly="True" CellStyle="{StaticResource style_DataGridCell_General}">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Image Source="/View/Resources/Component.png" Height="18" Margin="0,3,0,3" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="Part UID" Binding="{Binding PartUID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
-                <DataGridTextColumn Header="Description" Binding="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
-                <DataGridTextColumn Header="Manufacturer" Binding="{Binding Manufacturer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
-                <DataGridTextColumn Header="MPN" Binding="{Binding MPN, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
-                <DataGridTextColumn Header="Value" Binding="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
-                <!--<DataGridTextColumn Header="Sch. Library" Binding="{Binding SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />-->
-                <DataGridTemplateColumn Header="Sym. Library">
+                <DataGridTextColumn Header="Part UID"
+                                    Binding="{Binding PartUID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    CellStyle="{StaticResource style_DataGridCell_General}"
+                                    />
+                <DataGridTextColumn Header="Description"
+                                    Binding="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    CellStyle="{StaticResource style_DataGridCell_General}"
+                                    />
+                <DataGridTextColumn Header="Manufacturer"
+                                    Binding="{Binding Manufacturer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                    CellStyle="{StaticResource style_DataGridCell_General}"
+                                    />
+                <DataGridTextColumn Header="MPN"
+                                    Binding="{Binding MPN, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                    CellStyle="{StaticResource style_DataGridCell_General}"
+                                    />
+                <DataGridTextColumn Header="Value"
+                                    Binding="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                    CellStyle="{StaticResource style_DataGridCell_General}"
+                                    />
+                <DataGridTemplateColumn Header="Sym. Library"
+                                        CellStyle="{StaticResource style_DataGridCell_General}"
+                                        >
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
@@ -93,8 +87,9 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
-                <!--<DataGridTextColumn Header="Sch. Name" Binding="{Binding SymbolName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />-->
-                <DataGridTemplateColumn Header="Sym. Name">
+                <DataGridTemplateColumn Header="Sym. Name"
+                                        CellStyle="{StaticResource style_DataGridCell_General}"
+                                        >
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding SymbolName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
@@ -108,7 +103,10 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
-                <DataGridCheckBoxColumn Header="Excl. BOM" Binding="{Binding ExcludeFromBOM, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <DataGridCheckBoxColumn Header="Excl. BOM"
+                                        Binding="{Binding ExcludeFromBOM, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        CellStyle="{StaticResource style_DataGridCell_General}"
+                                        >
                     <DataGridCheckBoxColumn.ElementStyle>
                         <Style TargetType="{x:Type CheckBox}">
                             <Setter Property="Padding" Value="0,0,0,0" />
@@ -121,7 +119,10 @@
                         </Style>
                     </DataGridCheckBoxColumn.ElementStyle>
                 </DataGridCheckBoxColumn>
-                <DataGridCheckBoxColumn Header="Excl. Board" Binding="{Binding ExcludeFromBoard, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <DataGridCheckBoxColumn Header="Excl. Board"
+                                        Binding="{Binding ExcludeFromBoard, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        CellStyle="{StaticResource style_DataGridCell_General}"
+                                        >
                     <DataGridCheckBoxColumn.ElementStyle>
                         <Style TargetType="{x:Type CheckBox}">
                             <Setter Property="Padding" Value="0,0,0,0" />
@@ -134,7 +135,10 @@
                         </Style>
                     </DataGridCheckBoxColumn.ElementStyle>
                 </DataGridCheckBoxColumn>
-                <DataGridCheckBoxColumn Header="Excl. Sim" Binding="{Binding ExcludeFromSim, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <DataGridCheckBoxColumn Header="Excl. Sim"
+                                        Binding="{Binding ExcludeFromSim, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        CellStyle="{StaticResource style_DataGridCell_General}"
+                                        >
                     <DataGridCheckBoxColumn.ElementStyle>
                         <Style TargetType="{x:Type CheckBox}">
                             <Setter Property="Padding" Value="0,0,0,0" />

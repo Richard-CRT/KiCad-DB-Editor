@@ -42,7 +42,10 @@
                 </Style>
             </DataGrid.Resources>
             <DataGrid.Columns>
-                <DataGridTemplateColumn Width="SizeToCells" IsReadOnly="True" CellStyle="{StaticResource style_DataGridCell_General}">
+                <DataGridTemplateColumn Width="SizeToCells"
+                                        IsReadOnly="True"
+                                        CellStyle="{StaticResource style_DataGridCell_General}"
+                                        >
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Image Source="/View/Resources/Component.png" Height="18" Margin="0,3,0,3" />
@@ -70,6 +73,7 @@
                                     CellStyle="{StaticResource style_DataGridCell_General}"
                                     />
                 <DataGridTemplateColumn Header="Sym. Library"
+                                        SortMemberPath="SymbolLibraryName"
                                         CellStyle="{StaticResource style_DataGridCell_General}"
                                         >
                     <DataGridTemplateColumn.CellTemplate>
@@ -88,6 +92,7 @@
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="Sym. Name"
+                                        SortMemberPath="SymbolName"
                                         CellStyle="{StaticResource style_DataGridCell_General}"
                                         >
                     <DataGridTemplateColumn.CellTemplate>

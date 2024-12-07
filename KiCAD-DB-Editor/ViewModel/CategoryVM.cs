@@ -219,6 +219,8 @@ namespace KiCAD_DB_Editor.ViewModel
             RemoveParameterCommand = new BasicCommand(RemoveParameterCommandExecuted, RemoveParameterCommandCanExecute);
             NewPartCommand = new BasicCommand(NewPartCommandExecuted, null);
             DeletePartsCommand = new BasicCommand(DeletePartCommandExecuted, DeletePartsCommandCanExecute);
+            AddFootprintCommand = new BasicCommand(AddFootprintCommandExecuted, AddFootprintCommandCanExecute);
+            RemoveFootprintCommand = new BasicCommand(RemoveFootprintCommandExecuted, RemoveFootprintCommandCanExecute);
 
             // Initialise collection with events
             CategoryVMs = new(category.Categories.OrderBy(c => c.Name).Select(c => new CategoryVM(ParentLibraryVM, this, c)));
@@ -272,6 +274,8 @@ namespace KiCAD_DB_Editor.ViewModel
         public IBasicCommand RemoveParameterCommand { get; }
         public IBasicCommand NewPartCommand { get; }
         public IBasicCommand DeletePartsCommand { get; }
+        public IBasicCommand AddFootprintCommand { get; }
+        public IBasicCommand RemoveFootprintCommand { get; }
 
         private bool AddParameterCommandCanExecute(object? parameter)
         {
@@ -351,6 +355,30 @@ namespace KiCAD_DB_Editor.ViewModel
                 PartVMs.Remove(pVMToBeRemoved);
                 ParentLibraryVM.PartVMs.Remove(pVMToBeRemoved);
             }
+        }
+
+        private bool AddFootprintCommandCanExecute(object? parameter)
+        {
+            return SelectedPartVMs.Length > 0;
+        }
+
+        private void AddFootprintCommandExecuted(object? parameter)
+        {
+            Debug.Assert(SelectedPartVMs.Length > 0);
+            foreach (PartVM selectedPartVM in SelectedPartVMs)
+                selectedPartVM.AddFootprint();
+        }
+
+        private bool RemoveFootprintCommandCanExecute(object? parameter)
+        {
+            return SelectedPartVMs.Length > 0 && SelectedPartVMs.All(selectedPartVM => selectedPartVM.FootprintCount > 1);
+        }
+
+        private void RemoveFootprintCommandExecuted(object? parameter)
+        {
+            Debug.Assert(SelectedPartVMs.Length > 0);
+            foreach (PartVM selectedPartVM in SelectedPartVMs)
+                selectedPartVM.RemoveFootprint();
         }
 
         #endregion Commands

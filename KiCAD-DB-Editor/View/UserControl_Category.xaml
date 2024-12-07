@@ -57,6 +57,10 @@
                         Command="{Binding CategoryVM.NewPartCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
                 <Button Content="Delete Parts" Padding="5,1,5,1" Margin="5,0,0,0"
                         Command="{Binding CategoryVM.DeletePartsCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
+                <Button Content="Add Footprint" Padding="5,1,5,1" Margin="5,0,0,0"
+                        Command="{Binding CategoryVM.AddFootprintCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
+                <Button Content="Remove Footprint" Padding="5,1,5,1" Margin="5,0,0,0"
+                        Command="{Binding CategoryVM.RemoveFootprintCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
             </StackPanel>
             <View:UserControl_PartGrid
                 Grid.Row="2"

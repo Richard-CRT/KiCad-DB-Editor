@@ -246,11 +246,11 @@ namespace KiCAD_DB_Editor.ViewModel
                 var parameterVMsToBeAdded = InheritedAndNormalParameterVMs.Except(partVM.ParameterVMs).ToArray();
                 foreach (ParameterVM parameterVMToBeAdded in parameterVMsToBeAdded)
                     partVM.AddParameterVM(parameterVMToBeAdded);
+            }
 
                 foreach (CategoryVM cVM in CategoryVMs)
                     cVM.InvokePropertyChanged_InheritedParameterVMs();
             }
-        }
 
         public void InvokePropertyChanged_AvailableParameterVMs()
         {

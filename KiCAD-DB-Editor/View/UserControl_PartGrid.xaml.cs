@@ -220,7 +220,7 @@ namespace KiCAD_DB_Editor.View
 
         private List<DataGridColumn> columnsToRemoveWhenRedoing = new();
 
-        private DataGridTemplateColumn newFootprintColumn(string header, string valueBindingTarget, bool libraryBinding, string optionsBindingTarget)
+        private DataGridTemplateColumn newFootprintColumn(string header, string valueBindingTarget, bool libraryColumn, string optionsBindingTarget)
         {
             DataGridTemplateColumn dataGridTemplateColumn;
             dataGridTemplateColumn = new();
@@ -231,40 +231,32 @@ namespace KiCAD_DB_Editor.View
             valueBinding.Mode = BindingMode.TwoWay;
             valueBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
 
-            Binding optionsBinding = new(optionsBindingTarget);
-            if (libraryBinding)
-                optionsBinding.RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, typeof(UserControl_PartGrid), 1); // 1 means nearest
-
-            // Like this but for footprints
-            /*
-            <TextBlock Text="{Binding SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-            */
+            // Like the XAML symbol example but for footprint names
             DataTemplate cellTemplate = new();
             FrameworkElementFactory cellTemplateFrameworkElementFactory = new(typeof(TextBlock));
             cellTemplateFrameworkElementFactory.SetBinding(TextBlock.TextProperty, valueBinding);
             cellTemplate.VisualTree = cellTemplateFrameworkElementFactory;
             dataGridTemplateColumn.CellTemplate = cellTemplate;
 
-            // Like this but for footprints
-            /*
-            <ComboBox IsEditable="True"
-                        Text="{Binding SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        ItemsSource="{Binding KiCADSymbolLibraryVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}"
-                        DisplayMemberPath="Nickname"
-                        />
-            */
+            Binding optionsBinding = new(optionsBindingTarget);
+            if (libraryColumn)
+                // Note this not present for footprint names
+                optionsBinding.RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, typeof(UserControl_PartGrid), 1); // 1 means nearest
+
+            // Like the XAML symbol example but for footprint names
             DataTemplate cellEditingTemplate = new();
             FrameworkElementFactory cellEditingTemplateFrameworkElementFactory = new(typeof(ComboBox));
             cellEditingTemplateFrameworkElementFactory.SetBinding(ComboBox.TextProperty, valueBinding);
             cellEditingTemplateFrameworkElementFactory.SetBinding(ComboBox.ItemsSourceProperty, optionsBinding);
             cellEditingTemplateFrameworkElementFactory.SetValue(ComboBox.IsEditableProperty, true);
-            if (libraryBinding)
+            if (libraryColumn)
+                // Note this one not present for footprint names
                 cellEditingTemplateFrameworkElementFactory.SetValue(ComboBox.DisplayMemberPathProperty, "Nickname");
             cellEditingTemplate.VisualTree = cellEditingTemplateFrameworkElementFactory;
             dataGridTemplateColumn.CellEditingTemplate = cellEditingTemplate;
 
-            Style defaultStyle = (Style)dataGrid_Main.FindResource(typeof(DataGridCell));
             // Use as a baseline the style I defined in XAML
+            Style defaultStyle = (Style)dataGrid_Main.FindResource(typeof(DataGridCell));
             Style cellStyle = new(typeof(DataGridCell), defaultStyle);
             DataTrigger dataTrigger = new();
             dataTrigger.Value = null;
@@ -274,45 +266,16 @@ namespace KiCAD_DB_Editor.View
             dataGridTemplateColumn.CellStyle = cellStyle;
 
             return dataGridTemplateColumn;
+        }
 
-            /*
-            string dataGridTemplateColumnString = $$$$"""
-                <DataGridTemplateColumn xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                                        xmlns:View="clr-namespace:KiCAD_DB_Editor.View"
-                                        xmlns:local="clr-namespace:KiCAD_DB_Editor.View"
-                                        Header="{{{{header}}}}"
-                                        SortMemberPath="{{{{bindingTarget}}}}"
-                                        >
-                    <DataGridTemplateColumn.CellStyle>
-                        <Style>
-                            <Style.Triggers>
-                                <DataTrigger Value="{x:Null}" Binding="{Binding {{{{bindingTarget}}}}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                                    <Setter Property="IsEnabled" Value="false" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </DataGridTemplateColumn.CellStyle>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding {{{{bindingTarget}}}}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                    <DataGridTemplateColumn.CellEditingTemplate>
-                        <DataTemplate>
-                            <ComboBox IsEditable="True"
-                                      Text="{Binding {{{{bindingTarget}}}}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                      
-                                      DisplayMemberPath="Nickname"
-                                      />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellEditingTemplate>
-                </DataGridTemplateColumn>
-                """;
-            var stringReader = new StringReader(dataGridTemplateColumnString);
-            XmlReader xmlReader = XmlReader.Create(stringReader);
-            DataGridTemplateColumn dataGridTemplateColumn = (DataGridTemplateColumn)System.Windows.Markup.XamlReader.Load(xmlReader);
-            */
+        private DataGridTemplateColumn newFootprintNameColumn(string header, string valueBindingTarget, string optionsBindingTarget)
+        {
+            return newFootprintColumn(header, valueBindingTarget, false, optionsBindingTarget);
+        }
+
+        private DataGridTemplateColumn newFootprintLibraryColumn(string header, string valueBindingTarget)
+        {
+            return newFootprintColumn(header, valueBindingTarget, true, "KiCADFootprintLibraryVMs");
         }
 
         private DataGridTextColumn newTextColumn(string header, string valueBindingTarget)
@@ -326,8 +289,8 @@ namespace KiCAD_DB_Editor.View
             valueBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
             dataGridTextColumn.Binding = valueBinding;
 
-            Style defaultStyle = (Style)dataGrid_Main.FindResource(typeof(DataGridCell));
             // Use as a baseline the style I defined in XAML
+            Style defaultStyle = (Style)dataGrid_Main.FindResource(typeof(DataGridCell));
             Style cellStyle = new(typeof(DataGridCell), defaultStyle);
             DataTrigger dataTrigger = new();
             dataTrigger.Value = null;
@@ -362,10 +325,9 @@ namespace KiCAD_DB_Editor.View
                 for (int i = 0; i < maxFootprints; i++)
                 {
                     DataGridColumn footprintColumn;
-                    //footprintColumn = newTextColumn($"Fprt. {i + 1} Library", $"FootprintLibraryNameAccessor[{i}]");
-                    footprintColumn = newFootprintColumn($"Fprt. {i + 1} Library", $"FootprintLibraryNameAccessor[{i}]", true, "KiCADFootprintLibraryVMs");
+                    footprintColumn = newFootprintLibraryColumn($"Fprt. {i + 1} Library", $"FootprintLibraryNameAccessor[{i}]");
                     addColumn(footprintColumn);
-                    footprintColumn = newFootprintColumn($"Fprt. {i + 1} Name", $"FootprintNameAccessor[{i}]", false, $"SelectedFootprintLibraryVMAccessor[{i}].KiCADFootprintNames");
+                    footprintColumn = newFootprintNameColumn($"Fprt. {i + 1} Name", $"FootprintNameAccessor[{i}]", $"SelectedFootprintLibraryVMAccessor[{i}].KiCADFootprintNames");
                     addColumn(footprintColumn);
                 }
 

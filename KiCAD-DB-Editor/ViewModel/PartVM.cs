@@ -110,6 +110,9 @@ namespace KiCAD_DB_Editor.ViewModel
                 {
                     Part.SymbolLibraryName = value;
                     InvokePropertyChanged();
+
+                    // Doesn't seem to be technically required as the bindings for the ComboBoxes I'm designing this for only load
+                    // when the cells are edited, but if not then I'd need to do this to prompt the ComboBoxes to refetch the value
                     InvokePropertyChanged(nameof(this.SelectedKiCADSymbolLibraryVM));
                 }
             }

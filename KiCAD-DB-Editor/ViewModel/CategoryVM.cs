@@ -51,6 +51,9 @@ namespace KiCAD_DB_Editor.ViewModel
 
                     Category.Name = value;
                     InvokePropertyChanged();
+                    InvokePropertyChanged(nameof(this.Path));
+                    foreach (CategoryVM cVM in CategoryVMs)
+                        cVM.InvokePropertyChanged_Path();
 
                     int oldIndex = categoryCollection.IndexOf(this);
                     int newIndex = 0;
@@ -68,6 +71,11 @@ namespace KiCAD_DB_Editor.ViewModel
                         categoryCollection.Move(oldIndex, newIndex);
                 }
             }
+        }
+
+        public string Path
+        {
+            get { return ParentCategoryVM is not null ? $"{ParentCategoryVM.Path}/{this.Name}" : this.Name; }
         }
 
         // Do not initialise here, do in constructor to link collection changed
@@ -184,9 +192,6 @@ namespace KiCAD_DB_Editor.ViewModel
         private void _partVMs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             Category.Parts = new(this.PartVMs.Select(pVM => pVM.Part));
-
-            foreach(PartVM pVM in this.PartVMs)
-                pVM.ParentCategoryVM = this;
         }
 
         private PartVM[] _selectedPartVMs = Array.Empty<PartVM>();
@@ -231,6 +236,16 @@ namespace KiCAD_DB_Editor.ViewModel
             // Link to parent library instances of PartVM (requires Library to have already set them up)
             PartVMs = new(parentLibraryVM.PartVMs.Where(pVM => category.Parts.Contains(pVM.Part)));
             Debug.Assert(_partVMs is not null);
+
+            foreach (var pVM in PartVMs)
+            {
+                pVM.ParentCategoryVM = this;
+            }
+        }
+
+        public void InvokePropertyChanged_Path()
+        {
+            InvokePropertyChanged(nameof(this.Path));
         }
 
         public void InvokePropertyChanged_InheritedParameterVMs()
@@ -248,9 +263,9 @@ namespace KiCAD_DB_Editor.ViewModel
                     partVM.AddParameterVM(parameterVMToBeAdded);
             }
 
-                foreach (CategoryVM cVM in CategoryVMs)
-                    cVM.InvokePropertyChanged_InheritedParameterVMs();
-            }
+            foreach (CategoryVM cVM in CategoryVMs)
+                cVM.InvokePropertyChanged_InheritedParameterVMs();
+        }
 
         public void InvokePropertyChanged_AvailableParameterVMs()
         {

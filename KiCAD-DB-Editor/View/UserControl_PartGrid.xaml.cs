@@ -31,6 +31,18 @@ namespace KiCAD_DB_Editor.View
     {
         #region Dependency Properties
 
+        public static readonly DependencyProperty DisplayPartCategoryProperty = DependencyProperty.Register(
+            nameof(DisplayPartCategory),
+            typeof(bool),
+            typeof(UserControl_PartGrid)
+            );
+
+        public bool DisplayPartCategory
+        {
+            get => (bool)GetValue(DisplayPartCategoryProperty);
+            set => SetValue(DisplayPartCategoryProperty, value);
+        }
+
         public static readonly DependencyProperty SelectedPartVMsProperty = DependencyProperty.Register(
             nameof(SelectedPartVMs),
             typeof(PartVM[]),

@@ -49,6 +49,11 @@ namespace KiCAD_DB_Editor.ViewModel
         public readonly Model.Part Part;
         public readonly LibraryVM ParentLibraryVM;
 
+        // Included so I can get a category string for the all parts grid
+        // It has to have a setter since I can't provide parentCategoryVM at instantiation time, but this should never be changed
+        // For that reason does not InvokePropertyChanged
+        public CategoryVM? ParentCategoryVM { get; set; }
+
         #region Notify Properties
 
         public string PartUID
@@ -134,14 +139,6 @@ namespace KiCAD_DB_Editor.ViewModel
         {
             // Have to do ! as FirstOrDefault needs to think kSLVM could be null in order for me to return null
             get { return ParentLibraryVM.KiCADSymbolLibraryVMs.FirstOrDefault(kSLVM => kSLVM!.Nickname == SymbolLibraryName, null); }
-        }
-
-        // Included so I can get a category string for the all parts grid
-        private CategoryVM? _parentCategoryVM;
-        public CategoryVM? ParentCategoryVM
-        {
-            get { return _parentCategoryVM; }
-            set { if (_parentCategoryVM != value) { _parentCategoryVM = value; InvokePropertyChanged(); } }
         }
 
         #endregion Notify Properties

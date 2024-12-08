@@ -258,9 +258,12 @@ namespace KiCAD_DB_Editor.ViewModel
                 if (value is not null)
                 {
                     if (OwnerPartVM.Part.FootprintLibraryNames.Count > index)
+                    {
                         OwnerPartVM.Part.FootprintLibraryNames[index] = value;
+                        InvokePropertyChanged("Item[]");
                 }
             }
+        }
         }
 
         #endregion Notify Properties
@@ -291,9 +294,12 @@ namespace KiCAD_DB_Editor.ViewModel
                 if (value is not null)
                 {
                     if (OwnerPartVM.Part.FootprintNames.Count > index)
+                    {
                         OwnerPartVM.Part.FootprintNames[index] = value;
+                        InvokePropertyChanged("Item[]");
                 }
             }
+        }
         }
 
         #endregion Notify Properties

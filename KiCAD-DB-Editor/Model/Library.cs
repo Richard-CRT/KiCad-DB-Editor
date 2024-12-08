@@ -79,7 +79,7 @@ namespace KiCAD_DB_Editor.Model
                 }
                 SqliteConnection.ClearAllPools();
 
-                const int numberSpecialColumns = 11;
+                const int numberSpecialColumns = 12;
                 int columnIndex = 0;
                 if (
                     dbPartColumnNames.Count < numberSpecialColumns ||
@@ -95,6 +95,8 @@ namespace KiCAD_DB_Editor.Model
                     dbPartColumnNames[columnIndex++] != "MPN" ||
                     dbPartColumnTypes[columnIndex] != typeof(string) ||
                     dbPartColumnNames[columnIndex++] != "Value" ||
+                    dbPartColumnTypes[columnIndex] != typeof(string) ||
+                    dbPartColumnNames[columnIndex++] != "Datasheet" ||
                     dbPartColumnTypes[columnIndex] != typeof(Int64) ||
                     dbPartColumnNames[columnIndex++] != "Exclude from BOM" ||
                     dbPartColumnTypes[columnIndex] != typeof(Int64) ||
@@ -207,6 +209,7 @@ namespace KiCAD_DB_Editor.Model
                     part.Manufacturer = (string)dbPart[j++];
                     part.MPN = (string)dbPart[j++];
                     part.Value = (string)dbPart[j++];
+                    part.Datasheet = (string)dbPart[j++];
                     part.ExcludeFromBOM = (Int64)dbPart[j++] == 1;
                     part.ExcludeFromBoard = (Int64)dbPart[j++] == 1;
                     part.ExcludeFromSim = (Int64)dbPart[j++] == 1;
@@ -353,6 +356,7 @@ namespace KiCAD_DB_Editor.Model
                         "\"Manufacturer\" TEXT, " +
                         "\"MPN\" TEXT, " +
                         "\"Value\" TEXT, " +
+                        "\"Datasheet\" TEXT, " +
                         "\"Exclude from BOM\" INTEGER, " +
                         "\"Exclude from Board\" INTEGER, " +
                         "\"Exclude from Sim\" INTEGER, " +
@@ -380,6 +384,7 @@ namespace KiCAD_DB_Editor.Model
                         "\"Manufacturer\", " +
                         "\"MPN\", " +
                         "\"Value\", " +
+                        "\"Datasheet\", " +
                         "\"Exclude from BOM\", " +
                         "\"Exclude from Board\", " +
                         "\"Exclude from Sim\", " +
@@ -403,6 +408,7 @@ namespace KiCAD_DB_Editor.Model
                                 $"'{part.Manufacturer.Replace("'", "''")}', " +
                                 $"'{part.MPN.Replace("'", "''")}', " +
                                 $"'{part.Value.Replace("'", "''")}', " +
+                                $"'{part.Datasheet.Replace("'", "''")}', " +
                                 $"{(part.ExcludeFromBOM ? 1 : 0)}, " +
                                 $"{(part.ExcludeFromBoard ? 1 : 0)}, " +
                                 $"{(part.ExcludeFromSim ? 1 : 0)}, " +

@@ -96,6 +96,9 @@
                 <DataGridTextColumn Header="Value"
                                     Binding="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                                     />
+                <DataGridTextColumn Header="Datasheet"
+                                    Binding="{Binding Datasheet, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                    />
                 <DataGridCheckBoxColumn Header="Excl. BOM"
                                         Binding="{Binding ExcludeFromBOM, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         >

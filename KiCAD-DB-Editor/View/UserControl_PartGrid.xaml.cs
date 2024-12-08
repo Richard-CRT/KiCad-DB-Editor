@@ -241,7 +241,7 @@ namespace KiCAD_DB_Editor.View
                     addColumn($"Fprt. {i + 1} Name", $"FootprintNameAccessor[{i}]");
                 }
 
-                int indexToInsertAt = 6;
+                int indexToInsertAt = 7;
                 foreach (ParameterVM parameterVM in ParameterVMs)
                     addColumn(parameterVM.Name, $"ParameterAccessor[{parameterVM.Name}]", index: indexToInsertAt++);
             }

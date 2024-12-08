@@ -46,6 +46,11 @@ namespace KiCAD_DB_Editor.ViewModel
             get { return Part.Value; }
             set { if (Part.Value != value) { Part.Value = value; InvokePropertyChanged(); } }
         }
+        public string Datasheet
+        {
+            get { return Part.Datasheet; }
+            set { if (Part.Datasheet != value) { Part.Datasheet = value; InvokePropertyChanged(); } }
+        }
         public bool ExcludeFromBOM
         {
             get { return Part.ExcludeFromBOM; }

@@ -165,9 +165,9 @@
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
                             <ComboBox IsEditable="True"
-                      Text="{Binding SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                      ItemsSource="{Binding KiCADSymbolLibraryVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}"
-                      DisplayMemberPath="Nickname"
+                                      Text="{Binding SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      ItemsSource="{Binding KiCADSymbolLibraryVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}"
+                                      DisplayMemberPath="Nickname"
                       />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
@@ -183,8 +183,8 @@
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
                             <ComboBox IsEditable="True"
-                      Text="{Binding SymbolName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                      ItemsSource="{Binding SelectedKiCADSymbolLibraryVM.KiCADSymbolNames}"/>
+                                      Text="{Binding SymbolName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      ItemsSource="{Binding SelectedKiCADSymbolLibraryVM.KiCADSymbolNames}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>

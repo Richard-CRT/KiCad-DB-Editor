@@ -65,6 +65,7 @@
             <View:UserControl_PartGrid
                 Grid.Row="2"
                 KiCADSymbolLibraryVMs="{Binding CategoryVM.ParentLibraryVM.KiCADSymbolLibraryVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}"
+                KiCADFootprintLibraryVMs="{Binding CategoryVM.ParentLibraryVM.KiCADFootprintLibraryVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}"
                 ParameterVMs="{Binding CategoryVM.InheritedAndNormalParameterVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}"           
                 PartVMs="{Binding CategoryVM.PartVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}"
                 SelectedPartVMs="{Binding CategoryVM.SelectedPartVMs, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}, UpdateSourceTrigger=PropertyChanged}"

@@ -46,6 +46,7 @@ namespace KiCAD_DB_Editor.ViewModel
         public ParameterAccessor ParameterAccessor { get; }
         public FootprintLibraryNameAccessor FootprintLibraryNameAccessor { get; }
         public FootprintNameAccessor FootprintNameAccessor { get; }
+        public SelectedFootprintLibraryVMAccessor SelectedFootprintLibraryVMAccessor { get; }
         public readonly Model.Part Part;
         public readonly LibraryVM ParentLibraryVM;
 
@@ -156,6 +157,7 @@ namespace KiCAD_DB_Editor.ViewModel
             ParameterAccessor = new(this);
             FootprintLibraryNameAccessor = new(this);
             FootprintNameAccessor = new(this);
+            SelectedFootprintLibraryVMAccessor = new(this);
         }
 
         public void AddParameterVM(ParameterVM pVM)
@@ -264,9 +266,13 @@ namespace KiCAD_DB_Editor.ViewModel
                     {
                         OwnerPartVM.Part.FootprintLibraryNames[index] = value;
                         InvokePropertyChanged("Item[]");
+
+                        // Doesn't seem to be technically required as the bindings for the ComboBoxes I'm designing this for only load
+                        // when the cells are edited, but if not then I'd need to do this to prompt the ComboBoxes to refetch the value
+                        OwnerPartVM.SelectedFootprintLibraryVMAccessor.InvokePropertyChanged("Item[]");
+                    }
                 }
             }
-        }
         }
 
         #endregion Notify Properties
@@ -300,14 +306,40 @@ namespace KiCAD_DB_Editor.ViewModel
                     {
                         OwnerPartVM.Part.FootprintNames[index] = value;
                         InvokePropertyChanged("Item[]");
+                    }
                 }
             }
-        }
         }
 
         #endregion Notify Properties
 
         public FootprintNameAccessor(PartVM ownerPVM)
+        {
+            OwnerPartVM = ownerPVM;
+        }
+    }
+
+    public class SelectedFootprintLibraryVMAccessor : NotifyObject
+    {
+        public readonly PartVM OwnerPartVM;
+
+        #region Notify Properties
+
+        public KiCADFootprintLibraryVM? this[int index]
+        {
+            get
+            {
+                if (OwnerPartVM.Part.FootprintLibraryNames.Count > index)
+                    // Have to do ! as FirstOrDefault needs to think kSLVM could be null in order for me to return null
+                    return OwnerPartVM.ParentLibraryVM.KiCADFootprintLibraryVMs.FirstOrDefault(kFLVM => kFLVM!.Nickname == OwnerPartVM.Part.FootprintLibraryNames[index], null);
+                else
+                    return null;
+            }
+        }
+
+        #endregion Notify Properties
+
+        public SelectedFootprintLibraryVMAccessor(PartVM ownerPVM)
         {
             OwnerPartVM = ownerPVM;
         }

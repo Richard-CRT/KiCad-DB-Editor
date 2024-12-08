@@ -274,6 +274,9 @@ namespace KiCAD_DB_Editor.Model
         [JsonPropertyName("kicad_symbol_libraries"), JsonPropertyOrder(4)]
         public List<Model.KiCADSymbolLibrary> KiCADSymbolLibraries { get; set; } = new();
 
+        [JsonPropertyName("kicad_footprint_libraries"), JsonPropertyOrder(5)]
+        public List<Model.KiCADFootprintLibrary> KiCADFootprintLibraries { get; set; } = new();
+
         [JsonIgnore]
         public List<Model.Part> Parts { get; set; } = new();
 

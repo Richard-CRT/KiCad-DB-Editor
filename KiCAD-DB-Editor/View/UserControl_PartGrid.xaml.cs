@@ -76,6 +76,18 @@ namespace KiCAD_DB_Editor.View
             set => SetValue(KiCADSymbolLibraryVMsProperty, value);
         }
 
+        public static readonly DependencyProperty KiCADFootprintLibraryVMsProperty = DependencyProperty.Register(
+            nameof(KiCADFootprintLibraryVMs),
+            typeof(ObservableCollectionEx<KiCADFootprintLibraryVM>),
+            typeof(UserControl_PartGrid)
+            );
+
+        public ObservableCollectionEx<KiCADFootprintLibraryVM> KiCADFootprintLibraryVMs
+        {
+            get => (ObservableCollectionEx<KiCADFootprintLibraryVM>)GetValue(KiCADFootprintLibraryVMsProperty);
+            set => SetValue(KiCADFootprintLibraryVMsProperty, value);
+        }
+
         public static readonly DependencyProperty ParameterVMsProperty = DependencyProperty.Register(
             nameof(ParameterVMs),
             typeof(ObservableCollectionEx<ParameterVM>),
@@ -208,32 +220,132 @@ namespace KiCAD_DB_Editor.View
 
         private List<DataGridColumn> columnsToRemoveWhenRedoing = new();
 
-        private void addColumn(string header, string bindingTarget, int index=-1)
+        private DataGridTemplateColumn newFootprintColumn(string header, string valueBindingTarget, bool libraryBinding, string optionsBindingTarget)
         {
-            DataGridTextColumn dataGridTextColumn;
-            dataGridTextColumn = new();
-            dataGridTextColumn.Header = header.Replace("_", "__"); ;
-            Binding binding = new(bindingTarget);
-            binding.Mode = BindingMode.TwoWay;
-            binding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-            dataGridTextColumn.Binding = binding;
+            DataGridTemplateColumn dataGridTemplateColumn;
+            dataGridTemplateColumn = new();
+            dataGridTemplateColumn.Header = header.Replace("_", "__");
+            dataGridTemplateColumn.SortMemberPath = valueBindingTarget;
+
+            Binding valueBinding = new(valueBindingTarget);
+            valueBinding.Mode = BindingMode.TwoWay;
+            valueBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+
+            Binding optionsBinding = new(optionsBindingTarget);
+            if (libraryBinding)
+                optionsBinding.RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, typeof(UserControl_PartGrid), 1); // 1 means nearest
+
+            // Like this but for footprints
+            /*
+            <TextBlock Text="{Binding SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            */
+            DataTemplate cellTemplate = new();
+            FrameworkElementFactory cellTemplateFrameworkElementFactory = new(typeof(TextBlock));
+            cellTemplateFrameworkElementFactory.SetBinding(TextBlock.TextProperty, valueBinding);
+            cellTemplate.VisualTree = cellTemplateFrameworkElementFactory;
+            dataGridTemplateColumn.CellTemplate = cellTemplate;
+
+            // Like this but for footprints
+            /*
+            <ComboBox IsEditable="True"
+                        Text="{Binding SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        ItemsSource="{Binding KiCADSymbolLibraryVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}"
+                        DisplayMemberPath="Nickname"
+                        />
+            */
+            DataTemplate cellEditingTemplate = new();
+            FrameworkElementFactory cellEditingTemplateFrameworkElementFactory = new(typeof(ComboBox));
+            cellEditingTemplateFrameworkElementFactory.SetBinding(ComboBox.TextProperty, valueBinding);
+            cellEditingTemplateFrameworkElementFactory.SetBinding(ComboBox.ItemsSourceProperty, optionsBinding);
+            cellEditingTemplateFrameworkElementFactory.SetValue(ComboBox.IsEditableProperty, true);
+            if (libraryBinding)
+                cellEditingTemplateFrameworkElementFactory.SetValue(ComboBox.DisplayMemberPathProperty, "Nickname");
+            cellEditingTemplate.VisualTree = cellEditingTemplateFrameworkElementFactory;
+            dataGridTemplateColumn.CellEditingTemplate = cellEditingTemplate;
 
             Style defaultStyle = (Style)dataGrid_Main.FindResource(typeof(DataGridCell));
-
             // Use as a baseline the style I defined in XAML
             Style cellStyle = new(typeof(DataGridCell), defaultStyle);
             DataTrigger dataTrigger = new();
             dataTrigger.Value = null;
-            dataTrigger.Binding = binding;
+            dataTrigger.Binding = valueBinding;
+            dataTrigger.Setters.Add(new Setter(DataGridCell.IsEnabledProperty, false));
+            cellStyle.Triggers.Add(dataTrigger);
+            dataGridTemplateColumn.CellStyle = cellStyle;
+
+            return dataGridTemplateColumn;
+
+            /*
+            string dataGridTemplateColumnString = $$$$"""
+                <DataGridTemplateColumn xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                                        xmlns:View="clr-namespace:KiCAD_DB_Editor.View"
+                                        xmlns:local="clr-namespace:KiCAD_DB_Editor.View"
+                                        Header="{{{{header}}}}"
+                                        SortMemberPath="{{{{bindingTarget}}}}"
+                                        >
+                    <DataGridTemplateColumn.CellStyle>
+                        <Style>
+                            <Style.Triggers>
+                                <DataTrigger Value="{x:Null}" Binding="{Binding {{{{bindingTarget}}}}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                    <Setter Property="IsEnabled" Value="false" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGridTemplateColumn.CellStyle>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding {{{{bindingTarget}}}}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <ComboBox IsEditable="True"
+                                      Text="{Binding {{{{bindingTarget}}}}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      
+                                      DisplayMemberPath="Nickname"
+                                      />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+                """;
+            var stringReader = new StringReader(dataGridTemplateColumnString);
+            XmlReader xmlReader = XmlReader.Create(stringReader);
+            DataGridTemplateColumn dataGridTemplateColumn = (DataGridTemplateColumn)System.Windows.Markup.XamlReader.Load(xmlReader);
+            */
+        }
+
+        private DataGridTextColumn newTextColumn(string header, string valueBindingTarget)
+        {
+            DataGridTextColumn dataGridTextColumn;
+            dataGridTextColumn = new();
+            dataGridTextColumn.Header = header.Replace("_", "__");
+
+            Binding valueBinding = new(valueBindingTarget);
+            valueBinding.Mode = BindingMode.TwoWay;
+            valueBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+            dataGridTextColumn.Binding = valueBinding;
+
+            Style defaultStyle = (Style)dataGrid_Main.FindResource(typeof(DataGridCell));
+            // Use as a baseline the style I defined in XAML
+            Style cellStyle = new(typeof(DataGridCell), defaultStyle);
+            DataTrigger dataTrigger = new();
+            dataTrigger.Value = null;
+            dataTrigger.Binding = valueBinding;
             dataTrigger.Setters.Add(new Setter(DataGridCell.IsEnabledProperty, false));
             cellStyle.Triggers.Add(dataTrigger);
             dataGridTextColumn.CellStyle = cellStyle;
 
-            columnsToRemoveWhenRedoing.Add(dataGridTextColumn);
+            return dataGridTextColumn;
+        }
+
+        private void addColumn(DataGridColumn column, int index = -1)
+        {
+            columnsToRemoveWhenRedoing.Add(column);
             if (index == -1)
-                dataGrid_Main.Columns.Add(dataGridTextColumn);
+                dataGrid_Main.Columns.Add(column);
             else
-                dataGrid_Main.Columns.Insert(index, dataGridTextColumn);
+                dataGrid_Main.Columns.Insert(index, column);
         }
 
         private void redoColumns()
@@ -249,13 +361,20 @@ namespace KiCAD_DB_Editor.View
 
                 for (int i = 0; i < maxFootprints; i++)
                 {
-                    addColumn($"Fprt. {i + 1} Library", $"FootprintLibraryNameAccessor[{i}]");
-                    addColumn($"Fprt. {i + 1} Name", $"FootprintNameAccessor[{i}]");
+                    DataGridColumn footprintColumn;
+                    //footprintColumn = newTextColumn($"Fprt. {i + 1} Library", $"FootprintLibraryNameAccessor[{i}]");
+                    footprintColumn = newFootprintColumn($"Fprt. {i + 1} Library", $"FootprintLibraryNameAccessor[{i}]", true, "KiCADFootprintLibraryVMs");
+                    addColumn(footprintColumn);
+                    footprintColumn = newFootprintColumn($"Fprt. {i + 1} Name", $"FootprintNameAccessor[{i}]", false, $"SelectedFootprintLibraryVMAccessor[{i}].KiCADFootprintNames");
+                    addColumn(footprintColumn);
                 }
 
                 int indexToInsertAt = 7;
                 foreach (ParameterVM parameterVM in ParameterVMs)
-                    addColumn(parameterVM.Name, $"ParameterAccessor[{parameterVM.Name}]", index: indexToInsertAt++);
+                {
+                    DataGridColumn column = newTextColumn(parameterVM.Name, $"ParameterAccessor[{parameterVM.Name}]");
+                    addColumn(column, index: indexToInsertAt++);
+                }
             }
         }
 

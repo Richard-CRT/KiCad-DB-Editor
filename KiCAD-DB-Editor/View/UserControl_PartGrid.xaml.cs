@@ -481,7 +481,10 @@ namespace KiCAD_DB_Editor.View
                                 )
                         {
                             if (frameworkElementSubsidiary is TextBlock textBlockSubsidiary)
+                            {
                                 textBlockSubsidiary.Text = "";
+                                e.Handled = true;
+                            }
                         }
                     }
                 }

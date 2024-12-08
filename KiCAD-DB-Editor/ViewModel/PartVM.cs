@@ -13,6 +13,36 @@ namespace KiCAD_DB_Editor.ViewModel
 {
     public class PartVM : NotifyObject
     {
+        // Duplicated between LibraryVM and CategoryVM so we move the checks here
+        public static bool AddFootprintCommandCanExecute(IEnumerable<PartVM> partVMsToAddFootprintTo)
+        {
+            return partVMsToAddFootprintTo.Count() > 0;
+        }
+
+        // Duplicated between LibraryVM and CategoryVM so we move the checks here
+        public static void AddFootprintCommandExecuted(IEnumerable<PartVM> partVMsToAddFootprintTo)
+        {
+            Debug.Assert(partVMsToAddFootprintTo.Count() > 0);
+            foreach (PartVM pVM in partVMsToAddFootprintTo)
+                pVM.AddFootprint();
+        }
+
+        // Duplicated between LibraryVM and CategoryVM so we move the checks here
+        public static bool RemoveFootprintCommandCanExecute(IEnumerable<PartVM> partVMsToRemoveFootprintsFrom)
+        {
+            return partVMsToRemoveFootprintsFrom.Count() > 0 && partVMsToRemoveFootprintsFrom.All(pVM => pVM.FootprintCount > 1);
+        }
+
+        // Duplicated between LibraryVM and CategoryVM so we move the checks here
+        public static void RemoveFootprintCommandExecuted(IEnumerable<PartVM> partVMsToRemoveFootprintsFrom)
+        {
+            Debug.Assert(partVMsToRemoveFootprintsFrom.Count() > 0);
+            foreach (PartVM pVM in partVMsToRemoveFootprintsFrom)
+                pVM.RemoveFootprint();
+        }
+
+        // ======================================================================
+
         public ParameterAccessor ParameterAccessor { get; }
         public FootprintLibraryNameAccessor FootprintLibraryNameAccessor { get; }
         public FootprintNameAccessor FootprintNameAccessor { get; }

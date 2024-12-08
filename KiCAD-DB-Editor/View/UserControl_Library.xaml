@@ -82,11 +82,18 @@
         <TabItem Header="Parts">
             <DockPanel>
                 <TextBox DockPanel.Dock="Top"></TextBox>
+                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,5,0,5">
+                    <Button Content="Add Footprint" Padding="5,1,5,1" Margin="5,0,0,0"
+                        Command="{Binding LibraryVM.AddFootprintCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}" />
+                    <Button Content="Remove Footprint" Padding="5,1,5,1" Margin="5,0,0,0"
+                        Command="{Binding LibraryVM.RemoveFootprintCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}" />
+                </StackPanel>
                 <View:UserControl_PartGrid 
                     Grid.Row="2"
                     KiCADSymbolLibraryVMs="{Binding LibraryVM.KiCADSymbolLibraryVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"
                     ParameterVMs="{Binding LibraryVM.ParameterVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"           
                     PartVMs="{Binding LibraryVM.PartVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"
+                    SelectedPartVMs="{Binding LibraryVM.SelectedPartVMs, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}, UpdateSourceTrigger=PropertyChanged}"
                     />
             </DockPanel>
         </TabItem>

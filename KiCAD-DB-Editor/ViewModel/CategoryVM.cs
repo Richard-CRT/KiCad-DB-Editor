@@ -359,26 +359,22 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private bool AddFootprintCommandCanExecute(object? parameter)
         {
-            return SelectedPartVMs.Length > 0;
+            return PartVM.AddFootprintCommandCanExecute(SelectedPartVMs);
         }
 
         private void AddFootprintCommandExecuted(object? parameter)
         {
-            Debug.Assert(SelectedPartVMs.Length > 0);
-            foreach (PartVM selectedPartVM in SelectedPartVMs)
-                selectedPartVM.AddFootprint();
+            PartVM.AddFootprintCommandExecuted(SelectedPartVMs);
         }
 
         private bool RemoveFootprintCommandCanExecute(object? parameter)
         {
-            return SelectedPartVMs.Length > 0 && SelectedPartVMs.All(selectedPartVM => selectedPartVM.FootprintCount > 1);
+            return PartVM.RemoveFootprintCommandCanExecute(SelectedPartVMs);
         }
 
         private void RemoveFootprintCommandExecuted(object? parameter)
         {
-            Debug.Assert(SelectedPartVMs.Length > 0);
-            foreach (PartVM selectedPartVM in SelectedPartVMs)
-                selectedPartVM.RemoveFootprint();
+            PartVM.RemoveFootprintCommandExecuted(SelectedPartVMs);
         }
 
         #endregion Commands

@@ -168,6 +168,21 @@ namespace KiCAD_DB_Editor.ViewModel
             Library.Parts = new(this.PartVMs.Select(p => p.Part));
         }
 
+        private PartVM[] _selectedPartVMs = Array.Empty<PartVM>();
+        public PartVM[] SelectedPartVMs
+        {
+            // For some reason I can't do OneWayToSource :(
+            get { return _selectedPartVMs; }
+            set
+            {
+                if (_selectedPartVMs != value)
+                {
+                    _selectedPartVMs = value;
+                    InvokePropertyChanged();
+                }
+            }
+        }
+
         // Do not initialise here, do in constructor to link collection changed
         private ObservableCollectionEx<KiCADSymbolLibraryVM> _kiCADSymbolLibraryVMs;
         public ObservableCollectionEx<KiCADSymbolLibraryVM> KiCADSymbolLibraryVMs
@@ -258,6 +273,8 @@ namespace KiCAD_DB_Editor.ViewModel
             NewKiCADSymbolLibraryCommand = new BasicCommand(NewKiCADSymbolLibraryCommandExecuted, NewKiCADSymbolLibraryCommandCanExecute);
             UpdateKiCADSymbolLibraryCommand = new BasicCommand(UpdateKiCADSymbolLibraryCommandExecuted, UpdateKiCADSymbolLibraryCommandCanExecute);
             DeleteKiCADSymbolLibraryCommand = new BasicCommand(DeleteKiCADSymbolLibraryCommandExecuted, DeleteKiCADSymbolLibraryCommandCanExecute);
+            AddFootprintCommand = new BasicCommand(AddFootprintCommandExecuted, AddFootprintCommandCanExecute);
+            RemoveFootprintCommand = new BasicCommand(RemoveFootprintCommandExecuted, RemoveFootprintCommandCanExecute);
 
             // Initialise collection with events
             // Must do PartVMs first as CategoryVMs will use it
@@ -309,6 +326,8 @@ namespace KiCAD_DB_Editor.ViewModel
         public IBasicCommand NewParameterCommand { get; }
         public IBasicCommand RenameParameterCommand { get; }
         public IBasicCommand DeleteParameterCommand { get; }
+        public IBasicCommand AddFootprintCommand { get; }
+        public IBasicCommand RemoveFootprintCommand { get; }
         public IBasicCommand NewKiCADSymbolLibraryCommand { get; }
         public IBasicCommand UpdateKiCADSymbolLibraryCommand { get; }
         public IBasicCommand DeleteKiCADSymbolLibraryCommand { get; }
@@ -406,6 +425,26 @@ namespace KiCAD_DB_Editor.ViewModel
             ParameterVMs.Remove(SelectedParameterVM);
 
             SelectedParameterVM = ParameterVMs.FirstOrDefault();
+        }
+
+        private bool AddFootprintCommandCanExecute(object? parameter)
+        {
+            return PartVM.AddFootprintCommandCanExecute(SelectedPartVMs);
+        }
+
+        private void AddFootprintCommandExecuted(object? parameter)
+        {
+            PartVM.AddFootprintCommandExecuted(SelectedPartVMs);
+        }
+
+        private bool RemoveFootprintCommandCanExecute(object? parameter)
+        {
+            return PartVM.RemoveFootprintCommandCanExecute(SelectedPartVMs);
+        }
+
+        private void RemoveFootprintCommandExecuted(object? parameter)
+        {
+            PartVM.RemoveFootprintCommandExecuted(SelectedPartVMs);
         }
 
         private bool NewKiCADSymbolLibraryCommandCanExecute(object? parameter)

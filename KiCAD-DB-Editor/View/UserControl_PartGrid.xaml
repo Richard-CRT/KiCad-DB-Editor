@@ -155,8 +155,8 @@
                     </DataGridCheckBoxColumn.ElementStyle>
                 </DataGridCheckBoxColumn>
                 <DataGridTemplateColumn Header="Sym. Library"
-                        SortMemberPath="SymbolLibraryName"
-                        >
+                                        SortMemberPath="SymbolLibraryName"
+                                        >
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
@@ -173,8 +173,8 @@
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="Sym. Name"
-                        SortMemberPath="SymbolName"
-                        >
+                                        SortMemberPath="SymbolName"
+                                        >
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding SymbolName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>

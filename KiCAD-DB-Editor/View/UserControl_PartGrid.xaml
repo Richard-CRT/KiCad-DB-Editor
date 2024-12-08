@@ -67,8 +67,6 @@
                     </Setter>
                     <Setter Property="FontFamily" Value="Consolas" />
                     <Setter Property="IsEnabled" Value="True" />
-                    <Style.Triggers>
-                    </Style.Triggers>
                 </Style>
             </DataGrid.Resources>
             <DataGrid.Columns>

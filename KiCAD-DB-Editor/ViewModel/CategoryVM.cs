@@ -350,6 +350,7 @@ namespace KiCAD_DB_Editor.ViewModel
             string partUID = Utilities.GeneratePartUID(ParentLibraryVM.PartUIDScheme);
             Part part = new(partUID);
             PartVM partVM = new(ParentLibraryVM, part);
+            partVM.ParentCategoryVM = this;
             foreach (ParameterVM parameterVM in ParameterVMs)
                 partVM.AddParameterVM(parameterVM);
             PartVMs.Add(partVM);

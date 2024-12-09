@@ -430,6 +430,11 @@ namespace KiCAD_DB_Editor.View
                                             textBlock.Text = sourceData[srcY][srcX];
                                             e.Handled = true;
                                         }
+                                        else if (frameworkElement is ComboBox comboBox)
+                                        {
+                                            comboBox.Text = sourceData[srcY][srcX];
+                                            e.Handled = true;
+                                        }
                                         else if (frameworkElement is CheckBox checkBox)
                                         {
                                             string s = sourceData[srcY][srcX];
@@ -443,6 +448,17 @@ namespace KiCAD_DB_Editor.View
                                             if (frameworkElementSubsidiary is TextBlock textBlockSubsidiary)
                                             {
                                                 textBlockSubsidiary.Text = sourceData[srcY][srcX];
+                                                e.Handled = true;
+                                            }
+                                            else if (frameworkElementSubsidiary is ComboBox comboBoxSubsidiary)
+                                            {
+                                                comboBoxSubsidiary.Text = sourceData[srcY][srcX];
+                                                e.Handled = true;
+                                            }
+                                            else if (frameworkElementSubsidiary is CheckBox checkBoxSubsidiary)
+                                            {
+                                                string s = sourceData[srcY][srcX];
+                                                checkBoxSubsidiary.IsChecked = s.ToLower() == "true" || s == "1";
                                                 e.Handled = true;
                                             }
                                         }
@@ -471,6 +487,11 @@ namespace KiCAD_DB_Editor.View
                             textBlock.Text = "";
                             e.Handled = true;
                         }
+                        else if (frameworkElement is ComboBox comboBox)
+                        {
+                            comboBox.Text = "";
+                            e.Handled = true;
+                        }
                         else if (frameworkElement is CheckBox checkBox)
                         {
                             checkBox.IsChecked = false;
@@ -483,6 +504,16 @@ namespace KiCAD_DB_Editor.View
                             if (frameworkElementSubsidiary is TextBlock textBlockSubsidiary)
                             {
                                 textBlockSubsidiary.Text = "";
+                                e.Handled = true;
+                            }
+                            else if (frameworkElementSubsidiary is ComboBox comboBoxSubsidiary)
+                            {
+                                comboBoxSubsidiary.Text = "";
+                                e.Handled = true;
+                            }
+                            else if (frameworkElementSubsidiary is CheckBox checkBoxSubsidiary)
+                            {
+                                checkBoxSubsidiary.IsChecked = false;
                                 e.Handled = true;
                             }
                         }
@@ -510,6 +541,10 @@ namespace KiCAD_DB_Editor.View
                             {
                                 selectedCellCoords[coord] = textBlock.Text;
                             }
+                            else if (frameworkElement is ComboBox comboBox)
+                            {
+                                selectedCellCoords[coord] = comboBox.Text;
+                            }
                             else if (frameworkElement is CheckBox checkBox)
                             {
                                 if (checkBox.IsChecked is null)
@@ -522,9 +557,24 @@ namespace KiCAD_DB_Editor.View
                                     )
                             {
                                 if (frameworkElementSubsidiary is TextBlock textBlockSubsidiary)
+                                {
                                     selectedCellCoords[coord] = textBlockSubsidiary.Text;
+                                }
+                                else if (frameworkElementSubsidiary is ComboBox comboBoxSubsidiary)
+                                {
+                                    selectedCellCoords[coord] = comboBoxSubsidiary.Text;
+                                }
+                                else if (frameworkElementSubsidiary is CheckBox checkBoxSubsidiary)
+                                {
+                                    if (checkBoxSubsidiary.IsChecked is null)
+                                        selectedCellCoords[coord] = "";
+                                    else
+                                        selectedCellCoords[coord] = (bool)checkBoxSubsidiary.IsChecked ? "True" : "False";
+                                }
                                 else
+                                {
                                     selectedCellCoords[coord] = "";
+                                }
                             }
                             else
                                 selectedCellCoords[coord] = "";

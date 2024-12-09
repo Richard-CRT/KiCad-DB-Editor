@@ -231,7 +231,7 @@ namespace KiCAD_DB_Editor.View
             valueBinding.Mode = BindingMode.TwoWay;
             valueBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
 
-            // Like the XAML symbol example but for footprint names
+            // Like the XAML symbol example but for footprint columns
             DataTemplate cellTemplate = new();
             FrameworkElementFactory cellTemplateFrameworkElementFactory = new(typeof(TextBlock));
             cellTemplateFrameworkElementFactory.SetBinding(TextBlock.TextProperty, valueBinding);
@@ -243,7 +243,7 @@ namespace KiCAD_DB_Editor.View
                 // Note this not present for footprint names
                 optionsBinding.RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, typeof(UserControl_PartGrid), 1); // 1 means nearest
 
-            // Like the XAML symbol example but for footprint names
+            // Like the XAML symbol example but for footprint columns
             DataTemplate cellEditingTemplate = new();
             FrameworkElementFactory cellEditingTemplateFrameworkElementFactory = new(typeof(ComboBox));
             cellEditingTemplateFrameworkElementFactory.SetBinding(ComboBox.TextProperty, valueBinding);

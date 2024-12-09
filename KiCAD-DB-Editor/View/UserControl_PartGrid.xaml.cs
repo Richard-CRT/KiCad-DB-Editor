@@ -334,7 +334,7 @@ namespace KiCAD_DB_Editor.View
                     addColumn(footprintColumn);
                 }
 
-                int indexToInsertAt = 7;
+                int indexToInsertAt = 8;
                 foreach (ParameterVM parameterVM in ParameterVMs)
                 {
                     DataGridColumn column = newTextColumn(parameterVM.Name, $"ParameterAccessor[{parameterVM.Name}]");

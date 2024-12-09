@@ -299,7 +299,10 @@ namespace KiCAD_DB_Editor.View
             cellStyle.Triggers.Add(dataTrigger);
             dataGridTemplateColumn.CellStyle = cellStyle;
 
-            footprintColumns.Add(dataGridTemplateColumn);
+            if (libraryColumn)
+                footprintIndexToLibraryDataGridColumn[footprintIndex] = dataGridTemplateColumn;
+            else
+                footprintIndexToNameDataGridColumn[footprintIndex] = dataGridTemplateColumn;
 
             dataGrid_Main.Columns.Add(dataGridTemplateColumn);
 
@@ -405,8 +408,9 @@ namespace KiCAD_DB_Editor.View
             }
         }
 
-        private int previousMaxFootprints = -1;
-        private List<DataGridColumn> footprintColumns = new();
+        private int previousMaxFootprints = 0;
+        private Dictionary<int, DataGridColumn> footprintIndexToLibraryDataGridColumn = new();
+        private Dictionary<int, DataGridColumn> footprintIndexToNameDataGridColumn = new();
         private void redoColumns_PotentialFootprintColumnChange()
         {
             if (PartVMs is not null)
@@ -417,14 +421,26 @@ namespace KiCAD_DB_Editor.View
 
                 if (maxFootprints != previousMaxFootprints)
                 {
-                    foreach (DataGridColumn columnToRemove in footprintColumns)
-                        dataGrid_Main.Columns.Remove(columnToRemove);
-                    footprintColumns.Clear();
-
-                    for (int i = 0; i < maxFootprints; i++)
+                    if (previousMaxFootprints > maxFootprints)
                     {
-                        newFootprintLibraryColumn(i);
-                        newFootprintNameColumn(i);
+                        for (int footprintIndexColumnToRemove = previousMaxFootprints - 1; footprintIndexColumnToRemove >= maxFootprints; footprintIndexColumnToRemove--)
+                        {
+                            DataGridColumn column1 = footprintIndexToLibraryDataGridColumn[footprintIndexColumnToRemove];
+                            dataGrid_Main.Columns.Remove(column1);
+                            footprintIndexToLibraryDataGridColumn.Remove(footprintIndexColumnToRemove);
+
+                            DataGridColumn column2 = footprintIndexToNameDataGridColumn[footprintIndexColumnToRemove];
+                            dataGrid_Main.Columns.Remove(column2);
+                            footprintIndexToNameDataGridColumn.Remove(footprintIndexColumnToRemove);
+                        }
+                    }
+                    else if (maxFootprints > previousMaxFootprints)
+                    {
+                        for (int i = previousMaxFootprints; i < maxFootprints; i++)
+                        {
+                            newFootprintLibraryColumn(i);
+                            newFootprintNameColumn(i);
+                        }
                     }
 
                     previousMaxFootprints = maxFootprints;
@@ -432,9 +448,12 @@ namespace KiCAD_DB_Editor.View
             }
             else
             {
-                foreach (DataGridColumn columnToRemove in footprintColumns)
+                foreach (DataGridColumn columnToRemove in footprintIndexToLibraryDataGridColumn.Values)
                     dataGrid_Main.Columns.Remove(columnToRemove);
-                footprintColumns.Clear();
+                footprintIndexToLibraryDataGridColumn.Clear();
+                foreach (DataGridColumn columnToRemove in footprintIndexToNameDataGridColumn.Values)
+                    dataGrid_Main.Columns.Remove(columnToRemove);
+                footprintIndexToNameDataGridColumn.Clear();
             }
         }
 

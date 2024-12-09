@@ -334,6 +334,8 @@ namespace KiCAD_DB_Editor.View
                  dataGrid_Main.Columns.Add(columnToKeep);
             if (ParameterVMs is not null && PartVMs is not null)
             {
+                // Could do something clever here with figuring out if maxFootprints has actually changed, because if it hasn't,
+                // adding a new part doesn't need to trigger a column redo
                 int maxFootprints = 0;
                 foreach (PartVM partVM in PartVMs)
                     maxFootprints = Math.Max(maxFootprints, partVM.FootprintCount);
@@ -347,6 +349,8 @@ namespace KiCAD_DB_Editor.View
                     addColumn(footprintColumn);
                 }
 
+                // A parameter name change doesn't need to trigger a column redo, changing the header and binding would be much
+                // more efficient
                 int indexToInsertAt = 8;
                 foreach (ParameterVM parameterVM in ParameterVMs)
                 {

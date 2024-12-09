@@ -137,7 +137,8 @@ namespace KiCAD_DB_Editor.View
             if (oldParameterVMs is not null)
                 oldParameterVMs.CollectionChanged -= ParameterVMs_CollectionChanged;
             oldParameterVMs = ParameterVMs;
-            ParameterVMs.CollectionChanged += ParameterVMs_CollectionChanged;
+            if (ParameterVMs is not null)
+                ParameterVMs.CollectionChanged += ParameterVMs_CollectionChanged;
 
             ParameterVMs_CollectionChanged(this, new(NotifyCollectionChangedAction.Reset));
         }
@@ -150,9 +151,12 @@ namespace KiCAD_DB_Editor.View
                 foreach (ParameterVM pVM in oldParameterVMsCopy)
                     pVM.PropertyChanged -= ParameterVM_PropertyChanged;
             }
-            oldParameterVMsCopy = new(ParameterVMs);
-            foreach (ParameterVM pVM in oldParameterVMsCopy)
-                pVM.PropertyChanged += ParameterVM_PropertyChanged;
+            oldParameterVMsCopy = ParameterVMs is not null ? new(ParameterVMs) : null;
+            if (oldParameterVMsCopy is not null)
+            {
+                foreach (ParameterVM pVM in oldParameterVMsCopy)
+                    pVM.PropertyChanged += ParameterVM_PropertyChanged;
+            }
 
             redoColumns();
         }
@@ -169,8 +173,9 @@ namespace KiCAD_DB_Editor.View
         {
             if (oldPartVMs is not null)
                 oldPartVMs.CollectionChanged -= PartVMs_CollectionChanged;
-            PartVMs.CollectionChanged += PartVMs_CollectionChanged;
             oldPartVMs = PartVMs;
+            if (PartVMs is not null)
+                PartVMs.CollectionChanged += PartVMs_CollectionChanged;
 
             PartVMs_CollectionChanged(this, new(NotifyCollectionChangedAction.Reset));
         }
@@ -183,9 +188,13 @@ namespace KiCAD_DB_Editor.View
                 foreach (PartVM pVM in oldPartVMsCopy)
                     pVM.PropertyChanged -= PartVM_PropertyChanged;
             }
-            oldPartVMsCopy = new(PartVMs);
-            foreach (PartVM pVM in oldPartVMsCopy)
-                pVM.PropertyChanged += PartVM_PropertyChanged;
+            oldPartVMsCopy = PartVMs is not null ? new(PartVMs) : null;
+            if (oldPartVMsCopy is not null)
+            {
+                foreach (PartVM pVM in oldPartVMsCopy)
+                    pVM.PropertyChanged += PartVM_PropertyChanged;
+            }
+
             redoColumns();
 
             if (e.Action == NotifyCollectionChangedAction.Add)
@@ -211,8 +220,11 @@ namespace KiCAD_DB_Editor.View
             {
                 externalSelectedPartVMsPropertyChanged = true;
                 dataGrid_Main.SelectedItems.Clear();
-                foreach (PartVM selectedPartVM in SelectedPartVMs)
-                    dataGrid_Main.SelectedItems.Add(selectedPartVM);
+                if (SelectedPartVMs is not null)
+                {
+                    foreach (PartVM selectedPartVM in SelectedPartVMs)
+                        dataGrid_Main.SelectedItems.Add(selectedPartVM);
+                }
                 externalSelectedPartVMsPropertyChanged = false;
             }
         }

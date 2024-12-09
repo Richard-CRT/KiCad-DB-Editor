@@ -170,7 +170,9 @@ namespace KiCAD_DB_Editor.ViewModel
             {
                 Part.ParameterValues[pVM.Parameter] = "";
                 InvokePropertyChanged(nameof(ParameterVMs));
-                // Don't need to do an Item[] InvokePropertyChanged as changing Parameters redoes all parameter columns
+
+                // This is needed to update the table's existing cells
+                ParameterAccessor.InvokePropertyChanged("Item[]");
             }
         }
 
@@ -180,7 +182,9 @@ namespace KiCAD_DB_Editor.ViewModel
             {
                 Part.ParameterValues.Remove(pVM.Parameter);
                 InvokePropertyChanged(nameof(ParameterVMs));
-                // Don't need to do an Item[] InvokePropertyChanged as changing Parameters redoes all parameter columns
+
+                // This is needed to update the table's existing cells
+                ParameterAccessor.InvokePropertyChanged("Item[]");
             }
         }
 
@@ -189,11 +193,13 @@ namespace KiCAD_DB_Editor.ViewModel
             // Always needs to be done in tandem
             Part.FootprintLibraryNames.Add("");
             Part.FootprintNames.Add("");
+
+            // Have to do this one to tell the table it might have to redo its columns
+            InvokePropertyChanged(nameof(FootprintCount));
+
             // These 2 are needed to update the table's existing cells
             FootprintNameAccessor.InvokePropertyChanged("Item[]");
             FootprintLibraryNameAccessor.InvokePropertyChanged("Item[]");
-            // Have to do this one to tell the table it might have to redo its columns
-            InvokePropertyChanged(nameof(FootprintCount));
         }
 
         public void RemoveFootprint()
@@ -201,11 +207,13 @@ namespace KiCAD_DB_Editor.ViewModel
             // Always needs to be done in tandem
             Part.FootprintLibraryNames.RemoveAt(Part.FootprintLibraryNames.Count - 1);
             Part.FootprintNames.RemoveAt(Part.FootprintNames.Count - 1);
+
+            // Have to do this one to tell the table it might have to redo its columns
+            InvokePropertyChanged(nameof(FootprintCount));
+
             // These 2 are needed to update the table's existing cells
             FootprintNameAccessor.InvokePropertyChanged("Item[]");
             FootprintLibraryNameAccessor.InvokePropertyChanged("Item[]");
-            // Have to do this one to tell the table it might have to redo its columns
-            InvokePropertyChanged(nameof(FootprintCount));
         }
 
         #region Commands
@@ -226,10 +234,16 @@ namespace KiCAD_DB_Editor.ViewModel
         {
             get
             {
-                var key = OwnerPartVM.ParentLibraryVM.ParameterVMs.First(pVM => pVM.Name == parameterVMName).Parameter;
-                if (OwnerPartVM.Part.ParameterValues.TryGetValue(key, out string? val))
-                    return val;
-                else
+                ParameterVM? matchingParameterVM = OwnerPartVM.ParentLibraryVM.ParameterVMs.FirstOrDefault(pVM => pVM!.Name == parameterVMName, null);
+                if (matchingParameterVM is not null)
+                {
+                    var key = OwnerPartVM.ParentLibraryVM.ParameterVMs.First(pVM => pVM.Name == parameterVMName).Parameter;
+                    if (OwnerPartVM.Part.ParameterValues.TryGetValue(key, out string? val))
+                        return val;
+                    else
+                        return null;
+                }
+                else 
                     return null;
             }
             set

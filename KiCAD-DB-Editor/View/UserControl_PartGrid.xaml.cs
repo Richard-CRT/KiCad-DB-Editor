@@ -8,6 +8,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices.Marshalling;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -249,6 +250,8 @@ namespace KiCAD_DB_Editor.View
             cellEditingTemplateFrameworkElementFactory.SetBinding(ComboBox.TextProperty, valueBinding);
             cellEditingTemplateFrameworkElementFactory.SetBinding(ComboBox.ItemsSourceProperty, optionsBinding);
             cellEditingTemplateFrameworkElementFactory.SetValue(ComboBox.IsEditableProperty, true);
+            // Don't need to unhook this as the item holding the delegate is the combobox which is the short lived object
+            cellEditingTemplateFrameworkElementFactory.AddHandler(ComboBox.LoadedEvent, new RoutedEventHandler(TemplateColumn_ComboBox_Loaded));
             if (libraryColumn)
                 // Note this one not present for footprint names
                 cellEditingTemplateFrameworkElementFactory.SetValue(ComboBox.DisplayMemberPathProperty, "Nickname");
@@ -617,6 +620,14 @@ namespace KiCAD_DB_Editor.View
         private void dataGrid_Main_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
             editing = false;
+        }
+
+        private void TemplateColumn_ComboBox_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is ComboBox comboBox)
+            {
+                comboBox.Focus();
+            }
         }
     }
 }

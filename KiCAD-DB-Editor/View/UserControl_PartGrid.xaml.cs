@@ -213,9 +213,7 @@ namespace KiCAD_DB_Editor.View
 
         private void PartVM_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(PartVM.ParameterVMs))
-                redoColumns_PotentialParametersColumnChange();
-            else if (e.PropertyName == nameof(PartVM.FootprintCount))
+            if (e.PropertyName == nameof(PartVM.FootprintCount))
                 redoColumns_PotentialFootprintColumnChange();
         }
 

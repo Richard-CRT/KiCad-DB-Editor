@@ -350,37 +350,58 @@ namespace KiCAD_DB_Editor.View
 
             updateParameterBindings(dataGridTextColumn, parameterVM);
 
-            parameterColumns.Add(dataGridTextColumn);
-            parameterToDataGridColumn[parameterVM] = dataGridTextColumn;
+            parameterVMToDataGridColumn[parameterVM] = dataGridTextColumn;
+            parameterVMsThatHaveColumns.Insert(index, parameterVM);
 
-            dataGrid_Main.Columns.Insert(index, dataGridTextColumn);
+            const int baseColumnIndexToInsertAt = 8;
+            dataGrid_Main.Columns.Insert(baseColumnIndexToInsertAt + index, dataGridTextColumn);
 
             return dataGridTextColumn;
         }
 
         private void redoColumns_ParameterNameChange(ParameterVM parameterVMWithNameChange)
         {
-            DataGridTextColumn columnToUpdate = parameterToDataGridColumn[parameterVMWithNameChange];
+            DataGridTextColumn columnToUpdate = parameterVMToDataGridColumn[parameterVMWithNameChange];
             updateParameterBindings(columnToUpdate, parameterVMWithNameChange);
         }
 
-        private List<DataGridColumn> parameterColumns = new();
-        private Dictionary<ParameterVM, DataGridTextColumn> parameterToDataGridColumn = new();
+        private List<ParameterVM> parameterVMsThatHaveColumns = new();
+        private Dictionary<ParameterVM, DataGridTextColumn> parameterVMToDataGridColumn = new();
         private void redoColumns_PotentialParametersColumnChange()
         {
-            foreach (DataGridColumn columnToRemove in parameterColumns)
-                dataGrid_Main.Columns.Remove(columnToRemove);
-            parameterColumns.Clear();
-            parameterToDataGridColumn.Clear();
-
             if (ParameterVMs is not null)
             {
-                parameterColumns.Clear();
-                int indexToInsertAt = 8;
-                foreach (ParameterVM parameterVM in ParameterVMs)
+                var parameterVMsThatNeedANewColumn = ParameterVMs.Except(parameterVMsThatHaveColumns).ToArray();
+                var parameterVMsThatNeedToBeRemoved = parameterVMsThatHaveColumns.Except(ParameterVMs).ToArray();
+
+                foreach (ParameterVM parameterVM in parameterVMsThatNeedToBeRemoved)
                 {
-                    newParameterColumn(parameterVM, indexToInsertAt);
+                    DataGridTextColumn column = parameterVMToDataGridColumn[parameterVM];
+                    dataGrid_Main.Columns.Remove(column);
+                    parameterVMsThatHaveColumns.Remove(parameterVM);
+                    parameterVMToDataGridColumn.Remove(parameterVM);
                 }
+
+                foreach (ParameterVM parameterVM in parameterVMsThatNeedANewColumn)
+                {
+                    int indexOfPVMToBeAddedInParentCollection = ParameterVMs.IndexOf(parameterVM);
+                    int newIndex;
+                    for (newIndex = 0; newIndex < parameterVMsThatHaveColumns.Count; newIndex++)
+                    {
+                        if (indexOfPVMToBeAddedInParentCollection < ParameterVMs.IndexOf(parameterVMsThatHaveColumns[newIndex]))
+                        {
+                            break;
+                        }
+                    }
+                    newParameterColumn(parameterVM, newIndex);
+                }
+            }
+            else
+            {
+                foreach (DataGridTextColumn columnToRemove in parameterVMToDataGridColumn.Values)
+                    dataGrid_Main.Columns.Remove(columnToRemove);
+                parameterVMsThatHaveColumns.Clear();
+                parameterVMToDataGridColumn.Clear();
             }
         }
 

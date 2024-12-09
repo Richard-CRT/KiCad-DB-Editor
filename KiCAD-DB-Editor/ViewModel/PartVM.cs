@@ -170,6 +170,7 @@ namespace KiCAD_DB_Editor.ViewModel
             {
                 Part.ParameterValues[pVM.Parameter] = "";
                 InvokePropertyChanged(nameof(ParameterVMs));
+                // Don't need to do an Item[] InvokePropertyChanged as changing Parameters redoes all parameter columns
             }
         }
 
@@ -179,6 +180,7 @@ namespace KiCAD_DB_Editor.ViewModel
             {
                 Part.ParameterValues.Remove(pVM.Parameter);
                 InvokePropertyChanged(nameof(ParameterVMs));
+                // Don't need to do an Item[] InvokePropertyChanged as changing Parameters redoes all parameter columns
             }
         }
 
@@ -187,6 +189,10 @@ namespace KiCAD_DB_Editor.ViewModel
             // Always needs to be done in tandem
             Part.FootprintLibraryNames.Add("");
             Part.FootprintNames.Add("");
+            // These 2 are needed to update the table's existing cells
+            FootprintNameAccessor.InvokePropertyChanged("Item[]");
+            FootprintLibraryNameAccessor.InvokePropertyChanged("Item[]");
+            // Have to do this one to tell the table it might have to redo its columns
             InvokePropertyChanged(nameof(FootprintCount));
         }
 
@@ -195,6 +201,10 @@ namespace KiCAD_DB_Editor.ViewModel
             // Always needs to be done in tandem
             Part.FootprintLibraryNames.RemoveAt(Part.FootprintLibraryNames.Count - 1);
             Part.FootprintNames.RemoveAt(Part.FootprintNames.Count - 1);
+            // These 2 are needed to update the table's existing cells
+            FootprintNameAccessor.InvokePropertyChanged("Item[]");
+            FootprintLibraryNameAccessor.InvokePropertyChanged("Item[]");
+            // Have to do this one to tell the table it might have to redo its columns
             InvokePropertyChanged(nameof(FootprintCount));
         }
 

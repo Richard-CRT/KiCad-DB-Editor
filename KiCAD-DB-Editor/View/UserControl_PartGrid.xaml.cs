@@ -3,11 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Data.Common;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.PortableExecutable;
 using System.Runtime.InteropServices.Marshalling;
 using System.Text;
 using System.Threading.Tasks;
@@ -158,14 +160,17 @@ namespace KiCAD_DB_Editor.View
                     pVM.PropertyChanged += ParameterVM_PropertyChanged;
             }
 
-            redoColumns();
+            redoColumns_PotentialParametersColumnChange();
         }
 
         private void ParameterVM_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            // TODO At some point should check that renaming the parameter doesn't actually break things
-            if (e.PropertyName == nameof(ParameterVM.Name))
-                redoColumns();
+            if (sender is ParameterVM parameterVM)
+            {
+                // TODO At some point should check that renaming the parameter doesn't actually break things
+                if (e.PropertyName == nameof(ParameterVM.Name))
+                    redoColumns_ParameterNameChange(parameterVM);
+            }
         }
 
         private ObservableCollectionEx<PartVM>? oldPartVMs = null;
@@ -195,7 +200,7 @@ namespace KiCAD_DB_Editor.View
                     pVM.PropertyChanged += PartVM_PropertyChanged;
             }
 
-            redoColumns();
+            redoColumns_PotentialFootprintColumnChange();
 
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
@@ -208,8 +213,10 @@ namespace KiCAD_DB_Editor.View
 
         private void PartVM_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(PartVM.ParameterVMs) || e.PropertyName == nameof(PartVM.FootprintCount))
-                redoColumns();
+            if (e.PropertyName == nameof(PartVM.ParameterVMs))
+                redoColumns_PotentialParametersColumnChange();
+            else if (e.PropertyName == nameof(PartVM.FootprintCount))
+                redoColumns_PotentialFootprintColumnChange();
         }
 
         bool externalSelectedPartVMsPropertyChanged = false;
@@ -231,10 +238,24 @@ namespace KiCAD_DB_Editor.View
 
         #endregion
 
-        private List<DataGridColumn> columnsToRemoveWhenRedoing = new();
-
-        private DataGridTemplateColumn newFootprintColumn(string header, string valueBindingTarget, bool libraryColumn, string optionsBindingTarget)
+        private DataGridTemplateColumn newFootprintColumn(int footprintIndex, bool libraryColumn)
         {
+            string header;
+            string valueBindingTarget;
+            string optionsBindingTarget;
+            if (libraryColumn)
+            {
+                header = $"Fprt. {footprintIndex + 1} Library";
+                valueBindingTarget = $"FootprintLibraryNameAccessor[{footprintIndex}]";
+                optionsBindingTarget = "KiCADFootprintLibraryVMs";
+            }
+            else
+            {
+                header = $"Fprt. {footprintIndex + 1} Name";
+                valueBindingTarget = $"FootprintNameAccessor[{footprintIndex}]";
+                optionsBindingTarget = $"SelectedFootprintLibraryVMAccessor[{footprintIndex}].KiCADFootprintNames";
+            }
+
             DataGridTemplateColumn dataGridTemplateColumn;
             dataGridTemplateColumn = new();
             dataGridTemplateColumn.Header = header.Replace("_", "__");
@@ -280,29 +301,31 @@ namespace KiCAD_DB_Editor.View
             cellStyle.Triggers.Add(dataTrigger);
             dataGridTemplateColumn.CellStyle = cellStyle;
 
+            footprintColumns.Add(dataGridTemplateColumn);
+
+            dataGrid_Main.Columns.Add(dataGridTemplateColumn);
+
             return dataGridTemplateColumn;
         }
 
-        private DataGridTemplateColumn newFootprintNameColumn(string header, string valueBindingTarget, string optionsBindingTarget)
+        private DataGridTemplateColumn newFootprintNameColumn(int footprintIndex)
         {
-            return newFootprintColumn(header, valueBindingTarget, false, optionsBindingTarget);
+            return newFootprintColumn(footprintIndex, false);
         }
 
-        private DataGridTemplateColumn newFootprintLibraryColumn(string header, string valueBindingTarget)
+        private DataGridTemplateColumn newFootprintLibraryColumn(int footprintIndex)
         {
-            return newFootprintColumn(header, valueBindingTarget, true, "KiCADFootprintLibraryVMs");
+            return newFootprintColumn(footprintIndex, true);
         }
 
-        private DataGridTextColumn newTextColumn(string header, string valueBindingTarget)
+        private void updateParameterBindings(DataGridTextColumn column, ParameterVM parameterVM)
         {
-            DataGridTextColumn dataGridTextColumn;
-            dataGridTextColumn = new();
-            dataGridTextColumn.Header = header.Replace("_", "__");
+            column.Header = parameterVM.Name.Replace("_", "__");
 
-            Binding valueBinding = new(valueBindingTarget);
+            Binding valueBinding = new($"ParameterAccessor[{parameterVM.Name}]");
             valueBinding.Mode = BindingMode.TwoWay;
             valueBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-            dataGridTextColumn.Binding = valueBinding;
+            column.Binding = valueBinding;
 
             // Use as a baseline the style I defined in XAML
             Style defaultStyle = (Style)dataGrid_Main.FindResource(typeof(DataGridCell));
@@ -312,51 +335,87 @@ namespace KiCAD_DB_Editor.View
             dataTrigger.Binding = valueBinding;
             dataTrigger.Setters.Add(new Setter(DataGridCell.IsEnabledProperty, false));
             cellStyle.Triggers.Add(dataTrigger);
-            dataGridTextColumn.CellStyle = cellStyle;
+
+            column.CellStyle = cellStyle;
+        }
+
+        private DataGridTextColumn newParameterColumn(ParameterVM parameterVM, int index)
+        {
+            DataGridTextColumn dataGridTextColumn;
+            dataGridTextColumn = new();
+            dataGridTextColumn.Header = parameterVM.Name.Replace("_", "__");
+
+            Binding valueBinding = new($"ParameterAccessor[{parameterVM.Name}]");
+            valueBinding.Mode = BindingMode.TwoWay;
+            valueBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+            dataGridTextColumn.Binding = valueBinding;
+
+            updateParameterBindings(dataGridTextColumn, parameterVM);
+
+            parameterColumns.Add(dataGridTextColumn);
+            parameterToDataGridColumn[parameterVM] = dataGridTextColumn;
+
+            dataGrid_Main.Columns.Insert(index, dataGridTextColumn);
 
             return dataGridTextColumn;
         }
 
-        private void addColumn(DataGridColumn column, int index = -1)
+        private void redoColumns_ParameterNameChange(ParameterVM parameterVMWithNameChange)
         {
-            columnsToRemoveWhenRedoing.Add(column);
-            if (index == -1)
-                dataGrid_Main.Columns.Add(column);
-            else
-                dataGrid_Main.Columns.Insert(index, column);
+            DataGridTextColumn columnToUpdate = parameterToDataGridColumn[parameterVMWithNameChange];
+            updateParameterBindings(columnToUpdate, parameterVMWithNameChange);
         }
 
-        private void redoColumns()
+        private List<DataGridColumn> parameterColumns = new();
+        private Dictionary<ParameterVM, DataGridTextColumn> parameterToDataGridColumn = new();
+        private void redoColumns_PotentialParametersColumnChange()
         {
-            var columnsToKeep = dataGrid_Main.Columns.Except(columnsToRemoveWhenRedoing).ToArray();
-            dataGrid_Main.Columns.Clear();
-            foreach (DataGridColumn columnToKeep in columnsToKeep)
-                 dataGrid_Main.Columns.Add(columnToKeep);
-            if (ParameterVMs is not null && PartVMs is not null)
+            foreach (DataGridColumn columnToRemove in parameterColumns)
+                dataGrid_Main.Columns.Remove(columnToRemove);
+            parameterColumns.Clear();
+            parameterToDataGridColumn.Clear();
+
+            if (ParameterVMs is not null)
             {
-                // Could do something clever here with figuring out if maxFootprints has actually changed, because if it hasn't,
-                // adding a new part doesn't need to trigger a column redo
+                parameterColumns.Clear();
+                int indexToInsertAt = 8;
+                foreach (ParameterVM parameterVM in ParameterVMs)
+                {
+                    newParameterColumn(parameterVM, indexToInsertAt);
+                }
+            }
+        }
+
+        private int previousMaxFootprints = -1;
+        private List<DataGridColumn> footprintColumns = new();
+        private void redoColumns_PotentialFootprintColumnChange()
+        {
+            if (PartVMs is not null)
+            {
                 int maxFootprints = 0;
                 foreach (PartVM partVM in PartVMs)
                     maxFootprints = Math.Max(maxFootprints, partVM.FootprintCount);
 
-                for (int i = 0; i < maxFootprints; i++)
+                if (maxFootprints != previousMaxFootprints)
                 {
-                    DataGridColumn footprintColumn;
-                    footprintColumn = newFootprintLibraryColumn($"Fprt. {i + 1} Library", $"FootprintLibraryNameAccessor[{i}]");
-                    addColumn(footprintColumn);
-                    footprintColumn = newFootprintNameColumn($"Fprt. {i + 1} Name", $"FootprintNameAccessor[{i}]", $"SelectedFootprintLibraryVMAccessor[{i}].KiCADFootprintNames");
-                    addColumn(footprintColumn);
-                }
+                    foreach (DataGridColumn columnToRemove in footprintColumns)
+                        dataGrid_Main.Columns.Remove(columnToRemove);
+                    footprintColumns.Clear();
 
-                // A parameter name change doesn't need to trigger a column redo, changing the header and binding would be much
-                // more efficient
-                int indexToInsertAt = 8;
-                foreach (ParameterVM parameterVM in ParameterVMs)
-                {
-                    DataGridColumn column = newTextColumn(parameterVM.Name, $"ParameterAccessor[{parameterVM.Name}]");
-                    addColumn(column, index: indexToInsertAt++);
+                    for (int i = 0; i < maxFootprints; i++)
+                    {
+                        newFootprintLibraryColumn(i);
+                        newFootprintNameColumn(i);
+                    }
+
+                    previousMaxFootprints = maxFootprints;
                 }
+            }
+            else
+            {
+                foreach (DataGridColumn columnToRemove in footprintColumns)
+                    dataGrid_Main.Columns.Remove(columnToRemove);
+                footprintColumns.Clear();
             }
         }
 

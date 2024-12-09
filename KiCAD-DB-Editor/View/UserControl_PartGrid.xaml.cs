@@ -328,9 +328,10 @@ namespace KiCAD_DB_Editor.View
 
         private void redoColumns()
         {
-            foreach (DataGridColumn columnToRemove in columnsToRemoveWhenRedoing)
-                dataGrid_Main.Columns.Remove(columnToRemove);
-            columnsToRemoveWhenRedoing.Clear();
+            var columnsToKeep = dataGrid_Main.Columns.Except(columnsToRemoveWhenRedoing).ToArray();
+            dataGrid_Main.Columns.Clear();
+            foreach (DataGridColumn columnToKeep in columnsToKeep)
+                 dataGrid_Main.Columns.Add(columnToKeep);
             if (ParameterVMs is not null && PartVMs is not null)
             {
                 int maxFootprints = 0;

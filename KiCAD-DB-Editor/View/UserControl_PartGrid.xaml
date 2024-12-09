@@ -93,7 +93,6 @@
                                     />
                 <DataGridTextColumn Header="Part UID"
                                     Binding="{Binding PartUID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    SortDirection="Ascending"
                                     />
                 <DataGridTextColumn Header="Description"
                                     Binding="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"

@@ -58,8 +58,8 @@
                     <Button DockPanel.Dock="Bottom" Content="Delete Category" Padding="5,1,5,1"
                             Command="{Binding LibraryVM.DeleteCategoryCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" CommandParameter="{Binding SelectedItem, ElementName=treeView_FoldersAndCategories, Mode=OneWay}" />
                     <TreeView x:Name="treeView_FoldersAndCategories"
-                  ItemsSource="{Binding LibraryVM.TopLevelCategoryVMs, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
-                  >
+                              ItemsSource="{Binding LibraryVM.TopLevelCategoryVMs, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
+                              >
                         <TreeView.Resources>
                             <HierarchicalDataTemplate ItemsSource="{Binding CategoryVMs}" DataType="{x:Type vm:CategoryVM}">
                                 <StackPanel Orientation="Horizontal">
@@ -75,8 +75,9 @@
                 </DockPanel>
                 <GridSplitter Grid.Column="3" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="3,0,3,0" Width="3" />
                 <local:UserControl_Category Grid.Column="4"
-                                    CategoryVM="{Binding SelectedItem, ElementName=treeView_FoldersAndCategories, Mode=OneWay}"
-                                    Visibility="{Binding CategoryVM, Converter={StaticResource Null_to_Visibility_Converter}, Mode=OneWay, RelativeSource={RelativeSource Mode=Self}}" />
+                                            CategoryVM="{Binding SelectedItem, ElementName=treeView_FoldersAndCategories, Mode=OneWay}"
+                                            Visibility="{Binding CategoryVM, Converter={StaticResource Null_to_Visibility_Converter}, Mode=OneWay, RelativeSource={RelativeSource Mode=Self}}"
+                                            />
             </Grid>
         </TabItem>
         <TabItem Header="Parts">
@@ -84,9 +85,9 @@
                 <TextBox DockPanel.Dock="Top"></TextBox>
                 <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,5,0,5">
                     <Button Content="Add Footprint" Padding="5,1,5,1" Margin="5,0,0,0"
-                        Command="{Binding LibraryVM.AddFootprintCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}" />
+                            Command="{Binding LibraryVM.AddFootprintCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}" />
                     <Button Content="Remove Footprint" Padding="5,1,5,1" Margin="5,0,0,0"
-                        Command="{Binding LibraryVM.RemoveFootprintCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}" />
+                            Command="{Binding LibraryVM.RemoveFootprintCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}" />
                 </StackPanel>
                 <View:UserControl_PartGrid 
                     Grid.Row="2"

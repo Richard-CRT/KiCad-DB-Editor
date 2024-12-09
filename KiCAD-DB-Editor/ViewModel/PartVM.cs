@@ -114,6 +114,10 @@ namespace KiCAD_DB_Editor.ViewModel
 
                     // Doesn't seem to be technically required as the bindings for the ComboBoxes I'm designing this for only load
                     // when the cells are edited, but if not then I'd need to do this to prompt the ComboBoxes to refetch the value
+                    // On future investigation, it's clear that I can't switch to a system where the ComboBoxes are persistent. WPF is
+                    // weird: when I clear the SelectedKiCADSymbolLibraryVM, the available items in the symbol name should be blank
+                    // and it does do this, but if the current text is one of those items, it will get cleared, which is not what
+                    // I want at all
                     InvokePropertyChanged(nameof(this.SelectedKiCADSymbolLibraryVM));
                 }
             }
@@ -269,6 +273,10 @@ namespace KiCAD_DB_Editor.ViewModel
 
                         // Doesn't seem to be technically required as the bindings for the ComboBoxes I'm designing this for only load
                         // when the cells are edited, but if not then I'd need to do this to prompt the ComboBoxes to refetch the value
+                        // On future investigation, it's clear that I can't switch to a system where the ComboBoxes are persistent. WPF is
+                        // weird: when I clear the SelectedKiCADFootprintLibraryVM, the available items in the footprint name should be blank
+                        // and it does do this, but if the current text is one of those items, it will get cleared, which is not what
+                        // I want at all
                         OwnerPartVM.SelectedFootprintLibraryVMAccessor.InvokePropertyChanged("Item[]");
                     }
                 }

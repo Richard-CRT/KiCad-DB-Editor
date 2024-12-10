@@ -167,7 +167,6 @@ namespace KiCAD_DB_Editor.View
         {
             if (sender is ParameterVM parameterVM)
             {
-                // TODO At some point should check that renaming the parameter doesn't actually break things
                 if (e.PropertyName == nameof(ParameterVM.Name))
                     redoColumns_ParameterNameChange(parameterVM);
             }
@@ -365,7 +364,7 @@ namespace KiCAD_DB_Editor.View
         private void redoColumns_ParameterNameChange(ParameterVM parameterVMWithNameChange)
         {
             DataGridTextColumn columnToUpdate = parameterVMToDataGridColumn[parameterVMWithNameChange];
-            updateParameterBindings(columnToUpdate, parameterVMWithNameChange);
+            columnToUpdate.Header = parameterVMWithNameChange.Name.Replace("_", "__");
         }
 
         private List<ParameterVM> parameterVMsThatHaveColumns = new();

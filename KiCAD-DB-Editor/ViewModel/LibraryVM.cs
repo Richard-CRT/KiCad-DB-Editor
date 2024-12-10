@@ -585,7 +585,8 @@ namespace KiCAD_DB_Editor.ViewModel
             if (SelectedKiCADSymbolLibraryVM is not null && this.NewKiCADSymbolLibraryName.Length > 0 && this.NewKiCADSymbolLibraryRelativePath.Length > 0)
             {
                 var kiCADSymbolLibraryVMsWithSameName = KiCADSymbolLibraryVMs.Where(p => p.Nickname.ToLower() == this.NewKiCADSymbolLibraryName.ToLower()).ToArray();
-                var kiCADSymbolLibraryVMsWithSameRelativePath = KiCADSymbolLibraryVMs.Where(p => p.RelativePath.ToLower() == this.NewKiCADSymbolLibraryRelativePath.ToLower()).ToArray();
+                // Don't do .ToLower() on paths, as UNIX would allow these to coexist. We'll just expect designers to be careful with duplicates
+                var kiCADSymbolLibraryVMsWithSameRelativePath = KiCADSymbolLibraryVMs.Where(p => p.RelativePath == this.NewKiCADSymbolLibraryRelativePath).ToArray();
                 return (kiCADSymbolLibraryVMsWithSameName.Length == 0 && kiCADSymbolLibraryVMsWithSameRelativePath.Length == 0) ||
                        (kiCADSymbolLibraryVMsWithSameName.Length == 1 && kiCADSymbolLibraryVMsWithSameName[0] == SelectedKiCADSymbolLibraryVM && kiCADSymbolLibraryVMsWithSameRelativePath.Length == 0) ||
                        (kiCADSymbolLibraryVMsWithSameName.Length == 0 && kiCADSymbolLibraryVMsWithSameRelativePath.Length == 1 && kiCADSymbolLibraryVMsWithSameRelativePath[0] == SelectedKiCADSymbolLibraryVM);
@@ -680,7 +681,8 @@ namespace KiCAD_DB_Editor.ViewModel
             if (SelectedKiCADFootprintLibraryVM is not null && this.NewKiCADFootprintLibraryName.Length > 0 && this.NewKiCADFootprintLibraryRelativePath.Length > 0)
             {
                 var kiCADFootprintLibraryVMsWithSameName = KiCADFootprintLibraryVMs.Where(p => p.Nickname.ToLower() == this.NewKiCADFootprintLibraryName.ToLower()).ToArray();
-                var kiCADFootprintLibraryVMsWithSameRelativePath = KiCADFootprintLibraryVMs.Where(p => p.RelativePath.ToLower() == this.NewKiCADFootprintLibraryRelativePath.ToLower()).ToArray();
+                // Don't do .ToLower() on paths, as UNIX would allow these to coexist. We'll just expect designers to be careful with duplicates
+                var kiCADFootprintLibraryVMsWithSameRelativePath = KiCADFootprintLibraryVMs.Where(p => p.RelativePath == this.NewKiCADFootprintLibraryRelativePath).ToArray();
                 return (kiCADFootprintLibraryVMsWithSameName.Length == 0 && kiCADFootprintLibraryVMsWithSameRelativePath.Length == 0) ||
                        (kiCADFootprintLibraryVMsWithSameName.Length == 1 && kiCADFootprintLibraryVMsWithSameName[0] == SelectedKiCADFootprintLibraryVM && kiCADFootprintLibraryVMsWithSameRelativePath.Length == 0) ||
                        (kiCADFootprintLibraryVMsWithSameName.Length == 0 && kiCADFootprintLibraryVMsWithSameRelativePath.Length == 1 && kiCADFootprintLibraryVMsWithSameRelativePath[0] == SelectedKiCADFootprintLibraryVM);

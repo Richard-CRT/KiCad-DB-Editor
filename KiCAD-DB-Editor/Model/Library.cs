@@ -157,19 +157,26 @@ namespace KiCAD_DB_Editor.Model
                 {
                     string columnName = dbPartColumnNames[i];
 
-                    bool match = false;
-                    foreach (Parameter parameter in library.Parameters)
+                    if (columnName.Length >= 36)
                     {
-                        if (parameter.Name == columnName)
+                        string potentialUUID = columnName[^36..];
+                        if (Guid.TryParse(potentialUUID, out Guid guid))
                         {
-                            //columnIndexToParameterMap[i] = parameter;
-                            parameterUUIDToColumnIndexToMap[parameter.UUID] = i;
-                            match = true;
-                            break;
+                            string uuid = guid.ToString();
+                            Parameter? matchingParameter = library.Parameters.FirstOrDefault(p => p!.UUID == uuid, null);
+                            if (matchingParameter is not null)
+                            {
+                                //columnIndexToParameterMap[i] = parameter;
+                                parameterUUIDToColumnIndexToMap[uuid] = i;
+                            }
+                            else
+                                throw new InvalidDataException("Could not find a parameter to correspond to database column UUID");
                         }
+                        else
+                            throw new InvalidDataException("Could not parse UUID from column name");
                     }
-                    if (!match)
-                        throw new InvalidDataException("Could not find a parameter to correspond to database column name");
+                    else
+                        throw new InvalidDataException("Column name not longer enough to find UUID substring");
                 }
 
                 foreach (List<object> dbPart in dbParts)
@@ -372,7 +379,7 @@ namespace KiCAD_DB_Editor.Model
                         createTableSql += $"\"Footprint {j} Name\" TEXT, ";
                     }
                     foreach (Parameter parameter in Parameters)
-                        createTableSql += $"\"{parameter.Name.Replace("\"", "\"\"")}\" TEXT, ";
+                        createTableSql += $"\"{parameter.Name.Replace("\"", "\"\"")} {parameter.UUID}\" TEXT, ";
                     createTableSql = createTableSql[..^2];
                     createTableSql += ")";
 
@@ -399,7 +406,7 @@ namespace KiCAD_DB_Editor.Model
                         insertPartsSql += $"\"Footprint {j} Name\", ";
                     }
                     foreach (Parameter parameter in Parameters)
-                        insertPartsSql += $"\"{parameter.Name.Replace("\"", "\"\"")}\", ";
+                        insertPartsSql += $"\"{parameter.Name.Replace("\"", "\"\"")} {parameter.UUID}\", ";
                     insertPartsSql = insertPartsSql[..^2];
                     insertPartsSql += ") VALUES ";
                     foreach (Part part in Parts)

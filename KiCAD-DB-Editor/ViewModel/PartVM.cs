@@ -237,7 +237,7 @@ namespace KiCAD_DB_Editor.ViewModel
                 ParameterVM? matchingParameterVM = OwnerPartVM.ParentLibraryVM.ParameterVMs.FirstOrDefault(pVM => pVM!.Name == parameterVMName, null);
                 if (matchingParameterVM is not null)
                 {
-                    var key = OwnerPartVM.ParentLibraryVM.ParameterVMs.First(pVM => pVM.Name == parameterVMName).Parameter;
+                    var key = matchingParameterVM.Parameter;
                     if (OwnerPartVM.Part.ParameterValues.TryGetValue(key, out string? val))
                         return val;
                     else

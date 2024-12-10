@@ -344,11 +344,11 @@ namespace KiCAD_DB_Editor.ViewModel
             NewParameterCommand = new BasicCommand(NewParameterCommandExecuted, NewParameterCommandCanExecute);
             RenameParameterCommand = new BasicCommand(RenameParameterCommandExecuted, RenameParameterCommandCanExecute);
             DeleteParameterCommand = new BasicCommand(DeleteParameterCommandExecuted, DeleteParameterCommandCanExecute);
-            BrowseKiCADSymbolLibraryCommand = new BasicCommand(BrowseKiCADSymbolLibraryCommandExecuted, null);
+            BrowseKiCADSymbolLibraryCommand = new BasicCommand(BrowseKiCADSymbolLibraryCommandExecuted, BrowseKiCADSymbolLibraryCommandCanExecute);
             NewKiCADSymbolLibraryCommand = new BasicCommand(NewKiCADSymbolLibraryCommandExecuted, NewKiCADSymbolLibraryCommandCanExecute);
             UpdateKiCADSymbolLibraryCommand = new BasicCommand(UpdateKiCADSymbolLibraryCommandExecuted, UpdateKiCADSymbolLibraryCommandCanExecute);
             DeleteKiCADSymbolLibraryCommand = new BasicCommand(DeleteKiCADSymbolLibraryCommandExecuted, DeleteKiCADSymbolLibraryCommandCanExecute);
-            BrowseKiCADFootprintLibraryCommand = new BasicCommand(BrowseKiCADFootprintLibraryCommandExecuted, null);
+            BrowseKiCADFootprintLibraryCommand = new BasicCommand(BrowseKiCADFootprintLibraryCommandExecuted, BrowseKiCADFootprintLibraryCommandCanExecute);
             NewKiCADFootprintLibraryCommand = new BasicCommand(NewKiCADFootprintLibraryCommandExecuted, NewKiCADFootprintLibraryCommandCanExecute);
             UpdateKiCADFootprintLibraryCommand = new BasicCommand(UpdateKiCADFootprintLibraryCommandExecuted, UpdateKiCADFootprintLibraryCommandCanExecute);
             DeleteKiCADFootprintLibraryCommand = new BasicCommand(DeleteKiCADFootprintLibraryCommandExecuted, DeleteKiCADFootprintLibraryCommandCanExecute);
@@ -533,17 +533,22 @@ namespace KiCAD_DB_Editor.ViewModel
             PartVM.RemoveFootprintCommandExecuted(SelectedPartVMs);
         }
 
+        private bool BrowseKiCADSymbolLibraryCommandCanExecute(object? parameter)
+        {
+            return Library.ProjectDirectoryPath != "";
+        }
+
         private void BrowseKiCADSymbolLibraryCommandExecuted(object? parameter)
         {
+            Debug.Assert(Library.ProjectDirectoryPath != "");
+
             // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
             OpenFileDialog openFileDialog = new();
             // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
             openFileDialog.Title = "Open KiCAD Symbol Library File";
             openFileDialog.Filter = "Symbol library file (*.kicad_sym)|*.kicad_sym|All files (*.*)|*.*";
             if (openFileDialog.ShowDialog() == true)
-            {
-                var foo = Path.GetRelativePath(Library.ProjectDirectoryPath, openFileDialog.FileName);
-            }
+                this.NewKiCADSymbolLibraryRelativePath = Path.GetRelativePath(Library.ProjectDirectoryPath, openFileDialog.FileName);
         }
 
         private bool NewKiCADSymbolLibraryCommandCanExecute(object? parameter)
@@ -624,8 +629,21 @@ namespace KiCAD_DB_Editor.ViewModel
             SelectedKiCADSymbolLibraryVM = KiCADSymbolLibraryVMs.FirstOrDefault();
         }
 
+        private bool BrowseKiCADFootprintLibraryCommandCanExecute(object? parameter)
+        {
+            return Library.ProjectDirectoryPath != "";
+        }
+
         private void BrowseKiCADFootprintLibraryCommandExecuted(object? parameter)
         {
+            Debug.Assert(Library.ProjectDirectoryPath != "");
+
+            // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
+            OpenFolderDialog openFolderDialog = new();
+            // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
+            openFolderDialog.Title = "Open KiCAD Footprint Library Directory";
+            if (openFolderDialog.ShowDialog() == true)
+                this.NewKiCADFootprintLibraryRelativePath = Path.GetRelativePath(Library.ProjectDirectoryPath, openFolderDialog.FolderName);
         }
 
         private bool NewKiCADFootprintLibraryCommandCanExecute(object? parameter)

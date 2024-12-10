@@ -49,10 +49,6 @@ namespace KiCAD_DB_Editor.ViewModel
                     if (value.Length == 0)
                         throw new Exceptions.ArgumentValidationException("Proposed name invalid");
 
-                    // Don't do .ToLower() on paths, as UNIX would allow these to coexist. We'll just expect designers to be careful with duplicates
-                    if (ParentLibraryVM.KiCADFootprintLibraryVMs.Any(p => p.RelativePath == value))
-                        throw new Exceptions.ArgumentValidationException("Parent already contains KiCAD footprint library with proposed relative path");
-
                     KiCADFootprintLibrary.RelativePath = value;
                     InvokePropertyChanged();
                 }

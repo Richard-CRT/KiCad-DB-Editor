@@ -30,10 +30,6 @@ namespace KiCAD_DB_Editor.ViewModel
                     if (value.Length == 0)
                         throw new Exceptions.ArgumentValidationException("Proposed name invalid");
 
-                    // Don't do .ToLower() on paths, as UNIX would allow these to coexist. We'll just expect designers to be careful with duplicates
-                    if (ParentLibraryVM.KiCADSymbolLibraryVMs.Any(p => p.Nickname == value))
-                        throw new Exceptions.ArgumentValidationException("Parent already contains KiCAD symbol library with proposed name");
-
                     KiCADSymbolLibrary.Nickname = value;
                     InvokePropertyChanged();
                 }
@@ -49,9 +45,6 @@ namespace KiCAD_DB_Editor.ViewModel
                 {
                     if (value.Length == 0)
                         throw new Exceptions.ArgumentValidationException("Proposed name invalid");
-
-                    if (ParentLibraryVM.KiCADSymbolLibraryVMs.Any(p => p.RelativePath.ToLower() == value.ToLower()))
-                        throw new Exceptions.ArgumentValidationException("Parent already contains KiCAD symbol library with proposed relative path");
 
                     KiCADSymbolLibrary.RelativePath = value;
                     InvokePropertyChanged();

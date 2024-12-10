@@ -134,7 +134,13 @@
                         <TextBlock>Name</TextBlock>
                         <TextBox Text="{Binding LibraryVM.NewKiCADSymbolLibraryName, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock>Relative Path</TextBlock>
-                        <TextBox Text="{Binding LibraryVM.NewKiCADSymbolLibraryRelativePath, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}" />
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Margin="5,0,0,0" Padding="5,1,5,1"
+                                    Content="Browse"
+                                    Command="{Binding LibraryVM.BrowseKiCADSymbolLibraryCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
+                                    />
+                            <TextBox Text="{Binding LibraryVM.NewKiCADSymbolLibraryRelativePath, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}" />
+                        </DockPanel>
                         <Button Content="Add" Padding="5,1,5,1"
                                 Command="{Binding LibraryVM.NewKiCADSymbolLibraryCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />
                         <Button Content="Update" Padding="5,1,5,1"
@@ -163,7 +169,13 @@
                         <TextBlock>Name</TextBlock>
                         <TextBox Text="{Binding LibraryVM.NewKiCADFootprintLibraryName, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock>Relative Path</TextBlock>
-                        <TextBox Text="{Binding LibraryVM.NewKiCADFootprintLibraryRelativePath, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}" />
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Margin="5,0,0,0" Padding="5,1,5,1"
+                                    Content="Browse"
+                                    Command="{Binding LibraryVM.BrowseKiCADFootprintLibraryCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
+                                    />
+                            <TextBox Text="{Binding LibraryVM.NewKiCADFootprintLibraryRelativePath, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}" />
+                        </DockPanel>
                         <Button Content="Add" Padding="5,1,5,1"
                                 Command="{Binding LibraryVM.NewKiCADFootprintLibraryCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />
                         <Button Content="Update" Padding="5,1,5,1"

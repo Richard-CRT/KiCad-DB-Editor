@@ -323,7 +323,7 @@ namespace KiCAD_DB_Editor.View
         {
             column.Header = parameterVM.Name.Replace("_", "__");
 
-            Binding valueBinding = new($"ParameterAccessor[{parameterVM.Name}]");
+            Binding valueBinding = new($"ParameterAccessor[{parameterVM.UUID}]");
             valueBinding.Mode = BindingMode.TwoWay;
             valueBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
             column.Binding = valueBinding;

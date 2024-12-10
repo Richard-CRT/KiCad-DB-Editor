@@ -23,7 +23,7 @@ namespace KiCAD_DB_Editor.Model
         public bool ExcludeFromBOM { get; set; } = false;
         public bool ExcludeFromBoard { get; set; } = false;
         public bool ExcludeFromSim { get; set; } = false;
-        public Dictionary<Model.Parameter, string> ParameterValues { get; set; } = new();
+        public Dictionary<string, string> ParameterValues { get; set; } = new();
 
         public Part(string partUID)
         {

@@ -40,8 +40,8 @@ namespace KiCAD_DB_Editor.Model
                 var jsonString = File.ReadAllText(projectFilePath);
 
                 Library? o;
-                o = (Library?)JsonSerializer.Deserialize(jsonString, typeof(Library), new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve });
-                //o = (Library?)JsonSerializer.Deserialize(jsonString, typeof(Library), new JsonSerializerOptions { });
+                //o = (Library?)JsonSerializer.Deserialize(jsonString, typeof(Library), new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve });
+                o = (Library?)JsonSerializer.Deserialize(jsonString, typeof(Library), new JsonSerializerOptions { });
 
                 if (o is null) throw new ArgumentNullException("Library is null");
 
@@ -152,7 +152,7 @@ namespace KiCAD_DB_Editor.Model
                 }
 
                 //Dictionary<int, Parameter> columnIndexToParameterMap = new();
-                Dictionary<Parameter, int> parameterToColumnIndexToMap = new();
+                Dictionary<string, int> parameterUUIDToColumnIndexToMap = new();
                 for (int i = numberSpecialColumns + numberOfFootprintColumns; i < dbPartColumnNames.Count; i++)
                 {
                     string columnName = dbPartColumnNames[i];
@@ -163,7 +163,7 @@ namespace KiCAD_DB_Editor.Model
                         if (parameter.Name == columnName)
                         {
                             //columnIndexToParameterMap[i] = parameter;
-                            parameterToColumnIndexToMap[parameter] = i;
+                            parameterUUIDToColumnIndexToMap[parameter.UUID] = i;
                             match = true;
                             break;
                         }
@@ -233,14 +233,14 @@ namespace KiCAD_DB_Editor.Model
                             part.FootprintNames.Add((string)footprintNameValue);
                         }
                     }
-                    foreach (Parameter p in partCategory.Parameters)
+                    foreach (string parameterUUID in partCategory.Parameters)
                     {
-                        object value = dbPart[parameterToColumnIndexToMap[p]];
+                        object value = dbPart[parameterUUIDToColumnIndexToMap[parameterUUID]];
                         // Default value to "" if parameter is expected to be present but is null
                         if (value is System.DBNull)
-                            part.ParameterValues[p] = "";
+                            part.ParameterValues[parameterUUID] = "";
                         else
-                            part.ParameterValues[p] = (string)value;
+                            part.ParameterValues[parameterUUID] = (string)value;
                     }
                     library.Parts.Add(part);
                     partCategory.Parts.Add(part);
@@ -305,8 +305,8 @@ namespace KiCAD_DB_Editor.Model
                 string tempProjectPath = $"proj.tmp";
                 string tempComponentsPath = $"components.tmp";
 
-                File.WriteAllText(tempProjectPath, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true, ReferenceHandler = ReferenceHandler.Preserve }));
-                //File.WriteAllText(tempProjectPath, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
+                //File.WriteAllText(tempProjectPath, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true, ReferenceHandler = ReferenceHandler.Preserve }));
+                File.WriteAllText(tempProjectPath, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
 
                 List<Category> allCategories = new();
                 Dictionary<Category, string> categoryToCategoryStringMap = new();
@@ -432,7 +432,7 @@ namespace KiCAD_DB_Editor.Model
                         }
                         foreach (Parameter parameter in Parameters)
                         {
-                            if (part.ParameterValues.TryGetValue(parameter, out string? value))
+                            if (part.ParameterValues.TryGetValue(parameter.UUID, out string? value))
                                 insertPartsSql += $"'{value.Replace("'", "''")}', ";
                             else
                                 insertPartsSql += $"NULL, ";

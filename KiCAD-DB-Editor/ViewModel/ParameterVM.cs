@@ -42,6 +42,11 @@ namespace KiCAD_DB_Editor.ViewModel
             }
         }
 
+        public string UUID
+        {
+            get { return Parameter.UUID; }
+        }
+
         #endregion Notify Properties
 
         public ParameterVM(LibraryVM parentLibraryVM, Model.Parameter parameter)

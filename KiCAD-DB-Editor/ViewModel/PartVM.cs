@@ -133,7 +133,7 @@ namespace KiCAD_DB_Editor.ViewModel
             get
             {
                 var keys = Part.ParameterValues.Keys;
-                return ParentLibraryVM.ParameterVMs.Where(pVM => keys.Contains(pVM.Parameter)).ToArray();
+                return ParentLibraryVM.ParameterVMs.Where(pVM => keys.Contains(pVM.UUID)).ToArray();
             }
         }
 
@@ -166,9 +166,9 @@ namespace KiCAD_DB_Editor.ViewModel
 
         public void AddParameterVM(ParameterVM pVM)
         {
-            if (!Part.ParameterValues.ContainsKey(pVM.Parameter))
+            if (!Part.ParameterValues.ContainsKey(pVM.UUID))
             {
-                Part.ParameterValues[pVM.Parameter] = "";
+                Part.ParameterValues[pVM.UUID] = "";
                 InvokePropertyChanged(nameof(ParameterVMs));
 
                 // This is needed to update the table's existing cells
@@ -178,9 +178,9 @@ namespace KiCAD_DB_Editor.ViewModel
 
         public void RemoveParameterVM(ParameterVM pVM)
         {
-            if (Part.ParameterValues.ContainsKey(pVM.Parameter))
+            if (Part.ParameterValues.ContainsKey(pVM.UUID))
             {
-                Part.ParameterValues.Remove(pVM.Parameter);
+                Part.ParameterValues.Remove(pVM.UUID);
                 InvokePropertyChanged(nameof(ParameterVMs));
 
                 // This is needed to update the table's existing cells
@@ -230,32 +230,24 @@ namespace KiCAD_DB_Editor.ViewModel
 
         #region Notify Properties
 
-        public string? this[string parameterVMName]
+        public string? this[string parameterUUID]
         {
             get
             {
-                ParameterVM? matchingParameterVM = OwnerPartVM.ParentLibraryVM.ParameterVMs.FirstOrDefault(pVM => pVM!.Name == parameterVMName, null);
-                if (matchingParameterVM is not null)
-                {
-                    var key = matchingParameterVM.Parameter;
-                    if (OwnerPartVM.Part.ParameterValues.TryGetValue(key, out string? val))
-                        return val;
-                    else
-                        return null;
-                }
-                else 
+                if (OwnerPartVM.Part.ParameterValues.TryGetValue(parameterUUID, out string? val))
+                    return val;
+                else
                     return null;
             }
             set
             {
                 if (value is not null)
                 {
-                    var key = OwnerPartVM.ParentLibraryVM.ParameterVMs.First(pVM => pVM.Name == parameterVMName).Parameter;
-                    if (OwnerPartVM.Part.ParameterValues.TryGetValue(key, out string? s))
+                    if (OwnerPartVM.Part.ParameterValues.TryGetValue(parameterUUID, out string? s))
                     {
                         if (s != value)
                         {
-                            OwnerPartVM.Part.ParameterValues[key] = value;
+                            OwnerPartVM.Part.ParameterValues[parameterUUID] = value;
                             InvokePropertyChanged("Item[]");
                         }
                     }

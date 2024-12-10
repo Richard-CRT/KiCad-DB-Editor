@@ -125,7 +125,7 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private void _parameterVMs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            Category.Parameters = new(this.ParameterVMs.Select(pVM => pVM.Parameter));
+            Category.Parameters = new(this.ParameterVMs.Select(pVM => pVM.UUID));
 
             InvokePropertyChanged(nameof(this.InheritedAndNormalParameterVMs));
             InvokePropertyChanged(nameof(this.AvailableParameterVMs));
@@ -231,7 +231,7 @@ namespace KiCAD_DB_Editor.ViewModel
             CategoryVMs = new(category.Categories.OrderBy(c => c.Name).Select(c => new CategoryVM(ParentLibraryVM, this, c)));
             Debug.Assert(_categoryVMs is not null);
             // Link to parent library instances of ParameterVM (requires Library to have already set them up)
-            ParameterVMs = new(parentLibraryVM.ParameterVMs.Where(pVM => category.Parameters.Contains(pVM.Parameter)));
+            ParameterVMs = new(parentLibraryVM.ParameterVMs.Where(pVM => category.Parameters.Contains(pVM.UUID)));
             Debug.Assert(_parameterVMs is not null);
             // Link to parent library instances of PartVM (requires Library to have already set them up)
             PartVMs = new(parentLibraryVM.PartVMs.Where(pVM => category.Parts.Contains(pVM.Part)));
@@ -277,7 +277,7 @@ namespace KiCAD_DB_Editor.ViewModel
                 foreach (PartVM pVM in PartVMs)
                     pVM.RemoveParameterVM(pVMToBeRemoved);
             }
-            ParameterVMs = new(ParentLibraryVM.ParameterVMs.Where(pVM => Category.Parameters.Contains(pVM.Parameter)));
+            ParameterVMs = new(ParentLibraryVM.ParameterVMs.Where(pVM => Category.Parameters.Contains(pVM.UUID)));
 
             foreach (CategoryVM cVM in CategoryVMs)
                 cVM.InvokePropertyChanged_AvailableParameterVMs();

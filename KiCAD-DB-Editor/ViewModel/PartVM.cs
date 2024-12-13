@@ -30,7 +30,7 @@ namespace KiCAD_DB_Editor.ViewModel
         // Duplicated between LibraryVM and CategoryVM so we move the checks here
         public static bool RemoveFootprintCommandCanExecute(IEnumerable<PartVM> partVMsToRemoveFootprintsFrom)
         {
-            return partVMsToRemoveFootprintsFrom.Count() > 0 && partVMsToRemoveFootprintsFrom.All(pVM => pVM.FootprintCount > 1);
+            return partVMsToRemoveFootprintsFrom.Count() > 0 && partVMsToRemoveFootprintsFrom.All(pVM => pVM.FootprintCount > 0);
         }
 
         // Duplicated between LibraryVM and CategoryVM so we move the checks here

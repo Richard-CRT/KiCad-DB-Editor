@@ -1,0 +1,184 @@
+{
+  "part_uid_scheme": "CMP-#######-####",
+  "parameters": [
+    {
+      "uuid": "28268508-1b23-483b-901d-d9756d49e7e6",
+      "name": "BOM Comments"
+    },
+    {
+      "uuid": "787ebf49-a7ad-4f5f-8bc6-76fcbfe6994c",
+      "name": "Package"
+    },
+    {
+      "uuid": "18902a19-9568-4ad2-9b5b-b6539d64b2b7",
+      "name": "Notes"
+    }
+  ],
+  "top_level_categories": [
+    {
+      "name": "Capacitors",
+      "parameters": [],
+      "categories": []
+    },
+    {
+      "name": "Connectors",
+      "parameters": [
+        "787ebf49-a7ad-4f5f-8bc6-76fcbfe6994c"
+      ],
+      "categories": [
+        {
+          "name": "Card Edge Connectors",
+          "parameters": [],
+          "categories": []
+        },
+        {
+          "name": "Headers \u0026 Wire Housings",
+          "parameters": [],
+          "categories": []
+        },
+        {
+          "name": "RF",
+          "parameters": [
+            "28268508-1b23-483b-901d-d9756d49e7e6"
+          ],
+          "categories": [
+            {
+              "name": "SMA",
+              "parameters": [],
+              "categories": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Diodes",
+      "parameters": [
+        "18902a19-9568-4ad2-9b5b-b6539d64b2b7"
+      ],
+      "categories": [
+        {
+          "name": "Schottky",
+          "parameters": [],
+          "categories": []
+        },
+        {
+          "name": "TVS",
+          "parameters": [],
+          "categories": []
+        },
+        {
+          "name": "Zener",
+          "parameters": [],
+          "categories": []
+        }
+      ]
+    },
+    {
+      "name": "Fiducials",
+      "parameters": [],
+      "categories": []
+    },
+    {
+      "name": "Frequency \u0026 Timing",
+      "parameters": [],
+      "categories": [
+        {
+          "name": "Crystals",
+          "parameters": [],
+          "categories": []
+        },
+        {
+          "name": "Oscillators",
+          "parameters": [],
+          "categories": []
+        }
+      ]
+    },
+    {
+      "name": "Graphical",
+      "parameters": [],
+      "categories": []
+    },
+    {
+      "name": "Inductors",
+      "parameters": [],
+      "categories": []
+    },
+    {
+      "name": "Integrated Circuits",
+      "parameters": [],
+      "categories": []
+    },
+    {
+      "name": "LED",
+      "parameters": [],
+      "categories": []
+    },
+    {
+      "name": "Mechanical",
+      "parameters": [],
+      "categories": []
+    },
+    {
+      "name": "Miscellaneous",
+      "parameters": [],
+      "categories": []
+    },
+    {
+      "name": "Radio \u0026 RF",
+      "parameters": [],
+      "categories": []
+    },
+    {
+      "name": "Relays",
+      "parameters": [],
+      "categories": []
+    },
+    {
+      "name": "Resistors",
+      "parameters": [],
+      "categories": []
+    },
+    {
+      "name": "Sensors",
+      "parameters": [],
+      "categories": []
+    },
+    {
+      "name": "Switches",
+      "parameters": [],
+      "categories": []
+    },
+    {
+      "name": "Test Points",
+      "parameters": [],
+      "categories": []
+    },
+    {
+      "name": "Transistors",
+      "parameters": [],
+      "categories": []
+    }
+  ],
+  "kicad_symbol_libraries": [
+    {
+      "nickname": "LIB_GENERIC_CAPACITORS",
+      "relative_path": "sample_kicad_library\\symbol_libraries\\GENERIC_CAPACITORS.kicad_sym"
+    },
+    {
+      "nickname": "LIB_GENERIC_RESISTORS",
+      "relative_path": "sample_kicad_library\\symbol_libraries\\GENERIC_RESISTORS.kicad_sym"
+    }
+  ],
+  "kicad_footprint_libraries": [
+    {
+      "nickname": "LIB_GENERIC_CAPACITORS",
+      "relative_path": "sample_kicad_library\\footprint_libraries\\GENERIC_CAPACITORS.pretty"
+    },
+    {
+      "nickname": "LIB_GENERIC_RESISTORS",
+      "relative_path": "sample_kicad_library\\footprint_libraries\\GENERIC_RESISTORS.pretty"
+    }
+  ]
+}

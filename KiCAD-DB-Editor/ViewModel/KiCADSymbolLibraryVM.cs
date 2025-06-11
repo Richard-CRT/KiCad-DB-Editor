@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
@@ -77,8 +78,18 @@ namespace KiCAD_DB_Editor.ViewModel
             KiCADSymbolLibrary = kiCADSymbolLibrary;
 
             // Parse to produce symbol names
-            KiCADSymbolNames = new() { "aaaa", "bbbb", "cccc" };
+            // Special case while developing
+            if (kiCADSymbolLibrary.Nickname == "LIB_GENERIC_CAPACITORS")
+                KiCADSymbolNames = new() { "aaaa", "bbbb", "cccc" };
+            else
+                KiCADSymbolNames = new() { "dddd", "eeee", "ffff" };
             Debug.Assert(_kicadSymbolNames is not null);
+        }
+
+        public void ParseKiCADSymbolNames()
+        {
+            // Need to parse the symbols from the provided library
+            string absolutePath = Path.Combine(ParentLibraryVM.Library.ProjectDirectoryPath, KiCADSymbolLibrary.RelativePath);
         }
 
         #region Commands

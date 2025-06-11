@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
@@ -51,6 +52,8 @@ namespace KiCAD_DB_Editor.ViewModel
 
                     KiCADFootprintLibrary.RelativePath = value;
                     InvokePropertyChanged();
+
+                    ParseKiCADFootprintNames();
                 }
             }
         }
@@ -80,8 +83,22 @@ namespace KiCAD_DB_Editor.ViewModel
             KiCADFootprintLibrary = kiCADFootprintLibrary;
 
             // Parse to produce footprint names
-            KiCADFootprintNames = new() { "xxxx", "yyyy", "zzzz" };
+            ParseKiCADFootprintNames();
             Debug.Assert(_kicadFootprintNames is not null);
+        }
+
+        public void ParseKiCADFootprintNames()
+        {
+            // Need to parse the footprints from the provided path
+            string absolutePath = Path.Combine(ParentLibraryVM.Library.ProjectDirectoryPath, KiCADFootprintLibrary.RelativePath);
+            if (Directory.Exists(absolutePath))
+            {
+                var filePaths = Directory.GetFiles(absolutePath, "*.kicad_mod", SearchOption.TopDirectoryOnly);
+                var fileNames = filePaths.Select(fP => Path.GetFileName(fP));
+                KiCADFootprintNames = new(fileNames);
+            }
+            else
+                KiCADFootprintNames = new();
         }
 
         #region Commands

@@ -10,7 +10,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace KiCAD_DB_Editor
+namespace KiCAD_DB_Editor.View
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

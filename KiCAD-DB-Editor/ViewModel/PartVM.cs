@@ -119,9 +119,20 @@ namespace KiCAD_DB_Editor.ViewModel
                     // and it does do this, but if the current text is one of those items, it will get cleared, which is not what
                     // I want at all
                     InvokePropertyChanged(nameof(this.SelectedKiCADSymbolLibraryVM));
+
+                    // Changing the selected symbol library should prompt clearing the symbol name
+                    SymbolName = "";
                 }
             }
         }
+
+        // Included so the KiCAD symbol name drop down has a source
+        public KiCADSymbolLibraryVM? SelectedKiCADSymbolLibraryVM
+        {
+            // Have to do ! as FirstOrDefault needs to think kSLVM could be null in order for me to return null
+            get { return ParentLibraryVM.KiCADSymbolLibraryVMs.FirstOrDefault(kSLVM => kSLVM!.Nickname == SymbolLibraryName, null); }
+        }
+
         public string SymbolName
         {
             get { return Part.SymbolName; }
@@ -140,13 +151,6 @@ namespace KiCAD_DB_Editor.ViewModel
         public int FootprintCount
         {
             get { return Part.FootprintLibraryNames.Count; }
-        }
-
-        // Included so the KiCAD symbol name drop down has a source
-        public KiCADSymbolLibraryVM? SelectedKiCADSymbolLibraryVM
-        {
-            // Have to do ! as FirstOrDefault needs to think kSLVM could be null in order for me to return null
-            get { return ParentLibraryVM.KiCADSymbolLibraryVMs.FirstOrDefault(kSLVM => kSLVM!.Nickname == SymbolLibraryName, null); }
         }
 
         #endregion Notify Properties
@@ -294,6 +298,10 @@ namespace KiCAD_DB_Editor.ViewModel
                         // and it does do this, but if the current text is one of those items, it will get cleared, which is not what
                         // I want at all
                         OwnerPartVM.SelectedFootprintLibraryVMAccessor.InvokePropertyChanged("Item[]");
+
+                        // Changing the selected footprint library should prompt clearing the footprint name
+                        OwnerPartVM.Part.FootprintNames[index] = "";
+                        OwnerPartVM.FootprintNameAccessor.InvokePropertyChanged("Item[]");
                     }
                 }
             }

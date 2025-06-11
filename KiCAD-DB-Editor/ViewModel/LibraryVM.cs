@@ -348,10 +348,12 @@ namespace KiCAD_DB_Editor.ViewModel
             NewKiCADSymbolLibraryCommand = new BasicCommand(NewKiCADSymbolLibraryCommandExecuted, NewKiCADSymbolLibraryCommandCanExecute);
             UpdateKiCADSymbolLibraryCommand = new BasicCommand(UpdateKiCADSymbolLibraryCommandExecuted, UpdateKiCADSymbolLibraryCommandCanExecute);
             DeleteKiCADSymbolLibraryCommand = new BasicCommand(DeleteKiCADSymbolLibraryCommandExecuted, DeleteKiCADSymbolLibraryCommandCanExecute);
+            ReparseKiCADSymbolNamesCommand = new BasicCommand(ReparseKiCADSymbolNamesCommandExecuted, ReparseKiCADSymbolNamesCommandCanExecute);
             BrowseKiCADFootprintLibraryCommand = new BasicCommand(BrowseKiCADFootprintLibraryCommandExecuted, BrowseKiCADFootprintLibraryCommandCanExecute);
             NewKiCADFootprintLibraryCommand = new BasicCommand(NewKiCADFootprintLibraryCommandExecuted, NewKiCADFootprintLibraryCommandCanExecute);
             UpdateKiCADFootprintLibraryCommand = new BasicCommand(UpdateKiCADFootprintLibraryCommandExecuted, UpdateKiCADFootprintLibraryCommandCanExecute);
             DeleteKiCADFootprintLibraryCommand = new BasicCommand(DeleteKiCADFootprintLibraryCommandExecuted, DeleteKiCADFootprintLibraryCommandCanExecute);
+            ReparseKiCADFootprintNamesCommand = new BasicCommand(ReparseKiCADFootprintNamesCommandExecuted, ReparseKiCADFootprintNamesCommandCanExecute);
             AddFootprintCommand = new BasicCommand(AddFootprintCommandExecuted, AddFootprintCommandCanExecute);
             RemoveFootprintCommand = new BasicCommand(RemoveFootprintCommandExecuted, RemoveFootprintCommandCanExecute);
 
@@ -413,10 +415,12 @@ namespace KiCAD_DB_Editor.ViewModel
         public IBasicCommand NewKiCADSymbolLibraryCommand { get; }
         public IBasicCommand UpdateKiCADSymbolLibraryCommand { get; }
         public IBasicCommand DeleteKiCADSymbolLibraryCommand { get; }
+        public IBasicCommand ReparseKiCADSymbolNamesCommand { get; }
         public IBasicCommand BrowseKiCADFootprintLibraryCommand { get; }
         public IBasicCommand NewKiCADFootprintLibraryCommand { get; }
         public IBasicCommand UpdateKiCADFootprintLibraryCommand { get; }
         public IBasicCommand DeleteKiCADFootprintLibraryCommand { get; }
+        public IBasicCommand ReparseKiCADFootprintNamesCommand { get; }
 
         private bool NewTopLevelCategoryCommandCanExecute(object? parameter)
         {
@@ -629,6 +633,17 @@ namespace KiCAD_DB_Editor.ViewModel
             SelectedKiCADSymbolLibraryVM = KiCADSymbolLibraryVMs.FirstOrDefault();
         }
 
+        private bool ReparseKiCADSymbolNamesCommandCanExecute(object? parameter)
+        {
+            return SelectedKiCADSymbolLibraryVM is not null;
+        }
+
+        private void ReparseKiCADSymbolNamesCommandExecuted(object? parameter)
+        {
+            Debug.Assert(SelectedKiCADSymbolLibraryVM is not null);
+            SelectedKiCADSymbolLibraryVM.ParseKiCADSymbolNames();
+        }
+
         private bool BrowseKiCADFootprintLibraryCommandCanExecute(object? parameter)
         {
             return Library.ProjectDirectoryPath != "";
@@ -722,6 +737,17 @@ namespace KiCAD_DB_Editor.ViewModel
             KiCADFootprintLibraryVMs.Remove(SelectedKiCADFootprintLibraryVM);
 
             SelectedKiCADFootprintLibraryVM = KiCADFootprintLibraryVMs.FirstOrDefault();
+        }
+
+        private bool ReparseKiCADFootprintNamesCommandCanExecute(object? parameter)
+        {
+            return SelectedKiCADFootprintLibraryVM is not null;
+        }
+
+        private void ReparseKiCADFootprintNamesCommandExecuted(object? parameter)
+        {
+            Debug.Assert(SelectedKiCADFootprintLibraryVM is not null);
+            SelectedKiCADFootprintLibraryVM.ParseKiCADFootprintNames();
         }
 
         #endregion Commands

@@ -12,6 +12,7 @@ using System.ComponentModel;
 using Microsoft.VisualBasic;
 using KiCAD_DB_Editor.Commands;
 using KiCAD_DB_Editor.View;
+using KiCAD_DB_Editor.ViewModel.Utilities;
 using KiCAD_DB_Editor.Exceptions;
 using KiCAD_DB_Editor.Model;
 using KiCAD_DB_Editor.View.Dialogs;
@@ -37,7 +38,7 @@ namespace KiCAD_DB_Editor.ViewModel
                 if (Category.Name != value)
                 {
                     string lowerValue = value.ToLower();
-                    if (value.Length == 0 || lowerValue.Any(c => !Utilities.SafeCategoryCharacters.Contains(c)))
+                    if (value.Length == 0 || lowerValue.Any(c => !Util.SafeCategoryCharacters.Contains(c)))
                         throw new Exceptions.ArgumentValidationException("Proposed name invalid");
 
                     ObservableCollectionEx<CategoryVM> categoryCollection;
@@ -347,7 +348,7 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private void NewPartCommandExecuted(object? parameter)
         {
-            string partUID = Utilities.GeneratePartUID(ParentLibraryVM.PartUIDScheme);
+            string partUID = Util.GeneratePartUID(ParentLibraryVM.PartUIDScheme);
             Part part = new(partUID);
             PartVM partVM = new(ParentLibraryVM, part);
             partVM.ParentCategoryVM = this;

@@ -3,6 +3,7 @@ using KiCAD_DB_Editor.Exceptions;
 using KiCAD_DB_Editor.Model;
 using KiCAD_DB_Editor.View;
 using KiCAD_DB_Editor.View.Dialogs;
+using KiCAD_DB_Editor.ViewModel.Utilities;
 using Microsoft.VisualBasic;
 using Microsoft.Win32;
 using System;
@@ -36,7 +37,7 @@ namespace KiCAD_DB_Editor.ViewModel
             {
                 if (Library.PartUIDScheme != value)
                 {
-                    if (value.Count(c => c == '#') != Utilities.PartUIDSchemeNumberOfWildcards)
+                    if (value.Count(c => c == '#') != Util.PartUIDSchemeNumberOfWildcards)
                         throw new Exceptions.ArgumentValidationException("Proposed scheme does not contain the necessary wildcard characters");
 
                     Library.PartUIDScheme = value;
@@ -375,7 +376,7 @@ namespace KiCAD_DB_Editor.ViewModel
         private bool canNewCategory(ObservableCollectionEx<CategoryVM> categoryVMCollection)
         {
             string lowerValue = this.NewCategoryName.ToLower();
-            if (this.NewCategoryName.Length > 0 && lowerValue.All(c => Utilities.SafeCategoryCharacters.Contains(c)))
+            if (this.NewCategoryName.Length > 0 && lowerValue.All(c => Util.SafeCategoryCharacters.Contains(c)))
             {
                 if (!categoryVMCollection.Any(cVM => cVM.Name.ToLower() == lowerValue))
                 {
@@ -463,9 +464,9 @@ namespace KiCAD_DB_Editor.ViewModel
         private bool NewParameterCommandCanExecute(object? parameter)
         {
             string lowerValue = this.NewParameterName.ToLower();
-            if (this.NewParameterName.Length > 0 && lowerValue.All(c => Utilities.SafeParameterCharacters.Contains(c)))
+            if (this.NewParameterName.Length > 0 && lowerValue.All(c => Util.SafeParameterCharacters.Contains(c)))
             {
-                if (!Utilities.ReservedParameterNames.Contains(lowerValue) && Utilities.ReservedParameterNameStarts.All(s => !lowerValue.StartsWith(s)))
+                if (!Util.ReservedParameterNames.Contains(lowerValue) && Util.ReservedParameterNameStarts.All(s => !lowerValue.StartsWith(s)))
                 {
                     if (!ParameterVMs.Any(p => p.Name.ToLower() == lowerValue))
                     {
@@ -485,9 +486,9 @@ namespace KiCAD_DB_Editor.ViewModel
         private bool RenameParameterCommandCanExecute(object? parameter)
         {
             string lowerValue = this.NewParameterName.ToLower();
-            if (SelectedParameterVM is not null && this.NewParameterName.Length > 0 && lowerValue.All(c => Utilities.SafeParameterCharacters.Contains(c)))
+            if (SelectedParameterVM is not null && this.NewParameterName.Length > 0 && lowerValue.All(c => Util.SafeParameterCharacters.Contains(c)))
             {
-                if (!Utilities.ReservedParameterNames.Contains(lowerValue) && Utilities.ReservedParameterNameStarts.All(s => !lowerValue.StartsWith(s)))
+                if (!Util.ReservedParameterNames.Contains(lowerValue) && Util.ReservedParameterNameStarts.All(s => !lowerValue.StartsWith(s)))
                 {
                     if (!ParameterVMs.Any(p => p.Name.ToLower() == lowerValue))
                     {

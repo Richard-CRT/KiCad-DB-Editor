@@ -2,6 +2,7 @@
 using KiCAD_DB_Editor.Exceptions;
 using KiCAD_DB_Editor.Model;
 using KiCAD_DB_Editor.View.Dialogs;
+using KiCAD_DB_Editor.ViewModel.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -27,10 +28,10 @@ namespace KiCAD_DB_Editor.ViewModel
                 if (Parameter.Name != value)
                 {
                     string lowerValue = value.ToLower();
-                    if (value.Length == 0 || lowerValue.Any(c => !Utilities.SafeParameterCharacters.Contains(c)))
+                    if (value.Length == 0 || lowerValue.Any(c => !Util.SafeParameterCharacters.Contains(c)))
                         throw new Exceptions.ArgumentValidationException("Proposed name invalid");
 
-                    if (Utilities.ReservedParameterNames.Contains(lowerValue) || Utilities.ReservedParameterNameStarts.Any(s => lowerValue.StartsWith(s)))
+                    if (Util.ReservedParameterNames.Contains(lowerValue) || Util.ReservedParameterNameStarts.Any(s => lowerValue.StartsWith(s)))
                         throw new Exceptions.ArgumentValidationException("Proposed name not permitted");
 
                     if (ParentLibraryVM.ParameterVMs.Any(cVM => cVM.Name.ToLower() == lowerValue))

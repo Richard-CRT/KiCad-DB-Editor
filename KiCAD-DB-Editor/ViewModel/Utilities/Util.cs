@@ -7,9 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KiCAD_DB_Editor
+namespace KiCAD_DB_Editor.ViewModel.Utilities
 {
-    public static class Utilities
+    public static class Util
     {
         public static HashSet<string> ReservedParameterNames = new HashSet<string>()
         {
@@ -22,7 +22,7 @@ namespace KiCAD_DB_Editor
             "exclude from board",
             "exclude from sim",
         };
-        public static string[] ReservedParameterNameStarts = new string[] 
+        public static string[] ReservedParameterNameStarts = new string[]
         {
             "symbol",
             "footprint",
@@ -107,7 +107,7 @@ namespace KiCAD_DB_Editor
         public const int PartUIDSchemeNumberOfWildcards = 11;
         public static string GeneratePartUID(string partUIDScheme)
         {
-            if (partUIDScheme.Count(c => c == '#') != Utilities.PartUIDSchemeNumberOfWildcards)
+            if (partUIDScheme.Count(c => c == '#') != PartUIDSchemeNumberOfWildcards)
                 throw new InvalidDataException("Part UID scheme does not contain the necessary wildcard characters");
 
             // Seconds Epoch [54:20]
@@ -123,13 +123,13 @@ namespace KiCAD_DB_Editor
             DateTime utcNow = DateTime.UtcNow;
             TimeSpan epoch = utcNow.Subtract(DateTime.UnixEpoch);
 
-            UInt64 secondsSinceEpoch = (UInt64)(epoch.TotalSeconds) & (((UInt64)1 << secondsEpochBits) - 1);
-            uint milliseconds = (uint)utcNow.Millisecond & ((1 << millisecondsBits) - 1);
-            uint randomValue = (uint)(random.Next(1 << 10)) & ((1 << randomBits) - 1);
-            UInt64 uid = (secondsSinceEpoch << secondsEpochShift) |
-                ((UInt64)milliseconds << millisecondsShift) |
-                ((UInt64)randomValue << randomShift);
-            string base32UID = Utilities.UInt64ToBase32(uid).PadLeft(Utilities.PartUIDSchemeNumberOfWildcards, Base32EncodeBook[0]);
+            ulong secondsSinceEpoch = (ulong)epoch.TotalSeconds & ((ulong)1 << secondsEpochBits) - 1;
+            uint milliseconds = (uint)utcNow.Millisecond & (1 << millisecondsBits) - 1;
+            uint randomValue = (uint)random.Next(1 << 10) & (1 << randomBits) - 1;
+            ulong uid = secondsSinceEpoch << secondsEpochShift |
+                (ulong)milliseconds << millisecondsShift |
+                (ulong)randomValue << randomShift;
+            string base32UID = UInt64ToBase32(uid).PadLeft(PartUIDSchemeNumberOfWildcards, Base32EncodeBook[0]);
             char[] partUIDArray = partUIDScheme.ToCharArray();
             for (int i = 0; i < base32UID.Length; i++)
                 partUIDArray[Array.IndexOf(partUIDArray, '#')] = base32UID[i];
@@ -150,7 +150,7 @@ namespace KiCAD_DB_Editor
             UInt64 millisecondsSinceEpoch = (UInt64)(DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalMilliseconds) & (((UInt64)1 << millisecondEpochBits) - 1);
             uint randomValue = (uint)(random.Next(1 << 10)) & ((1 << randomBits) - 1);
             UInt64 uid = ((UInt64)type << typeShift) | (millisecondsSinceEpoch << millisecondEpochShift) | ((UInt64)randomValue << randomShift);
-            string base32UID = Utilities.UInt64ToBase32(uid).PadLeft(Utilities.PartUIDSchemeNumberOfWildcards, Base32EncodeBook[0]);
+            string base32UID = Util.UInt64ToBase32(uid).PadLeft(Util.PartUIDSchemeNumberOfWildcards, Base32EncodeBook[0]);
             char[] partUIDArray = partUIDScheme.ToCharArray();
             for (int i = 0; i < base32UID.Length; i++)
                 partUIDArray[Array.IndexOf(partUIDArray, '#')] = base32UID[i];
@@ -205,7 +205,7 @@ namespace KiCAD_DB_Editor
                 ((UInt128)seconds << secondsShift) |
                 ((UInt128)milliseconds << millisecondEpochShift) |
                 ((UInt128)randomValue << randomShift);
-            string base32UID = Utilities.UInt128ToBase32(uid).PadLeft(Utilities.PartUIDSchemeNumberOfWildcards, Base32EncodeBook[0]);
+            string base32UID = Util.UInt128ToBase32(uid).PadLeft(Util.PartUIDSchemeNumberOfWildcards, Base32EncodeBook[0]);
             char[] partUIDArray = partUIDScheme.ToCharArray();
             for (int i = 0; i < base32UID.Length; i++)
                 partUIDArray[Array.IndexOf(partUIDArray, '#')] = base32UID[i];
@@ -215,14 +215,14 @@ namespace KiCAD_DB_Editor
             return partUID;
         }
 
-        private static string UInt64ToBase32(UInt64 uid)
+        private static string UInt64ToBase32(ulong uid)
         {
             if (uid == 0)
                 return Base32EncodeBook[0].ToString();
             else
             {
                 string s = "";
-                UInt64 v = uid;
+                ulong v = uid;
                 while (v > 0)
                 {
                     s = Base32EncodeBook[(byte)(v & 0x1F)] + s;

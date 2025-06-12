@@ -146,7 +146,7 @@ namespace KiCAD_DB_Editor.ViewModel
             get
             {
                 if (ParentCategoryVM is not null && ParentCategoryVM.ParameterVMs is not null)
-                    return new(new List<ParameterVM>(ParentCategoryVM.InheritedParameterVMs.Concat(ParentCategoryVM.ParameterVMs).Distinct()));
+                    return new(new List<ParameterVM>(ParentLibraryVM.ParameterVMs.Intersect(ParentCategoryVM.InheritedParameterVMs.Concat(ParentCategoryVM.ParameterVMs))));
                 else
                     return new(new List<ParameterVM>());
             }

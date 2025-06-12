@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.Sqlite;
+﻿using KiCAD_DB_Editor.ViewModel;
+using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -324,8 +325,8 @@ namespace KiCAD_DB_Editor.Model
                 while (i < allCategories.Count)
                 {
                     allCategories.AddRange(allCategories[i].Categories);
-                    foreach (Category category in allCategories[i].Categories)
-                        categoryToCategoryStringMap[category] = $"{categoryToCategoryStringMap[allCategories[i]]}/{category.Name}";
+                    foreach (Category subCategory in allCategories[i].Categories)
+                        categoryToCategoryStringMap[subCategory] = $"{categoryToCategoryStringMap[allCategories[i]]}/{subCategory.Name}";
                     i++;
                 }
 
@@ -460,6 +461,93 @@ namespace KiCAD_DB_Editor.Model
 
                 File.Move(tempProjectPath, projectFilePath, overwrite: true);
                 File.Move(tempComponentsPath, componentsFilePath, overwrite: true);
+
+                return true;
+            }
+            catch (Exception)
+            {
+                SqliteConnection.ClearAllPools();
+                return false;
+            }
+        }
+
+        public bool ExportToKiCAD(string kicadDbConfFilePath)
+        {
+            try
+            {
+                string? parentDirectory = Path.GetDirectoryName(kicadDbConfFilePath);
+                string? fileName = Path.GetFileNameWithoutExtension(kicadDbConfFilePath);
+
+                if (parentDirectory is null || parentDirectory == "" || fileName is null || fileName == "")
+                    throw new InvalidOperationException();
+
+                string kiCadSqliteFilePath = Path.Combine(parentDirectory, fileName);
+                kiCadSqliteFilePath += ".sqlite3";
+
+                string tempDbConfPath = $"db_conf.tmp";
+                string tempSqlitePath = $"sqlite.tmp";
+
+                List<Category> allCategories = new();
+                Dictionary<Category, string> categoryToKiCadExportCategoryStringMap = new();
+                Dictionary<Category, HashSet<Parameter>> categoryToParametersMap = new();
+                allCategories.AddRange(TopLevelCategories);
+                foreach (Category category in TopLevelCategories)
+                    categoryToKiCadExportCategoryStringMap[category] = $"{category.Name}";
+                int i = 0;
+                while (i < allCategories.Count)
+                {
+                    var categoryParameters = this.Parameters.Where(p => allCategories[i].Parameters.Contains(p.UUID));
+                    if (categoryToParametersMap.TryGetValue(allCategories[i], out HashSet<Parameter>? value))
+                    {
+                        foreach (var cP in categoryParameters)
+                            value.Add(cP);
+                    }
+                    else
+                        categoryToParametersMap[allCategories[i]] = categoryParameters.ToHashSet();
+
+                    allCategories.AddRange(allCategories[i].Categories);
+                    foreach (Category subCategory in allCategories[i].Categories)
+                    {
+                        categoryToParametersMap[subCategory] = new(categoryToParametersMap[allCategories[i]]);
+                        categoryToKiCadExportCategoryStringMap[subCategory] = $"{categoryToKiCadExportCategoryStringMap[allCategories[i]]} | {subCategory.Name}";
+                    }
+                    i++;
+                }
+
+                File.Delete(tempSqlitePath);
+                using (var connection = new SqliteConnection($"Data Source={tempSqlitePath}"))
+                {
+                    connection.Open();
+
+                    foreach (Category category in allCategories)
+                    {
+                        string createTableSql = $"CREATE TABLE \"{categoryToKiCadExportCategoryStringMap[category]}\" (" +
+                            "\"Part UID\" TEXT, " +
+                            "\"Description\" TEXT, " +
+                            "\"Manufacturer\" TEXT, " +
+                            "\"MPN\" TEXT, " +
+                            "\"Value\" TEXT, " +
+                            "\"Datasheet\" TEXT, ";
+
+                        foreach (var parameter in this.Parameters.Where(p => categoryToParametersMap[category].Contains(p)))
+                            createTableSql += $"\"{parameter.Name.Replace("\"", "\"\"")}\" TEXT, ";
+
+                        createTableSql += "\"Schematic Symbol\" TEXT, " +
+                            "\"Footprints\" TEXT, " +
+                            "\"Exclude from BOM\" TEXT, " +
+                            "\"Exclude from Board\" TEXT, " +
+                            "\"Exclude from Sim\" TEXT)";
+
+                        var createTableCommand = connection.CreateCommand();
+                        createTableCommand.CommandText = createTableSql;
+
+                        createTableCommand.ExecuteNonQuery();
+                    }
+                }
+                SqliteConnection.ClearAllPools();
+
+                //File.Move(tempDbConfPath, kicadDbConfFilePath, overwrite: true);
+                File.Move(tempSqlitePath, kiCadSqliteFilePath, overwrite: true);
 
                 return true;
             }

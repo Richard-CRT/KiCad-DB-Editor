@@ -339,6 +339,7 @@ namespace KiCAD_DB_Editor.ViewModel
             Library = library;
 
             // Setup commands
+            ExportToKiCADCommand = new BasicCommand(ExportToKiCADCommandExecuted, ExportToKiCADCommandCanExecute);
             NewTopLevelCategoryCommand = new BasicCommand(NewTopLevelCategoryCommandExecuted, NewTopLevelCategoryCommandCanExecute);
             NewSubCategoryCommand = new BasicCommand(NewSubCategoryCommandExecuted, NewSubCategoryCommandCanExecute);
             DeleteCategoryCommand = new BasicCommand(DeleteCategoryCommandExecuted, DeleteCategoryCommandCanExecute);
@@ -404,6 +405,7 @@ namespace KiCAD_DB_Editor.ViewModel
 
         #region Commands
 
+        public IBasicCommand ExportToKiCADCommand { get; }
         public IBasicCommand NewTopLevelCategoryCommand { get; }
         public IBasicCommand NewSubCategoryCommand { get; }
         public IBasicCommand DeleteCategoryCommand { get; }
@@ -422,6 +424,29 @@ namespace KiCAD_DB_Editor.ViewModel
         public IBasicCommand UpdateKiCADFootprintLibraryCommand { get; }
         public IBasicCommand DeleteKiCADFootprintLibraryCommand { get; }
         public IBasicCommand ReparseKiCADFootprintNamesCommand { get; }
+
+        private bool ExportToKiCADCommandCanExecute(object? parameter)
+        {
+            return true;
+        }
+
+        private void ExportToKiCADCommandExecuted(object? parameter)
+        {
+            // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
+            SaveFileDialog saveFileDialog = new();
+            // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
+            saveFileDialog.Title = "Export KiCAD DB & Config File";
+            saveFileDialog.Filter = "Project file (*.kicad_dbl)|*.kicad_dbl|All files (*.*)|*.*";
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                if (!this.Library.ExportToKiCAD(saveFileDialog.FileName))
+                {
+                    // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
+                    (new View.Dialogs.Window_ErrorDialog("Export failed!")).ShowDialog();
+                    // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
+                }
+            }
+        }
 
         private bool NewTopLevelCategoryCommandCanExecute(object? parameter)
         {

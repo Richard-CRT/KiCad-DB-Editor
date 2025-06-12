@@ -2,6 +2,7 @@
 using KiCAD_DB_Editor.Exceptions;
 using KiCAD_DB_Editor.Model;
 using KiCAD_DB_Editor.View.Dialogs;
+using KiCAD_DB_Editor.ViewModel.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -78,11 +79,7 @@ namespace KiCAD_DB_Editor.ViewModel
             KiCADSymbolLibrary = kiCADSymbolLibrary;
 
             // Parse to produce symbol names
-            // Special case while developing
-            if (kiCADSymbolLibrary.Nickname == "LIB_GENERIC_CAPACITORS")
-                KiCADSymbolNames = new() { "aaaa", "bbbb", "cccc" };
-            else
-                KiCADSymbolNames = new() { "dddd", "eeee", "ffff" };
+            ParseKiCADSymbolNames();
             Debug.Assert(_kicadSymbolNames is not null);
         }
 
@@ -90,6 +87,17 @@ namespace KiCAD_DB_Editor.ViewModel
         {
             // Need to parse the symbols from the provided library
             string absolutePath = Path.Combine(ParentLibraryVM.Library.ProjectDirectoryPath, KiCADSymbolLibrary.RelativePath);
+            if (File.Exists(absolutePath))
+            {
+                string fileText = File.ReadAllText(absolutePath);
+                SExpressionToken kiCADSymbolLibSExpToken = SExpressionToken.FromString(fileText);
+                if (kiCADSymbolLibSExpToken.Name != "kicad_symbol_lib")
+                    throw new FormatException($"Top level S-Expression in provided file is not a KiCAD symbol library: {absolutePath}");
+                var kiCADSymbolSExpTokens = kiCADSymbolLibSExpToken.SubTokens.Where(sT => sT.Name == "symbol");
+                KiCADSymbolNames = new(kiCADSymbolSExpTokens.Select(sT => sT.Attributes[0][1..^1]));
+            }
+            else
+                KiCADSymbolNames = new();
         }
 
         #region Commands

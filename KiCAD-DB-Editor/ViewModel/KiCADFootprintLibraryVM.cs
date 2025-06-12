@@ -2,6 +2,7 @@
 using KiCAD_DB_Editor.Exceptions;
 using KiCAD_DB_Editor.Model;
 using KiCAD_DB_Editor.View.Dialogs;
+using KiCAD_DB_Editor.ViewModel.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -93,9 +94,17 @@ namespace KiCAD_DB_Editor.ViewModel
             string absolutePath = Path.Combine(ParentLibraryVM.Library.ProjectDirectoryPath, KiCADFootprintLibrary.RelativePath);
             if (Directory.Exists(absolutePath))
             {
-                var filePaths = Directory.GetFiles(absolutePath, "*.kicad_mod", SearchOption.TopDirectoryOnly);
-                var fileNames = filePaths.Select(fP => Path.GetFileName(fP));
-                KiCADFootprintNames = new(fileNames);
+                var absoluteFilePaths = Directory.GetFiles(absolutePath, "*.kicad_mod", SearchOption.TopDirectoryOnly);
+
+                KiCADFootprintNames = new();
+                foreach (string absoluteFilePath in absoluteFilePaths)
+                {
+                    string fileText = File.ReadAllText(absoluteFilePath);
+                    SExpressionToken kiCADFootprintSExpToken = SExpressionToken.FromString(fileText);
+                    if (kiCADFootprintSExpToken.Name != "footprint")
+                        throw new FormatException($"Top level S-Expression in provided file is not a KiCAD footprint: {absoluteFilePath}");
+                    KiCADFootprintNames.Add(kiCADFootprintSExpToken.Attributes[0][1..^1]);
+                }
             }
             else
                 KiCADFootprintNames = new();

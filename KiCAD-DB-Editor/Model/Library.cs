@@ -321,13 +321,11 @@ namespace KiCAD_DB_Editor.Model
                 allCategories.AddRange(TopLevelCategories);
                 foreach (Category category in TopLevelCategories)
                     categoryToCategoryStringMap[category] = $"/{category.Name}";
-                int i = 0;
-                while (i < allCategories.Count)
+                for (int i = 0; i < allCategories.Count; i++)
                 {
                     allCategories.AddRange(allCategories[i].Categories);
                     foreach (Category subCategory in allCategories[i].Categories)
                         categoryToCategoryStringMap[subCategory] = $"{categoryToCategoryStringMap[allCategories[i]]}/{subCategory.Name}";
-                    i++;
                 }
 
                 Dictionary<Part, string> partToCategoryStringMap = new();
@@ -386,6 +384,8 @@ namespace KiCAD_DB_Editor.Model
 
                     var createTableCommand = connection.CreateCommand();
                     createTableCommand.CommandText = createTableSql;
+
+                    createTableCommand.ExecuteNonQuery();
 
 
                     string insertPartsSql = "INSERT INTO \"Components\" (" +
@@ -453,7 +453,6 @@ namespace KiCAD_DB_Editor.Model
                     var insertPartsCommand = connection.CreateCommand();
                     insertPartsCommand.CommandText = insertPartsSql;
 
-                    createTableCommand.ExecuteNonQuery();
                     insertPartsCommand.ExecuteNonQuery();
 
                 }
@@ -493,8 +492,7 @@ namespace KiCAD_DB_Editor.Model
                 allCategories.AddRange(TopLevelCategories);
                 foreach (Category category in TopLevelCategories)
                     categoryToKiCadExportCategoryStringMap[category] = $"{category.Name}";
-                int i = 0;
-                while (i < allCategories.Count)
+                for (int i = 0; i < allCategories.Count; i++)
                 {
                     var categoryParameters = this.Parameters.Where(p => allCategories[i].Parameters.Contains(p.UUID));
                     if (categoryToParametersMap.TryGetValue(allCategories[i], out HashSet<Parameter>? value))
@@ -511,7 +509,6 @@ namespace KiCAD_DB_Editor.Model
                         categoryToParametersMap[subCategory] = new(categoryToParametersMap[allCategories[i]]);
                         categoryToKiCadExportCategoryStringMap[subCategory] = $"{categoryToKiCadExportCategoryStringMap[allCategories[i]]} | {subCategory.Name}";
                     }
-                    i++;
                 }
 
                 File.Delete(tempSqlitePath);
@@ -521,6 +518,8 @@ namespace KiCAD_DB_Editor.Model
 
                     foreach (Category category in allCategories)
                     {
+                        var categoryParemetersInOrder = this.Parameters.Where(p => categoryToParametersMap[category].Contains(p));
+
                         string createTableSql = $"CREATE TABLE \"{categoryToKiCadExportCategoryStringMap[category]}\" (" +
                             "\"Part UID\" TEXT, " +
                             "\"Description\" TEXT, " +
@@ -529,10 +528,11 @@ namespace KiCAD_DB_Editor.Model
                             "\"Value\" TEXT, " +
                             "\"Datasheet\" TEXT, ";
 
-                        foreach (var parameter in this.Parameters.Where(p => categoryToParametersMap[category].Contains(p)))
+                        foreach (var parameter in categoryParemetersInOrder)
                             createTableSql += $"\"{parameter.Name.Replace("\"", "\"\"")}\" TEXT, ";
 
-                        createTableSql += "\"Schematic Symbol\" TEXT, " +
+                        createTableSql += 
+                            "\"Schematic Symbol\" TEXT, " +
                             "\"Footprints\" TEXT, " +
                             "\"Exclude from BOM\" TEXT, " +
                             "\"Exclude from Board\" TEXT, " +
@@ -542,6 +542,63 @@ namespace KiCAD_DB_Editor.Model
                         createTableCommand.CommandText = createTableSql;
 
                         createTableCommand.ExecuteNonQuery();
+
+                        if (category.Parts.Count > 0)
+                        {
+                            string insertPartsSql = $"INSERT INTO \"{categoryToKiCadExportCategoryStringMap[category].Replace("\"", "\"\"")}\" (" +
+                                "\"Part UID\", " +
+                                "\"Description\", " +
+                                "\"Manufacturer\", " +
+                                "\"MPN\", " +
+                                "\"Value\", " +
+                                "\"Datasheet\", ";
+
+                            foreach (var parameter in categoryParemetersInOrder)
+                                insertPartsSql += $"\"{parameter.Name.Replace("\"", "\"\"")}\", ";
+
+                            insertPartsSql +=
+                                "\"Schematic Symbol\", " +
+                                "\"Footprints\", " +
+                                "\"Exclude from BOM\", " +
+                                "\"Exclude from Board\", " +
+                                "\"Exclude from Sim\") VALUES ";
+                            foreach (Part part in category.Parts)
+                            {
+                                string footprintsString = "";
+                                for (int i = 0; i < part.FootprintLibraryNames.Count; i++)
+                                {
+                                    footprintsString += $"{part.FootprintLibraryNames[i]}:{part.FootprintNames[i]}";
+                                    if (i < part.FootprintLibraryNames.Count - 1)
+                                        footprintsString += ";";
+                                }
+
+                                insertPartsSql +=
+                                    "(" +
+                                    $"'{part.PartUID.Replace("'", "''")}', " +
+                                    $"'{part.Description.Replace("'", "''")}', " +
+                                    $"'{part.Manufacturer.Replace("'", "''")}', " +
+                                    $"'{part.MPN.Replace("'", "''")}', " +
+                                    $"'{part.Value.Replace("'", "''")}', " +
+                                    $"'{part.Datasheet.Replace("'", "''")}', ";
+
+                                foreach (var parameter in categoryParemetersInOrder)
+                                    insertPartsSql += $"\"{part.ParameterValues[parameter.UUID].Replace("\"", "\"\"")}\", ";
+
+                                insertPartsSql +=
+                                    $"'{part.SymbolLibraryName.Replace("'", "''")}:{part.SymbolName.Replace("'", "''")}', " +
+                                    $"'{footprintsString.Replace("'", "''")}', " +
+                                    $"{(part.ExcludeFromBOM ? 1 : 0)}, " +
+                                    $"{(part.ExcludeFromBoard ? 1 : 0)}, " +
+                                    $"{(part.ExcludeFromSim ? 1 : 0)}), ";
+                            }
+                            insertPartsSql = insertPartsSql[..^2];
+
+                            var insertPartsCommand = connection.CreateCommand();
+                            insertPartsCommand.CommandText = insertPartsSql;
+
+                            insertPartsCommand.ExecuteNonQuery();
+                        }
+
                     }
                 }
                 SqliteConnection.ClearAllPools();

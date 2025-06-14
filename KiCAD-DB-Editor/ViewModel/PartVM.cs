@@ -43,65 +43,25 @@ namespace KiCAD_DB_Editor.ViewModel
 
         // ======================================================================
 
-        public ParameterAccessor ParameterAccessor { get; }
-        public FootprintLibraryNameAccessor FootprintLibraryNameAccessor { get; }
-        public FootprintNameAccessor FootprintNameAccessor { get; }
-        public SelectedFootprintLibraryVMAccessor SelectedFootprintLibraryVMAccessor { get; }
-        public readonly Model.Part Part;
-        public readonly LibraryVM ParentLibraryVM;
-
-        // Included so I can get a category string for the all parts grid
-        // It has to have a setter since I can't provide parentCategoryVM at instantiation time, but this should never be changed
-        // For that reason does not InvokePropertyChanged
-        public CategoryVM? ParentCategoryVM { get; set; }
+        public Part Part { get; }
 
         #region Notify Properties
 
-        public string PartUID
+        public string Path
         {
-            get { return Part.PartUID; }
-            set { if (Part.PartUID != value) { Part.PartUID = value; InvokePropertyChanged(); } }
+            get
+            {
+                string path = Part.ParentCategory.Name;
+                var c = Part.ParentCategory;
+                while (c.ParentCategory is not null)
+                {
+                    path = $"{c.Name}/{path}";
+                    c = c.ParentCategory;
+                }
+                return path;
+            }
         }
-        public string Description
-        {
-            get { return Part.Description; }
-            set { if (Part.Description != value) { Part.Description = value; InvokePropertyChanged(); } }
-        }
-        public string Manufacturer
-        {
-            get { return Part.Manufacturer; }
-            set { if (Part.Manufacturer != value) { Part.Manufacturer = value; InvokePropertyChanged(); } }
-        }
-        public string MPN
-        {
-            get { return Part.MPN; }
-            set { if (Part.MPN != value) { Part.MPN = value; InvokePropertyChanged(); } }
-        }
-        public string Value
-        {
-            get { return Part.Value; }
-            set { if (Part.Value != value) { Part.Value = value; InvokePropertyChanged(); } }
-        }
-        public string Datasheet
-        {
-            get { return Part.Datasheet; }
-            set { if (Part.Datasheet != value) { Part.Datasheet = value; InvokePropertyChanged(); } }
-        }
-        public bool ExcludeFromBOM
-        {
-            get { return Part.ExcludeFromBOM; }
-            set { if (Part.ExcludeFromBOM != value) { Part.ExcludeFromBOM = value; InvokePropertyChanged(); } }
-        }
-        public bool ExcludeFromBoard
-        {
-            get { return Part.ExcludeFromBoard; }
-            set { if (Part.ExcludeFromBoard != value) { Part.ExcludeFromBoard = value; InvokePropertyChanged(); } }
-        }
-        public bool ExcludeFromSim
-        {
-            get { return Part.ExcludeFromSim; }
-            set { if (Part.ExcludeFromSim != value) { Part.ExcludeFromSim = value; InvokePropertyChanged(); } }
-        }
+
         public string SymbolLibraryName
         {
             get { return Part.SymbolLibraryName; }
@@ -118,7 +78,7 @@ namespace KiCAD_DB_Editor.ViewModel
                     // weird: when I clear the SelectedKiCADSymbolLibraryVM, the available items in the symbol name should be blank
                     // and it does do this, but if the current text is one of those items, it will get cleared, which is not what
                     // I want at all
-                    InvokePropertyChanged(nameof(this.SelectedKiCADSymbolLibraryVM));
+                    InvokePropertyChanged(nameof(this.SelectedKiCADSymbolLibrary));
 
                     // Changing the selected symbol library should prompt clearing the symbol name
                     SymbolName = "";
@@ -127,25 +87,16 @@ namespace KiCAD_DB_Editor.ViewModel
         }
 
         // Included so the KiCAD symbol name drop down has a source
-        public KiCADSymbolLibraryVM? SelectedKiCADSymbolLibraryVM
+        public KiCADSymbolLibrary? SelectedKiCADSymbolLibrary
         {
             // Have to do ! as FirstOrDefault needs to think kSLVM could be null in order for me to return null
-            get { return ParentLibraryVM.KiCADSymbolLibraryVMs.FirstOrDefault(kSLVM => kSLVM!.Nickname == SymbolLibraryName, null); }
+            get { return Part.ParentLibrary.KiCADSymbolLibraries.FirstOrDefault(kSLVM => kSLVM!.Nickname == SymbolLibraryName, null); }
         }
 
         public string SymbolName
         {
             get { return Part.SymbolName; }
             set { if (Part.SymbolName != value) { Part.SymbolName = value; InvokePropertyChanged(); } }
-        }
-
-        public ParameterVM[] ParameterVMs
-        {
-            get
-            {
-                var keys = Part.ParameterValues.Keys;
-                return ParentLibraryVM.ParameterVMs.Where(pVM => keys.Contains(pVM.UUID)).ToArray();
-            }
         }
 
         public int FootprintCount
@@ -155,10 +106,8 @@ namespace KiCAD_DB_Editor.ViewModel
 
         #endregion Notify Properties
 
-        public PartVM(LibraryVM parentLibraryVM, Model.Part part)
+        public PartVM(Model.Part part)
         {
-            ParentLibraryVM = parentLibraryVM;
-
             // Link model
             Part = part;
 
@@ -168,28 +117,9 @@ namespace KiCAD_DB_Editor.ViewModel
             SelectedFootprintLibraryVMAccessor = new(this);
         }
 
-        public void AddParameterVM(ParameterVM pVM)
+        public void InvokePropertyChanged_Path()
         {
-            if (!Part.ParameterValues.ContainsKey(pVM.UUID))
-            {
-                Part.ParameterValues[pVM.UUID] = "";
-                InvokePropertyChanged(nameof(ParameterVMs));
-
-                // This is needed to update the table's existing cells
-                ParameterAccessor.InvokePropertyChanged("Item[]");
-            }
-        }
-
-        public void RemoveParameterVM(ParameterVM pVM)
-        {
-            if (Part.ParameterValues.ContainsKey(pVM.UUID))
-            {
-                Part.ParameterValues.Remove(pVM.UUID);
-                InvokePropertyChanged(nameof(ParameterVMs));
-
-                // This is needed to update the table's existing cells
-                ParameterAccessor.InvokePropertyChanged("Item[]");
-            }
+            InvokePropertyChanged(nameof(this.Path));
         }
 
         public void AddFootprint()
@@ -226,154 +156,5 @@ namespace KiCAD_DB_Editor.ViewModel
 
         #endregion Commands
 
-    }
-
-    public class ParameterAccessor : NotifyObject
-    {
-        public readonly PartVM OwnerPartVM;
-
-        #region Notify Properties
-
-        public string? this[string parameterUUID]
-        {
-            get
-            {
-                if (OwnerPartVM.Part.ParameterValues.TryGetValue(parameterUUID, out string? val))
-                    return val;
-                else
-                    return null;
-            }
-            set
-            {
-                if (value is not null)
-                {
-                    if (OwnerPartVM.Part.ParameterValues.TryGetValue(parameterUUID, out string? s))
-                    {
-                        if (s != value)
-                        {
-                            OwnerPartVM.Part.ParameterValues[parameterUUID] = value;
-                            InvokePropertyChanged("Item[]");
-                        }
-                    }
-                }
-            }
-        }
-
-        #endregion Notify Properties
-
-        public ParameterAccessor(PartVM ownerPVM)
-        {
-            OwnerPartVM = ownerPVM;
-        }
-    }
-
-    public class FootprintLibraryNameAccessor : NotifyObject
-    {
-        public readonly PartVM OwnerPartVM;
-
-        #region Notify Properties
-
-        public string? this[int index]
-        {
-            get
-            {
-                if (OwnerPartVM.Part.FootprintLibraryNames.Count > index)
-                    return OwnerPartVM.Part.FootprintLibraryNames[index];
-                else
-                    return null;
-            }
-            set
-            {
-                if (value is not null)
-                {
-                    if (OwnerPartVM.Part.FootprintLibraryNames.Count > index)
-                    {
-                        OwnerPartVM.Part.FootprintLibraryNames[index] = value;
-                        InvokePropertyChanged("Item[]");
-
-                        // Doesn't seem to be technically required as the bindings for the ComboBoxes I'm designing this for only load
-                        // when the cells are edited, but if not then I'd need to do this to prompt the ComboBoxes to refetch the value
-                        // On future investigation, it's clear that I can't switch to a system where the ComboBoxes are persistent. WPF is
-                        // weird: when I clear the SelectedKiCADFootprintLibraryVM, the available items in the footprint name should be blank
-                        // and it does do this, but if the current text is one of those items, it will get cleared, which is not what
-                        // I want at all
-                        OwnerPartVM.SelectedFootprintLibraryVMAccessor.InvokePropertyChanged("Item[]");
-
-                        // Changing the selected footprint library should prompt clearing the footprint name
-                        OwnerPartVM.Part.FootprintNames[index] = "";
-                        OwnerPartVM.FootprintNameAccessor.InvokePropertyChanged("Item[]");
-                    }
-                }
-            }
-        }
-
-        #endregion Notify Properties
-
-        public FootprintLibraryNameAccessor(PartVM ownerPVM)
-        {
-            OwnerPartVM = ownerPVM;
-        }
-    }
-
-    public class FootprintNameAccessor : NotifyObject
-    {
-        public readonly PartVM OwnerPartVM;
-
-        #region Notify Properties
-
-        public string? this[int index]
-        {
-            get
-            {
-                if (OwnerPartVM.Part.FootprintNames.Count > index)
-                    return OwnerPartVM.Part.FootprintNames[index];
-                else
-                    return null;
-            }
-            set
-            {
-                if (value is not null)
-                {
-                    if (OwnerPartVM.Part.FootprintNames.Count > index)
-                    {
-                        OwnerPartVM.Part.FootprintNames[index] = value;
-                        InvokePropertyChanged("Item[]");
-                    }
-                }
-            }
-        }
-
-        #endregion Notify Properties
-
-        public FootprintNameAccessor(PartVM ownerPVM)
-        {
-            OwnerPartVM = ownerPVM;
-        }
-    }
-
-    public class SelectedFootprintLibraryVMAccessor : NotifyObject
-    {
-        public readonly PartVM OwnerPartVM;
-
-        #region Notify Properties
-
-        public KiCADFootprintLibraryVM? this[int index]
-        {
-            get
-            {
-                if (OwnerPartVM.Part.FootprintLibraryNames.Count > index)
-                    // Have to do ! as FirstOrDefault needs to think kSLVM could be null in order for me to return null
-                    return OwnerPartVM.ParentLibraryVM.KiCADFootprintLibraryVMs.FirstOrDefault(kFLVM => kFLVM!.Nickname == OwnerPartVM.Part.FootprintLibraryNames[index], null);
-                else
-                    return null;
-            }
-        }
-
-        #endregion Notify Properties
-
-        public SelectedFootprintLibraryVMAccessor(PartVM ownerPVM)
-        {
-            OwnerPartVM = ownerPVM;
-        }
     }
 }

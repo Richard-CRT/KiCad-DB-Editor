@@ -1,7 +1,11 @@
-﻿using KiCAD_DB_Editor.ViewModel;
+﻿using KiCAD_DB_Editor.Commands;
+using KiCAD_DB_Editor.Model.Json;
+using KiCAD_DB_Editor.ViewModel;
+using KiCAD_DB_Editor.ViewModel.Utilities;
 using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Data;
 using System.Diagnostics;
 using System.IO;
@@ -16,7 +20,7 @@ using System.Windows.Documents;
 
 namespace KiCAD_DB_Editor.Model
 {
-    public class Library
+    public class Library : NotifyObject
     {
         public static Library FromScratch()
         {
@@ -27,9 +31,17 @@ namespace KiCAD_DB_Editor.Model
 
         public static Library FromFile(string projectFilePath)
         {
-            Library library;
+            Library library = new();
             try
             {
+                JsonLibrary jsonLibrary = JsonLibrary.FromFile(projectFilePath);
+
+                library.AllParameters.AddRange(jsonLibrary.Parameters.Select(jP => new Parameter(jP)));
+                library.TopLevelCategories.AddRange(jsonLibrary.TopLevelCategories.Select(c => new Category(c, library, null)));
+                library.AllCategories.AddRange(library.TopLevelCategories);
+                for (int i = 0; i < library.AllCategories.Count; i++)
+                    library.AllCategories.AddRange(library.AllCategories[i].Categories);
+
                 string? projectDirectory = Path.GetDirectoryName(projectFilePath);
                 string? projectName = Path.GetFileNameWithoutExtension(projectFilePath);
                 if (projectDirectory is null || projectDirectory == "" || projectName is null || projectName == "")
@@ -37,16 +49,6 @@ namespace KiCAD_DB_Editor.Model
 
                 string componentsFilePath = Path.Combine(projectDirectory, projectName);
                 componentsFilePath += ".sqlite3";
-
-                var jsonString = File.ReadAllText(projectFilePath);
-
-                Library? o;
-                //o = (Library?)JsonSerializer.Deserialize(jsonString, typeof(Library), new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve });
-                o = (Library?)JsonSerializer.Deserialize(jsonString, typeof(Library), new JsonSerializerOptions { });
-
-                if (o is null) throw new ArgumentNullException("Library is null");
-
-                library = (Library)o!;
 
                 library.ProjectDirectoryPath = projectDirectory;
                 library.ProjectName = projectName;
@@ -153,7 +155,7 @@ namespace KiCAD_DB_Editor.Model
                 }
 
                 //Dictionary<int, Parameter> columnIndexToParameterMap = new();
-                Dictionary<string, int> parameterUUIDToColumnIndexToMap = new();
+                Dictionary<Parameter, int> parameterToColumnIndexToMap = new();
                 for (int i = numberSpecialColumns + numberOfFootprintColumns; i < dbPartColumnNames.Count; i++)
                 {
                     string columnName = dbPartColumnNames[i];
@@ -164,11 +166,11 @@ namespace KiCAD_DB_Editor.Model
                         if (Guid.TryParse(potentialUUID, out Guid guid))
                         {
                             string uuid = guid.ToString();
-                            Parameter? matchingParameter = library.Parameters.FirstOrDefault(p => p!.UUID == uuid, null);
+                            Parameter? matchingParameter = library.AllParameters.FirstOrDefault(p => p!.UUID == uuid, null);
                             if (matchingParameter is not null)
                             {
                                 //columnIndexToParameterMap[i] = parameter;
-                                parameterUUIDToColumnIndexToMap[uuid] = i;
+                                parameterToColumnIndexToMap[matchingParameter] = i;
                             }
                             else
                                 throw new InvalidDataException("Could not find a parameter to correspond to database column UUID");
@@ -212,7 +214,7 @@ namespace KiCAD_DB_Editor.Model
 
                     int j = 1;
                     string partUID = (string)dbPart[j++];
-                    Part part = new(partUID);
+                    Part part = new(partUID, library, partCategory);
                     part.Description = (string)dbPart[j++];
                     part.Manufacturer = (string)dbPart[j++];
                     part.MPN = (string)dbPart[j++];
@@ -241,16 +243,16 @@ namespace KiCAD_DB_Editor.Model
                             part.FootprintNames.Add((string)footprintNameValue);
                         }
                     }
-                    foreach (string parameterUUID in partCategory.Parameters)
+                    foreach (Parameter parameter in partCategory.Parameters)
                     {
-                        object value = dbPart[parameterUUIDToColumnIndexToMap[parameterUUID]];
+                        object value = dbPart[parameterToColumnIndexToMap[parameter]];
                         // Default value to "" if parameter is expected to be present but is null
                         if (value is System.DBNull)
-                            part.ParameterValues[parameterUUID] = "";
+                            part.ParameterValues[parameter] = "";
                         else
-                            part.ParameterValues[parameterUUID] = (string)value;
+                            part.ParameterValues[parameter] = (string)value;
                     }
-                    library.Parts.Add(part);
+                    library.AllParts.Add(part);
                     partCategory.Parts.Add(part);
                 }
             }
@@ -264,29 +266,82 @@ namespace KiCAD_DB_Editor.Model
 
         // ======================================================================
 
-        [JsonIgnore]
+        #region Notify Properties
+
+        private string _partUIDScheme { get; set; } = "CMP-#######-####";
+        public string PartUIDScheme
+        {
+            get { return this.PartUIDScheme; }
+            set
+            {
+                if (this.PartUIDScheme != value)
+                {
+                    if (value.Count(c => c == '#') != Util.PartUIDSchemeNumberOfWildcards)
+                        throw new Exceptions.ArgumentValidationException("Proposed scheme does not contain the necessary wildcard characters");
+
+                    _partUIDScheme = value;
+                    InvokePropertyChanged();
+                }
+            }
+        }
+
+        // No setter, to prevent the VM needing to listening PropertyChanged events
+        private ObservableCollectionEx<Part> _allParts;
+        public ObservableCollectionEx<Part> AllParts
+        {
+            get { return _allParts; }
+        }
+
+        // No setter, to prevent the VM needing to listening PropertyChanged events
+        private ObservableCollectionEx<Parameter> _allParameters;
+        public ObservableCollectionEx<Parameter> AllParameters
+        {
+            get { return _allParameters; }
+        }
+
+        // No setter, to prevent the VM needing to listening PropertyChanged events
+        private ObservableCollectionEx<Category> _allCategories;
+        public ObservableCollectionEx<Category> AllCategories
+        {
+            get { return _allCategories; }
+        }
+
+        // No setter, to prevent the VM needing to listening PropertyChanged events
+        private ObservableCollectionEx<Category> _topLevelCategories;
+        public ObservableCollectionEx<Category> TopLevelCategories
+        {
+            get { return _topLevelCategories; }
+        }
+
+        // No setter, to prevent the VM needing to listening PropertyChanged events
+        private ObservableCollectionEx<Category> _kiCADSymbolLibraries;
+        public ObservableCollectionEx<Category> KiCADSymbolLibraries
+        {
+            get { return _kiCADSymbolLibraries; }
+        }
+
+
+        // No setter, to prevent the VM needing to listening PropertyChanged events
+        private ObservableCollectionEx<Category> _kiCADFootprintLibraries;
+        public ObservableCollectionEx<Category> KiCADFootprintLibraries
+        {
+            get { return _kiCADFootprintLibraries; }
+        }
+
+        #endregion Notify Properties
+
         public string ProjectDirectoryPath { get; set; } = "";
 
-        [JsonIgnore]
         public string ProjectName { get; set; } = "";
 
-        [JsonPropertyName("part_uid_scheme"), JsonPropertyOrder(1)]
-        public string PartUIDScheme { get; set; } = "CMP-#######-####";
-
-        [JsonPropertyName("parameters"), JsonPropertyOrder(2)]
-        public List<Model.Parameter> Parameters { get; set; } = new();
-
-        [JsonPropertyName("top_level_categories"), JsonPropertyOrder(3)]
-        public List<Model.Category> TopLevelCategories { get; set; } = new();
-
-        [JsonPropertyName("kicad_symbol_libraries"), JsonPropertyOrder(4)]
-        public List<Model.KiCADSymbolLibrary> KiCADSymbolLibraries { get; set; } = new();
-
-        [JsonPropertyName("kicad_footprint_libraries"), JsonPropertyOrder(5)]
-        public List<Model.KiCADFootprintLibrary> KiCADFootprintLibraries { get; set; } = new();
-
-        [JsonIgnore]
-        public List<Model.Part> Parts { get; set; } = new();
+        public Library()
+        {
+            // Initialise collection with events
+            _allParts = new();
+            _allParameters = new();
+            _allCategories = new();
+            _topLevelCategories = new();
+        }
 
         public bool WriteToFile(string projectFilePath, bool autosave = false)
         {
@@ -313,23 +368,27 @@ namespace KiCAD_DB_Editor.Model
                 string tempProjectPath = $"proj.tmp";
                 string tempComponentsPath = $"components.tmp";
 
+                // Have to create a JsonLibrary to serialise it
+
                 //File.WriteAllText(tempProjectPath, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true, ReferenceHandler = ReferenceHandler.Preserve }));
                 File.WriteAllText(tempProjectPath, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
 
                 List<Category> allCategories = new();
                 Dictionary<Category, string> categoryToCategoryStringMap = new();
-                allCategories.AddRange(TopLevelCategories);
-                foreach (Category category in TopLevelCategories)
-                    categoryToCategoryStringMap[category] = $"/{category.Name}";
-                for (int i = 0; i < allCategories.Count; i++)
+                foreach (Category category in AllCategories)
                 {
-                    allCategories.AddRange(allCategories[i].Categories);
-                    foreach (Category subCategory in allCategories[i].Categories)
-                        categoryToCategoryStringMap[subCategory] = $"{categoryToCategoryStringMap[allCategories[i]]}/{subCategory.Name}";
+                    string path = $"/{category.Name}";
+                    var c = category;
+                    while (c.ParentCategory is not null)
+                    {
+                        path = $"/{c.Name}{path}";
+                        c = c.ParentCategory;
+                    }
+                    categoryToCategoryStringMap[category] = path;
                 }
 
                 Dictionary<Part, string> partToCategoryStringMap = new();
-                foreach (Category category in allCategories)
+                foreach (Category category in AllCategories)
                 {
                     foreach (Part part in category.Parts)
                     {
@@ -342,7 +401,7 @@ namespace KiCAD_DB_Editor.Model
 
                 int maxFootprintLibraryNames = 0;
                 int maxFootprintNames = 0;
-                foreach (Part part in Parts)
+                foreach (Part part in AllParts)
                 {
                     if (part.FootprintLibraryNames.Count != part.FootprintNames.Count)
                         throw new InvalidOperationException("Part FootprintLibraryNames doesn't match FootprintNames");
@@ -377,7 +436,7 @@ namespace KiCAD_DB_Editor.Model
                         createTableSql += $"\"Footprint {j} Library Name\" TEXT, ";
                         createTableSql += $"\"Footprint {j} Name\" TEXT, ";
                     }
-                    foreach (Parameter parameter in Parameters)
+                    foreach (Parameter parameter in AllParameters)
                         createTableSql += $"\"{parameter.Name.Replace("\"", "\"\"")} {parameter.UUID}\" TEXT, ";
                     createTableSql = createTableSql[..^2];
                     createTableSql += ")";
@@ -406,11 +465,11 @@ namespace KiCAD_DB_Editor.Model
                         insertPartsSql += $"\"Footprint {j} Library Name\", ";
                         insertPartsSql += $"\"Footprint {j} Name\", ";
                     }
-                    foreach (Parameter parameter in Parameters)
+                    foreach (Parameter parameter in AllParameters)
                         insertPartsSql += $"\"{parameter.Name.Replace("\"", "\"\"")} {parameter.UUID}\", ";
                     insertPartsSql = insertPartsSql[..^2];
                     insertPartsSql += ") VALUES ";
-                    foreach (Part part in Parts)
+                    foreach (Part part in AllParts)
                     {
                         insertPartsSql += "(" +
                                 $"'{partToCategoryStringMap[part]}', " +
@@ -438,9 +497,9 @@ namespace KiCAD_DB_Editor.Model
                                 insertPartsSql += $"NULL, NULL, ";
                             }
                         }
-                        foreach (Parameter parameter in Parameters)
+                        foreach (Parameter parameter in AllParameters)
                         {
-                            if (part.ParameterValues.TryGetValue(parameter.UUID, out string? value))
+                            if (part.ParameterValues.TryGetValue(parameter, out string? value))
                                 insertPartsSql += $"'{value.Replace("'", "''")}', ";
                             else
                                 insertPartsSql += $"NULL, ";
@@ -472,6 +531,7 @@ namespace KiCAD_DB_Editor.Model
 
         public bool ExportToKiCAD(string kicadDbConfFilePath)
         {
+            /*
             try
             {
                 string? parentDirectory = Path.GetDirectoryName(kicadDbConfFilePath);
@@ -488,14 +548,14 @@ namespace KiCAD_DB_Editor.Model
 
                 List<Category> allCategories = new();
                 Dictionary<Category, string> categoryToKiCadExportCategoryStringMap = new();
-                Dictionary<Category, HashSet<Parameter>> categoryToParametersMap = new();
+                Dictionary<Category, HashSet<JsonParameter>> categoryToParametersMap = new();
                 allCategories.AddRange(TopLevelCategories);
                 foreach (Category category in TopLevelCategories)
                     categoryToKiCadExportCategoryStringMap[category] = $"{category.Name}";
                 for (int i = 0; i < allCategories.Count; i++)
                 {
                     var categoryParameters = this.Parameters.Where(p => allCategories[i].Parameters.Contains(p.UUID));
-                    if (categoryToParametersMap.TryGetValue(allCategories[i], out HashSet<Parameter>? value))
+                    if (categoryToParametersMap.TryGetValue(allCategories[i], out HashSet<JsonParameter>? value))
                     {
                         foreach (var cP in categoryParameters)
                             value.Add(cP);
@@ -613,6 +673,8 @@ namespace KiCAD_DB_Editor.Model
                 SqliteConnection.ClearAllPools();
                 return false;
             }
+            */
+            return false;
         }
     }
 }

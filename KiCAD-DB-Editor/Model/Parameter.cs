@@ -1,4 +1,5 @@
-﻿using System;
+﻿using KiCAD_DB_Editor.Model.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,19 +10,19 @@ namespace KiCAD_DB_Editor.Model
 {
     public class Parameter
     {
-        [JsonPropertyName("uuid"), JsonPropertyOrder(0)]
-        public string UUID { get; set; } = Guid.NewGuid().ToString();
-        [JsonPropertyName("name"), JsonPropertyOrder(1)]
+        public string UUID { get; } = Guid.NewGuid().ToString();
         public string Name { get; set; } = "";
 
-        [JsonConstructor]
-        public Parameter()
+        public Parameter(JsonParameter jsonParameter)
         {
+            this.UUID = jsonParameter.UUID;
+            this.Name = jsonParameter.Name;
         }
-        
+
         public Parameter(string name)
         {
-            Name = name;
+            this.UUID = Guid.NewGuid().ToString();
+            this.Name = name;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using KiCAD_DB_Editor.Model;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -27,6 +28,15 @@ namespace KiCAD_DB_Editor.ViewModel
                     _notificationSupressed = false;
                 }
             }
+        }
+
+        public void AddRange(IEnumerable<T> range)
+        {
+            var backUp = this.SupressNotification;
+            this.SupressNotification = true;
+            foreach (var item in range)
+                this.Add(item);
+            this.SupressNotification = backUp;
         }
 
         protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)

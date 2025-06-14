@@ -26,7 +26,7 @@ namespace KiCAD_DB_Editor.ViewModel
 {
     public class LibraryVM : NotifyObject
     {
-        public readonly Model.Library Library;
+        public Library Library { get; }
 
         #region Notify Properties
 
@@ -46,73 +46,19 @@ namespace KiCAD_DB_Editor.ViewModel
             }
         }
 
-        // Do not initialise here, do in constructor to link collection changed
-        private ObservableCollectionEx<ViewModel.ParameterVM> _parameterVMs;
-        public ObservableCollectionEx<ViewModel.ParameterVM> ParameterVMs
+        private Parameter? _selectedParameter = null;
+        public Parameter? SelectedParameter
         {
-            get { return _parameterVMs; }
+            get { return _selectedParameter; }
             set
             {
-                if (_parameterVMs != value)
+                if (_selectedParameter != value)
                 {
-                    if (_parameterVMs is not null)
-                        _parameterVMs.CollectionChanged -= _parameters_CollectionChanged;
-                    _parameterVMs = value;
-                    _parameterVMs.CollectionChanged += _parameters_CollectionChanged; ;
-
-                    InvokePropertyChanged(nameof(this.ParameterVMs));
-                    _parameters_CollectionChanged(this, new(NotifyCollectionChangedAction.Reset));
-                }
-            }
-        }
-
-        private void _parameters_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-        {
-            Library.Parameters = new(this.ParameterVMs.Select(p => p.Parameter));
-
-            if (TopLevelCategoryVMs is not null)
-                foreach (CategoryVM tlcVM in TopLevelCategoryVMs)
-                    tlcVM.InvokePropertyChanged_AvailableParameterVMs();
-        }
-
-        // Do not initialise here, do in constructor to link collection changed
-        private ObservableCollectionEx<ViewModel.CategoryVM> _topLevelCategoryVMs;
-        public ObservableCollectionEx<ViewModel.CategoryVM> TopLevelCategoryVMs
-        {
-            get { return _topLevelCategoryVMs; }
-            set
-            {
-                if (_topLevelCategoryVMs != value)
-                {
-                    if (_topLevelCategoryVMs is not null)
-                        _topLevelCategoryVMs.CollectionChanged -= _topLevelCategoryVMs_CollectionChanged;
-                    _topLevelCategoryVMs = value;
-                    _topLevelCategoryVMs.CollectionChanged += _topLevelCategoryVMs_CollectionChanged;
-
-                    InvokePropertyChanged(nameof(this.TopLevelCategoryVMs));
-                    _topLevelCategoryVMs_CollectionChanged(this, new(NotifyCollectionChangedAction.Reset));
-                }
-            }
-        }
-
-        private void _topLevelCategoryVMs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-        {
-            Library.TopLevelCategories = new(this.TopLevelCategoryVMs.Select(tlcVM => tlcVM.Category));
-        }
-
-        private ParameterVM? _selectedParameterVM = null;
-        public ParameterVM? SelectedParameterVM
-        {
-            get { return _selectedParameterVM; }
-            set
-            {
-                if (_selectedParameterVM != value)
-                {
-                    _selectedParameterVM = value;
+                    _selectedParameter = value;
                     InvokePropertyChanged();
 
-                    if (SelectedParameterVM is not null)
-                        NewParameterName = SelectedParameterVM.Name;
+                    if (SelectedParameter is not null)
+                        NewParameterName = SelectedParameter.Name;
                 }
             }
         }
@@ -145,29 +91,18 @@ namespace KiCAD_DB_Editor.ViewModel
             }
         }
 
-        // Do not initialise here, do in constructor to link collection changed
-        private ObservableCollectionEx<ViewModel.PartVM> _partVMs;
-        public ObservableCollectionEx<ViewModel.PartVM> PartVMs
+        private ObservableCollectionEx<CategoryVM> _topLevelCategoryVMs;
+        public ObservableCollectionEx<CategoryVM> TopLevelCategoryVMs
         {
-            get { return _partVMs; }
-            set
-            {
-                if (_partVMs != value)
-                {
-                    if (_partVMs is not null)
-                        _partVMs.CollectionChanged -= _partVMs_CollectionChanged;
-                    _partVMs = value;
-                    _partVMs.CollectionChanged += _partVMs_CollectionChanged; ;
-
-                    InvokePropertyChanged(nameof(this.PartVMs));
-                    _partVMs_CollectionChanged(this, new(NotifyCollectionChangedAction.Reset));
-                }
-            }
+            get { return _topLevelCategoryVMs; }
+            set { if (_topLevelCategoryVMs != value) _topLevelCategoryVMs = value; InvokePropertyChanged(); }
         }
 
-        private void _partVMs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        private ObservableCollectionEx<PartVM> _allPartVMs;
+        public ObservableCollectionEx<PartVM> AllPartVMs
         {
-            Library.Parts = new(this.PartVMs.Select(p => p.Part));
+            get { return _allPartVMs; }
+            set { if (_allPartVMs != value) _allPartVMs = value; InvokePropertyChanged(); }
         }
 
         private PartVM[] _selectedPartVMs = Array.Empty<PartVM>();
@@ -183,31 +118,6 @@ namespace KiCAD_DB_Editor.ViewModel
                     InvokePropertyChanged();
                 }
             }
-        }
-
-        // Do not initialise here, do in constructor to link collection changed
-        private ObservableCollectionEx<KiCADSymbolLibraryVM> _kiCADSymbolLibraryVMs;
-        public ObservableCollectionEx<KiCADSymbolLibraryVM> KiCADSymbolLibraryVMs
-        {
-            get { return _kiCADSymbolLibraryVMs; }
-            set
-            {
-                if (_kiCADSymbolLibraryVMs != value)
-                {
-                    if (_kiCADSymbolLibraryVMs is not null)
-                        _kiCADSymbolLibraryVMs.CollectionChanged -= _kiCADSymbolLibraryVMs_CollectionChanged;
-                    _kiCADSymbolLibraryVMs = value;
-                    _kiCADSymbolLibraryVMs.CollectionChanged += _kiCADSymbolLibraryVMs_CollectionChanged;
-
-                    InvokePropertyChanged(nameof(this.KiCADSymbolLibraryVMs));
-                    _kiCADSymbolLibraryVMs_CollectionChanged(this, new(NotifyCollectionChangedAction.Reset));
-                }
-            }
-        }
-
-        private void _kiCADSymbolLibraryVMs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-        {
-            Library.KiCADSymbolLibraries = new(this.KiCADSymbolLibraryVMs.Select(kSLVM => kSLVM.KiCADSymbolLibrary));
         }
 
         private string _newKiCADSymbolLibraryName = "";
@@ -238,49 +148,24 @@ namespace KiCAD_DB_Editor.ViewModel
             }
         }
 
-        private KiCADSymbolLibraryVM? _selectedKiCADSymbolLibraryVM = null;
-        public KiCADSymbolLibraryVM? SelectedKiCADSymbolLibraryVM
+        private KiCADSymbolLibrary? _selectedKiCADSymbolLibrary = null;
+        public KiCADSymbolLibrary? SelectedKiCADSymbolLibrary
         {
-            get { return _selectedKiCADSymbolLibraryVM; }
+            get { return _selectedKiCADSymbolLibrary; }
             set
             {
-                if (_selectedKiCADSymbolLibraryVM != value)
+                if (_selectedKiCADSymbolLibrary != value)
                 {
-                    _selectedKiCADSymbolLibraryVM = value;
+                    _selectedKiCADSymbolLibrary = value;
                     InvokePropertyChanged();
 
-                    if (SelectedKiCADSymbolLibraryVM is not null)
+                    if (SelectedKiCADSymbolLibrary is not null)
                     {
-                        NewKiCADSymbolLibraryName = SelectedKiCADSymbolLibraryVM.Nickname;
-                        NewKiCADSymbolLibraryRelativePath = SelectedKiCADSymbolLibraryVM.RelativePath;
+                        NewKiCADSymbolLibraryName = SelectedKiCADSymbolLibrary.Nickname;
+                        NewKiCADSymbolLibraryRelativePath = SelectedKiCADSymbolLibrary.RelativePath;
                     }
                 }
             }
-        }
-
-        // Do not initialise here, do in constructor to link collection changed
-        private ObservableCollectionEx<KiCADFootprintLibraryVM> _kiCADFootprintLibraryVMs;
-        public ObservableCollectionEx<KiCADFootprintLibraryVM> KiCADFootprintLibraryVMs
-        {
-            get { return _kiCADFootprintLibraryVMs; }
-            set
-            {
-                if (_kiCADFootprintLibraryVMs != value)
-                {
-                    if (_kiCADFootprintLibraryVMs is not null)
-                        _kiCADFootprintLibraryVMs.CollectionChanged -= _kiCADFootprintLibraryVMs_CollectionChanged;
-                    _kiCADFootprintLibraryVMs = value;
-                    _kiCADFootprintLibraryVMs.CollectionChanged += _kiCADFootprintLibraryVMs_CollectionChanged;
-
-                    InvokePropertyChanged(nameof(this.KiCADFootprintLibraryVMs));
-                    _kiCADFootprintLibraryVMs_CollectionChanged(this, new(NotifyCollectionChangedAction.Reset));
-                }
-            }
-        }
-
-        private void _kiCADFootprintLibraryVMs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-        {
-            Library.KiCADFootprintLibraries = new(this.KiCADFootprintLibraryVMs.Select(kSLVM => kSLVM.KiCADFootprintLibrary));
         }
 
         private string _newKiCADFootprintLibraryName = "";
@@ -311,21 +196,21 @@ namespace KiCAD_DB_Editor.ViewModel
             }
         }
 
-        private KiCADFootprintLibraryVM? _selectedKiCADFootprintLibraryVM = null;
-        public KiCADFootprintLibraryVM? SelectedKiCADFootprintLibraryVM
+        private KiCADFootprintLibrary? _selectedKiCADFootprintLibrary = null;
+        public KiCADFootprintLibrary? SelectedKiCADFootprintLibrary
         {
-            get { return _selectedKiCADFootprintLibraryVM; }
+            get { return _selectedKiCADFootprintLibrary; }
             set
             {
-                if (_selectedKiCADFootprintLibraryVM != value)
+                if (_selectedKiCADFootprintLibrary != value)
                 {
-                    _selectedKiCADFootprintLibraryVM = value;
+                    _selectedKiCADFootprintLibrary = value;
                     InvokePropertyChanged();
 
-                    if (SelectedKiCADFootprintLibraryVM is not null)
+                    if (SelectedKiCADFootprintLibrary is not null)
                     {
-                        NewKiCADFootprintLibraryName = SelectedKiCADFootprintLibraryVM.Nickname;
-                        NewKiCADFootprintLibraryRelativePath = SelectedKiCADFootprintLibraryVM.RelativePath;
+                        NewKiCADFootprintLibraryName = SelectedKiCADFootprintLibrary.Nickname;
+                        NewKiCADFootprintLibraryRelativePath = SelectedKiCADFootprintLibrary.RelativePath;
                     }
                 }
             }
@@ -338,8 +223,18 @@ namespace KiCAD_DB_Editor.ViewModel
             // Link model
             Library = library;
 
+            Library.PropertyChanged += Library_PropertyChanged;
+
+            Library.TopLevelCategories.CollectionChanged += TopLevelCategories_CollectionChanged;
+            TopLevelCategoryVMs = new(library.TopLevelCategories.Select(c => new CategoryVM(c)));
+            Debug.Assert(_topLevelCategoryVMs is not null);
+
+            Library.AllParts.CollectionChanged += AllParts_CollectionChanged;
+            AllPartVMs = new(Library.AllParts.Select(p => new PartVM(p)));
+            Debug.Assert(_allPartVMs is not null);
+
             // Setup commands
-            ExportToKiCADCommand = new BasicCommand(ExportToKiCADCommandExecuted, ExportToKiCADCommandCanExecute);
+            ExportToKiCADCommand = new BasicCommand(ExportToKiCADCommandExecuted, null);
             NewTopLevelCategoryCommand = new BasicCommand(NewTopLevelCategoryCommandExecuted, NewTopLevelCategoryCommandCanExecute);
             NewSubCategoryCommand = new BasicCommand(NewSubCategoryCommandExecuted, NewSubCategoryCommandCanExecute);
             DeleteCategoryCommand = new BasicCommand(DeleteCategoryCommandExecuted, DeleteCategoryCommandCanExecute);
@@ -361,25 +256,42 @@ namespace KiCAD_DB_Editor.ViewModel
 
             // Initialise collection with events
             // Must do PartVMs first as CategoryVMs will use it
-            PartVMs = new(library.Parts.Select(p => new PartVM(this, p)));
-            Debug.Assert(_partVMs is not null);
-            // Must do ParameterVMs first as CategoryVMs will use it
-            ParameterVMs = new(library.Parameters.Select(p => new ParameterVM(this, p)));
-            Debug.Assert(_parameterVMs is not null);
-            TopLevelCategoryVMs = new(library.TopLevelCategories.OrderBy(c => c.Name).Select(c => new CategoryVM(this, null, c)));
-            Debug.Assert(_topLevelCategoryVMs is not null);
             KiCADSymbolLibraryVMs = new(library.KiCADSymbolLibraries.OrderBy(kSL => kSL.Nickname).Select(kSL => new KiCADSymbolLibraryVM(this, kSL)));
             Debug.Assert(_kiCADSymbolLibraryVMs is not null);
             KiCADFootprintLibraryVMs = new(library.KiCADFootprintLibraries.OrderBy(kFL => kFL.Nickname).Select(kSL => new KiCADFootprintLibraryVM(this, kSL)));
             Debug.Assert(_kiCADFootprintLibraryVMs is not null);
         }
 
-        private bool canNewCategory(ObservableCollectionEx<CategoryVM> categoryVMCollection)
+        private void KiCADFootprintLibraries_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void KiCADSymbolLibraries_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void Library_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+        }
+
+        private void AllParts_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            AllPartVMs = new(Library.AllParts.Select(p => new PartVM(p)));
+        }
+
+        private void TopLevelCategories_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            TopLevelCategoryVMs = new(Library.TopLevelCategories.Select(c => new CategoryVM(c)));
+        }
+
+        private bool canNewCategory(ObservableCollectionEx<Category> categoryCollection)
         {
             string lowerValue = this.NewCategoryName.ToLower();
             if (this.NewCategoryName.Length > 0 && lowerValue.All(c => Util.SafeCategoryCharacters.Contains(c)))
             {
-                if (!categoryVMCollection.Any(cVM => cVM.Name.ToLower() == lowerValue))
+                if (!categoryCollection.Any(c => c.Name.ToLower() == lowerValue))
                 {
                     return true;
                 }
@@ -387,20 +299,22 @@ namespace KiCAD_DB_Editor.ViewModel
             return false;
         }
 
-        private void newCategory(CategoryVM? parentCategoryVM, ObservableCollectionEx<CategoryVM> categoryVMCollection)
+        private void newCategory(Category? parentCategory, ObservableCollectionEx<Category> categoryCollection)
         {
             string lowerValue = this.NewCategoryName.ToLower();
             int newIndex;
-            for (newIndex = 0; newIndex < categoryVMCollection.Count; newIndex++)
+            for (newIndex = 0; newIndex < categoryCollection.Count; newIndex++)
             {
-                CategoryVM compareCategoryVM = categoryVMCollection[newIndex];
-                if (compareCategoryVM.Name.CompareTo(lowerValue) > 0)
+                Category compareCategory = categoryCollection[newIndex];
+                if (compareCategory.Name.CompareTo(lowerValue) > 0)
                     break;
             }
-            if (newIndex == categoryVMCollection.Count)
-                categoryVMCollection.Add(new(this, parentCategoryVM, new(this.NewCategoryName)));
+            Category newCategory = new Category(this.NewCategoryName, Library, parentCategory);
+            if (newIndex == categoryCollection.Count)
+                categoryCollection.Add(newCategory);
             else
-                categoryVMCollection.Insert(newIndex, new(this, parentCategoryVM, new(this.NewCategoryName)));
+                categoryCollection.Insert(newIndex, newCategory);
+            Library.AllCategories.Add(newCategory);
         }
 
         #region Commands
@@ -425,11 +339,6 @@ namespace KiCAD_DB_Editor.ViewModel
         public IBasicCommand DeleteKiCADFootprintLibraryCommand { get; }
         public IBasicCommand ReparseKiCADFootprintNamesCommand { get; }
 
-        private bool ExportToKiCADCommandCanExecute(object? parameter)
-        {
-            return true;
-        }
-
         private void ExportToKiCADCommandExecuted(object? parameter)
         {
             // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
@@ -450,18 +359,18 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private bool NewTopLevelCategoryCommandCanExecute(object? parameter)
         {
-            return canNewCategory(TopLevelCategoryVMs);
+            return canNewCategory(Library.TopLevelCategories);
         }
 
         private void NewTopLevelCategoryCommandExecuted(object? parameter)
         {
-            newCategory(null, TopLevelCategoryVMs);
+            newCategory(null, Library.TopLevelCategories);
         }
 
         private bool NewSubCategoryCommandCanExecute(object? parameter)
         {
             if (parameter is not null && parameter is CategoryVM cVM)
-                return canNewCategory(cVM.CategoryVMs);
+                return canNewCategory(cVM.Category.Categories);
             else
                 return false;
         }
@@ -469,7 +378,7 @@ namespace KiCAD_DB_Editor.ViewModel
         private void NewSubCategoryCommandExecuted(object? parameter)
         {
             CategoryVM selectedCategoryVM = (CategoryVM)parameter!;
-            newCategory(selectedCategoryVM, selectedCategoryVM.CategoryVMs);
+            newCategory(selectedCategoryVM.Category, selectedCategoryVM.Category.Categories);
         }
 
         private bool DeleteCategoryCommandCanExecute(object? parameter)
@@ -480,10 +389,12 @@ namespace KiCAD_DB_Editor.ViewModel
         private void DeleteCategoryCommandExecuted(object? parameter)
         {
             CategoryVM selectedCategoryVM = (CategoryVM)parameter!;
-            if (selectedCategoryVM.ParentCategoryVM is null)
-                this.TopLevelCategoryVMs.Remove(selectedCategoryVM);
+            Category selectedCategory = selectedCategoryVM.Category;
+            Library.AllCategories.Remove(selectedCategory);
+            if (selectedCategory.ParentCategory is null)
+                Library.TopLevelCategories.Remove(selectedCategory);
             else
-                selectedCategoryVM.ParentCategoryVM.CategoryVMs.Remove(selectedCategoryVM);
+                selectedCategory.ParentCategory.Categories.Remove(selectedCategory);
         }
 
         private bool NewParameterCommandCanExecute(object? parameter)
@@ -493,7 +404,7 @@ namespace KiCAD_DB_Editor.ViewModel
             {
                 if (!Util.ReservedParameterNames.Contains(lowerValue) && Util.ReservedParameterNameStarts.All(s => !lowerValue.StartsWith(s)))
                 {
-                    if (!ParameterVMs.Any(p => p.Name.ToLower() == lowerValue))
+                    if (!Library.AllParameters.Any(p => p.Name.ToLower() == lowerValue))
                     {
                         return true;
                     }
@@ -504,18 +415,18 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private void NewParameterCommandExecuted(object? parameter)
         {
-            ParameterVMs.Add(new(this, new(this.NewParameterName)));
+            Library.AllParameters.Add(new(this.NewParameterName));
             this.NewParameterName = "";
         }
 
         private bool RenameParameterCommandCanExecute(object? parameter)
         {
             string lowerValue = this.NewParameterName.ToLower();
-            if (SelectedParameterVM is not null && this.NewParameterName.Length > 0 && lowerValue.All(c => Util.SafeParameterCharacters.Contains(c)))
+            if (SelectedParameter is not null && this.NewParameterName.Length > 0 && lowerValue.All(c => Util.SafeParameterCharacters.Contains(c)))
             {
                 if (!Util.ReservedParameterNames.Contains(lowerValue) && Util.ReservedParameterNameStarts.All(s => !lowerValue.StartsWith(s)))
                 {
-                    if (!ParameterVMs.Any(p => p.Name.ToLower() == lowerValue))
+                    if (!Library.AllParameters.Any(p => p.Name.ToLower() == lowerValue))
                     {
                         return true;
                     }
@@ -526,21 +437,21 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private void RenameParameterCommandExecuted(object? parameter)
         {
-            Debug.Assert(SelectedParameterVM is not null);
-            SelectedParameterVM.Name = this.NewParameterName;
+            Debug.Assert(SelectedParameter is not null);
+            SelectedParameter.Name = this.NewParameterName;
         }
 
         private bool DeleteParameterCommandCanExecute(object? parameter)
         {
-            return SelectedParameterVM is not null;
+            return SelectedParameter is not null;
         }
 
         private void DeleteParameterCommandExecuted(object? parameter)
         {
-            Debug.Assert(SelectedParameterVM is not null);
-            ParameterVMs.Remove(SelectedParameterVM);
+            Debug.Assert(SelectedParameter is not null);
+            Library.AllParameters.Remove(SelectedParameter);
 
-            SelectedParameterVM = ParameterVMs.FirstOrDefault();
+            SelectedParameter = Library.AllParameters.FirstOrDefault();
         }
 
         private bool AddFootprintCommandCanExecute(object? parameter)
@@ -611,14 +522,14 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private bool UpdateKiCADSymbolLibraryCommandCanExecute(object? parameter)
         {
-            if (SelectedKiCADSymbolLibraryVM is not null && this.NewKiCADSymbolLibraryName.Length > 0 && this.NewKiCADSymbolLibraryRelativePath.Length > 0)
+            if (SelectedKiCADSymbolLibrary is not null && this.NewKiCADSymbolLibraryName.Length > 0 && this.NewKiCADSymbolLibraryRelativePath.Length > 0)
             {
                 var kiCADSymbolLibraryVMsWithSameName = KiCADSymbolLibraryVMs.Where(p => p.Nickname.ToLower() == this.NewKiCADSymbolLibraryName.ToLower()).ToArray();
 
                 // Allow updates if none share the same name, or the name is the same as current, but the path is not (path case sensitive because of UNIX)
                 return (kiCADSymbolLibraryVMsWithSameName.Length == 0) ||
-                       (kiCADSymbolLibraryVMsWithSameName.Length == 1 && kiCADSymbolLibraryVMsWithSameName[0] == SelectedKiCADSymbolLibraryVM &&
-                       this.NewKiCADSymbolLibraryRelativePath != SelectedKiCADSymbolLibraryVM.RelativePath);
+                       (kiCADSymbolLibraryVMsWithSameName.Length == 1 && kiCADSymbolLibraryVMsWithSameName[0] == SelectedKiCADSymbolLibrary &&
+                       this.NewKiCADSymbolLibraryRelativePath != SelectedKiCADSymbolLibrary.RelativePath);
             }
             else
                 return false;
@@ -626,16 +537,16 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private void UpdateKiCADSymbolLibraryCommandExecuted(object? parameter)
         {
-            Debug.Assert(SelectedKiCADSymbolLibraryVM is not null);
-            SelectedKiCADSymbolLibraryVM.Nickname = this.NewKiCADSymbolLibraryName;
-            SelectedKiCADSymbolLibraryVM.RelativePath = this.NewKiCADSymbolLibraryRelativePath;
+            Debug.Assert(SelectedKiCADSymbolLibrary is not null);
+            SelectedKiCADSymbolLibrary.Nickname = this.NewKiCADSymbolLibraryName;
+            SelectedKiCADSymbolLibrary.RelativePath = this.NewKiCADSymbolLibraryRelativePath;
 
-            int oldIndex = KiCADSymbolLibraryVMs.IndexOf(SelectedKiCADSymbolLibraryVM);
+            int oldIndex = KiCADSymbolLibraryVMs.IndexOf(SelectedKiCADSymbolLibrary);
             int newIndex = 0;
             for (int i = 0; i < KiCADSymbolLibraryVMs.Count; i++)
             {
                 var compareKSL = KiCADSymbolLibraryVMs[i];
-                if (compareKSL != SelectedKiCADSymbolLibraryVM)
+                if (compareKSL != SelectedKiCADSymbolLibrary)
                 {
                     if (compareKSL.Nickname.CompareTo(this.NewKiCADSymbolLibraryName) > 0)
                         break;
@@ -648,26 +559,26 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private bool DeleteKiCADSymbolLibraryCommandCanExecute(object? parameter)
         {
-            return SelectedKiCADSymbolLibraryVM is not null;
+            return SelectedKiCADSymbolLibrary is not null;
         }
 
         private void DeleteKiCADSymbolLibraryCommandExecuted(object? parameter)
         {
-            Debug.Assert(SelectedKiCADSymbolLibraryVM is not null);
-            KiCADSymbolLibraryVMs.Remove(SelectedKiCADSymbolLibraryVM);
+            Debug.Assert(SelectedKiCADSymbolLibrary is not null);
+            KiCADSymbolLibraryVMs.Remove(SelectedKiCADSymbolLibrary);
 
-            SelectedKiCADSymbolLibraryVM = KiCADSymbolLibraryVMs.FirstOrDefault();
+            SelectedKiCADSymbolLibrary = KiCADSymbolLibraryVMs.FirstOrDefault();
         }
 
         private bool ReparseKiCADSymbolNamesCommandCanExecute(object? parameter)
         {
-            return SelectedKiCADSymbolLibraryVM is not null;
+            return SelectedKiCADSymbolLibrary is not null;
         }
 
         private void ReparseKiCADSymbolNamesCommandExecuted(object? parameter)
         {
-            Debug.Assert(SelectedKiCADSymbolLibraryVM is not null);
-            SelectedKiCADSymbolLibraryVM.ParseKiCADSymbolNames();
+            Debug.Assert(SelectedKiCADSymbolLibrary is not null);
+            SelectedKiCADSymbolLibrary.ParseKiCADSymbolNames();
         }
 
         private bool BrowseKiCADFootprintLibraryCommandCanExecute(object? parameter)
@@ -717,14 +628,14 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private bool UpdateKiCADFootprintLibraryCommandCanExecute(object? parameter)
         {
-            if (SelectedKiCADFootprintLibraryVM is not null && this.NewKiCADFootprintLibraryName.Length > 0 && this.NewKiCADFootprintLibraryRelativePath.Length > 0)
+            if (SelectedKiCADFootprintLibrary is not null && this.NewKiCADFootprintLibraryName.Length > 0 && this.NewKiCADFootprintLibraryRelativePath.Length > 0)
             {
                 var kiCADFootprintLibraryVMsWithSameName = KiCADFootprintLibraryVMs.Where(p => p.Nickname.ToLower() == this.NewKiCADFootprintLibraryName.ToLower()).ToArray();
 
                 // Allow updates if none share the same name, or the name is the same as current, but the path is not (path case sensitive because of UNIX)
                 return (kiCADFootprintLibraryVMsWithSameName.Length == 0) ||
-                       (kiCADFootprintLibraryVMsWithSameName.Length == 1 && kiCADFootprintLibraryVMsWithSameName[0] == SelectedKiCADFootprintLibraryVM &&
-                       this.NewKiCADFootprintLibraryRelativePath != SelectedKiCADFootprintLibraryVM.RelativePath);
+                       (kiCADFootprintLibraryVMsWithSameName.Length == 1 && kiCADFootprintLibraryVMsWithSameName[0] == SelectedKiCADFootprintLibrary &&
+                       this.NewKiCADFootprintLibraryRelativePath != SelectedKiCADFootprintLibrary.RelativePath);
             }
             else
                 return false;
@@ -732,16 +643,16 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private void UpdateKiCADFootprintLibraryCommandExecuted(object? parameter)
         {
-            Debug.Assert(SelectedKiCADFootprintLibraryVM is not null);
-            SelectedKiCADFootprintLibraryVM.Nickname = this.NewKiCADFootprintLibraryName;
-            SelectedKiCADFootprintLibraryVM.RelativePath = this.NewKiCADFootprintLibraryRelativePath;
+            Debug.Assert(SelectedKiCADFootprintLibrary is not null);
+            SelectedKiCADFootprintLibrary.Nickname = this.NewKiCADFootprintLibraryName;
+            SelectedKiCADFootprintLibrary.RelativePath = this.NewKiCADFootprintLibraryRelativePath;
 
-            int oldIndex = KiCADFootprintLibraryVMs.IndexOf(SelectedKiCADFootprintLibraryVM);
+            int oldIndex = KiCADFootprintLibraryVMs.IndexOf(SelectedKiCADFootprintLibrary);
             int newIndex = 0;
             for (int i = 0; i < KiCADFootprintLibraryVMs.Count; i++)
             {
                 var compareKFL = KiCADFootprintLibraryVMs[i];
-                if (compareKFL != SelectedKiCADFootprintLibraryVM)
+                if (compareKFL != SelectedKiCADFootprintLibrary)
                 {
                     if (compareKFL.Nickname.CompareTo(this.NewKiCADFootprintLibraryName) > 0)
                         break;
@@ -754,26 +665,26 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private bool DeleteKiCADFootprintLibraryCommandCanExecute(object? parameter)
         {
-            return SelectedKiCADFootprintLibraryVM is not null;
+            return SelectedKiCADFootprintLibrary is not null;
         }
 
         private void DeleteKiCADFootprintLibraryCommandExecuted(object? parameter)
         {
-            Debug.Assert(SelectedKiCADFootprintLibraryVM is not null);
-            KiCADFootprintLibraryVMs.Remove(SelectedKiCADFootprintLibraryVM);
+            Debug.Assert(SelectedKiCADFootprintLibrary is not null);
+            KiCADFootprintLibraryVMs.Remove(SelectedKiCADFootprintLibrary);
 
-            SelectedKiCADFootprintLibraryVM = KiCADFootprintLibraryVMs.FirstOrDefault();
+            SelectedKiCADFootprintLibrary = KiCADFootprintLibraryVMs.FirstOrDefault();
         }
 
         private bool ReparseKiCADFootprintNamesCommandCanExecute(object? parameter)
         {
-            return SelectedKiCADFootprintLibraryVM is not null;
+            return SelectedKiCADFootprintLibrary is not null;
         }
 
         private void ReparseKiCADFootprintNamesCommandExecuted(object? parameter)
         {
-            Debug.Assert(SelectedKiCADFootprintLibraryVM is not null);
-            SelectedKiCADFootprintLibraryVM.ParseKiCADFootprintNames();
+            Debug.Assert(SelectedKiCADFootprintLibrary is not null);
+            SelectedKiCADFootprintLibrary.ParseKiCADFootprintNames();
         }
 
         #endregion Commands

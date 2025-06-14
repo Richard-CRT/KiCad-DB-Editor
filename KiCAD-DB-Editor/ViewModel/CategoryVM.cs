@@ -19,180 +19,57 @@ using KiCAD_DB_Editor.View.Dialogs;
 using System.Security.Cryptography;
 using System.Windows.Media;
 using System.Formats.Asn1;
+using System.Diagnostics.CodeAnalysis;
 
 namespace KiCAD_DB_Editor.ViewModel
 {
     public class CategoryVM : NotifyObject
     {
-        public LibraryVM ParentLibraryVM { get; }
-        public readonly Model.Category Category;
-        public readonly CategoryVM? ParentCategoryVM;
+        public Category Category { get; }
 
         #region Notify Properties
 
-        public string Name
+        public string Path
         {
-            get { return Category.Name; }
-            set
+            get
             {
-                if (Category.Name != value)
+                string path = this.Category.Name;
+                var c = this.Category;
+                while (c.ParentCategory is not null)
                 {
-                    string lowerValue = value.ToLower();
-                    if (value.Length == 0 || lowerValue.Any(c => !Util.SafeCategoryCharacters.Contains(c)))
-                        throw new Exceptions.ArgumentValidationException("Proposed name invalid");
-
-                    ObservableCollectionEx<CategoryVM> categoryCollection;
-                    if (ParentCategoryVM is null)
-                        categoryCollection = ParentLibraryVM.TopLevelCategoryVMs;
-                    else
-                        categoryCollection = ParentCategoryVM.CategoryVMs;
-
-                    if (categoryCollection.Any(cVM => cVM.Name.ToLower() == lowerValue))
-                        throw new Exceptions.ArgumentValidationException("Parent already contains category with proposed name");
-
-                    Category.Name = value;
-                    InvokePropertyChanged();
-                    InvokePropertyChanged(nameof(this.Path));
-                    foreach (CategoryVM cVM in CategoryVMs)
-                        cVM.InvokePropertyChanged_Path();
-
-                    int oldIndex = categoryCollection.IndexOf(this);
-                    int newIndex = 0;
-                    for (int i = 0; i < categoryCollection.Count; i++)
-                    {
-                        CategoryVM compareCategoryVM = categoryCollection[i];
-                        if (compareCategoryVM != this)
-                        {
-                            if (compareCategoryVM.Name.CompareTo(this.Name) > 0)
-                                break;
-                            newIndex++;
-                        }
-                    }
-                    if (oldIndex != newIndex)
-                        categoryCollection.Move(oldIndex, newIndex);
+                    path = $"{c.Name}/{path}";
+                    c = c.ParentCategory;
                 }
+                return path; 
             }
         }
 
-        public string Path
-        {
-            get { return ParentCategoryVM is not null ? $"{ParentCategoryVM.Path}/{this.Name}" : this.Name; }
-        }
-
-        // Do not initialise here, do in constructor to link collection changed
         private ObservableCollectionEx<CategoryVM> _categoryVMs;
         public ObservableCollectionEx<CategoryVM> CategoryVMs
         {
             get { return _categoryVMs; }
-            set
-            {
-                if (_categoryVMs != value)
-                {
-                    if (_categoryVMs is not null)
-                        _categoryVMs.CollectionChanged -= _categoryVMs_CollectionChanged;
-                    _categoryVMs = value;
-                    _categoryVMs.CollectionChanged += _categoryVMs_CollectionChanged;
-
-                    InvokePropertyChanged();
-                    _categoryVMs_CollectionChanged(this, new(NotifyCollectionChangedAction.Reset));
-                }
-            }
-        }
-
-        private void _categoryVMs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-        {
-            Category.Categories = new(this.CategoryVMs.Select(cVM => cVM.Category));
-        }
-
-        // Do not initialise here, do in constructor to link collection changed
-        private ObservableCollectionEx<ParameterVM> _parameterVMs;
-        public ObservableCollectionEx<ParameterVM> ParameterVMs
-        {
-            get { return _parameterVMs; }
-            set
-            {
-                if (_parameterVMs != value)
-                {
-                    if (_parameterVMs is not null)
-                        _parameterVMs.CollectionChanged -= _parameterVMs_CollectionChanged;
-                    _parameterVMs = value;
-                    _parameterVMs.CollectionChanged += _parameterVMs_CollectionChanged;
-
-                    InvokePropertyChanged();
-                    _parameterVMs_CollectionChanged(this, new(NotifyCollectionChangedAction.Reset));
-                }
-            }
-        }
-
-        private void _parameterVMs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-        {
-            Category.Parameters = new(this.ParameterVMs.Select(pVM => pVM.UUID));
-
-            InvokePropertyChanged(nameof(this.InheritedAndNormalParameterVMs));
-            InvokePropertyChanged(nameof(this.AvailableParameterVMs));
-
-            foreach (CategoryVM cVM in CategoryVMs)
-                cVM.InvokePropertyChanged_InheritedParameterVMs();
-        }
-
-        // Should be ReadOnlyCollection really, but this binds to the Part grid view, so it needs to be ObservableCollectionEx
-        public ObservableCollectionEx<ParameterVM> InheritedAndNormalParameterVMs
-        {
-            get { return new(ParentLibraryVM.ParameterVMs.Intersect(ParameterVMs.Concat(InheritedParameterVMs))); }
-        }
-
-        public ReadOnlyCollection<ParameterVM> InheritedParameterVMs
-        {
-            get
-            {
-                if (ParentCategoryVM is not null && ParentCategoryVM.ParameterVMs is not null)
-                    return new(new List<ParameterVM>(ParentLibraryVM.ParameterVMs.Intersect(ParentCategoryVM.InheritedParameterVMs.Concat(ParentCategoryVM.ParameterVMs))));
-                else
-                    return new(new List<ParameterVM>());
-            }
-        }
-
-        public ReadOnlyCollection<ParameterVM> AvailableParameterVMs
-        {
-            get { return new(new List<ParameterVM>(ParentLibraryVM.ParameterVMs.Except(ParameterVMs))); }
-        }
-
-        private ParameterVM? _selectedUnusedParameterVM = null;
-        public ParameterVM? SelectedUnusedParameterVM
-        {
-            get { return _selectedUnusedParameterVM; }
-            set { if (_selectedUnusedParameterVM != value) { _selectedUnusedParameterVM = value; InvokePropertyChanged(); } }
-        }
-
-        private ParameterVM? _selectedParameterVM = null;
-        public ParameterVM? SelectedParameterVM
-        {
-            get { return _selectedParameterVM; }
-            set { if (_selectedParameterVM != value) { _selectedParameterVM = value; InvokePropertyChanged(); } }
+            set { if (_categoryVMs != value) _categoryVMs = value; InvokePropertyChanged(); }
         }
 
         private ObservableCollectionEx<PartVM> _partVMs;
         public ObservableCollectionEx<PartVM> PartVMs
         {
             get { return _partVMs; }
-            set
-            {
-                if (_partVMs != value)
-                {
-                    if (_partVMs is not null)
-                        _partVMs.CollectionChanged -= _partVMs_CollectionChanged;
-                    _partVMs = value;
-                    _partVMs.CollectionChanged += _partVMs_CollectionChanged; ;
-
-                    InvokePropertyChanged();
-                    _partVMs_CollectionChanged(this, new(NotifyCollectionChangedAction.Reset));
-                }
-            }
+            set { if (_partVMs != value) _partVMs = value; InvokePropertyChanged(); }
         }
 
-        private void _partVMs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        private Parameter? _selectedUnusedParameter = null;
+        public Parameter? SelectedUnusedParameter
         {
-            Category.Parts = new(this.PartVMs.Select(pVM => pVM.Part));
+            get { return _selectedUnusedParameter; }
+            set { if (_selectedUnusedParameter != value) { _selectedUnusedParameter = value; InvokePropertyChanged(); } }
+        }
+
+        private Parameter? _selectedParameter = null;
+        public Parameter? SelectedParameter
+        {
+            get { return _selectedParameter; }
+            set { if (_selectedParameter != value) { _selectedParameter = value; InvokePropertyChanged(); } }
         }
 
         private PartVM[] _selectedPartVMs = Array.Empty<PartVM>();
@@ -212,13 +89,20 @@ namespace KiCAD_DB_Editor.ViewModel
 
         #endregion Notify Properties
 
-        public CategoryVM(LibraryVM parentLibraryVM, CategoryVM? parentCategoryVM, Model.Category category)
+        public CategoryVM(Model.Category category)
         {
-            ParentLibraryVM = parentLibraryVM;
-            ParentCategoryVM = parentCategoryVM;
-
             // Link model
             Category = category;
+
+            Category.PropertyChanged += Category_PropertyChanged;
+
+            Category.Categories.CollectionChanged += Categories_CollectionChanged;
+            CategoryVMs = new(Category.Categories.Select(c => new CategoryVM(c)));
+            Debug.Assert(_categoryVMs is not null);
+
+            Category.Parts.CollectionChanged += Parts_CollectionChanged;
+            PartVMs = new(Category.Parts.Select(p => new PartVM(p)));
+            Debug.Assert(_partVMs is not null);
 
             // Setup commands
             AddParameterCommand = new BasicCommand(AddParameterCommandExecuted, AddParameterCommandCanExecute);
@@ -227,61 +111,36 @@ namespace KiCAD_DB_Editor.ViewModel
             DeletePartsCommand = new BasicCommand(DeletePartCommandExecuted, DeletePartsCommandCanExecute);
             AddFootprintCommand = new BasicCommand(AddFootprintCommandExecuted, AddFootprintCommandCanExecute);
             RemoveFootprintCommand = new BasicCommand(RemoveFootprintCommandExecuted, RemoveFootprintCommandCanExecute);
+        }
 
-            // Initialise collection with events
-            CategoryVMs = new(category.Categories.OrderBy(c => c.Name).Select(c => new CategoryVM(ParentLibraryVM, this, c)));
-            Debug.Assert(_categoryVMs is not null);
-            // Link to parent library instances of ParameterVM (requires Library to have already set them up)
-            ParameterVMs = new(parentLibraryVM.ParameterVMs.Where(pVM => category.Parameters.Contains(pVM.UUID)));
-            Debug.Assert(_parameterVMs is not null);
-            // Link to parent library instances of PartVM (requires Library to have already set them up)
-            PartVMs = new(parentLibraryVM.PartVMs.Where(pVM => category.Parts.Contains(pVM.Part)));
-            Debug.Assert(_partVMs is not null);
+        private void Parts_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            PartVMs = new(Category.Parts.Select(p => new PartVM(p)));
+        }
 
-            foreach (var pVM in PartVMs)
+        private void Categories_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            CategoryVMs = new(Category.Categories.OrderBy(c => c.Name).Select(c => new CategoryVM(c)));
+        }
+
+        private void Category_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
             {
-                pVM.ParentCategoryVM = this;
+                case nameof(Category.Name):
+                    InvokePropertyChanged_Path();
+                    break;
+                // Categories, Parameters, Parts do not have setter so we don't need to listen here
             }
         }
 
         public void InvokePropertyChanged_Path()
         {
             InvokePropertyChanged(nameof(this.Path));
-        }
-
-        public void InvokePropertyChanged_InheritedParameterVMs()
-        {
-            InvokePropertyChanged(nameof(this.InheritedParameterVMs));
-            InvokePropertyChanged(nameof(this.InheritedAndNormalParameterVMs));
-
-            foreach (PartVM partVM in PartVMs)
-            {
-                var parameterVMsToBeRemoved = partVM.ParameterVMs.Except(InheritedAndNormalParameterVMs).ToArray();
-                foreach (ParameterVM parameterVMToBeRemoved in parameterVMsToBeRemoved)
-                    partVM.RemoveParameterVM(parameterVMToBeRemoved);
-                var parameterVMsToBeAdded = InheritedAndNormalParameterVMs.Except(partVM.ParameterVMs).ToArray();
-                foreach (ParameterVM parameterVMToBeAdded in parameterVMsToBeAdded)
-                    partVM.AddParameterVM(parameterVMToBeAdded);
-            }
-
             foreach (CategoryVM cVM in CategoryVMs)
-                cVM.InvokePropertyChanged_InheritedParameterVMs();
-        }
-
-        public void InvokePropertyChanged_AvailableParameterVMs()
-        {
-            InvokePropertyChanged(nameof(this.AvailableParameterVMs));
-
-            var pVMsToBeRemoved = ParameterVMs.Except(ParentLibraryVM.ParameterVMs).ToArray();
-            foreach (var pVMToBeRemoved in pVMsToBeRemoved)
-            {
-                foreach (PartVM pVM in PartVMs)
-                    pVM.RemoveParameterVM(pVMToBeRemoved);
-            }
-            ParameterVMs = new(ParentLibraryVM.ParameterVMs.Where(pVM => Category.Parameters.Contains(pVM.UUID)));
-
-            foreach (CategoryVM cVM in CategoryVMs)
-                cVM.InvokePropertyChanged_AvailableParameterVMs();
+                cVM.InvokePropertyChanged_Path();
+            foreach (PartVM pVM in PartVMs)
+                pVM.InvokePropertyChanged_Path();
         }
 
         #region Commands
@@ -295,67 +154,55 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private bool AddParameterCommandCanExecute(object? parameter)
         {
-            return SelectedUnusedParameterVM is not null;
+            return SelectedUnusedParameter is not null;
         }
 
         private void AddParameterCommandExecuted(object? parameter)
         {
-            Debug.Assert(SelectedUnusedParameterVM is not null);
+            Debug.Assert(SelectedUnusedParameter is not null);
 
-            ParameterVM pVMToBeAdded = SelectedUnusedParameterVM;
+            Parameter pToBeAdded = SelectedUnusedParameter;
 
-            int indexOfPVMToBeAddedInLibrary = ParentLibraryVM.ParameterVMs.IndexOf(pVMToBeAdded);
+            int indexOfPToBeAddedInLibrary = Category.ParentLibrary.AllParameters.IndexOf(pToBeAdded);
             int newIndex;
-            for (newIndex = 0; newIndex < ParameterVMs.Count; newIndex++)
+            for (newIndex = 0; newIndex < Category.Parameters.Count; newIndex++)
             {
-                if (indexOfPVMToBeAddedInLibrary < ParentLibraryVM.ParameterVMs.IndexOf(ParameterVMs[newIndex]))
+                if (indexOfPToBeAddedInLibrary < Category.ParentLibrary.AllParameters.IndexOf(Category.Parameters[newIndex]))
                 {
                     break;
                 }
             }
-            if (newIndex == ParameterVMs.Count)
-                ParameterVMs.Add(pVMToBeAdded);
+            if (newIndex == Category.Parameters.Count)
+                Category.Parameters.Add(pToBeAdded);
             else
-                ParameterVMs.Insert(newIndex, pVMToBeAdded);
+                Category.Parameters.Insert(newIndex, pToBeAdded);
 
-            foreach (PartVM pVM in PartVMs)
-                pVM.AddParameterVM(pVMToBeAdded);
-
-            SelectedUnusedParameterVM = AvailableParameterVMs.FirstOrDefault();
+            SelectedUnusedParameter = Category.AvailableParameters.FirstOrDefault();
         }
 
         private bool RemoveParameterCommandCanExecute(object? parameter)
         {
-            return SelectedParameterVM is not null;
+            return SelectedParameter is not null;
         }
 
         private void RemoveParameterCommandExecuted(object? parameter)
         {
-            Debug.Assert(SelectedParameterVM is not null);
+            Debug.Assert(SelectedParameter is not null);
 
-            ParameterVM pVMToBeRemoved = SelectedParameterVM;
+            Parameter pToBeRemoved = SelectedParameter;
 
-            this.ParameterVMs.Remove(pVMToBeRemoved);
+            Category.Parameters.Remove(pToBeRemoved);
 
-            if (!InheritedParameterVMs.Contains(pVMToBeRemoved))
-            {
-                foreach (PartVM pVM in PartVMs)
-                    pVM.RemoveParameterVM(pVMToBeRemoved);
-            }
-
-            SelectedParameterVM = ParameterVMs.FirstOrDefault();
+            SelectedParameter = Category.Parameters.FirstOrDefault();
         }
 
-        private void NewPartCommandExecuted(object? parameter)
+        private void NewPartCommandExecuted(object? _)
         {
-            string partUID = Util.GeneratePartUID(ParentLibraryVM.PartUIDScheme);
-            Part part = new(partUID);
-            PartVM partVM = new(ParentLibraryVM, part);
-            partVM.ParentCategoryVM = this;
-            foreach (ParameterVM parameterVM in ParameterVMs)
-                partVM.AddParameterVM(parameterVM);
-            PartVMs.Add(partVM);
-            ParentLibraryVM.PartVMs.Add(partVM);
+            string partUID = Util.GeneratePartUID(Category.ParentLibrary.PartUIDScheme);
+            Part part = new(partUID, Category.ParentLibrary, Category);
+            foreach (Parameter parameter in Category.Parameters)
+                part.ParameterValues.Add(parameter, "");
+            Category.Parts.Add(part);
         }
 
         private bool DeletePartsCommandCanExecute(object? parameter)
@@ -366,11 +213,11 @@ namespace KiCAD_DB_Editor.ViewModel
         private void DeletePartCommandExecuted(object? parameter)
         {
             Debug.Assert(SelectedPartVMs.Length > 0);
-            List<PartVM> pVMsToBeRemoved = new(SelectedPartVMs);
-            foreach (PartVM pVMToBeRemoved in pVMsToBeRemoved)
+            List<Part> psToBeRemoved = new(SelectedPartVMs.Select(pVM => pVM.Part));
+            foreach (Part pToBeRemoved in psToBeRemoved)
             {
-                PartVMs.Remove(pVMToBeRemoved);
-                ParentLibraryVM.PartVMs.Remove(pVMToBeRemoved);
+                Category.Parts.Remove(pToBeRemoved);
+                Category.ParentLibrary.AllParts.Remove(pToBeRemoved);
             }
         }
 

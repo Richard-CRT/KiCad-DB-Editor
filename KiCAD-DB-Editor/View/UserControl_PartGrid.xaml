@@ -88,29 +88,29 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTextColumn Header="Category"
-                                    Binding="{Binding ParentCategoryVM.Path, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                                    Binding="{Binding Path, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                                     Visibility="{Binding DataContext.DisplayPartCategory, Source={x:Reference dummyElementToGetDataContext}, Converter={StaticResource Boolean_to_Visibility_Converter}}"
                                     />
                 <DataGridTextColumn Header="Part UID"
-                                    Binding="{Binding PartUID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    Binding="{Binding Part.PartUID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                     />
                 <DataGridTextColumn Header="Description"
-                                    Binding="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    Binding="{Binding Part.Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                     />
                 <DataGridTextColumn Header="Manufacturer"
-                                    Binding="{Binding Manufacturer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                    Binding="{Binding Part.Manufacturer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                                     />
                 <DataGridTextColumn Header="MPN"
-                                    Binding="{Binding MPN, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                    Binding="{Binding Part.MPN, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                                     />
                 <DataGridTextColumn Header="Value"
-                                    Binding="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                    Binding="{Binding Part.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                                     />
                 <DataGridTextColumn Header="Datasheet"
-                                    Binding="{Binding Datasheet, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                    Binding="{Binding Part.Datasheet, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                                     />
                 <DataGridCheckBoxColumn Header="Excl. BOM"
-                                        Binding="{Binding ExcludeFromBOM, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        Binding="{Binding Part.ExcludeFromBOM, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         >
                     <DataGridCheckBoxColumn.ElementStyle>
                         <Style TargetType="{x:Type CheckBox}">
@@ -125,7 +125,7 @@
                     </DataGridCheckBoxColumn.ElementStyle>
                 </DataGridCheckBoxColumn>
                 <DataGridCheckBoxColumn Header="Excl. Board"
-                                        Binding="{Binding ExcludeFromBoard, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        Binding="{Binding Part.ExcludeFromBoard, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         >
                     <DataGridCheckBoxColumn.ElementStyle>
                         <Style TargetType="{x:Type CheckBox}">
@@ -140,7 +140,7 @@
                     </DataGridCheckBoxColumn.ElementStyle>
                 </DataGridCheckBoxColumn>
                 <DataGridCheckBoxColumn Header="Excl. Sim"
-                                        Binding="{Binding ExcludeFromSim, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        Binding="{Binding Part.ExcludeFromSim, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         >
                     <DataGridCheckBoxColumn.ElementStyle>
                         <Style TargetType="{x:Type CheckBox}">
@@ -159,14 +159,14 @@
                                         >
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock Text="{Binding Part.SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
                             <ComboBox IsEditable="True"
-                                      Text="{Binding SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                      ItemsSource="{Binding KiCADSymbolLibraryVMs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}"
+                                      Text="{Binding Part.SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      ItemsSource="{Binding KiCADSymbolLibraries, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}"
                                       DisplayMemberPath="Nickname"
                                       Loaded="TemplateColumn_ComboBox_Loaded"
                                       />
@@ -178,14 +178,14 @@
                                         >
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding SymbolName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock Text="{Binding Part.SymbolName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
                             <ComboBox IsEditable="True"
-                                      Text="{Binding SymbolName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                      ItemsSource="{Binding SelectedKiCADSymbolLibraryVM.KiCADSymbolNames}"
+                                      Text="{Binding Part.SymbolName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      ItemsSource="{Binding SelectedKiCADSymbolLibrary.KiCADSymbolNames}"
                                       Loaded="TemplateColumn_ComboBox_Loaded"
                                       />
                         </DataTemplate>

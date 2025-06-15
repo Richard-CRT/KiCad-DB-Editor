@@ -1,4 +1,5 @@
-﻿using KiCAD_DB_Editor.ViewModel;
+﻿using KiCAD_DB_Editor.Model;
+using KiCAD_DB_Editor.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -67,48 +68,48 @@ namespace KiCAD_DB_Editor.View
             }
         }
 
-        public static readonly DependencyProperty KiCADSymbolLibraryVMsProperty = DependencyProperty.Register(
-            nameof(KiCADSymbolLibraryVMs),
-            typeof(ObservableCollectionEx<KiCADSymbolLibraryVM>),
+        public static readonly DependencyProperty KiCADSymbolLibrariesProperty = DependencyProperty.Register(
+            nameof(KiCADSymbolLibraries),
+            typeof(ObservableCollectionEx<KiCADSymbolLibrary>),
             typeof(UserControl_PartGrid)
             );
 
-        public ObservableCollectionEx<KiCADSymbolLibraryVM> KiCADSymbolLibraryVMs
+        public ObservableCollectionEx<KiCADSymbolLibrary> KiCADSymbolLibraries
         {
-            get => (ObservableCollectionEx<KiCADSymbolLibraryVM>)GetValue(KiCADSymbolLibraryVMsProperty);
-            set => SetValue(KiCADSymbolLibraryVMsProperty, value);
+            get => (ObservableCollectionEx<KiCADSymbolLibrary>)GetValue(KiCADSymbolLibrariesProperty);
+            set => SetValue(KiCADSymbolLibrariesProperty, value);
         }
 
         public static readonly DependencyProperty KiCADFootprintLibraryVMsProperty = DependencyProperty.Register(
-            nameof(KiCADFootprintLibraryVMs),
-            typeof(ObservableCollectionEx<KiCADFootprintLibraryVM>),
+            nameof(KiCADFootprintLibraries),
+            typeof(ObservableCollectionEx<KiCADFootprintLibrary>),
             typeof(UserControl_PartGrid)
             );
 
-        public ObservableCollectionEx<KiCADFootprintLibraryVM> KiCADFootprintLibraryVMs
+        public ObservableCollectionEx<KiCADFootprintLibrary> KiCADFootprintLibraries
         {
-            get => (ObservableCollectionEx<KiCADFootprintLibraryVM>)GetValue(KiCADFootprintLibraryVMsProperty);
+            get => (ObservableCollectionEx<KiCADFootprintLibrary>)GetValue(KiCADFootprintLibraryVMsProperty);
             set => SetValue(KiCADFootprintLibraryVMsProperty, value);
         }
 
-        public static readonly DependencyProperty ParameterVMsProperty = DependencyProperty.Register(
-            nameof(ParameterVMs),
-            typeof(ObservableCollectionEx<ParameterVM>),
+        public static readonly DependencyProperty ParametersProperty = DependencyProperty.Register(
+            nameof(Parameters),
+            typeof(ObservableCollectionEx<Parameter>),
             typeof(UserControl_PartGrid),
             new PropertyMetadata(new PropertyChangedCallback(ParameterVMsPropertyChangedCallback))
             );
 
-        public ObservableCollectionEx<ParameterVM> ParameterVMs
+        public ObservableCollectionEx<Parameter> Parameters
         {
-            get => (ObservableCollectionEx<ParameterVM>)GetValue(ParameterVMsProperty);
-            set => SetValue(ParameterVMsProperty, value);
+            get => (ObservableCollectionEx<Parameter>)GetValue(ParametersProperty);
+            set => SetValue(ParametersProperty, value);
         }
 
         private static void ParameterVMsPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is UserControl_PartGrid uc_pg)
             {
-                uc_pg.ParameterVMsPropertyChanged();
+                uc_pg.ParametersPropertyChanged();
             }
         }
 
@@ -133,42 +134,42 @@ namespace KiCAD_DB_Editor.View
             }
         }
 
-        private ObservableCollectionEx<ParameterVM>? oldParameterVMs = null;
-        protected void ParameterVMsPropertyChanged()
+        private ObservableCollectionEx<Parameter>? oldParameters = null;
+        protected void ParametersPropertyChanged()
         {
-            if (oldParameterVMs is not null)
-                oldParameterVMs.CollectionChanged -= ParameterVMs_CollectionChanged;
-            oldParameterVMs = ParameterVMs;
-            if (ParameterVMs is not null)
-                ParameterVMs.CollectionChanged += ParameterVMs_CollectionChanged;
+            if (oldParameters is not null)
+                oldParameters.CollectionChanged -= Parameters_CollectionChanged;
+            oldParameters = Parameters;
+            if (Parameters is not null)
+                Parameters.CollectionChanged += Parameters_CollectionChanged;
 
-            ParameterVMs_CollectionChanged(this, new(NotifyCollectionChangedAction.Reset));
+            Parameters_CollectionChanged(this, new(NotifyCollectionChangedAction.Reset));
         }
 
-        private ObservableCollectionEx<ParameterVM>? oldParameterVMsCopy = null;
-        private void ParameterVMs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        private ObservableCollectionEx<Parameter>? oldParametersCopy = null;
+        private void Parameters_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            if (oldParameterVMsCopy is not null)
+            if (oldParametersCopy is not null)
             {
-                foreach (ParameterVM pVM in oldParameterVMsCopy)
-                    pVM.PropertyChanged -= ParameterVM_PropertyChanged;
+                foreach (Parameter p in oldParametersCopy)
+                    p.PropertyChanged -= Parameter_PropertyChanged;
             }
-            oldParameterVMsCopy = ParameterVMs is not null ? new(ParameterVMs) : null;
-            if (oldParameterVMsCopy is not null)
+            oldParametersCopy = Parameters is not null ? new(Parameters) : null;
+            if (oldParametersCopy is not null)
             {
-                foreach (ParameterVM pVM in oldParameterVMsCopy)
-                    pVM.PropertyChanged += ParameterVM_PropertyChanged;
+                foreach (Parameter p in oldParametersCopy)
+                    p.PropertyChanged += Parameter_PropertyChanged;
             }
 
             redoColumns_PotentialParametersColumnChange();
         }
 
-        private void ParameterVM_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void Parameter_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (sender is ParameterVM parameterVM)
+            if (sender is Parameter parameter)
             {
-                if (e.PropertyName == nameof(ParameterVM.Name))
-                    redoColumns_ParameterNameChange(parameterVM);
+                if (e.PropertyName == nameof(Parameter.Name))
+                    redoColumns_ParameterNameChange(parameter);
             }
         }
 
@@ -244,13 +245,13 @@ namespace KiCAD_DB_Editor.View
             {
                 header = $"Fprt. {footprintIndex + 1} Library";
                 valueBindingTarget = $"FootprintLibraryNameAccessor[{footprintIndex}]";
-                optionsBindingTarget = "KiCADFootprintLibraryVMs";
+                optionsBindingTarget = "KiCADFootprintLibraries";
             }
             else
             {
                 header = $"Fprt. {footprintIndex + 1} Name";
                 valueBindingTarget = $"FootprintNameAccessor[{footprintIndex}]";
-                optionsBindingTarget = $"SelectedFootprintLibraryVMAccessor[{footprintIndex}].KiCADFootprintNames";
+                optionsBindingTarget = $"SelectedFootprintLibraryAccessor[{footprintIndex}].KiCADFootprintNames";
             }
 
             DataGridTemplateColumn dataGridTemplateColumn;
@@ -318,11 +319,11 @@ namespace KiCAD_DB_Editor.View
             return newFootprintColumn(footprintIndex, true);
         }
 
-        private void updateParameterBindings(DataGridTextColumn column, ParameterVM parameterVM)
+        private void updateParameterBindings(DataGridTextColumn column, Parameter parameter)
         {
-            column.Header = parameterVM.Name.Replace("_", "__");
+            column.Header = parameter.Name.Replace("_", "__");
 
-            Binding valueBinding = new($"ParameterAccessor[{parameterVM.UUID}]");
+            Binding valueBinding = new($"ParameterAccessor[{parameter.UUID}]");
             valueBinding.Mode = BindingMode.TwoWay;
             valueBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
             column.Binding = valueBinding;
@@ -339,21 +340,21 @@ namespace KiCAD_DB_Editor.View
             column.CellStyle = cellStyle;
         }
 
-        private DataGridTextColumn newParameterColumn(ParameterVM parameterVM, int index)
+        private DataGridTextColumn newParameterColumn(Parameter parameter, int index)
         {
             DataGridTextColumn dataGridTextColumn;
             dataGridTextColumn = new();
-            dataGridTextColumn.Header = parameterVM.Name.Replace("_", "__");
+            dataGridTextColumn.Header = parameter.Name.Replace("_", "__");
 
-            Binding valueBinding = new($"ParameterAccessor[{parameterVM.Name}]");
+            Binding valueBinding = new($"ParameterAccessor[{parameter.UUID}]");
             valueBinding.Mode = BindingMode.TwoWay;
             valueBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
             dataGridTextColumn.Binding = valueBinding;
 
-            updateParameterBindings(dataGridTextColumn, parameterVM);
+            updateParameterBindings(dataGridTextColumn, parameter);
 
-            parameterVMToDataGridColumn[parameterVM] = dataGridTextColumn;
-            parameterVMsThatHaveColumns.Insert(index, parameterVM);
+            parameterToDataGridColumn[parameter] = dataGridTextColumn;
+            parametersThatHaveColumns.Insert(index, parameter);
 
             const int baseColumnIndexToInsertAt = 8;
             dataGrid_Main.Columns.Insert(baseColumnIndexToInsertAt + index, dataGridTextColumn);
@@ -361,49 +362,49 @@ namespace KiCAD_DB_Editor.View
             return dataGridTextColumn;
         }
 
-        private void redoColumns_ParameterNameChange(ParameterVM parameterVMWithNameChange)
+        private void redoColumns_ParameterNameChange(Parameter parameterWithNameChange)
         {
-            DataGridTextColumn columnToUpdate = parameterVMToDataGridColumn[parameterVMWithNameChange];
-            columnToUpdate.Header = parameterVMWithNameChange.Name.Replace("_", "__");
+            DataGridTextColumn columnToUpdate = parameterToDataGridColumn[parameterWithNameChange];
+            columnToUpdate.Header = parameterWithNameChange.Name.Replace("_", "__");
         }
 
-        private List<ParameterVM> parameterVMsThatHaveColumns = new();
-        private Dictionary<ParameterVM, DataGridTextColumn> parameterVMToDataGridColumn = new();
+        private List<Parameter> parametersThatHaveColumns = new();
+        private Dictionary<Parameter, DataGridTextColumn> parameterToDataGridColumn = new();
         private void redoColumns_PotentialParametersColumnChange()
         {
-            if (ParameterVMs is not null)
+            if (Parameters is not null)
             {
-                var parameterVMsThatNeedANewColumn = ParameterVMs.Except(parameterVMsThatHaveColumns).ToArray();
-                var parameterVMsThatNeedToBeRemoved = parameterVMsThatHaveColumns.Except(ParameterVMs).ToArray();
+                var parametersThatNeedANewColumn = Parameters.Except(parametersThatHaveColumns).ToArray();
+                var parametersThatNeedToBeRemoved = parametersThatHaveColumns.Except(Parameters).ToArray();
 
-                foreach (ParameterVM parameterVM in parameterVMsThatNeedToBeRemoved)
+                foreach (Parameter parameter in parametersThatNeedToBeRemoved)
                 {
-                    DataGridTextColumn column = parameterVMToDataGridColumn[parameterVM];
+                    DataGridTextColumn column = parameterToDataGridColumn[parameter];
                     dataGrid_Main.Columns.Remove(column);
-                    parameterVMsThatHaveColumns.Remove(parameterVM);
-                    parameterVMToDataGridColumn.Remove(parameterVM);
+                    parametersThatHaveColumns.Remove(parameter);
+                    parameterToDataGridColumn.Remove(parameter);
                 }
 
-                foreach (ParameterVM parameterVM in parameterVMsThatNeedANewColumn)
+                foreach (Parameter parameter in parametersThatNeedANewColumn)
                 {
-                    int indexOfPVMToBeAddedInParentCollection = ParameterVMs.IndexOf(parameterVM);
+                    int indexOfPVMToBeAddedInParentCollection = Parameters.IndexOf(parameter);
                     int newIndex;
-                    for (newIndex = 0; newIndex < parameterVMsThatHaveColumns.Count; newIndex++)
+                    for (newIndex = 0; newIndex < parametersThatHaveColumns.Count; newIndex++)
                     {
-                        if (indexOfPVMToBeAddedInParentCollection < ParameterVMs.IndexOf(parameterVMsThatHaveColumns[newIndex]))
+                        if (indexOfPVMToBeAddedInParentCollection < Parameters.IndexOf(parametersThatHaveColumns[newIndex]))
                         {
                             break;
                         }
                     }
-                    newParameterColumn(parameterVM, newIndex);
+                    newParameterColumn(parameter, newIndex);
                 }
             }
             else
             {
-                foreach (DataGridTextColumn columnToRemove in parameterVMToDataGridColumn.Values)
+                foreach (DataGridTextColumn columnToRemove in parameterToDataGridColumn.Values)
                     dataGrid_Main.Columns.Remove(columnToRemove);
-                parameterVMsThatHaveColumns.Clear();
-                parameterVMToDataGridColumn.Clear();
+                parametersThatHaveColumns.Clear();
+                parameterToDataGridColumn.Clear();
             }
         }
 

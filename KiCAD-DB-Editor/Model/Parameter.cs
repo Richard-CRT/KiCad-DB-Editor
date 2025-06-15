@@ -1,4 +1,6 @@
-﻿using System;
+﻿using KiCAD_DB_Editor.Model.Json;
+using KiCAD_DB_Editor.ViewModel;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,21 +9,35 @@ using System.Threading.Tasks;
 
 namespace KiCAD_DB_Editor.Model
 {
-    public class Parameter
+    public class Parameter : NotifyObject
     {
-        [JsonPropertyName("uuid"), JsonPropertyOrder(0)]
-        public string UUID { get; set; } = Guid.NewGuid().ToString();
-        [JsonPropertyName("name"), JsonPropertyOrder(1)]
-        public string Name { get; set; } = "";
+        #region Notify Properties
 
-        [JsonConstructor]
-        public Parameter()
+        private string _uuid = "";
+        public string UUID
         {
+            get { return _uuid; }
         }
-        
+
+        private string _name = "";
+        public string Name
+        {
+            get { return _name; }
+            set { if (_name != value) _name = value; InvokePropertyChanged(); }
+        }
+
+        #endregion Notify Properties
+
+        public Parameter(JsonParameter jsonParameter)
+        {
+            this._uuid = jsonParameter.UUID;
+            this.Name = jsonParameter.Name;
+        }
+
         public Parameter(string name)
         {
-            Name = name;
+            this._uuid = Guid.NewGuid().ToString();
+            this.Name = name;
         }
     }
 }

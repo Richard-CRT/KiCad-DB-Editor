@@ -46,7 +46,7 @@
                         <Separator DockPanel.Dock="Bottom" Margin="0,10,0,10" />
                         <Button DockPanel.Dock="Bottom" Content="Delete Parameter" Padding="5,1,5,1"
                             Command="{Binding LibraryVM.DeleteParameterCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />
-                        <ListBox ItemsSource="{Binding LibraryVM.ParameterVMs, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" DisplayMemberPath="Name" MinHeight="60" SelectedItem="{Binding LibraryVM.SelectedParameterVM, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />
+                        <ListBox ItemsSource="{Binding LibraryVM.Library.AllParameters, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" DisplayMemberPath="Name" MinHeight="60" SelectedItem="{Binding LibraryVM.SelectedParameter, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />
                     </DockPanel>
                     <GridSplitter Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="3,0,3,0" Width="3" />
                     <DockPanel Grid.Column="2">
@@ -67,7 +67,7 @@
                                 <HierarchicalDataTemplate ItemsSource="{Binding CategoryVMs}" DataType="{x:Type vm:CategoryVM}">
                                     <StackPanel Orientation="Horizontal">
                                         <Image Source="/View/Resources/ComponentFolder.png" Height="18" Margin="0,0,5,0" />
-                                        <TextBlock Text="{Binding Name}" />
+                                        <TextBlock Text="{Binding Category.Name}" />
                                     </StackPanel>
                                 </HierarchicalDataTemplate>
                             </TreeView.Resources>
@@ -94,10 +94,10 @@
                     </StackPanel>
                     <local:UserControl_PartGrid 
                     Grid.Row="2"
-                    KiCADSymbolLibraryVMs="{Binding LibraryVM.KiCADSymbolLibraryVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"
-                    KiCADFootprintLibraryVMs="{Binding LibraryVM.KiCADFootprintLibraryVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"
-                    ParameterVMs="{Binding LibraryVM.ParameterVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"           
-                    PartVMs="{Binding LibraryVM.PartVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"
+                    KiCADSymbolLibraries="{Binding LibraryVM.Library.KiCADSymbolLibraries, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"
+                    KiCADFootprintLibraries="{Binding LibraryVM.Library.KiCADFootprintLibraries, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"
+                    Parameters="{Binding LibraryVM.Library.AllParameters, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"           
+                    PartVMs="{Binding LibraryVM.AllPartVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"
                     SelectedPartVMs="{Binding LibraryVM.SelectedPartVMs, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}, UpdateSourceTrigger=PropertyChanged}"
                     DisplayPartCategory="True"
                     />
@@ -117,8 +117,8 @@
                         <StackPanel Grid.Column="0" Orientation="Vertical">
                             <TextBlock>KiCAD Symbol Libraries</TextBlock>
                             <ListView Height="150"
-                                  ItemsSource="{Binding LibraryVM.KiCADSymbolLibraryVMs, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
-                                  SelectedItem="{Binding LibraryVM.SelectedKiCADSymbolLibraryVM, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}, UpdateSourceTrigger=PropertyChanged}"
+                                  ItemsSource="{Binding LibraryVM.Library.KiCADSymbolLibraries, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
+                                  SelectedItem="{Binding LibraryVM.SelectedKiCADSymbolLibrary, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}, UpdateSourceTrigger=PropertyChanged}"
                                   Foreground="Black"
                                   >
                                 <ListView.View>
@@ -153,7 +153,7 @@
                             <Separator Margin="0,10,0,10" />
                             <TextBlock>Parsed Symbol Names</TextBlock>
                             <ListBox Height="150"
-                                 ItemsSource="{Binding LibraryVM.SelectedKiCADSymbolLibraryVM.KiCADSymbolNames, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
+                                 ItemsSource="{Binding LibraryVM.SelectedKiCADSymbolLibrary.KiCADSymbolNames, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
                                  />
                             <Button Content="Re-Parse" Padding="5,1,5,1"
                                 Command="{Binding LibraryVM.ReparseKiCADSymbolNamesCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />
@@ -161,8 +161,8 @@
                         <StackPanel Grid.Column="2" Orientation="Vertical">
                             <TextBlock>KiCAD Footprint Libraries</TextBlock>
                             <ListView Height="150"
-                                  ItemsSource="{Binding LibraryVM.KiCADFootprintLibraryVMs, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
-                                  SelectedItem="{Binding LibraryVM.SelectedKiCADFootprintLibraryVM, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}, UpdateSourceTrigger=PropertyChanged}"
+                                  ItemsSource="{Binding LibraryVM.Library.KiCADFootprintLibraries, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
+                                  SelectedItem="{Binding LibraryVM.SelectedKiCADFootprintLibrary, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}, UpdateSourceTrigger=PropertyChanged}"
                                   Foreground="Black"
                                   >
                                 <ListView.View>
@@ -197,7 +197,7 @@
                             <Separator Margin="0,10,0,10" />
                             <TextBlock>Parsed Footprint Names</TextBlock>
                             <ListBox Height="150"
-                                 ItemsSource="{Binding LibraryVM.SelectedKiCADFootprintLibraryVM.KiCADFootprintNames, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
+                                 ItemsSource="{Binding LibraryVM.SelectedKiCADFootprintLibrary.KiCADFootprintNames, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
                                  />
                             <Button Content="Re-Parse" Padding="5,1,5,1"
                                 Command="{Binding LibraryVM.ReparseKiCADFootprintNamesCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />

@@ -1,7 +1,7 @@
 ﻿using KiCAD_DB_Editor.Commands;
 using KiCAD_DB_Editor.Model.Json;
 using KiCAD_DB_Editor.ViewModel;
-using KiCAD_DB_Editor.ViewModel.Utilities;
+using KiCAD_DB_Editor.Utilities;
 using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
@@ -356,6 +356,8 @@ namespace KiCAD_DB_Editor.Model
 
         public bool WriteToFile(string projectFilePath, bool autosave = false)
         {
+            // For this function we don't rely on anything being DB sanitised, even though we controlled the inputs
+            // of some things. Hence lots of .Replace("'", "''") and .Replace("\"", "\"\"")
             try
             {
                 string? projectDirectory = Path.GetDirectoryName(projectFilePath);
@@ -521,6 +523,8 @@ namespace KiCAD_DB_Editor.Model
 
         public bool ExportToKiCAD(string kicadDbConfFilePath)
         {
+            // For this function we don't rely on anything being DB sanitised, even though we controlled the inputs
+            // of some things. Hence lots of .Replace("'", "''") and .Replace("\"", "\"\"")
             try
             {
                 string? parentDirectory = Path.GetDirectoryName(kicadDbConfFilePath);
@@ -538,15 +542,17 @@ namespace KiCAD_DB_Editor.Model
                 Dictionary<Category, string> categoryToKiCadExportCategoryStringMap = new();
                 foreach (Category category in AllCategories)
                 {
-                    string path = $"/{category.Name}";
+                    string path = $"{category.Name}";
                     var c = category;
                     while (c.ParentCategory is not null)
                     {
-                        path = $"/{c.ParentCategory.Name}{path}";
+                        path = $"{c.ParentCategory.Name} | {path}";
                         c = c.ParentCategory;
                     }
                     categoryToKiCadExportCategoryStringMap[category] = path;
                 }
+
+                KiCadDblLibraryData kiCadDblLibraryData = new("PART_LIB_NAME", "PART_LIB_DESCRIPTION", "ODBC_STRING");
 
                 File.Delete(tempSqlitePath);
                 using (var connection = new SqliteConnection($"Data Source={tempSqlitePath}"))
@@ -557,7 +563,12 @@ namespace KiCAD_DB_Editor.Model
                     {
                         var categoryParemetersInOrder = AllParameters.Intersect(category.InheritedAndNormalParameters);
 
-                        string createTableSql = $"CREATE TABLE \"{categoryToKiCadExportCategoryStringMap[category]}\" (" +
+                        string tableName = categoryToKiCadExportCategoryStringMap[category].Replace("\"", "\"\"");
+
+                        KiCadDblTableData kiCadDblTableData = new(category.Name, tableName, "Part UID", "Schematic Symbol", "Footprints");
+                        kiCadDblLibraryData.kiCadDblTableDatas.Add(kiCadDblTableData);
+
+                        string createTableSql = $"CREATE TABLE \"{tableName}\" (" +
                             "\"Part UID\" TEXT, " +
                             "\"Description\" TEXT, " +
                             "\"Manufacturer\" TEXT, " +
@@ -640,7 +651,9 @@ namespace KiCAD_DB_Editor.Model
                 }
                 SqliteConnection.ClearAllPools();
 
-                //File.Move(tempDbConfPath, kicadDbConfFilePath, overwrite: true);
+                File.WriteAllText(tempDbConfPath, KiCadDblConfig.Generate(kiCadDblLibraryData));
+
+                File.Move(tempDbConfPath, kicadDbConfFilePath, overwrite: true);
                 File.Move(tempSqlitePath, kiCadSqliteFilePath, overwrite: true);
 
                 return true;

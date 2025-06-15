@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KiCAD_DB_Editor.ViewModel.Utilities
+namespace KiCAD_DB_Editor.Utilities
 {
     public static class Util
     {
@@ -27,6 +27,10 @@ namespace KiCAD_DB_Editor.ViewModel.Utilities
             "symbol",
             "footprint",
         };
+
+        // Definitely no quotes, I don't want to have to detail with DB sanitisation
+        // No slashes, forward or back, as could be used as a delimeter / escape character
+        // No | as used for a visual splitter for the KiCad categories
         public static HashSet<char> SafeCategoryCharacters = new HashSet<char>("abcdefghjiklmnopqrstuvwxyz0123456789_-& ");
         public static HashSet<char> SafeParameterCharacters = new HashSet<char>("abcdefghjiklmnopqrstuvwxyz0123456789_-& ");
 

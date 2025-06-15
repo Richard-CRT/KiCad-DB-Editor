@@ -8,7 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace KiCAD_DB_Editor.ViewModel.Utilities
+namespace KiCAD_DB_Editor.Utilities
 {
     public partial class SExpressionToken
     {

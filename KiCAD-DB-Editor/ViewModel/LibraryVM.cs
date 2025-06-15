@@ -3,7 +3,7 @@ using KiCAD_DB_Editor.Exceptions;
 using KiCAD_DB_Editor.Model;
 using KiCAD_DB_Editor.View;
 using KiCAD_DB_Editor.View.Dialogs;
-using KiCAD_DB_Editor.ViewModel.Utilities;
+using KiCAD_DB_Editor.Utilities;
 using Microsoft.VisualBasic;
 using Microsoft.Win32;
 using System;

@@ -1,6 +1,6 @@
 ﻿using KiCAD_DB_Editor.Model.Json;
 using KiCAD_DB_Editor.ViewModel;
-using KiCAD_DB_Editor.ViewModel.Utilities;
+using KiCAD_DB_Editor.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

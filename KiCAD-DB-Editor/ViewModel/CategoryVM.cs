@@ -12,7 +12,7 @@ using System.ComponentModel;
 using Microsoft.VisualBasic;
 using KiCAD_DB_Editor.Commands;
 using KiCAD_DB_Editor.View;
-using KiCAD_DB_Editor.ViewModel.Utilities;
+using KiCAD_DB_Editor.Utilities;
 using KiCAD_DB_Editor.Exceptions;
 using KiCAD_DB_Editor.Model;
 using KiCAD_DB_Editor.View.Dialogs;

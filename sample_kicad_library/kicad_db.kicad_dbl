@@ -1,0 +1,28 @@
+{
+    "meta": {
+        "version": 1.0
+    },
+    "name": "PART_LIB_NAME",
+    "description": "PART_LIB_DESCRIPTION",
+    "source": {
+        "type": "odbc",
+        "dsn": ",
+        "username": ",
+        "password": ",
+        "timeout_seconds": 2,
+        "connection_string": "DSN=ODBC_STRING;"
+    },
+    "libraries": [
+        {
+            "name": "SMA",
+            "table": "Connectors | RF | SMA",
+            "key": "Part UID",
+            "symbols": "Schematic Symbol",
+            "footprints": "Footprints",
+            "fields": [[[FIELDS]]
+            ],
+            "properties": {[[PROPERTIES]]
+            }
+        }
+    ]
+}

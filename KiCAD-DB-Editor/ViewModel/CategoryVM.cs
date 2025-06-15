@@ -40,7 +40,7 @@ namespace KiCAD_DB_Editor.ViewModel
                     path = $"{c.Name}/{path}";
                     c = c.ParentCategory;
                 }
-                return path; 
+                return path;
             }
         }
 
@@ -128,9 +128,24 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private void Parts_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            // Make sure PartVM unsubscribes before we lose the objects
-            if (PartVMs is not null) foreach (var pVM in PartVMs) pVM.Unsubscribe();
-            PartVMs = new(Category.Parts.Select(p => new PartVM(p)));
+            switch (e.Action)
+            {
+                // Handle some of these more precisely than Reset for efficiency
+                case NotifyCollectionChangedAction.Add:
+                    Debug.Assert(e.NewItems is not null && e.NewItems.Count == 1);
+                    Part newPart = (e.NewItems[0] as Part)!;
+                    PartVMs.Insert(e.NewStartingIndex, new(newPart));
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    PartVMs.RemoveAt(e.OldStartingIndex);
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                default:
+                    // Make sure PartVM unsubscribes before we lose the objects
+                    if (PartVMs is not null) foreach (var pVM in PartVMs) pVM.Unsubscribe();
+                    PartVMs = new(Category.Parts.Select(p => new PartVM(p)));
+                    break;
+            }
         }
 
         private void Categories_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -147,7 +162,7 @@ namespace KiCAD_DB_Editor.ViewModel
                 case nameof(Category.Name):
                     InvokePropertyChanged_Path();
                     break;
-                // Categories, Parameters, Parts do not have setter so we don't need to listen here
+                    // Categories, Parameters, Parts do not have setter so we don't need to listen here
             }
         }
 
@@ -217,7 +232,7 @@ namespace KiCAD_DB_Editor.ViewModel
         {
             string partUID = Util.GeneratePartUID(Category.ParentLibrary.PartUIDScheme);
             Part part = new(partUID, Category.ParentLibrary, Category);
-            foreach (Parameter parameter in Category.Parameters)
+            foreach (Parameter parameter in Category.InheritedAndNormalParameters)
                 part.ParameterValues.Add(parameter, "");
             Category.Parts.Add(part);
         }
@@ -248,7 +263,7 @@ namespace KiCAD_DB_Editor.ViewModel
             foreach (PartVM pVM in SelectedPartVMs)
             {
                 // Always needs to be done in tandem
-                pVM.Part.FootprintPairs.Add(("",""));
+                pVM.Part.FootprintPairs.Add(("", ""));
             }
         }
 

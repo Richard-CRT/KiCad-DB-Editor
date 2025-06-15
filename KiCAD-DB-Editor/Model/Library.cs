@@ -561,12 +561,25 @@ namespace KiCAD_DB_Editor.Model
 
                     foreach (Category category in AllCategories)
                     {
-                        var categoryParemetersInOrder = AllParameters.Intersect(category.InheritedAndNormalParameters);
 
                         string tableName = categoryToKiCadExportCategoryStringMap[category].Replace("\"", "\"\"");
 
                         KiCadDblTableData kiCadDblTableData = new(category.Name, tableName, "Part UID", "Schematic Symbol", "Footprints");
                         kiCadDblLibraryData.kiCadDblTableDatas.Add(kiCadDblTableData);
+
+                        // Fields
+                        kiCadDblTableData.kiCadDblFieldDatas.Add(new("Part UID", "Part UID", true, true));
+                        kiCadDblTableData.kiCadDblFieldDatas.Add(new("Manufacturer", "Manufacturer", true, true));
+                        kiCadDblTableData.kiCadDblFieldDatas.Add(new("MPN", "MPN", true, true));
+                        kiCadDblTableData.kiCadDblFieldDatas.Add(new("Value", "Value", true, true));
+                        kiCadDblTableData.kiCadDblFieldDatas.Add(new("Datasheet", "Datasheet", true, true));
+
+                        // Properties
+                        // Not sure why description is here instead of in fields but it's KiCad's rule
+                        kiCadDblTableData.kiCadDblPropertyDatas.Add(new("description", "Description"));
+                        kiCadDblTableData.kiCadDblPropertyDatas.Add(new("exclude_from_bom", "Exclude from BOM"));
+                        kiCadDblTableData.kiCadDblPropertyDatas.Add(new("exclude_from_board", "Exclude from Board"));
+                        kiCadDblTableData.kiCadDblPropertyDatas.Add(new("exclude_from_sim", "Exclude from Sim"));
 
                         string createTableSql = $"CREATE TABLE \"{tableName}\" (" +
                             "\"Part UID\" TEXT, " +
@@ -576,8 +589,12 @@ namespace KiCAD_DB_Editor.Model
                             "\"Value\" TEXT, " +
                             "\"Datasheet\" TEXT, ";
 
-                        foreach (var parameter in categoryParemetersInOrder)
+                        var categoryParametersInOrder = AllParameters.Intersect(category.InheritedAndNormalParameters);
+                        foreach (var parameter in categoryParametersInOrder)
+                        {
+                            kiCadDblTableData.kiCadDblFieldDatas.Add(new(parameter.Name, parameter.Name, true, true));
                             createTableSql += $"\"{parameter.Name.Replace("\"", "\"\"")}\" TEXT, ";
+                        }
 
                         createTableSql += 
                             "\"Schematic Symbol\" TEXT, " +
@@ -601,7 +618,7 @@ namespace KiCAD_DB_Editor.Model
                                 "\"Value\", " +
                                 "\"Datasheet\", ";
 
-                            foreach (var parameter in categoryParemetersInOrder)
+                            foreach (var parameter in categoryParametersInOrder)
                                 insertPartsSql += $"\"{parameter.Name.Replace("\"", "\"\"")}\", ";
 
                             insertPartsSql +=
@@ -629,7 +646,7 @@ namespace KiCAD_DB_Editor.Model
                                     $"'{part.Value.Replace("'", "''")}', " +
                                     $"'{part.Datasheet.Replace("'", "''")}', ";
 
-                                foreach (var parameter in categoryParemetersInOrder)
+                                foreach (var parameter in categoryParametersInOrder)
                                     insertPartsSql += $"\"{part.ParameterValues[parameter].Replace("\"", "\"\"")}\", ";
 
                                 insertPartsSql +=

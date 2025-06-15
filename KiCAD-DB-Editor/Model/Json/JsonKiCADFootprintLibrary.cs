@@ -17,5 +17,11 @@ namespace KiCAD_DB_Editor.Model.Json
 
         [JsonConstructor]
         public JsonKiCADFootprintLibrary() { }
+
+        public JsonKiCADFootprintLibrary(KiCADFootprintLibrary kicadFootprintLibrary)
+        {
+            Nickname = kicadFootprintLibrary.Nickname;
+            RelativePath = kicadFootprintLibrary.RelativePath;
+        }
     }
 }

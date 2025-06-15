@@ -22,5 +22,12 @@ namespace KiCAD_DB_Editor.Model.Json
         private JsonCategory()
         {
         }
+
+        public JsonCategory(Category category)
+        {
+            Name = category.Name;
+            Parameters = new(category.Parameters.Select(p => p.UUID));
+            Categories = new(category.Categories.Select(c => new JsonCategory(c)));
+        }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace KiCAD_DB_Editor.Model.Json
 {
@@ -17,5 +18,11 @@ namespace KiCAD_DB_Editor.Model.Json
 
         [JsonConstructor]
         public JsonKiCADSymbolLibrary() { }
+
+        public JsonKiCADSymbolLibrary(KiCADSymbolLibrary kicadSymbolLibrary)
+        {
+            Nickname = kicadSymbolLibrary.Nickname;
+            RelativePath = kicadSymbolLibrary.RelativePath;
+        }
     }
 }

@@ -55,7 +55,7 @@ namespace KiCAD_DB_Editor.Model.Json
         public string PartUIDScheme { get; set; } = "CMP-#######-####";
 
         [JsonPropertyName("parameters"), JsonPropertyOrder(2)]
-        public List<JsonParameter> Parameters { get; set; } = new();
+        public List<JsonParameter> AllParameters { get; set; } = new();
 
         [JsonPropertyName("top_level_categories"), JsonPropertyOrder(3)]
         public List<JsonCategory> TopLevelCategories { get; set; } = new();
@@ -66,28 +66,24 @@ namespace KiCAD_DB_Editor.Model.Json
         [JsonPropertyName("kicad_footprint_libraries"), JsonPropertyOrder(5)]
         public List<JsonKiCADFootprintLibrary> KiCADFootprintLibraries { get; set; } = new();
 
-        public bool WriteToFile(string projectFilePath, bool autosave = false)
+        [JsonConstructor]
+        public JsonLibrary() { }
+
+        public JsonLibrary(Library library)
+        {
+            PartUIDScheme = library.PartUIDScheme;
+            AllParameters = new(library.AllParameters.Select(p => new JsonParameter(p)));
+            TopLevelCategories = new(library.TopLevelCategories.Select(c => new JsonCategory(c)));
+            KiCADSymbolLibraries = new(library.KiCADSymbolLibraries.Select(kSL => new JsonKiCADSymbolLibrary(kSL)));
+            KiCADFootprintLibraries = new(library.KiCADFootprintLibraries.Select(kFL => new JsonKiCADFootprintLibrary(kFL)));
+        }
+
+        public bool WriteToFile(string filePath, bool autosave = false)
         {
             try
             {
-                string? projectDirectory = Path.GetDirectoryName(projectFilePath);
-                string? projectName = Path.GetFileNameWithoutExtension(projectFilePath);
-
-                if (projectDirectory is null || projectDirectory == "" || projectName is null || projectName == "")
-                    throw new InvalidOperationException();
-
-                if (autosave)
-                {
-                    projectFilePath += ".autosave";
-                }
-
-                string tempProjectPath = $"proj.tmp";
-                string tempComponentsPath = $"components.tmp";
-
                 //File.WriteAllText(tempProjectPath, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true, ReferenceHandler = ReferenceHandler.Preserve }));
-                File.WriteAllText(tempProjectPath, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
-
-                File.Move(tempProjectPath, projectFilePath, overwrite: true);
+                File.WriteAllText(filePath, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
 
                 return true;
             }

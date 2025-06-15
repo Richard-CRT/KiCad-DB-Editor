@@ -223,13 +223,15 @@ namespace KiCAD_DB_Editor.ViewModel
             // Link model
             Library = library;
 
-            Library.PropertyChanged += Library_PropertyChanged;
-
-            Library.TopLevelCategories.CollectionChanged += TopLevelCategories_CollectionChanged;
+            Library.TopLevelCategories.CollectionChanged += Library_TopLevelCategories_CollectionChanged;
+            // Make sure TopLevelCategoryVM unsubscribes before we lose the objects
+            if (TopLevelCategoryVMs is not null) foreach (var cVM in TopLevelCategoryVMs) cVM.Unsubscribe();
             TopLevelCategoryVMs = new(library.TopLevelCategories.Select(c => new CategoryVM(c)));
             Debug.Assert(_topLevelCategoryVMs is not null);
 
             Library.AllParts.CollectionChanged += AllParts_CollectionChanged;
+            // Make sure PartVM unsubscribes before we lose the objects
+            if (AllPartVMs is not null) foreach (var pVM in AllPartVMs) pVM.Unsubscribe();
             AllPartVMs = new(Library.AllParts.Select(p => new PartVM(p)));
             Debug.Assert(_allPartVMs is not null);
 
@@ -253,36 +255,27 @@ namespace KiCAD_DB_Editor.ViewModel
             ReparseKiCADFootprintNamesCommand = new BasicCommand(ReparseKiCADFootprintNamesCommandExecuted, ReparseKiCADFootprintNamesCommandCanExecute);
             AddFootprintCommand = new BasicCommand(AddFootprintCommandExecuted, AddFootprintCommandCanExecute);
             RemoveFootprintCommand = new BasicCommand(RemoveFootprintCommandExecuted, RemoveFootprintCommandCanExecute);
-
-            // Initialise collection with events
-            // Must do PartVMs first as CategoryVMs will use it
-            KiCADSymbolLibraryVMs = new(library.KiCADSymbolLibraries.OrderBy(kSL => kSL.Nickname).Select(kSL => new KiCADSymbolLibraryVM(this, kSL)));
-            Debug.Assert(_kiCADSymbolLibraryVMs is not null);
-            KiCADFootprintLibraryVMs = new(library.KiCADFootprintLibraries.OrderBy(kFL => kFL.Nickname).Select(kSL => new KiCADFootprintLibraryVM(this, kSL)));
-            Debug.Assert(_kiCADFootprintLibraryVMs is not null);
         }
 
-        private void KiCADFootprintLibraries_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        public void Unsubscribe()
         {
-            throw new NotImplementedException();
-        }
-
-        private void KiCADSymbolLibraries_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void Library_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
+            Library.TopLevelCategories.CollectionChanged -= Library_TopLevelCategories_CollectionChanged;
+            Library.AllParts.CollectionChanged -= AllParts_CollectionChanged;
+            foreach (var cVM in TopLevelCategoryVMs) cVM.Unsubscribe();
+            foreach (var pVM in AllPartVMs) pVM.Unsubscribe();
         }
 
         private void AllParts_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
+            // Make sure PartVM unsubscribes before we lose the objects
+            if (AllPartVMs is not null) foreach (var pVM in AllPartVMs) pVM.Unsubscribe();
             AllPartVMs = new(Library.AllParts.Select(p => new PartVM(p)));
         }
 
-        private void TopLevelCategories_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        private void Library_TopLevelCategories_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
+            // Make sure TopLevelCategoryVM unsubscribes before we lose the objects
+            if (TopLevelCategoryVMs is not null) foreach (var cVM in TopLevelCategoryVMs) cVM.Unsubscribe();
             TopLevelCategoryVMs = new(Library.TopLevelCategories.Select(c => new CategoryVM(c)));
         }
 
@@ -456,22 +449,28 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private bool AddFootprintCommandCanExecute(object? parameter)
         {
-            return PartVM.AddFootprintCommandCanExecute(SelectedPartVMs);
+            return SelectedPartVMs.Count() > 0;
         }
 
         private void AddFootprintCommandExecuted(object? parameter)
         {
-            PartVM.AddFootprintCommandExecuted(SelectedPartVMs);
+            foreach (PartVM pVM in SelectedPartVMs)
+            {
+                pVM.Part.FootprintPairs.Add(("",""));
+            }
         }
 
         private bool RemoveFootprintCommandCanExecute(object? parameter)
         {
-            return PartVM.RemoveFootprintCommandCanExecute(SelectedPartVMs);
+            return SelectedPartVMs.Count() > 0 && SelectedPartVMs.All(pVM => pVM.FootprintCount > 0);
         }
 
         private void RemoveFootprintCommandExecuted(object? parameter)
         {
-            PartVM.RemoveFootprintCommandExecuted(SelectedPartVMs);
+            foreach (PartVM pVM in SelectedPartVMs)
+            {
+                pVM.Part.FootprintPairs.RemoveAt(pVM.Part.FootprintPairs.Count - 1);
+            }
         }
 
         private bool BrowseKiCADSymbolLibraryCommandCanExecute(object? parameter)
@@ -495,7 +494,7 @@ namespace KiCAD_DB_Editor.ViewModel
         private bool NewKiCADSymbolLibraryCommandCanExecute(object? parameter)
         {
             if (this.NewKiCADSymbolLibraryName.Length > 0 && this.NewKiCADSymbolLibraryRelativePath.Length > 0)
-                return !KiCADSymbolLibraryVMs.Any(p => p.Nickname.ToLower() == this.NewKiCADSymbolLibraryName.ToLower());
+                return !Library.KiCADSymbolLibraries.Any(kSL => kSL.Nickname.ToLower() == this.NewKiCADSymbolLibraryName.ToLower());
             else
                 return false;
         }
@@ -503,18 +502,18 @@ namespace KiCAD_DB_Editor.ViewModel
         private void NewKiCADSymbolLibraryCommandExecuted(object? parameter)
         {
             int newIndex;
-            for (newIndex = 0; newIndex < KiCADSymbolLibraryVMs.Count; newIndex++)
+            for (newIndex = 0; newIndex < Library.KiCADSymbolLibraries.Count; newIndex++)
             {
-                var compareKSL = KiCADSymbolLibraryVMs[newIndex];
+                var compareKSL = Library.KiCADSymbolLibraries[newIndex];
                 if (compareKSL.Nickname.CompareTo(this.NewKiCADSymbolLibraryName) > 0)
                     break;
             }
 
-            KiCADSymbolLibraryVM newKiCADSymbolLibraryVM = new(this, new(this.NewKiCADSymbolLibraryName, this.NewKiCADSymbolLibraryRelativePath));
-            if (newIndex == KiCADSymbolLibraryVMs.Count)
-                KiCADSymbolLibraryVMs.Add(newKiCADSymbolLibraryVM);
+            KiCADSymbolLibrary newKiCADSymbolLibrary = new(this.NewKiCADSymbolLibraryName, this.NewKiCADSymbolLibraryRelativePath, Library);
+            if (newIndex == Library.KiCADSymbolLibraries.Count)
+                Library.KiCADSymbolLibraries.Add(newKiCADSymbolLibrary);
             else
-                KiCADSymbolLibraryVMs.Insert(newIndex, newKiCADSymbolLibraryVM);
+                Library.KiCADSymbolLibraries.Insert(newIndex, newKiCADSymbolLibrary);
 
             this.NewKiCADSymbolLibraryName = "";
             this.NewKiCADSymbolLibraryRelativePath = "";
@@ -524,11 +523,11 @@ namespace KiCAD_DB_Editor.ViewModel
         {
             if (SelectedKiCADSymbolLibrary is not null && this.NewKiCADSymbolLibraryName.Length > 0 && this.NewKiCADSymbolLibraryRelativePath.Length > 0)
             {
-                var kiCADSymbolLibraryVMsWithSameName = KiCADSymbolLibraryVMs.Where(p => p.Nickname.ToLower() == this.NewKiCADSymbolLibraryName.ToLower()).ToArray();
+                var kiCADSymbolLibrariesWithSameName = Library.KiCADSymbolLibraries.Where(p => p.Nickname.ToLower() == this.NewKiCADSymbolLibraryName.ToLower()).ToArray();
 
                 // Allow updates if none share the same name, or the name is the same as current, but the path is not (path case sensitive because of UNIX)
-                return (kiCADSymbolLibraryVMsWithSameName.Length == 0) ||
-                       (kiCADSymbolLibraryVMsWithSameName.Length == 1 && kiCADSymbolLibraryVMsWithSameName[0] == SelectedKiCADSymbolLibrary &&
+                return (kiCADSymbolLibrariesWithSameName.Length == 0) ||
+                       (kiCADSymbolLibrariesWithSameName.Length == 1 && kiCADSymbolLibrariesWithSameName[0] == SelectedKiCADSymbolLibrary &&
                        this.NewKiCADSymbolLibraryRelativePath != SelectedKiCADSymbolLibrary.RelativePath);
             }
             else
@@ -541,11 +540,11 @@ namespace KiCAD_DB_Editor.ViewModel
             SelectedKiCADSymbolLibrary.Nickname = this.NewKiCADSymbolLibraryName;
             SelectedKiCADSymbolLibrary.RelativePath = this.NewKiCADSymbolLibraryRelativePath;
 
-            int oldIndex = KiCADSymbolLibraryVMs.IndexOf(SelectedKiCADSymbolLibrary);
+            int oldIndex = Library.KiCADSymbolLibraries.IndexOf(SelectedKiCADSymbolLibrary);
             int newIndex = 0;
-            for (int i = 0; i < KiCADSymbolLibraryVMs.Count; i++)
+            for (int i = 0; i < Library.KiCADSymbolLibraries.Count; i++)
             {
-                var compareKSL = KiCADSymbolLibraryVMs[i];
+                var compareKSL = Library.KiCADSymbolLibraries[i];
                 if (compareKSL != SelectedKiCADSymbolLibrary)
                 {
                     if (compareKSL.Nickname.CompareTo(this.NewKiCADSymbolLibraryName) > 0)
@@ -554,7 +553,7 @@ namespace KiCAD_DB_Editor.ViewModel
                 }
             }
             if (oldIndex != newIndex)
-                KiCADSymbolLibraryVMs.Move(oldIndex, newIndex);
+                Library.KiCADSymbolLibraries.Move(oldIndex, newIndex);
         }
 
         private bool DeleteKiCADSymbolLibraryCommandCanExecute(object? parameter)
@@ -565,9 +564,9 @@ namespace KiCAD_DB_Editor.ViewModel
         private void DeleteKiCADSymbolLibraryCommandExecuted(object? parameter)
         {
             Debug.Assert(SelectedKiCADSymbolLibrary is not null);
-            KiCADSymbolLibraryVMs.Remove(SelectedKiCADSymbolLibrary);
+            Library.KiCADSymbolLibraries.Remove(SelectedKiCADSymbolLibrary);
 
-            SelectedKiCADSymbolLibrary = KiCADSymbolLibraryVMs.FirstOrDefault();
+            SelectedKiCADSymbolLibrary = Library.KiCADSymbolLibraries.FirstOrDefault();
         }
 
         private bool ReparseKiCADSymbolNamesCommandCanExecute(object? parameter)
@@ -601,7 +600,7 @@ namespace KiCAD_DB_Editor.ViewModel
         private bool NewKiCADFootprintLibraryCommandCanExecute(object? parameter)
         {
             if (this.NewKiCADFootprintLibraryName.Length > 0 && this.NewKiCADFootprintLibraryRelativePath.Length > 0)
-                return !KiCADFootprintLibraryVMs.Any(p => p.Nickname.ToLower() == this.NewKiCADFootprintLibraryName.ToLower());
+                return !Library.KiCADFootprintLibraries.Any(p => p.Nickname.ToLower() == this.NewKiCADFootprintLibraryName.ToLower());
             else
                 return false;
         }
@@ -609,18 +608,18 @@ namespace KiCAD_DB_Editor.ViewModel
         private void NewKiCADFootprintLibraryCommandExecuted(object? parameter)
         {
             int newIndex;
-            for (newIndex = 0; newIndex < KiCADFootprintLibraryVMs.Count; newIndex++)
+            for (newIndex = 0; newIndex < Library.KiCADFootprintLibraries.Count; newIndex++)
             {
-                var compareKFL = KiCADFootprintLibraryVMs[newIndex];
+                var compareKFL = Library.KiCADFootprintLibraries[newIndex];
                 if (compareKFL.Nickname.CompareTo(this.NewKiCADFootprintLibraryName) > 0)
                     break;
             }
 
-            KiCADFootprintLibraryVM newKiCADFootprintLibraryVM = new(this, new(this.NewKiCADFootprintLibraryName, this.NewKiCADFootprintLibraryRelativePath));
-            if (newIndex == KiCADFootprintLibraryVMs.Count)
-                KiCADFootprintLibraryVMs.Add(newKiCADFootprintLibraryVM);
+            KiCADFootprintLibrary newKiCADFootprintLibrary = new(this.NewKiCADFootprintLibraryName, this.NewKiCADFootprintLibraryRelativePath, Library);
+            if (newIndex == Library.KiCADFootprintLibraries.Count)
+                Library.KiCADFootprintLibraries.Add(newKiCADFootprintLibrary);
             else
-                KiCADFootprintLibraryVMs.Insert(newIndex, newKiCADFootprintLibraryVM);
+                Library.KiCADFootprintLibraries.Insert(newIndex, newKiCADFootprintLibrary);
 
             this.NewKiCADFootprintLibraryName = "";
             this.NewKiCADFootprintLibraryRelativePath = "";
@@ -630,11 +629,11 @@ namespace KiCAD_DB_Editor.ViewModel
         {
             if (SelectedKiCADFootprintLibrary is not null && this.NewKiCADFootprintLibraryName.Length > 0 && this.NewKiCADFootprintLibraryRelativePath.Length > 0)
             {
-                var kiCADFootprintLibraryVMsWithSameName = KiCADFootprintLibraryVMs.Where(p => p.Nickname.ToLower() == this.NewKiCADFootprintLibraryName.ToLower()).ToArray();
+                var kiCADFootprintLibrariesWithSameName = Library.KiCADFootprintLibraries.Where(p => p.Nickname.ToLower() == this.NewKiCADFootprintLibraryName.ToLower()).ToArray();
 
                 // Allow updates if none share the same name, or the name is the same as current, but the path is not (path case sensitive because of UNIX)
-                return (kiCADFootprintLibraryVMsWithSameName.Length == 0) ||
-                       (kiCADFootprintLibraryVMsWithSameName.Length == 1 && kiCADFootprintLibraryVMsWithSameName[0] == SelectedKiCADFootprintLibrary &&
+                return (kiCADFootprintLibrariesWithSameName.Length == 0) ||
+                       (kiCADFootprintLibrariesWithSameName.Length == 1 && kiCADFootprintLibrariesWithSameName[0] == SelectedKiCADFootprintLibrary &&
                        this.NewKiCADFootprintLibraryRelativePath != SelectedKiCADFootprintLibrary.RelativePath);
             }
             else
@@ -647,11 +646,11 @@ namespace KiCAD_DB_Editor.ViewModel
             SelectedKiCADFootprintLibrary.Nickname = this.NewKiCADFootprintLibraryName;
             SelectedKiCADFootprintLibrary.RelativePath = this.NewKiCADFootprintLibraryRelativePath;
 
-            int oldIndex = KiCADFootprintLibraryVMs.IndexOf(SelectedKiCADFootprintLibrary);
+            int oldIndex = Library.KiCADFootprintLibraries.IndexOf(SelectedKiCADFootprintLibrary);
             int newIndex = 0;
-            for (int i = 0; i < KiCADFootprintLibraryVMs.Count; i++)
+            for (int i = 0; i < Library.KiCADFootprintLibraries.Count; i++)
             {
-                var compareKFL = KiCADFootprintLibraryVMs[i];
+                var compareKFL = Library.KiCADFootprintLibraries[i];
                 if (compareKFL != SelectedKiCADFootprintLibrary)
                 {
                     if (compareKFL.Nickname.CompareTo(this.NewKiCADFootprintLibraryName) > 0)
@@ -660,7 +659,7 @@ namespace KiCAD_DB_Editor.ViewModel
                 }
             }
             if (oldIndex != newIndex)
-                KiCADFootprintLibraryVMs.Move(oldIndex, newIndex);
+                Library.KiCADFootprintLibraries.Move(oldIndex, newIndex);
         }
 
         private bool DeleteKiCADFootprintLibraryCommandCanExecute(object? parameter)
@@ -671,9 +670,9 @@ namespace KiCAD_DB_Editor.ViewModel
         private void DeleteKiCADFootprintLibraryCommandExecuted(object? parameter)
         {
             Debug.Assert(SelectedKiCADFootprintLibrary is not null);
-            KiCADFootprintLibraryVMs.Remove(SelectedKiCADFootprintLibrary);
+            Library.KiCADFootprintLibraries.Remove(SelectedKiCADFootprintLibrary);
 
-            SelectedKiCADFootprintLibrary = KiCADFootprintLibraryVMs.FirstOrDefault();
+            SelectedKiCADFootprintLibrary = Library.KiCADFootprintLibraries.FirstOrDefault();
         }
 
         private bool ReparseKiCADFootprintNamesCommandCanExecute(object? parameter)

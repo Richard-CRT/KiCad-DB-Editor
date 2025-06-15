@@ -15,8 +15,12 @@ namespace KiCAD_DB_Editor.Model.Json
         public string Name { get; set; } = "";
 
         [JsonConstructor]
-        public JsonParameter()
+        public JsonParameter() { }
+
+        public JsonParameter(Parameter parameter)
         {
+            UUID = parameter.UUID;
+            Name = parameter.Name;
         }
     }
 }

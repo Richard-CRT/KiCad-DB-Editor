@@ -73,7 +73,7 @@ namespace KiCAD_DB_Editor.Model
         public string SymbolLibraryName
         {
             get { return _symbolLibraryName; }
-            set { if (_symbolLibraryName != value) _mpn = value; InvokePropertyChanged(); }
+            set { if (_symbolLibraryName != value) _symbolLibraryName = value; InvokePropertyChanged(); }
         }
 
         private string _symbolName = "";
@@ -83,20 +83,11 @@ namespace KiCAD_DB_Editor.Model
             set { if (_symbolName != value) _symbolName = value; InvokePropertyChanged(); }
         }
 
-        // Do not initialise here, do in constructor to link collection changed
-        private ObservableCollectionEx<string> _footprintLibraryNames;
-        public ObservableCollectionEx<string> FootprintLibraryNames
+        // No setter, to prevent the VM needing to listening PropertyChanged events
+        private ObservableCollectionEx<(string,string)> _footprintPairs;
+        public ObservableCollectionEx<(string,string)> FootprintPairs
         {
-            get { return _footprintLibraryNames; }
-            set { if (_footprintLibraryNames != value) _footprintLibraryNames = value; InvokePropertyChanged(); }
-        }
-
-        // Do not initialise here, do in constructor to link collection changed
-        private ObservableCollectionEx<string> _footprintNames;
-        public ObservableCollectionEx<string> FootprintNames
-        {
-            get { return _footprintNames; }
-            set { if (_footprintNames != value) _footprintNames = value; InvokePropertyChanged(); }
+            get { return _footprintPairs; }
         }
 
         private bool _excludeFromBOM = false;
@@ -131,10 +122,12 @@ namespace KiCAD_DB_Editor.Model
             PartUID = partUID;
 
             // Initialise collection with events
-            FootprintLibraryNames = new();
-            Debug.Assert(_footprintLibraryNames is not null);
-            FootprintNames = new();
-            Debug.Assert(_footprintNames is not null);
+            _footprintPairs = new();
+        }
+
+        public override string ToString()
+        {
+            return $"{PartUID}";
         }
     }
 }

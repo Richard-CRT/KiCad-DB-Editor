@@ -97,10 +97,14 @@ namespace KiCAD_DB_Editor.ViewModel
             Category.PropertyChanged += Category_PropertyChanged;
 
             Category.Categories.CollectionChanged += Categories_CollectionChanged;
+            // Make sure CategoryVM unsubscribes before we lose the objects
+            if (CategoryVMs is not null) foreach (var cVM in CategoryVMs) cVM.Unsubscribe();
             CategoryVMs = new(Category.Categories.Select(c => new CategoryVM(c)));
             Debug.Assert(_categoryVMs is not null);
 
             Category.Parts.CollectionChanged += Parts_CollectionChanged;
+            // Make sure PartVM unsubscribes before we lose the objects
+            if (PartVMs is not null) foreach (var pVM in PartVMs) pVM.Unsubscribe();
             PartVMs = new(Category.Parts.Select(p => new PartVM(p)));
             Debug.Assert(_partVMs is not null);
 
@@ -113,14 +117,27 @@ namespace KiCAD_DB_Editor.ViewModel
             RemoveFootprintCommand = new BasicCommand(RemoveFootprintCommandExecuted, RemoveFootprintCommandCanExecute);
         }
 
+        public void Unsubscribe()
+        {
+            Category.PropertyChanged -= Category_PropertyChanged;
+            Category.Categories.CollectionChanged -= Parts_CollectionChanged;
+            Category.Parts.CollectionChanged -= Parts_CollectionChanged;
+            foreach (var cVM in CategoryVMs) cVM.Unsubscribe();
+            foreach (var pVM in PartVMs) pVM.Unsubscribe();
+        }
+
         private void Parts_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
+            // Make sure PartVM unsubscribes before we lose the objects
+            if (PartVMs is not null) foreach (var pVM in PartVMs) pVM.Unsubscribe();
             PartVMs = new(Category.Parts.Select(p => new PartVM(p)));
         }
 
         private void Categories_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            CategoryVMs = new(Category.Categories.OrderBy(c => c.Name).Select(c => new CategoryVM(c)));
+            // Make sure CategoryVM unsubscribes before we lose the objects
+            if (CategoryVMs is not null) foreach (var cVM in CategoryVMs) cVM.Unsubscribe();
+            CategoryVMs = new(Category.Categories.Select(c => new CategoryVM(c)));
         }
 
         private void Category_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -223,22 +240,30 @@ namespace KiCAD_DB_Editor.ViewModel
 
         private bool AddFootprintCommandCanExecute(object? parameter)
         {
-            return PartVM.AddFootprintCommandCanExecute(SelectedPartVMs);
+            return SelectedPartVMs.Count() > 0;
         }
 
         private void AddFootprintCommandExecuted(object? parameter)
         {
-            PartVM.AddFootprintCommandExecuted(SelectedPartVMs);
+            foreach (PartVM pVM in SelectedPartVMs)
+            {
+                // Always needs to be done in tandem
+                pVM.Part.FootprintPairs.Add(("",""));
+            }
         }
 
         private bool RemoveFootprintCommandCanExecute(object? parameter)
         {
-            return PartVM.RemoveFootprintCommandCanExecute(SelectedPartVMs);
+            return SelectedPartVMs.Count() > 0 && SelectedPartVMs.All(pVM => pVM.FootprintCount > 0);
         }
 
         private void RemoveFootprintCommandExecuted(object? parameter)
         {
-            PartVM.RemoveFootprintCommandExecuted(SelectedPartVMs);
+            foreach (PartVM pVM in SelectedPartVMs)
+            {
+                // Always needs to be done in tandem
+                pVM.Part.FootprintPairs.RemoveAt(pVM.Part.FootprintPairs.Count - 1);
+            }
         }
 
         #endregion Commands

@@ -48,26 +48,32 @@ namespace KiCAD_DB_Editor.Model
                     else
                         categoryCollection = ParentCategory.Categories;
 
-                    if (categoryCollection.Any(cVM => cVM.Name.ToLower() == lowerValue))
+                    if (categoryCollection is not null && categoryCollection.Any(c => c.Name.ToLower() == lowerValue))
                         throw new Exceptions.ArgumentValidationException("Parent already contains category with proposed name");
 
                     _name = value;
                     InvokePropertyChanged();
 
-                    int oldIndex = categoryCollection.IndexOf(this);
-                    int newIndex = 0;
-                    for (int i = 0; i < categoryCollection.Count; i++)
+                    if (categoryCollection is not null)
                     {
-                        Category compareCategory = categoryCollection[i];
-                        if (compareCategory != this)
+                        int oldIndex = categoryCollection.IndexOf(this);
+                        if (oldIndex != -1)
                         {
-                            if (compareCategory.Name.CompareTo(this.Name) > 0)
-                                break;
-                            newIndex++;
+                            int newIndex = 0;
+                            for (int i = 0; i < categoryCollection.Count; i++)
+                            {
+                                Category compareCategory = categoryCollection[i];
+                                if (compareCategory != this)
+                                {
+                                    if (compareCategory.Name.CompareTo(this.Name) > 0)
+                                        break;
+                                    newIndex++;
+                                }
+                            }
+                            if (oldIndex != newIndex)
+                                categoryCollection.Move(oldIndex, newIndex);
                         }
                     }
-                    if (oldIndex != newIndex)
-                        categoryCollection.Move(oldIndex, newIndex);
                 }
             }
         }
@@ -95,7 +101,7 @@ namespace KiCAD_DB_Editor.Model
 
         public ObservableCollectionEx<Parameter> InheritedAndNormalParameters
         {
-            get { return new(Parameters.Concat(InheritedParameters)); }
+            get { return new(ParentLibrary.AllParameters.Intersect(Parameters.Concat(InheritedParameters))); }
         }
 
         public ObservableCollectionEx<Parameter> InheritedParameters
@@ -113,34 +119,31 @@ namespace KiCAD_DB_Editor.Model
         public Category(JsonCategory jsonCategory, Library parentLibrary, Category? parentCategory)
         {
             _parentLibrary = parentLibrary;
-            _parentLibrary.AllParameters.CollectionChanged += ParentLibrary_AllParameters_CollectionChanged;
             _parentCategory = parentCategory;
-            if (_parentCategory is not null)
-                _parentCategory.InheritedAndNormalParameters.CollectionChanged += ParentCategory_InheritedAndNormalParameters_CollectionChanged;
             Name = jsonCategory.Name;
 
-            // Initialise collection with events
-            _categories = new(jsonCategory.Categories.Select(jC => new Category(jC, ParentLibrary, this)));
             _parameters = new(ParentLibrary.AllParameters.Where(p => jsonCategory.Parameters.Contains(p.UUID)));
+            // We don't worry about unsubscribing because this object is the event publisher
             _parameters.CollectionChanged += Parameters_CollectionChanged;
+            // _parameters must be set up first, as this line will rely on that
+            _categories = new(jsonCategory.Categories.Select(jC => new Category(jC, ParentLibrary, this)));
             _parts = new();
         }
 
         public Category(string name, Library parentLibrary, Category? parentCategory)
         {
             _parentLibrary = parentLibrary;
-            _parentLibrary.AllParameters.CollectionChanged += ParentLibrary_AllParameters_CollectionChanged;
             _parentCategory = parentCategory;
+            
             Name = name;
 
-            // Initialise collection with events
-            _categories = new();
             _parameters = new();
             _parameters.CollectionChanged += Parameters_CollectionChanged;
+            _categories = new();
             _parts = new();
         }
 
-        private void ParentLibrary_AllParameters_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        public void ParentLibrary_AllParameters_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             InvokePropertyChanged(nameof(AvailableParameters));
 
@@ -152,10 +155,12 @@ namespace KiCAD_DB_Editor.Model
             }
         }
 
-        private void ParentCategory_InheritedAndNormalParameters_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        public void ParentCategory_InheritedParameters_PropertyChanged()
         {
             InvokePropertyChanged(nameof(InheritedParameters));
             InvokePropertyChanged(nameof(InheritedAndNormalParameters));
+
+            foreach (Category c in Categories) c.ParentCategory_InheritedParameters_PropertyChanged();
 
             foreach (Part part in Parts)
             {
@@ -172,6 +177,8 @@ namespace KiCAD_DB_Editor.Model
         {
             InvokePropertyChanged(nameof(AvailableParameters));
             InvokePropertyChanged(nameof(InheritedAndNormalParameters));
+
+            foreach (Category c in Categories) c.ParentCategory_InheritedParameters_PropertyChanged();
 
             foreach (Part part in Parts)
             {

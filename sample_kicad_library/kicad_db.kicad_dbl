@@ -836,7 +836,7 @@
       }
     },
     {
-      "name": "Card Edge Connectors",
+      "name": "Connectors | Card Edge Connectors",
       "table": "Connectors | Card Edge Connectors",
       "key": "Part UID",
       "symbols": "Schematic Symbol",
@@ -887,7 +887,7 @@
       }
     },
     {
-      "name": "Headers \u0026 Wire Housings",
+      "name": "Connectors | Headers \u0026 Wire Housings",
       "table": "Connectors | Headers \u0026 Wire Housings",
       "key": "Part UID",
       "symbols": "Schematic Symbol",
@@ -938,7 +938,7 @@
       }
     },
     {
-      "name": "RF",
+      "name": "Connectors | RF",
       "table": "Connectors | RF",
       "key": "Part UID",
       "symbols": "Schematic Symbol",
@@ -995,7 +995,7 @@
       }
     },
     {
-      "name": "Schottky",
+      "name": "Diodes | Schottky",
       "table": "Diodes | Schottky",
       "key": "Part UID",
       "symbols": "Schematic Symbol",
@@ -1046,7 +1046,7 @@
       }
     },
     {
-      "name": "TVS",
+      "name": "Diodes | TVS",
       "table": "Diodes | TVS",
       "key": "Part UID",
       "symbols": "Schematic Symbol",
@@ -1097,7 +1097,7 @@
       }
     },
     {
-      "name": "Zener",
+      "name": "Diodes | Zener",
       "table": "Diodes | Zener",
       "key": "Part UID",
       "symbols": "Schematic Symbol",
@@ -1148,7 +1148,7 @@
       }
     },
     {
-      "name": "Crystals",
+      "name": "Frequency \u0026 Timing | Crystals",
       "table": "Frequency \u0026 Timing | Crystals",
       "key": "Part UID",
       "symbols": "Schematic Symbol",
@@ -1193,7 +1193,7 @@
       }
     },
     {
-      "name": "Oscillators",
+      "name": "Frequency \u0026 Timing | Oscillators",
       "table": "Frequency \u0026 Timing | Oscillators",
       "key": "Part UID",
       "symbols": "Schematic Symbol",
@@ -1238,7 +1238,7 @@
       }
     },
     {
-      "name": "SMA",
+      "name": "Connectors | RF | SMA",
       "table": "Connectors | RF | SMA",
       "key": "Part UID",
       "symbols": "Schematic Symbol",

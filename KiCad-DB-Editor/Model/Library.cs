@@ -612,7 +612,7 @@ namespace KiCad_DB_Editor.Model
 
                         string tableName = categoryToKiCadExportCategoryStringMap[category];
 
-                        JsonKiCadDbl_Library jsonKiCadDbl_Library = new(category.Name, tableName, "Part UID", "Schematic Symbol", "Footprints");
+                        JsonKiCadDbl_Library jsonKiCadDbl_Library = new(tableName, tableName, "Part UID", "Schematic Symbol", "Footprints");
                         jsonKiCadDblFile.jsonKiCadDbl_Libraries.Add(jsonKiCadDbl_Library);
 
                         // Fields

@@ -14,7 +14,6 @@ using Microsoft.Win32;
 using System.Windows.Input;
 using System.IO;
 using System.Windows.Threading;
-using SQLitePCL;
 
 namespace KiCad_DB_Editor.ViewModel
 {

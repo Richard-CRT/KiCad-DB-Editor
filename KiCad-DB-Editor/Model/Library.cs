@@ -123,7 +123,7 @@ namespace KiCad_DB_Editor.Model
                     throw new InvalidDataException("Special columns not found or wrong type");
 
                 int numberOfFootprintColumns = 0;
-                for (int i = numberSpecialColumns; dbPartColumnNames[i].StartsWith("Footprint"); i++, numberOfFootprintColumns++) ;
+                for (int i = numberSpecialColumns; i < dbPartColumnNames.Count && dbPartColumnNames[i].StartsWith("Footprint"); i++, numberOfFootprintColumns++) ;
                 if (numberOfFootprintColumns % 2 != 0)
                     throw new InvalidDataException("Footprint columns not an even number");
 
@@ -403,7 +403,7 @@ namespace KiCad_DB_Editor.Model
             {
                 projectFilePath = (new Uri(projectFilePath)).AbsolutePath;
 
-                string ? projectDirectory = Path.GetDirectoryName(projectFilePath);
+                string? projectDirectory = Path.GetDirectoryName(projectFilePath);
                 string? projectName = Path.GetFileNameWithoutExtension(projectFilePath);
                 string? fileExtension = Path.GetExtension(projectFilePath);
 

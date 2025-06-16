@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:KiCAD_DB_Editor.View"
         xmlns:vm="clr-namespace:KiCAD_DB_Editor.ViewModel"
         mc:Ignorable="d"
-        Title="{Binding WindowTitle}" Height="900" Width="1600" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen">
+        Title="{Binding WindowTitle}" Height="900" Width="1600" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen" WindowState="Maximized">
     <Window.DataContext>
         <vm:MainWindowVM />
     </Window.DataContext>

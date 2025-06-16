@@ -1,0 +1,78 @@
+﻿<UserControl x:Class="KiCad_DB_Editor.View.UserControl_Category"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:KiCad_DB_Editor.View"
+             xmlns:conv="clr-namespace:KiCad_DB_Editor.View.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*" MinHeight="200"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <DockPanel>
+            <TextBlock DockPanel.Dock="Top">Part Category</TextBlock>
+            <TextBox DockPanel.Dock="Top" Text="{Binding CategoryVM.Category.Name, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" />
+            <Separator DockPanel.Dock="Top" Margin="0,10,0,10" />
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+                <DockPanel DockPanel.Dock="Top">
+                    <TextBlock DockPanel.Dock="Top">Inherited Parameters</TextBlock>
+                    <ListBox DisplayMemberPath="Name"
+                             ItemsSource="{Binding CategoryVM.Category.InheritedParameters, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
+                </DockPanel>
+                <Grid Grid.Row="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="1*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Row="0" Grid.Column="0" DockPanel.Dock="Top" HorizontalAlignment="Center">Available Parameters</TextBlock>
+                    <ListBox Grid.Row="1" Grid.Column="0" DisplayMemberPath="Name"
+                                ItemsSource="{Binding CategoryVM.Category.AvailableParameters, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}"
+                                SelectedItem="{Binding CategoryVM.SelectedUnusedParameter, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
+                    <StackPanel Grid.Row="1" Grid.Column="1" Margin="5,0,5,0" VerticalAlignment="Center">
+                        <Button Content="&gt;&gt;&gt;" Padding="5,1,5,1" Command="{Binding CategoryVM.AddParameterCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}"></Button>
+                        <Button Content="&lt;&lt;&lt;" Padding="5,1,5,1" Margin="0,5,0,0" Command="{Binding CategoryVM.RemoveParameterCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}"></Button>
+                    </StackPanel>
+                    <TextBlock Grid.Row="0" Grid.Column="2" DockPanel.Dock="Top" HorizontalAlignment="Center">Parameters</TextBlock>
+                    <ListBox  Grid.Row="1" Grid.Column="2"
+                              ItemsSource="{Binding CategoryVM.Category.Parameters, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}"
+                              DisplayMemberPath="Name"
+                              SelectedItem="{Binding CategoryVM.SelectedParameter, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
+                </Grid>
+            </Grid>
+        </DockPanel>
+        <GridSplitter Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0,3,0,3" Height="3" />
+        <DockPanel Grid.Row="2">
+            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,5,0,0">
+                <Button Content="New Part" Padding="5,1,5,1"
+                        Command="{Binding CategoryVM.NewPartCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
+                <Button Content="Delete Parts" Padding="5,1,5,1" Margin="5,0,0,0"
+                        Command="{Binding CategoryVM.DeletePartsCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
+                <Button Content="Add Footprint" Padding="5,1,5,1" Margin="5,0,0,0"
+                        Command="{Binding CategoryVM.AddFootprintCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
+                <Button Content="Remove Footprint" Padding="5,1,5,1" Margin="5,0,0,0"
+                        Command="{Binding CategoryVM.RemoveFootprintCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
+            </StackPanel>
+            <local:UserControl_PartGrid
+                Grid.Row="2"
+                KiCadSymbolLibraries="{Binding CategoryVM.Category.ParentLibrary.KiCadSymbolLibraries, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}"
+                KiCadFootprintLibraries="{Binding CategoryVM.Category.ParentLibrary.KiCadFootprintLibraries, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}"
+                Parameters="{Binding CategoryVM.Category.InheritedAndNormalParameters, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}"           
+                PartVMs="{Binding CategoryVM.PartVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}"
+                SelectedPartVMs="{Binding CategoryVM.SelectedPartVMs, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}, UpdateSourceTrigger=PropertyChanged}"
+                />
+        </DockPanel>
+    </Grid>
+</UserControl>

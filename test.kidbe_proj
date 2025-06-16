@@ -166,24 +166,6 @@
       "categories": []
     }
   ],
-  "kicad_symbol_libraries": [
-    {
-      "nickname": "LIB_GENERIC_CAPACITORS",
-      "relative_path": "sample_kicad_library\\symbol_libraries\\GENERIC_CAPACITORS.kicad_sym"
-    },
-    {
-      "nickname": "LIB_GENERIC_RESISTORS",
-      "relative_path": "sample_kicad_library\\symbol_libraries\\GENERIC_RESISTORS.kicad_sym"
-    }
-  ],
-  "kicad_footprint_libraries": [
-    {
-      "nickname": "LIB_GENERIC_CAPACITORS",
-      "relative_path": "sample_kicad_library\\footprint_libraries\\GENERIC_CAPACITORS.pretty"
-    },
-    {
-      "nickname": "LIB_GENERIC_RESISTORS",
-      "relative_path": "sample_kicad_library\\footprint_libraries\\GENERIC_RESISTORS.pretty"
-    }
-  ]
+  "kicad_symbol_libraries": [],
+  "kicad_footprint_libraries": []
 }

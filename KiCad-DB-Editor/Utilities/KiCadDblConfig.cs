@@ -115,7 +115,7 @@ namespace KiCad_DB_Editor.Utilities
                 }";
 
         private const string propertyContentsTemplate = @"
-                ""[[KICAD_PROPERTY_NAME]]"": ""[[DB_FIELD_NAME]]"" ";
+                ""[[KICAD_PROPERTY_NAME]]"": ""[[DB_FIELD_NAME]]""";
 
         public static string Generate(KiCadDblLibraryData kiCadDblLibraryData)
         {

@@ -52,10 +52,10 @@
                 }
             ],
             "properties": {
-                "description": "Description" ,
-                "exclude_from_bom": "Exclude from BOM" ,
-                "exclude_from_board": "Exclude from Board" ,
-                "exclude_from_sim": "Exclude from Sim" 
+                "description": "Description",
+                "exclude_from_bom": "Exclude from BOM",
+                "exclude_from_board": "Exclude from Board",
+                "exclude_from_sim": "Exclude from Sim"
             }
         },
         {
@@ -103,10 +103,10 @@
                 }
             ],
             "properties": {
-                "description": "Description" ,
-                "exclude_from_bom": "Exclude from BOM" ,
-                "exclude_from_board": "Exclude from Board" ,
-                "exclude_from_sim": "Exclude from Sim" 
+                "description": "Description",
+                "exclude_from_bom": "Exclude from BOM",
+                "exclude_from_board": "Exclude from Board",
+                "exclude_from_sim": "Exclude from Sim"
             }
         },
         {
@@ -154,10 +154,10 @@
                 }
             ],
             "properties": {
-                "description": "Description" ,
-                "exclude_from_bom": "Exclude from BOM" ,
-                "exclude_from_board": "Exclude from Board" ,
-                "exclude_from_sim": "Exclude from Sim" 
+                "description": "Description",
+                "exclude_from_bom": "Exclude from BOM",
+                "exclude_from_board": "Exclude from Board",
+                "exclude_from_sim": "Exclude from Sim"
             }
         },
         {
@@ -199,10 +199,10 @@
                 }
             ],
             "properties": {
-                "description": "Description" ,
-                "exclude_from_bom": "Exclude from BOM" ,
-                "exclude_from_board": "Exclude from Board" ,
-                "exclude_from_sim": "Exclude from Sim" 
+                "description": "Description",
+                "exclude_from_bom": "Exclude from BOM",
+                "exclude_from_board": "Exclude from Board",
+                "exclude_from_sim": "Exclude from Sim"
             }
         },
         {
@@ -244,10 +244,10 @@
                 }
             ],
             "properties": {
-                "description": "Description" ,
-                "exclude_from_bom": "Exclude from BOM" ,
-                "exclude_from_board": "Exclude from Board" ,
-                "exclude_from_sim": "Exclude from Sim" 
+                "description": "Description",
+                "exclude_from_bom": "Exclude from BOM",
+                "exclude_from_board": "Exclude from Board",
+                "exclude_from_sim": "Exclude from Sim"
             }
         },
         {
@@ -289,10 +289,10 @@
                 }
             ],
             "properties": {
-                "description": "Description" ,
-                "exclude_from_bom": "Exclude from BOM" ,
-                "exclude_from_board": "Exclude from Board" ,
-                "exclude_from_sim": "Exclude from Sim" 
+                "description": "Description",
+                "exclude_from_bom": "Exclude from BOM",
+                "exclude_from_board": "Exclude from Board",
+                "exclude_from_sim": "Exclude from Sim"
             }
         },
         {
@@ -334,10 +334,10 @@
                 }
             ],
             "properties": {
-                "description": "Description" ,
-                "exclude_from_bom": "Exclude from BOM" ,
-                "exclude_from_board": "Exclude from Board" ,
-                "exclude_from_sim": "Exclude from Sim" 
+                "description": "Description",
+                "exclude_from_bom": "Exclude from BOM",
+                "exclude_from_board": "Exclude from Board",
+                "exclude_from_sim": "Exclude from Sim"
             }
         },
         {
@@ -379,10 +379,10 @@
                 }
             ],
             "properties": {
-                "description": "Description" ,
-                "exclude_from_bom": "Exclude from BOM" ,
-                "exclude_from_board": "Exclude from Board" ,
-                "exclude_from_sim": "Exclude from Sim" 
+                "description": "Description",
+                "exclude_from_bom": "Exclude from BOM",
+                "exclude_from_board": "Exclude from Board",
+                "exclude_from_sim": "Exclude from Sim"
             }
         },
         {
@@ -424,10 +424,10 @@
                 }
             ],
             "properties": {
-                "description": "Description" ,
-                "exclude_from_bom": "Exclude from BOM" ,
-                "exclude_from_board": "Exclude from Board" ,
-                "exclude_from_sim": "Exclude from Sim" 
+                "description": "Description",
+                "exclude_from_bom": "Exclude from BOM",
+                "exclude_from_board": "Exclude from Board",
+                "exclude_from_sim": "Exclude from Sim"
             }
         },
         {
@@ -469,10 +469,10 @@
                 }
             ],
             "properties": {
-                "description": "Description" ,
-                "exclude_from_bom": "Exclude from BOM" ,
-                "exclude_from_board": "Exclude from Board" ,
-                "exclude_from_sim": "Exclude from Sim" 
+                "description": "Description",
+                "exclude_from_bom": "Exclude from BOM",
+                "exclude_from_board": "Exclude from Board",
+                "exclude_from_sim": "Exclude from Sim"
             }
         },
         {
@@ -514,10 +514,10 @@
                 }
             ],
             "properties": {
-                "description": "Description" ,
-                "exclude_from_bom": "Exclude from BOM" ,
-                "exclude_from_board": "Exclude from Board" ,
-                "exclude_from_sim": "Exclude from Sim" 
+                "description": "Description",
+                "exclude_from_bom": "Exclude from BOM",
+                "exclude_from_board": "Exclude from Board",
+                "exclude_from_sim": "Exclude from Sim"
             }
         },
         {
@@ -559,10 +559,10 @@
                 }
             ],
             "properties": {
-                "description": "Description" ,
-                "exclude_from_bom": "Exclude from BOM" ,
-                "exclude_from_board": "Exclude from Board" ,
-                "exclude_from_sim": "Exclude from Sim" 
+                "description": "Description",
+                "exclude_from_bom": "Exclude from BOM",
+                "exclude_from_board": "Exclude from Board",
+                "exclude_from_sim": "Exclude from Sim"
             }
         },
         {
@@ -604,10 +604,10 @@
                 }
             ],
             "properties": {
-                "description": "Description" ,
-                "exclude_from_bom": "Exclude from BOM" ,
-                "exclude_from_board": "Exclude from Board" ,
-                "exclude_from_sim": "Exclude from Sim" 
+                "description": "Description",
+                "exclude_from_bom": "Exclude from BOM",
+                "exclude_from_board": "Exclude from Board",
+                "exclude_from_sim": "Exclude from Sim"
             }
         },
         {
@@ -649,10 +649,10 @@
                 }
             ],
             "properties": {
-                "description": "Description" ,
-                "exclude_from_bom": "Exclude from BOM" ,
-                "exclude_from_board": "Exclude from Board" ,
-                "exclude_from_sim": "Exclude from Sim" 
+                "description": "Description",
+                "exclude_from_bom": "Exclude from BOM",
+                "exclude_from_board": "Exclude from Board",
+                "exclude_from_sim": "Exclude from Sim"
             }
         },
         {
@@ -694,10 +694,10 @@
                 }
             ],
             "properties": {
-                "description": "Description" ,
-                "exclude_from_bom": "Exclude from BOM" ,
-                "exclude_from_board": "Exclude from Board" ,
-                "exclude_from_sim": "Exclude from Sim" 
+                "description": "Description",
+                "exclude_from_bom": "Exclude from BOM",
+                "exclude_from_board": "Exclude from Board",
+                "exclude_from_sim": "Exclude from Sim"
             }
         },
         {
@@ -739,10 +739,10 @@
                 }
             ],
             "properties": {
-                "description": "Description" ,
-                "exclude_from_bom": "Exclude from BOM" ,
-                "exclude_from_board": "Exclude from Board" ,
-                "exclude_from_sim": "Exclude from Sim" 
+                "description": "Description",
+                "exclude_from_bom": "Exclude from BOM",
+                "exclude_from_board": "Exclude from Board",
+                "exclude_from_sim": "Exclude from Sim"
             }
         },
         {
@@ -784,10 +784,10 @@
                 }
             ],
             "properties": {
-                "description": "Description" ,
-                "exclude_from_bom": "Exclude from BOM" ,
-                "exclude_from_board": "Exclude from Board" ,
-                "exclude_from_sim": "Exclude from Sim" 
+                "description": "Description",
+                "exclude_from_bom": "Exclude from BOM",
+                "exclude_from_board": "Exclude from Board",
+                "exclude_from_sim": "Exclude from Sim"
             }
         },
         {
@@ -829,10 +829,10 @@
                 }
             ],
             "properties": {
-                "description": "Description" ,
-                "exclude_from_bom": "Exclude from BOM" ,
-                "exclude_from_board": "Exclude from Board" ,
-                "exclude_from_sim": "Exclude from Sim" 
+                "description": "Description",
+                "exclude_from_bom": "Exclude from BOM",
+                "exclude_from_board": "Exclude from Board",
+                "exclude_from_sim": "Exclude from Sim"
             }
         },
         {
@@ -880,10 +880,10 @@
                 }
             ],
             "properties": {
-                "description": "Description" ,
-                "exclude_from_bom": "Exclude from BOM" ,
-                "exclude_from_board": "Exclude from Board" ,
-                "exclude_from_sim": "Exclude from Sim" 
+                "description": "Description",
+                "exclude_from_bom": "Exclude from BOM",
+                "exclude_from_board": "Exclude from Board",
+                "exclude_from_sim": "Exclude from Sim"
             }
         },
         {
@@ -931,10 +931,10 @@
                 }
             ],
             "properties": {
-                "description": "Description" ,
-                "exclude_from_bom": "Exclude from BOM" ,
-                "exclude_from_board": "Exclude from Board" ,
-                "exclude_from_sim": "Exclude from Sim" 
+                "description": "Description",
+                "exclude_from_bom": "Exclude from BOM",
+                "exclude_from_board": "Exclude from Board",
+                "exclude_from_sim": "Exclude from Sim"
             }
         },
         {
@@ -988,10 +988,10 @@
                 }
             ],
             "properties": {
-                "description": "Description" ,
-                "exclude_from_bom": "Exclude from BOM" ,
-                "exclude_from_board": "Exclude from Board" ,
-                "exclude_from_sim": "Exclude from Sim" 
+                "description": "Description",
+                "exclude_from_bom": "Exclude from BOM",
+                "exclude_from_board": "Exclude from Board",
+                "exclude_from_sim": "Exclude from Sim"
             }
         },
         {
@@ -1039,10 +1039,10 @@
                 }
             ],
             "properties": {
-                "description": "Description" ,
-                "exclude_from_bom": "Exclude from BOM" ,
-                "exclude_from_board": "Exclude from Board" ,
-                "exclude_from_sim": "Exclude from Sim" 
+                "description": "Description",
+                "exclude_from_bom": "Exclude from BOM",
+                "exclude_from_board": "Exclude from Board",
+                "exclude_from_sim": "Exclude from Sim"
             }
         },
         {
@@ -1090,10 +1090,10 @@
                 }
             ],
             "properties": {
-                "description": "Description" ,
-                "exclude_from_bom": "Exclude from BOM" ,
-                "exclude_from_board": "Exclude from Board" ,
-                "exclude_from_sim": "Exclude from Sim" 
+                "description": "Description",
+                "exclude_from_bom": "Exclude from BOM",
+                "exclude_from_board": "Exclude from Board",
+                "exclude_from_sim": "Exclude from Sim"
             }
         },
         {
@@ -1141,10 +1141,10 @@
                 }
             ],
             "properties": {
-                "description": "Description" ,
-                "exclude_from_bom": "Exclude from BOM" ,
-                "exclude_from_board": "Exclude from Board" ,
-                "exclude_from_sim": "Exclude from Sim" 
+                "description": "Description",
+                "exclude_from_bom": "Exclude from BOM",
+                "exclude_from_board": "Exclude from Board",
+                "exclude_from_sim": "Exclude from Sim"
             }
         },
         {
@@ -1186,10 +1186,10 @@
                 }
             ],
             "properties": {
-                "description": "Description" ,
-                "exclude_from_bom": "Exclude from BOM" ,
-                "exclude_from_board": "Exclude from Board" ,
-                "exclude_from_sim": "Exclude from Sim" 
+                "description": "Description",
+                "exclude_from_bom": "Exclude from BOM",
+                "exclude_from_board": "Exclude from Board",
+                "exclude_from_sim": "Exclude from Sim"
             }
         },
         {
@@ -1231,10 +1231,10 @@
                 }
             ],
             "properties": {
-                "description": "Description" ,
-                "exclude_from_bom": "Exclude from BOM" ,
-                "exclude_from_board": "Exclude from Board" ,
-                "exclude_from_sim": "Exclude from Sim" 
+                "description": "Description",
+                "exclude_from_bom": "Exclude from BOM",
+                "exclude_from_board": "Exclude from Board",
+                "exclude_from_sim": "Exclude from Sim"
             }
         },
         {
@@ -1288,10 +1288,10 @@
                 }
             ],
             "properties": {
-                "description": "Description" ,
-                "exclude_from_bom": "Exclude from BOM" ,
-                "exclude_from_board": "Exclude from Board" ,
-                "exclude_from_sim": "Exclude from Sim" 
+                "description": "Description",
+                "exclude_from_bom": "Exclude from BOM",
+                "exclude_from_board": "Exclude from Board",
+                "exclude_from_sim": "Exclude from Sim"
             }
         }
     ]

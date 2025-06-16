@@ -82,9 +82,9 @@ namespace KiCAD_DB_Editor.Utilities
     ""description"": ""[[PART_LIB_DESC]]"",
     ""source"": {
         ""type"": ""odbc"",
-        ""dsn"": "",
-        ""username"": "",
-        ""password"": "",
+        ""dsn"": """",
+        ""username"": """",
+        ""password"": """",
         ""timeout_seconds"": 2,
         ""connection_string"": ""DSN=[[DSN_NAME]];""
     },

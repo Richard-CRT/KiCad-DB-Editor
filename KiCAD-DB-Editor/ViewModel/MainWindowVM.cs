@@ -142,6 +142,13 @@ namespace KiCAD_DB_Editor.ViewModel
                     (new View.Dialogs.Window_ErrorDialog("Save failed!")).ShowDialog();
                     // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
                 }
+                else if (LibraryVM.Library.KiCadAutoExportOnSave && !LibraryVM.Library.ExportToKiCAD(true))
+                {
+                    // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
+                    (new View.Dialogs.Window_ErrorDialog("Export failed!")).ShowDialog();
+                    // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
+                }
+
             }
             else
             {
@@ -166,11 +173,18 @@ namespace KiCAD_DB_Editor.ViewModel
                     Properties.Settings.Default.OpenProjectPath = saveFileDialog.FileName;
                     Properties.Settings.Default.Save();
                     InvokePropertyChanged(nameof(WindowTitle));
+
+                    if (LibraryVM.Library.KiCadAutoExportOnSave && !LibraryVM.Library.ExportToKiCAD(true))
+                    {
+                        // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
+                        (new View.Dialogs.Window_ErrorDialog("Export failed!")).ShowDialog();
+                        // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
+                    }
                 }
                 else
                 {
                     // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
-                     (new View.Dialogs.Window_ErrorDialog("Save failed!")).ShowDialog();
+                    (new View.Dialogs.Window_ErrorDialog("Save failed!")).ShowDialog();
                     // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
                 }
             }

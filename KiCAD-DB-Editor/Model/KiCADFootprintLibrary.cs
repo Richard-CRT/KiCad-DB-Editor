@@ -72,6 +72,7 @@ namespace KiCAD_DB_Editor.Model
         {
             // Need to parse the footprints from the provided path
             string absolutePath = Path.Combine(ParentLibrary.ProjectDirectoryPath, RelativePath);
+            absolutePath = (new Uri(absolutePath)).AbsolutePath;
             if (Directory.Exists(absolutePath))
             {
                 var absoluteFilePaths = Directory.GetFiles(absolutePath, "*.kicad_mod", SearchOption.TopDirectoryOnly);

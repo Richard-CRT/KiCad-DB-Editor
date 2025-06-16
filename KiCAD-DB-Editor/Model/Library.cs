@@ -49,6 +49,11 @@ namespace KiCAD_DB_Editor.Model
                 JsonLibrary jsonLibrary = JsonLibrary.FromFile(projectFilePath);
 
                 library.PartUIDScheme = jsonLibrary.PartUIDScheme;
+                library.KiCadExportPartLibraryName = jsonLibrary.KiCadExportPartLibraryName;
+                library.KiCadExportPartLibraryDescription = jsonLibrary.KiCadExportPartLibraryDescription;
+                library.KiCadExportOdbcName = jsonLibrary.KiCadExportOdbcName;
+                library.KiCadAutoExportOnSave = jsonLibrary.KiCadAutoExportOnSave;
+                library.KiCadAutoExportRelativePath = jsonLibrary.KiCadAutoExportRelativePath;
                 library.AllParameters.AddRange(jsonLibrary.AllParameters.Select(jP => new Parameter(jP)));
                 library.TopLevelCategories.AddRange(jsonLibrary.TopLevelCategories.Select(c => new Category(c, library, null)));
                 library.AllCategories.AddRange(library.TopLevelCategories);
@@ -288,6 +293,41 @@ namespace KiCAD_DB_Editor.Model
             }
         }
 
+        private string _kiCadExportPartLibraryName { get; set; } = "";
+        public string KiCadExportPartLibraryName
+        {
+            get { return _kiCadExportPartLibraryName; }
+            set { if (_kiCadExportPartLibraryName != value) { _kiCadExportPartLibraryName = value; InvokePropertyChanged(); } }
+        }
+
+        private string _kiCadExportPartLibraryDescription { get; set; } = "";
+        public string KiCadExportPartLibraryDescription
+        {
+            get { return _kiCadExportPartLibraryDescription; }
+            set { if (_kiCadExportPartLibraryDescription != value) { _kiCadExportPartLibraryDescription = value; InvokePropertyChanged(); } }
+        }
+
+        private string _kiCadExportOdbcName { get; set; } = "";
+        public string KiCadExportOdbcName
+        {
+            get { return _kiCadExportOdbcName; }
+            set { if (_kiCadExportOdbcName != value) { _kiCadExportOdbcName = value; InvokePropertyChanged(); } }
+        }
+
+        private bool _kiCadAutoExportOnSave { get; set; } = false;
+        public bool KiCadAutoExportOnSave
+        {
+            get { return _kiCadAutoExportOnSave; }
+            set { if (_kiCadAutoExportOnSave != value) { _kiCadAutoExportOnSave = value; InvokePropertyChanged(); } }
+        }
+
+        private string _kiCadAutoExportPath { get; set; } = "";
+        public string KiCadAutoExportRelativePath
+        {
+            get { return _kiCadAutoExportPath; }
+            set { if (_kiCadAutoExportPath != value) { _kiCadAutoExportPath = value; InvokePropertyChanged(); } }
+        }
+
         // No setter, to prevent the VM needing to listening PropertyChanged events
         private ObservableCollectionEx<Part> _allParts;
         public ObservableCollectionEx<Part> AllParts
@@ -361,10 +401,13 @@ namespace KiCAD_DB_Editor.Model
             // of some things. Hence lots of .Replace("'", "''") and .Replace("\"", "\"\"")
             try
             {
-                string? projectDirectory = Path.GetDirectoryName(projectFilePath);
-                string? projectName = Path.GetFileNameWithoutExtension(projectFilePath);
+                projectFilePath = (new Uri(projectFilePath)).AbsolutePath;
 
-                if (projectDirectory is null || projectDirectory == "" || projectName is null || projectName == "")
+                string ? projectDirectory = Path.GetDirectoryName(projectFilePath);
+                string? projectName = Path.GetFileNameWithoutExtension(projectFilePath);
+                string? fileExtension = Path.GetExtension(projectFilePath);
+
+                if (projectDirectory is null || projectDirectory == "" || !Directory.Exists(projectDirectory) || projectName is null || projectName == "" || fileExtension is null || fileExtension != ".kidbe_proj")
                     throw new InvalidOperationException();
 
                 this.ProjectDirectoryPath = projectDirectory;
@@ -522,16 +565,20 @@ namespace KiCAD_DB_Editor.Model
             }
         }
 
-        public bool ExportToKiCAD(string kicadDbConfFilePath)
+        public bool ExportToKiCAD(bool autoExport, string kicadDbConfFilePath = "")
         {
             // For this function we don't rely on anything being DB sanitised, even though we controlled the inputs
             // of some things. Hence lots of .Replace("'", "''") and .Replace("\"", "\"\"")
             try
             {
+                if (autoExport)
+                    kicadDbConfFilePath = (new Uri(Path.Combine(ProjectDirectoryPath, KiCadAutoExportRelativePath))).AbsolutePath;
+
                 string? parentDirectory = Path.GetDirectoryName(kicadDbConfFilePath);
                 string? fileName = Path.GetFileNameWithoutExtension(kicadDbConfFilePath);
+                string? fileExtension = Path.GetExtension(kicadDbConfFilePath);
 
-                if (parentDirectory is null || parentDirectory == "" || fileName is null || fileName == "")
+                if (parentDirectory is null || parentDirectory == "" || !Directory.Exists(parentDirectory) || fileName is null || fileName == "" || fileExtension is null || fileExtension != ".kicad_dbl")
                     throw new InvalidOperationException();
 
                 string kiCadSqliteFilePath = Path.Combine(parentDirectory, fileName);
@@ -553,7 +600,7 @@ namespace KiCAD_DB_Editor.Model
                     categoryToKiCadExportCategoryStringMap[category] = path;
                 }
 
-                KiCadDblLibraryData kiCadDblLibraryData = new("PART_LIB_NAME", "PART_LIB_DESCRIPTION", "ODBC_STRING");
+                KiCadDblLibraryData kiCadDblLibraryData = new(this.KiCadExportPartLibraryName, this.KiCadExportPartLibraryDescription, this.KiCadExportOdbcName);
 
                 File.Delete(tempSqlitePath);
                 using (var connection = new SqliteConnection($"Data Source={tempSqlitePath}"))
@@ -563,7 +610,7 @@ namespace KiCAD_DB_Editor.Model
                     foreach (Category category in AllCategories)
                     {
 
-                        string tableName = categoryToKiCadExportCategoryStringMap[category].Replace("\"", "\"\"");
+                        string tableName = categoryToKiCadExportCategoryStringMap[category];
 
                         KiCadDblTableData kiCadDblTableData = new(category.Name, tableName, "Part UID", "Schematic Symbol", "Footprints");
                         kiCadDblLibraryData.kiCadDblTableDatas.Add(kiCadDblTableData);
@@ -582,7 +629,7 @@ namespace KiCAD_DB_Editor.Model
                         kiCadDblTableData.kiCadDblPropertyDatas.Add(new("exclude_from_board", "Exclude from Board"));
                         kiCadDblTableData.kiCadDblPropertyDatas.Add(new("exclude_from_sim", "Exclude from Sim"));
 
-                        string createTableSql = $"CREATE TABLE \"{tableName}\" (" +
+                        string createTableSql = $"CREATE TABLE \"{tableName.Replace("\"", "\"\"")}\" (" +
                             "\"Part UID\" TEXT, " +
                             "\"Description\" TEXT, " +
                             "\"Manufacturer\" TEXT, " +
@@ -597,7 +644,7 @@ namespace KiCAD_DB_Editor.Model
                             createTableSql += $"\"{parameter.Name.Replace("\"", "\"\"")}\" TEXT, ";
                         }
 
-                        createTableSql += 
+                        createTableSql +=
                             "\"Schematic Symbol\" TEXT, " +
                             "\"Footprints\" TEXT, " +
                             "\"Exclude from BOM\" TEXT, " +

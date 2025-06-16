@@ -52,18 +52,33 @@ namespace KiCAD_DB_Editor.Model.Json
         // ======================================================================
 
         [JsonPropertyName("part_uid_scheme"), JsonPropertyOrder(1)]
-        public string PartUIDScheme { get; set; } = "CMP-#######-####";
+        public string PartUIDScheme { get; set; } = "";
 
-        [JsonPropertyName("parameters"), JsonPropertyOrder(2)]
+        [JsonPropertyName("part_lib_name"), JsonPropertyOrder(2)]
+        public string KiCadExportPartLibraryName { get; set; } = "";
+
+        [JsonPropertyName("part_lib_desc"), JsonPropertyOrder(3)]
+        public string KiCadExportPartLibraryDescription { get; set; } = "";
+
+        [JsonPropertyName("export_odbc_name"), JsonPropertyOrder(4)]
+        public string KiCadExportOdbcName { get; set; } = "";
+
+        [JsonPropertyName("auto_export"), JsonPropertyOrder(5)]
+        public bool KiCadAutoExportOnSave { get; set; } = false;
+
+        [JsonPropertyName("auto_export_relative_path"), JsonPropertyOrder(6)]
+        public string KiCadAutoExportRelativePath { get; set; } = "";
+
+        [JsonPropertyName("parameters"), JsonPropertyOrder(7)]
         public List<JsonParameter> AllParameters { get; set; } = new();
 
-        [JsonPropertyName("top_level_categories"), JsonPropertyOrder(3)]
+        [JsonPropertyName("top_level_categories"), JsonPropertyOrder(8)]
         public List<JsonCategory> TopLevelCategories { get; set; } = new();
 
-        [JsonPropertyName("kicad_symbol_libraries"), JsonPropertyOrder(4)]
+        [JsonPropertyName("kicad_symbol_libraries"), JsonPropertyOrder(9)]
         public List<JsonKiCADSymbolLibrary> KiCADSymbolLibraries { get; set; } = new();
 
-        [JsonPropertyName("kicad_footprint_libraries"), JsonPropertyOrder(5)]
+        [JsonPropertyName("kicad_footprint_libraries"), JsonPropertyOrder(10)]
         public List<JsonKiCADFootprintLibrary> KiCADFootprintLibraries { get; set; } = new();
 
         [JsonConstructor]
@@ -72,6 +87,11 @@ namespace KiCAD_DB_Editor.Model.Json
         public JsonLibrary(Library library)
         {
             PartUIDScheme = library.PartUIDScheme;
+            KiCadExportPartLibraryName = library.KiCadExportPartLibraryName;
+            KiCadExportPartLibraryDescription = library.KiCadExportPartLibraryDescription;
+            KiCadExportOdbcName = library.KiCadExportOdbcName;
+            KiCadAutoExportOnSave = library.KiCadAutoExportOnSave;
+            KiCadAutoExportRelativePath = library.KiCadAutoExportRelativePath;
             AllParameters = new(library.AllParameters.Select(p => new JsonParameter(p)));
             TopLevelCategories = new(library.TopLevelCategories.Select(c => new JsonCategory(c)));
             KiCADSymbolLibraries = new(library.KiCADSymbolLibraries.Select(kSL => new JsonKiCADSymbolLibrary(kSL)));

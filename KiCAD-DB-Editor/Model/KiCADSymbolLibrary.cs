@@ -72,6 +72,7 @@ namespace KiCAD_DB_Editor.Model
         {
             // Need to parse the symbols from the provided library
             string absolutePath = Path.Combine(ParentLibrary.ProjectDirectoryPath, RelativePath);
+            absolutePath = (new Uri(absolutePath)).AbsolutePath;
             if (File.Exists(absolutePath))
             {
                 string fileText = File.ReadAllText(absolutePath);

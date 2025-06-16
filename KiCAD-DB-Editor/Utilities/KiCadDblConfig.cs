@@ -120,26 +120,26 @@ namespace KiCAD_DB_Editor.Utilities
         public static string Generate(KiCadDblLibraryData kiCadDblLibraryData)
         {
             string contents = contentsTemplate;
-            contents = contents.Replace("[[PART_LIB_NAME]]", kiCadDblLibraryData.PartLibName);
-            contents = contents.Replace("[[PART_LIB_DESC]]", kiCadDblLibraryData.PartLibDescription);
-            contents = contents.Replace("[[DSN_NAME]]", kiCadDblLibraryData.OdbcName);
+            contents = contents.Replace("[[PART_LIB_NAME]]", kiCadDblLibraryData.PartLibName.Replace("\"", "\\\""));
+            contents = contents.Replace("[[PART_LIB_DESC]]", kiCadDblLibraryData.PartLibDescription.Replace("\"", "\\\""));
+            contents = contents.Replace("[[DSN_NAME]]", kiCadDblLibraryData.OdbcName.Replace("\"", "\\\""));
 
             string tablesReplaceContents = "";
             foreach (var kiCadDblTableData in kiCadDblLibraryData.kiCadDblTableDatas)
             {
                 string tableReplaceContents = tableContentsTemplate;
-                tableReplaceContents = tableReplaceContents.Replace("[[TABLE_NAME]]", kiCadDblTableData.TableName);
-                tableReplaceContents = tableReplaceContents.Replace("[[KICAD_CATEGORY_NAME]]", kiCadDblTableData.CategoryName);
-                tableReplaceContents = tableReplaceContents.Replace("[[DB_KEY_FIELD_NAME]]", kiCadDblTableData.DbKeyFieldName);
-                tableReplaceContents = tableReplaceContents.Replace("[[DB_SYMBOLS_FIELD_NAME]]", kiCadDblTableData.DbSymbolsFieldName);
-                tableReplaceContents = tableReplaceContents.Replace("[[DB_FOOTPRINTS_FIELD_NAME]]", kiCadDblTableData.DbFootprintsFieldName);
+                tableReplaceContents = tableReplaceContents.Replace("[[TABLE_NAME]]", kiCadDblTableData.TableName.Replace("\"", "\\\""));
+                tableReplaceContents = tableReplaceContents.Replace("[[KICAD_CATEGORY_NAME]]", kiCadDblTableData.CategoryName.Replace("\"", "\\\""));
+                tableReplaceContents = tableReplaceContents.Replace("[[DB_KEY_FIELD_NAME]]", kiCadDblTableData.DbKeyFieldName.Replace("\"", "\\\""));
+                tableReplaceContents = tableReplaceContents.Replace("[[DB_SYMBOLS_FIELD_NAME]]", kiCadDblTableData.DbSymbolsFieldName.Replace("\"", "\\\""));
+                tableReplaceContents = tableReplaceContents.Replace("[[DB_FOOTPRINTS_FIELD_NAME]]", kiCadDblTableData.DbFootprintsFieldName.Replace("\"", "\\\""));
 
                 string fieldsReplaceContents = "";
                 foreach (var kicadDblFieldData in kiCadDblTableData.kiCadDblFieldDatas)
                 {
                     string fieldContents = fieldContentsTemplate;
-                    fieldContents = fieldContents.Replace("[[DB_FIELD_NAME]]", kicadDblFieldData.DbFieldName);
-                    fieldContents = fieldContents.Replace("[[KICAD_FIELD_NAME]]", kicadDblFieldData.KiCadFieldName);
+                    fieldContents = fieldContents.Replace("[[DB_FIELD_NAME]]", kicadDblFieldData.DbFieldName.Replace("\"", "\\\""));
+                    fieldContents = fieldContents.Replace("[[KICAD_FIELD_NAME]]", kicadDblFieldData.KiCadFieldName.Replace("\"", "\\\""));
                     fieldContents = fieldContents.Replace("[[FIELD_VISIBLE_IN_CHOOSER]]", kicadDblFieldData.FieldVisibleInChooser ? "true" : "false");
                     fieldContents = fieldContents.Replace("[[INHERIT_SYMBOL_PROPERTIES]]", kicadDblFieldData.InheritSymbolProperties ? "true" : "false");
                     fieldsReplaceContents += fieldContents + ",";
@@ -151,8 +151,8 @@ namespace KiCAD_DB_Editor.Utilities
                 foreach (var kicadDblPropertyData in kiCadDblTableData.kiCadDblPropertyDatas)
                 {
                     string propertyContents = propertyContentsTemplate;
-                    propertyContents = propertyContents.Replace("[[KICAD_PROPERTY_NAME]]", kicadDblPropertyData.KiCadPropertyName);
-                    propertyContents = propertyContents.Replace("[[DB_FIELD_NAME]]", kicadDblPropertyData.DbFieldName);
+                    propertyContents = propertyContents.Replace("[[KICAD_PROPERTY_NAME]]", kicadDblPropertyData.KiCadPropertyName.Replace("\"", "\\\""));
+                    propertyContents = propertyContents.Replace("[[DB_FIELD_NAME]]", kicadDblPropertyData.DbFieldName.Replace("\"", "\\\""));
 
                     propertiesReplaceContents += propertyContents + ",";
                 }

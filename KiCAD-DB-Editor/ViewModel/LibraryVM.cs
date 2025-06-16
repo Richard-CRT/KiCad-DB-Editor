@@ -341,7 +341,7 @@ namespace KiCAD_DB_Editor.ViewModel
             saveFileDialog.Filter = "Project file (*.kicad_dbl)|*.kicad_dbl|All files (*.*)|*.*";
             if (saveFileDialog.ShowDialog() == true)
             {
-                if (!this.Library.ExportToKiCAD(saveFileDialog.FileName))
+                if (!this.Library.ExportToKiCAD(false, saveFileDialog.FileName))
                 {
                     // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
                     (new View.Dialogs.Window_ErrorDialog("Export failed!")).ShowDialog();

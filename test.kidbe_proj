@@ -1,5 +1,10 @@
 {
   "part_uid_scheme": "CMP-#######-####",
+  "part_lib_name": "PART_LIB_NAME",
+  "part_lib_desc": "PART_LIB_DESCRIPTION",
+  "export_odbc_name": "ODBC_STRING",
+  "auto_export": true,
+  "auto_export_relative_path": "sample_kicad_library/kicad_db.kicad_dbl",
   "parameters": [
     {
       "uuid": "28268508-1b23-483b-901d-d9756d49e7e6",

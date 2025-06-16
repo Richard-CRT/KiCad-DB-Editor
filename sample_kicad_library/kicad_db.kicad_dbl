@@ -2,8 +2,8 @@
     "meta": {
         "version": 1.0
     },
-    "name": "PART_LIB_NAME",
-    "description": "PART_LIB_DESCRIPTION",
+    "name": "Sample Part Lib",
+    "description": "Sample part library used for testing and demonstrating the KiCad DB Editor",
     "source": {
         "type": "odbc",
         "dsn": "",

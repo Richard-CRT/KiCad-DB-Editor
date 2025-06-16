@@ -482,73 +482,75 @@ namespace KiCad_DB_Editor.Model
 
                     createTableCommand.ExecuteNonQuery();
 
-
-                    string insertPartsSql = "INSERT INTO \"Components\" (" +
-                        "\"Category\", " +
-                        "\"Part UID\", " +
-                        "\"Description\", " +
-                        "\"Manufacturer\", " +
-                        "\"MPN\", " +
-                        "\"Value\", " +
-                        "\"Datasheet\", " +
-                        "\"Exclude from BOM\", " +
-                        "\"Exclude from Board\", " +
-                        "\"Exclude from Sim\", " +
-                        "\"Symbol Library Name\", " +
-                        "\"Symbol Name\", ";
-                    for (int j = 1; j <= maxFootprints; j++)
+                    if (AllParts.Count > 0)
                     {
-                        insertPartsSql += $"\"Footprint {j} Library Name\", ";
-                        insertPartsSql += $"\"Footprint {j} Name\", ";
-                    }
-                    foreach (Parameter parameter in AllParameters)
-                        insertPartsSql += $"\"{parameter.Name.Replace("\"", "\"\"")} {parameter.UUID}\", ";
-                    insertPartsSql = insertPartsSql[..^2];
-                    insertPartsSql += ") VALUES ";
-                    foreach (Part part in AllParts)
-                    {
-                        insertPartsSql += "(" +
-                                $"'{categoryToCategoryStringMap[part.ParentCategory]}', " +
-                                $"'{part.PartUID.Replace("'", "''")}', " +
-                                $"'{part.Description.Replace("'", "''")}', " +
-                                $"'{part.Manufacturer.Replace("'", "''")}', " +
-                                $"'{part.MPN.Replace("'", "''")}', " +
-                                $"'{part.Value.Replace("'", "''")}', " +
-                                $"'{part.Datasheet.Replace("'", "''")}', " +
-                                $"{(part.ExcludeFromBOM ? 1 : 0)}, " +
-                                $"{(part.ExcludeFromBoard ? 1 : 0)}, " +
-                                $"{(part.ExcludeFromSim ? 1 : 0)}, " +
-                                $"'{part.SymbolLibraryName.Replace("'", "''")}', " +
-                                $"'{part.SymbolName.Replace("'", "''")}', ";
+                        string insertPartsSql = "INSERT INTO \"Components\" (" +
+                            "\"Category\", " +
+                            "\"Part UID\", " +
+                            "\"Description\", " +
+                            "\"Manufacturer\", " +
+                            "\"MPN\", " +
+                            "\"Value\", " +
+                            "\"Datasheet\", " +
+                            "\"Exclude from BOM\", " +
+                            "\"Exclude from Board\", " +
+                            "\"Exclude from Sim\", " +
+                            "\"Symbol Library Name\", " +
+                            "\"Symbol Name\", ";
                         for (int j = 1; j <= maxFootprints; j++)
                         {
-                            // We've previously asserted part.FootprintLibraryNames.Count == part.FootprintNames.Count
-                            if (j <= part.FootprintPairs.Count)
-                            {
-                                insertPartsSql += $"'{part.FootprintPairs[j - 1].Item1.Replace("'", "''")}', ";
-                                insertPartsSql += $"'{part.FootprintPairs[j - 1].Item2.Replace("'", "''")}', ";
-                            }
-                            else
-                            {
-                                insertPartsSql += $"NULL, NULL, ";
-                            }
+                            insertPartsSql += $"\"Footprint {j} Library Name\", ";
+                            insertPartsSql += $"\"Footprint {j} Name\", ";
                         }
                         foreach (Parameter parameter in AllParameters)
+                            insertPartsSql += $"\"{parameter.Name.Replace("\"", "\"\"")} {parameter.UUID}\", ";
+                        insertPartsSql = insertPartsSql[..^2];
+                        insertPartsSql += ") VALUES ";
+                        foreach (Part part in AllParts)
                         {
-                            if (part.ParameterValues.TryGetValue(parameter, out string? value))
-                                insertPartsSql += $"'{value.Replace("'", "''")}', ";
-                            else
-                                insertPartsSql += $"NULL, ";
+                            insertPartsSql += "(" +
+                                    $"'{categoryToCategoryStringMap[part.ParentCategory]}', " +
+                                    $"'{part.PartUID.Replace("'", "''")}', " +
+                                    $"'{part.Description.Replace("'", "''")}', " +
+                                    $"'{part.Manufacturer.Replace("'", "''")}', " +
+                                    $"'{part.MPN.Replace("'", "''")}', " +
+                                    $"'{part.Value.Replace("'", "''")}', " +
+                                    $"'{part.Datasheet.Replace("'", "''")}', " +
+                                    $"{(part.ExcludeFromBOM ? 1 : 0)}, " +
+                                    $"{(part.ExcludeFromBoard ? 1 : 0)}, " +
+                                    $"{(part.ExcludeFromSim ? 1 : 0)}, " +
+                                    $"'{part.SymbolLibraryName.Replace("'", "''")}', " +
+                                    $"'{part.SymbolName.Replace("'", "''")}', ";
+                            for (int j = 1; j <= maxFootprints; j++)
+                            {
+                                // We've previously asserted part.FootprintLibraryNames.Count == part.FootprintNames.Count
+                                if (j <= part.FootprintPairs.Count)
+                                {
+                                    insertPartsSql += $"'{part.FootprintPairs[j - 1].Item1.Replace("'", "''")}', ";
+                                    insertPartsSql += $"'{part.FootprintPairs[j - 1].Item2.Replace("'", "''")}', ";
+                                }
+                                else
+                                {
+                                    insertPartsSql += $"NULL, NULL, ";
+                                }
+                            }
+                            foreach (Parameter parameter in AllParameters)
+                            {
+                                if (part.ParameterValues.TryGetValue(parameter, out string? value))
+                                    insertPartsSql += $"'{value.Replace("'", "''")}', ";
+                                else
+                                    insertPartsSql += $"NULL, ";
+                            }
+                            insertPartsSql = insertPartsSql[..^2];
+                            insertPartsSql += "), ";
                         }
                         insertPartsSql = insertPartsSql[..^2];
-                        insertPartsSql += "), ";
+
+                        var insertPartsCommand = connection.CreateCommand();
+                        insertPartsCommand.CommandText = insertPartsSql;
+
+                        insertPartsCommand.ExecuteNonQuery();
                     }
-                    insertPartsSql = insertPartsSql[..^2];
-
-                    var insertPartsCommand = connection.CreateCommand();
-                    insertPartsCommand.CommandText = insertPartsSql;
-
-                    insertPartsCommand.ExecuteNonQuery();
 
                 }
                 SqliteConnection.ClearAllPools();

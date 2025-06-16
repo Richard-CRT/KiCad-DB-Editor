@@ -1,1298 +1,1298 @@
 {
-    "meta": {
-        "version": 1.0
-    },
-    "name": "Sample Part Lib",
-    "description": "Sample part library used for testing and demonstrating the KiCad DB Editor",
-    "source": {
-        "type": "odbc",
-        "dsn": "",
-        "username": "",
-        "password": "",
-        "timeout_seconds": 2,
-        "connection_string": "DSN=ODBC_STRING;"
-    },
-    "libraries": [
+  "meta": {
+    "version": 0
+  },
+  "name": "Sample Part Lib",
+  "description": "Sample part library used for testing and demonstrating the KiCad DB Editor",
+  "source": {
+    "type": "odbc",
+    "dsn": "",
+    "username": "",
+    "password": "",
+    "timeout_seconds": 2,
+    "connection_string": "DSN=sample_kicad_db;"
+  },
+  "libraries": [
+    {
+      "name": "Capacitors",
+      "table": "Capacitors",
+      "key": "Part UID",
+      "symbols": "Schematic Symbol",
+      "footprints": "Footprints",
+      "fields": [
         {
-            "name": "Capacitors",
-            "table": "Capacitors",
-            "key": "Part UID",
-            "symbols": "Schematic Symbol",
-            "footprints": "Footprints",
-            "fields": [
-                {
-                    "column": "Part UID",
-                    "name": "Part UID",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Manufacturer",
-                    "name": "Manufacturer",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "MPN",
-                    "name": "MPN",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Value",
-                    "name": "Value",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Datasheet",
-                    "name": "Datasheet",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                }
-            ],
-            "properties": {
-                "description": "Description",
-                "exclude_from_bom": "Exclude from BOM",
-                "exclude_from_board": "Exclude from Board",
-                "exclude_from_sim": "Exclude from Sim"
-            }
+          "column": "Part UID",
+          "name": "Part UID",
+          "visible_in_chooser": true,
+          "inherit_properties": true
         },
         {
-            "name": "Connectors",
-            "table": "Connectors",
-            "key": "Part UID",
-            "symbols": "Schematic Symbol",
-            "footprints": "Footprints",
-            "fields": [
-                {
-                    "column": "Part UID",
-                    "name": "Part UID",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Manufacturer",
-                    "name": "Manufacturer",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "MPN",
-                    "name": "MPN",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Value",
-                    "name": "Value",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Datasheet",
-                    "name": "Datasheet",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Package",
-                    "name": "Package",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                }
-            ],
-            "properties": {
-                "description": "Description",
-                "exclude_from_bom": "Exclude from BOM",
-                "exclude_from_board": "Exclude from Board",
-                "exclude_from_sim": "Exclude from Sim"
-            }
+          "column": "Manufacturer",
+          "name": "Manufacturer",
+          "visible_in_chooser": true,
+          "inherit_properties": true
         },
         {
-            "name": "Diodes",
-            "table": "Diodes",
-            "key": "Part UID",
-            "symbols": "Schematic Symbol",
-            "footprints": "Footprints",
-            "fields": [
-                {
-                    "column": "Part UID",
-                    "name": "Part UID",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Manufacturer",
-                    "name": "Manufacturer",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "MPN",
-                    "name": "MPN",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Value",
-                    "name": "Value",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Datasheet",
-                    "name": "Datasheet",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Notes",
-                    "name": "Notes",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                }
-            ],
-            "properties": {
-                "description": "Description",
-                "exclude_from_bom": "Exclude from BOM",
-                "exclude_from_board": "Exclude from Board",
-                "exclude_from_sim": "Exclude from Sim"
-            }
+          "column": "MPN",
+          "name": "MPN",
+          "visible_in_chooser": true,
+          "inherit_properties": true
         },
         {
-            "name": "Fiducials",
-            "table": "Fiducials",
-            "key": "Part UID",
-            "symbols": "Schematic Symbol",
-            "footprints": "Footprints",
-            "fields": [
-                {
-                    "column": "Part UID",
-                    "name": "Part UID",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Manufacturer",
-                    "name": "Manufacturer",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "MPN",
-                    "name": "MPN",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Value",
-                    "name": "Value",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Datasheet",
-                    "name": "Datasheet",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                }
-            ],
-            "properties": {
-                "description": "Description",
-                "exclude_from_bom": "Exclude from BOM",
-                "exclude_from_board": "Exclude from Board",
-                "exclude_from_sim": "Exclude from Sim"
-            }
+          "column": "Value",
+          "name": "Value",
+          "visible_in_chooser": true,
+          "inherit_properties": true
         },
         {
-            "name": "Frequency & Timing",
-            "table": "Frequency & Timing",
-            "key": "Part UID",
-            "symbols": "Schematic Symbol",
-            "footprints": "Footprints",
-            "fields": [
-                {
-                    "column": "Part UID",
-                    "name": "Part UID",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Manufacturer",
-                    "name": "Manufacturer",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "MPN",
-                    "name": "MPN",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Value",
-                    "name": "Value",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Datasheet",
-                    "name": "Datasheet",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                }
-            ],
-            "properties": {
-                "description": "Description",
-                "exclude_from_bom": "Exclude from BOM",
-                "exclude_from_board": "Exclude from Board",
-                "exclude_from_sim": "Exclude from Sim"
-            }
-        },
-        {
-            "name": "Graphical",
-            "table": "Graphical",
-            "key": "Part UID",
-            "symbols": "Schematic Symbol",
-            "footprints": "Footprints",
-            "fields": [
-                {
-                    "column": "Part UID",
-                    "name": "Part UID",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Manufacturer",
-                    "name": "Manufacturer",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "MPN",
-                    "name": "MPN",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Value",
-                    "name": "Value",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Datasheet",
-                    "name": "Datasheet",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                }
-            ],
-            "properties": {
-                "description": "Description",
-                "exclude_from_bom": "Exclude from BOM",
-                "exclude_from_board": "Exclude from Board",
-                "exclude_from_sim": "Exclude from Sim"
-            }
-        },
-        {
-            "name": "Inductors",
-            "table": "Inductors",
-            "key": "Part UID",
-            "symbols": "Schematic Symbol",
-            "footprints": "Footprints",
-            "fields": [
-                {
-                    "column": "Part UID",
-                    "name": "Part UID",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Manufacturer",
-                    "name": "Manufacturer",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "MPN",
-                    "name": "MPN",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Value",
-                    "name": "Value",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Datasheet",
-                    "name": "Datasheet",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                }
-            ],
-            "properties": {
-                "description": "Description",
-                "exclude_from_bom": "Exclude from BOM",
-                "exclude_from_board": "Exclude from Board",
-                "exclude_from_sim": "Exclude from Sim"
-            }
-        },
-        {
-            "name": "Integrated Circuits",
-            "table": "Integrated Circuits",
-            "key": "Part UID",
-            "symbols": "Schematic Symbol",
-            "footprints": "Footprints",
-            "fields": [
-                {
-                    "column": "Part UID",
-                    "name": "Part UID",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Manufacturer",
-                    "name": "Manufacturer",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "MPN",
-                    "name": "MPN",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Value",
-                    "name": "Value",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Datasheet",
-                    "name": "Datasheet",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                }
-            ],
-            "properties": {
-                "description": "Description",
-                "exclude_from_bom": "Exclude from BOM",
-                "exclude_from_board": "Exclude from Board",
-                "exclude_from_sim": "Exclude from Sim"
-            }
-        },
-        {
-            "name": "LED",
-            "table": "LED",
-            "key": "Part UID",
-            "symbols": "Schematic Symbol",
-            "footprints": "Footprints",
-            "fields": [
-                {
-                    "column": "Part UID",
-                    "name": "Part UID",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Manufacturer",
-                    "name": "Manufacturer",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "MPN",
-                    "name": "MPN",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Value",
-                    "name": "Value",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Datasheet",
-                    "name": "Datasheet",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                }
-            ],
-            "properties": {
-                "description": "Description",
-                "exclude_from_bom": "Exclude from BOM",
-                "exclude_from_board": "Exclude from Board",
-                "exclude_from_sim": "Exclude from Sim"
-            }
-        },
-        {
-            "name": "Mechanical",
-            "table": "Mechanical",
-            "key": "Part UID",
-            "symbols": "Schematic Symbol",
-            "footprints": "Footprints",
-            "fields": [
-                {
-                    "column": "Part UID",
-                    "name": "Part UID",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Manufacturer",
-                    "name": "Manufacturer",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "MPN",
-                    "name": "MPN",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Value",
-                    "name": "Value",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Datasheet",
-                    "name": "Datasheet",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                }
-            ],
-            "properties": {
-                "description": "Description",
-                "exclude_from_bom": "Exclude from BOM",
-                "exclude_from_board": "Exclude from Board",
-                "exclude_from_sim": "Exclude from Sim"
-            }
-        },
-        {
-            "name": "Miscellaneous",
-            "table": "Miscellaneous",
-            "key": "Part UID",
-            "symbols": "Schematic Symbol",
-            "footprints": "Footprints",
-            "fields": [
-                {
-                    "column": "Part UID",
-                    "name": "Part UID",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Manufacturer",
-                    "name": "Manufacturer",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "MPN",
-                    "name": "MPN",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Value",
-                    "name": "Value",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Datasheet",
-                    "name": "Datasheet",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                }
-            ],
-            "properties": {
-                "description": "Description",
-                "exclude_from_bom": "Exclude from BOM",
-                "exclude_from_board": "Exclude from Board",
-                "exclude_from_sim": "Exclude from Sim"
-            }
-        },
-        {
-            "name": "Radio & RF",
-            "table": "Radio & RF",
-            "key": "Part UID",
-            "symbols": "Schematic Symbol",
-            "footprints": "Footprints",
-            "fields": [
-                {
-                    "column": "Part UID",
-                    "name": "Part UID",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Manufacturer",
-                    "name": "Manufacturer",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "MPN",
-                    "name": "MPN",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Value",
-                    "name": "Value",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Datasheet",
-                    "name": "Datasheet",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                }
-            ],
-            "properties": {
-                "description": "Description",
-                "exclude_from_bom": "Exclude from BOM",
-                "exclude_from_board": "Exclude from Board",
-                "exclude_from_sim": "Exclude from Sim"
-            }
-        },
-        {
-            "name": "Relays",
-            "table": "Relays",
-            "key": "Part UID",
-            "symbols": "Schematic Symbol",
-            "footprints": "Footprints",
-            "fields": [
-                {
-                    "column": "Part UID",
-                    "name": "Part UID",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Manufacturer",
-                    "name": "Manufacturer",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "MPN",
-                    "name": "MPN",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Value",
-                    "name": "Value",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Datasheet",
-                    "name": "Datasheet",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                }
-            ],
-            "properties": {
-                "description": "Description",
-                "exclude_from_bom": "Exclude from BOM",
-                "exclude_from_board": "Exclude from Board",
-                "exclude_from_sim": "Exclude from Sim"
-            }
-        },
-        {
-            "name": "Resistors",
-            "table": "Resistors",
-            "key": "Part UID",
-            "symbols": "Schematic Symbol",
-            "footprints": "Footprints",
-            "fields": [
-                {
-                    "column": "Part UID",
-                    "name": "Part UID",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Manufacturer",
-                    "name": "Manufacturer",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "MPN",
-                    "name": "MPN",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Value",
-                    "name": "Value",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Datasheet",
-                    "name": "Datasheet",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                }
-            ],
-            "properties": {
-                "description": "Description",
-                "exclude_from_bom": "Exclude from BOM",
-                "exclude_from_board": "Exclude from Board",
-                "exclude_from_sim": "Exclude from Sim"
-            }
-        },
-        {
-            "name": "Sensors",
-            "table": "Sensors",
-            "key": "Part UID",
-            "symbols": "Schematic Symbol",
-            "footprints": "Footprints",
-            "fields": [
-                {
-                    "column": "Part UID",
-                    "name": "Part UID",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Manufacturer",
-                    "name": "Manufacturer",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "MPN",
-                    "name": "MPN",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Value",
-                    "name": "Value",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Datasheet",
-                    "name": "Datasheet",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                }
-            ],
-            "properties": {
-                "description": "Description",
-                "exclude_from_bom": "Exclude from BOM",
-                "exclude_from_board": "Exclude from Board",
-                "exclude_from_sim": "Exclude from Sim"
-            }
-        },
-        {
-            "name": "Switches",
-            "table": "Switches",
-            "key": "Part UID",
-            "symbols": "Schematic Symbol",
-            "footprints": "Footprints",
-            "fields": [
-                {
-                    "column": "Part UID",
-                    "name": "Part UID",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Manufacturer",
-                    "name": "Manufacturer",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "MPN",
-                    "name": "MPN",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Value",
-                    "name": "Value",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Datasheet",
-                    "name": "Datasheet",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                }
-            ],
-            "properties": {
-                "description": "Description",
-                "exclude_from_bom": "Exclude from BOM",
-                "exclude_from_board": "Exclude from Board",
-                "exclude_from_sim": "Exclude from Sim"
-            }
-        },
-        {
-            "name": "Test Points",
-            "table": "Test Points",
-            "key": "Part UID",
-            "symbols": "Schematic Symbol",
-            "footprints": "Footprints",
-            "fields": [
-                {
-                    "column": "Part UID",
-                    "name": "Part UID",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Manufacturer",
-                    "name": "Manufacturer",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "MPN",
-                    "name": "MPN",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Value",
-                    "name": "Value",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Datasheet",
-                    "name": "Datasheet",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                }
-            ],
-            "properties": {
-                "description": "Description",
-                "exclude_from_bom": "Exclude from BOM",
-                "exclude_from_board": "Exclude from Board",
-                "exclude_from_sim": "Exclude from Sim"
-            }
-        },
-        {
-            "name": "Transistors",
-            "table": "Transistors",
-            "key": "Part UID",
-            "symbols": "Schematic Symbol",
-            "footprints": "Footprints",
-            "fields": [
-                {
-                    "column": "Part UID",
-                    "name": "Part UID",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Manufacturer",
-                    "name": "Manufacturer",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "MPN",
-                    "name": "MPN",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Value",
-                    "name": "Value",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Datasheet",
-                    "name": "Datasheet",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                }
-            ],
-            "properties": {
-                "description": "Description",
-                "exclude_from_bom": "Exclude from BOM",
-                "exclude_from_board": "Exclude from Board",
-                "exclude_from_sim": "Exclude from Sim"
-            }
-        },
-        {
-            "name": "Card Edge Connectors",
-            "table": "Connectors | Card Edge Connectors",
-            "key": "Part UID",
-            "symbols": "Schematic Symbol",
-            "footprints": "Footprints",
-            "fields": [
-                {
-                    "column": "Part UID",
-                    "name": "Part UID",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Manufacturer",
-                    "name": "Manufacturer",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "MPN",
-                    "name": "MPN",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Value",
-                    "name": "Value",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Datasheet",
-                    "name": "Datasheet",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Package",
-                    "name": "Package",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                }
-            ],
-            "properties": {
-                "description": "Description",
-                "exclude_from_bom": "Exclude from BOM",
-                "exclude_from_board": "Exclude from Board",
-                "exclude_from_sim": "Exclude from Sim"
-            }
-        },
-        {
-            "name": "Headers & Wire Housings",
-            "table": "Connectors | Headers & Wire Housings",
-            "key": "Part UID",
-            "symbols": "Schematic Symbol",
-            "footprints": "Footprints",
-            "fields": [
-                {
-                    "column": "Part UID",
-                    "name": "Part UID",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Manufacturer",
-                    "name": "Manufacturer",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "MPN",
-                    "name": "MPN",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Value",
-                    "name": "Value",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Datasheet",
-                    "name": "Datasheet",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Package",
-                    "name": "Package",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                }
-            ],
-            "properties": {
-                "description": "Description",
-                "exclude_from_bom": "Exclude from BOM",
-                "exclude_from_board": "Exclude from Board",
-                "exclude_from_sim": "Exclude from Sim"
-            }
-        },
-        {
-            "name": "RF",
-            "table": "Connectors | RF",
-            "key": "Part UID",
-            "symbols": "Schematic Symbol",
-            "footprints": "Footprints",
-            "fields": [
-                {
-                    "column": "Part UID",
-                    "name": "Part UID",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Manufacturer",
-                    "name": "Manufacturer",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "MPN",
-                    "name": "MPN",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Value",
-                    "name": "Value",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Datasheet",
-                    "name": "Datasheet",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "BOM Comments",
-                    "name": "BOM Comments",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Package",
-                    "name": "Package",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                }
-            ],
-            "properties": {
-                "description": "Description",
-                "exclude_from_bom": "Exclude from BOM",
-                "exclude_from_board": "Exclude from Board",
-                "exclude_from_sim": "Exclude from Sim"
-            }
-        },
-        {
-            "name": "Schottky",
-            "table": "Diodes | Schottky",
-            "key": "Part UID",
-            "symbols": "Schematic Symbol",
-            "footprints": "Footprints",
-            "fields": [
-                {
-                    "column": "Part UID",
-                    "name": "Part UID",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Manufacturer",
-                    "name": "Manufacturer",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "MPN",
-                    "name": "MPN",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Value",
-                    "name": "Value",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Datasheet",
-                    "name": "Datasheet",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Notes",
-                    "name": "Notes",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                }
-            ],
-            "properties": {
-                "description": "Description",
-                "exclude_from_bom": "Exclude from BOM",
-                "exclude_from_board": "Exclude from Board",
-                "exclude_from_sim": "Exclude from Sim"
-            }
-        },
-        {
-            "name": "TVS",
-            "table": "Diodes | TVS",
-            "key": "Part UID",
-            "symbols": "Schematic Symbol",
-            "footprints": "Footprints",
-            "fields": [
-                {
-                    "column": "Part UID",
-                    "name": "Part UID",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Manufacturer",
-                    "name": "Manufacturer",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "MPN",
-                    "name": "MPN",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Value",
-                    "name": "Value",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Datasheet",
-                    "name": "Datasheet",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Notes",
-                    "name": "Notes",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                }
-            ],
-            "properties": {
-                "description": "Description",
-                "exclude_from_bom": "Exclude from BOM",
-                "exclude_from_board": "Exclude from Board",
-                "exclude_from_sim": "Exclude from Sim"
-            }
-        },
-        {
-            "name": "Zener",
-            "table": "Diodes | Zener",
-            "key": "Part UID",
-            "symbols": "Schematic Symbol",
-            "footprints": "Footprints",
-            "fields": [
-                {
-                    "column": "Part UID",
-                    "name": "Part UID",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Manufacturer",
-                    "name": "Manufacturer",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "MPN",
-                    "name": "MPN",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Value",
-                    "name": "Value",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Datasheet",
-                    "name": "Datasheet",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Notes",
-                    "name": "Notes",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                }
-            ],
-            "properties": {
-                "description": "Description",
-                "exclude_from_bom": "Exclude from BOM",
-                "exclude_from_board": "Exclude from Board",
-                "exclude_from_sim": "Exclude from Sim"
-            }
-        },
-        {
-            "name": "Crystals",
-            "table": "Frequency & Timing | Crystals",
-            "key": "Part UID",
-            "symbols": "Schematic Symbol",
-            "footprints": "Footprints",
-            "fields": [
-                {
-                    "column": "Part UID",
-                    "name": "Part UID",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Manufacturer",
-                    "name": "Manufacturer",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "MPN",
-                    "name": "MPN",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Value",
-                    "name": "Value",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Datasheet",
-                    "name": "Datasheet",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                }
-            ],
-            "properties": {
-                "description": "Description",
-                "exclude_from_bom": "Exclude from BOM",
-                "exclude_from_board": "Exclude from Board",
-                "exclude_from_sim": "Exclude from Sim"
-            }
-        },
-        {
-            "name": "Oscillators",
-            "table": "Frequency & Timing | Oscillators",
-            "key": "Part UID",
-            "symbols": "Schematic Symbol",
-            "footprints": "Footprints",
-            "fields": [
-                {
-                    "column": "Part UID",
-                    "name": "Part UID",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Manufacturer",
-                    "name": "Manufacturer",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "MPN",
-                    "name": "MPN",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Value",
-                    "name": "Value",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Datasheet",
-                    "name": "Datasheet",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                }
-            ],
-            "properties": {
-                "description": "Description",
-                "exclude_from_bom": "Exclude from BOM",
-                "exclude_from_board": "Exclude from Board",
-                "exclude_from_sim": "Exclude from Sim"
-            }
-        },
-        {
-            "name": "SMA",
-            "table": "Connectors | RF | SMA",
-            "key": "Part UID",
-            "symbols": "Schematic Symbol",
-            "footprints": "Footprints",
-            "fields": [
-                {
-                    "column": "Part UID",
-                    "name": "Part UID",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Manufacturer",
-                    "name": "Manufacturer",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "MPN",
-                    "name": "MPN",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Value",
-                    "name": "Value",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Datasheet",
-                    "name": "Datasheet",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "BOM Comments",
-                    "name": "BOM Comments",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                },
-                {
-                    "column": "Package",
-                    "name": "Package",
-                    "visible_in_chooser": true,
-                    "inherit_properties": true
-                }
-            ],
-            "properties": {
-                "description": "Description",
-                "exclude_from_bom": "Exclude from BOM",
-                "exclude_from_board": "Exclude from Board",
-                "exclude_from_sim": "Exclude from Sim"
-            }
+          "column": "Datasheet",
+          "name": "Datasheet",
+          "visible_in_chooser": true,
+          "inherit_properties": true
         }
-    ]
+      ],
+      "properties": {
+        "description": "Description",
+        "exclude_from_bom": "Exclude from BOM",
+        "exclude_from_board": "Exclude from Board",
+        "exclude_from_sim": "Exclude from Sim"
+      }
+    },
+    {
+      "name": "Connectors",
+      "table": "Connectors",
+      "key": "Part UID",
+      "symbols": "Schematic Symbol",
+      "footprints": "Footprints",
+      "fields": [
+        {
+          "column": "Part UID",
+          "name": "Part UID",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Manufacturer",
+          "name": "Manufacturer",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "MPN",
+          "name": "MPN",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Value",
+          "name": "Value",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Datasheet",
+          "name": "Datasheet",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Package",
+          "name": "Package",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        }
+      ],
+      "properties": {
+        "description": "Description",
+        "exclude_from_bom": "Exclude from BOM",
+        "exclude_from_board": "Exclude from Board",
+        "exclude_from_sim": "Exclude from Sim"
+      }
+    },
+    {
+      "name": "Diodes",
+      "table": "Diodes",
+      "key": "Part UID",
+      "symbols": "Schematic Symbol",
+      "footprints": "Footprints",
+      "fields": [
+        {
+          "column": "Part UID",
+          "name": "Part UID",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Manufacturer",
+          "name": "Manufacturer",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "MPN",
+          "name": "MPN",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Value",
+          "name": "Value",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Datasheet",
+          "name": "Datasheet",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Notes",
+          "name": "Notes",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        }
+      ],
+      "properties": {
+        "description": "Description",
+        "exclude_from_bom": "Exclude from BOM",
+        "exclude_from_board": "Exclude from Board",
+        "exclude_from_sim": "Exclude from Sim"
+      }
+    },
+    {
+      "name": "Fiducials",
+      "table": "Fiducials",
+      "key": "Part UID",
+      "symbols": "Schematic Symbol",
+      "footprints": "Footprints",
+      "fields": [
+        {
+          "column": "Part UID",
+          "name": "Part UID",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Manufacturer",
+          "name": "Manufacturer",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "MPN",
+          "name": "MPN",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Value",
+          "name": "Value",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Datasheet",
+          "name": "Datasheet",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        }
+      ],
+      "properties": {
+        "description": "Description",
+        "exclude_from_bom": "Exclude from BOM",
+        "exclude_from_board": "Exclude from Board",
+        "exclude_from_sim": "Exclude from Sim"
+      }
+    },
+    {
+      "name": "Frequency \u0026 Timing",
+      "table": "Frequency \u0026 Timing",
+      "key": "Part UID",
+      "symbols": "Schematic Symbol",
+      "footprints": "Footprints",
+      "fields": [
+        {
+          "column": "Part UID",
+          "name": "Part UID",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Manufacturer",
+          "name": "Manufacturer",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "MPN",
+          "name": "MPN",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Value",
+          "name": "Value",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Datasheet",
+          "name": "Datasheet",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        }
+      ],
+      "properties": {
+        "description": "Description",
+        "exclude_from_bom": "Exclude from BOM",
+        "exclude_from_board": "Exclude from Board",
+        "exclude_from_sim": "Exclude from Sim"
+      }
+    },
+    {
+      "name": "Graphical",
+      "table": "Graphical",
+      "key": "Part UID",
+      "symbols": "Schematic Symbol",
+      "footprints": "Footprints",
+      "fields": [
+        {
+          "column": "Part UID",
+          "name": "Part UID",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Manufacturer",
+          "name": "Manufacturer",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "MPN",
+          "name": "MPN",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Value",
+          "name": "Value",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Datasheet",
+          "name": "Datasheet",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        }
+      ],
+      "properties": {
+        "description": "Description",
+        "exclude_from_bom": "Exclude from BOM",
+        "exclude_from_board": "Exclude from Board",
+        "exclude_from_sim": "Exclude from Sim"
+      }
+    },
+    {
+      "name": "Inductors",
+      "table": "Inductors",
+      "key": "Part UID",
+      "symbols": "Schematic Symbol",
+      "footprints": "Footprints",
+      "fields": [
+        {
+          "column": "Part UID",
+          "name": "Part UID",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Manufacturer",
+          "name": "Manufacturer",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "MPN",
+          "name": "MPN",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Value",
+          "name": "Value",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Datasheet",
+          "name": "Datasheet",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        }
+      ],
+      "properties": {
+        "description": "Description",
+        "exclude_from_bom": "Exclude from BOM",
+        "exclude_from_board": "Exclude from Board",
+        "exclude_from_sim": "Exclude from Sim"
+      }
+    },
+    {
+      "name": "Integrated Circuits",
+      "table": "Integrated Circuits",
+      "key": "Part UID",
+      "symbols": "Schematic Symbol",
+      "footprints": "Footprints",
+      "fields": [
+        {
+          "column": "Part UID",
+          "name": "Part UID",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Manufacturer",
+          "name": "Manufacturer",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "MPN",
+          "name": "MPN",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Value",
+          "name": "Value",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Datasheet",
+          "name": "Datasheet",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        }
+      ],
+      "properties": {
+        "description": "Description",
+        "exclude_from_bom": "Exclude from BOM",
+        "exclude_from_board": "Exclude from Board",
+        "exclude_from_sim": "Exclude from Sim"
+      }
+    },
+    {
+      "name": "LED",
+      "table": "LED",
+      "key": "Part UID",
+      "symbols": "Schematic Symbol",
+      "footprints": "Footprints",
+      "fields": [
+        {
+          "column": "Part UID",
+          "name": "Part UID",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Manufacturer",
+          "name": "Manufacturer",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "MPN",
+          "name": "MPN",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Value",
+          "name": "Value",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Datasheet",
+          "name": "Datasheet",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        }
+      ],
+      "properties": {
+        "description": "Description",
+        "exclude_from_bom": "Exclude from BOM",
+        "exclude_from_board": "Exclude from Board",
+        "exclude_from_sim": "Exclude from Sim"
+      }
+    },
+    {
+      "name": "Mechanical",
+      "table": "Mechanical",
+      "key": "Part UID",
+      "symbols": "Schematic Symbol",
+      "footprints": "Footprints",
+      "fields": [
+        {
+          "column": "Part UID",
+          "name": "Part UID",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Manufacturer",
+          "name": "Manufacturer",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "MPN",
+          "name": "MPN",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Value",
+          "name": "Value",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Datasheet",
+          "name": "Datasheet",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        }
+      ],
+      "properties": {
+        "description": "Description",
+        "exclude_from_bom": "Exclude from BOM",
+        "exclude_from_board": "Exclude from Board",
+        "exclude_from_sim": "Exclude from Sim"
+      }
+    },
+    {
+      "name": "Miscellaneous",
+      "table": "Miscellaneous",
+      "key": "Part UID",
+      "symbols": "Schematic Symbol",
+      "footprints": "Footprints",
+      "fields": [
+        {
+          "column": "Part UID",
+          "name": "Part UID",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Manufacturer",
+          "name": "Manufacturer",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "MPN",
+          "name": "MPN",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Value",
+          "name": "Value",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Datasheet",
+          "name": "Datasheet",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        }
+      ],
+      "properties": {
+        "description": "Description",
+        "exclude_from_bom": "Exclude from BOM",
+        "exclude_from_board": "Exclude from Board",
+        "exclude_from_sim": "Exclude from Sim"
+      }
+    },
+    {
+      "name": "Radio \u0026 RF",
+      "table": "Radio \u0026 RF",
+      "key": "Part UID",
+      "symbols": "Schematic Symbol",
+      "footprints": "Footprints",
+      "fields": [
+        {
+          "column": "Part UID",
+          "name": "Part UID",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Manufacturer",
+          "name": "Manufacturer",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "MPN",
+          "name": "MPN",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Value",
+          "name": "Value",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Datasheet",
+          "name": "Datasheet",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        }
+      ],
+      "properties": {
+        "description": "Description",
+        "exclude_from_bom": "Exclude from BOM",
+        "exclude_from_board": "Exclude from Board",
+        "exclude_from_sim": "Exclude from Sim"
+      }
+    },
+    {
+      "name": "Relays",
+      "table": "Relays",
+      "key": "Part UID",
+      "symbols": "Schematic Symbol",
+      "footprints": "Footprints",
+      "fields": [
+        {
+          "column": "Part UID",
+          "name": "Part UID",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Manufacturer",
+          "name": "Manufacturer",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "MPN",
+          "name": "MPN",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Value",
+          "name": "Value",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Datasheet",
+          "name": "Datasheet",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        }
+      ],
+      "properties": {
+        "description": "Description",
+        "exclude_from_bom": "Exclude from BOM",
+        "exclude_from_board": "Exclude from Board",
+        "exclude_from_sim": "Exclude from Sim"
+      }
+    },
+    {
+      "name": "Resistors",
+      "table": "Resistors",
+      "key": "Part UID",
+      "symbols": "Schematic Symbol",
+      "footprints": "Footprints",
+      "fields": [
+        {
+          "column": "Part UID",
+          "name": "Part UID",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Manufacturer",
+          "name": "Manufacturer",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "MPN",
+          "name": "MPN",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Value",
+          "name": "Value",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Datasheet",
+          "name": "Datasheet",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        }
+      ],
+      "properties": {
+        "description": "Description",
+        "exclude_from_bom": "Exclude from BOM",
+        "exclude_from_board": "Exclude from Board",
+        "exclude_from_sim": "Exclude from Sim"
+      }
+    },
+    {
+      "name": "Sensors",
+      "table": "Sensors",
+      "key": "Part UID",
+      "symbols": "Schematic Symbol",
+      "footprints": "Footprints",
+      "fields": [
+        {
+          "column": "Part UID",
+          "name": "Part UID",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Manufacturer",
+          "name": "Manufacturer",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "MPN",
+          "name": "MPN",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Value",
+          "name": "Value",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Datasheet",
+          "name": "Datasheet",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        }
+      ],
+      "properties": {
+        "description": "Description",
+        "exclude_from_bom": "Exclude from BOM",
+        "exclude_from_board": "Exclude from Board",
+        "exclude_from_sim": "Exclude from Sim"
+      }
+    },
+    {
+      "name": "Switches",
+      "table": "Switches",
+      "key": "Part UID",
+      "symbols": "Schematic Symbol",
+      "footprints": "Footprints",
+      "fields": [
+        {
+          "column": "Part UID",
+          "name": "Part UID",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Manufacturer",
+          "name": "Manufacturer",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "MPN",
+          "name": "MPN",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Value",
+          "name": "Value",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Datasheet",
+          "name": "Datasheet",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        }
+      ],
+      "properties": {
+        "description": "Description",
+        "exclude_from_bom": "Exclude from BOM",
+        "exclude_from_board": "Exclude from Board",
+        "exclude_from_sim": "Exclude from Sim"
+      }
+    },
+    {
+      "name": "Test Points",
+      "table": "Test Points",
+      "key": "Part UID",
+      "symbols": "Schematic Symbol",
+      "footprints": "Footprints",
+      "fields": [
+        {
+          "column": "Part UID",
+          "name": "Part UID",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Manufacturer",
+          "name": "Manufacturer",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "MPN",
+          "name": "MPN",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Value",
+          "name": "Value",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Datasheet",
+          "name": "Datasheet",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        }
+      ],
+      "properties": {
+        "description": "Description",
+        "exclude_from_bom": "Exclude from BOM",
+        "exclude_from_board": "Exclude from Board",
+        "exclude_from_sim": "Exclude from Sim"
+      }
+    },
+    {
+      "name": "Transistors",
+      "table": "Transistors",
+      "key": "Part UID",
+      "symbols": "Schematic Symbol",
+      "footprints": "Footprints",
+      "fields": [
+        {
+          "column": "Part UID",
+          "name": "Part UID",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Manufacturer",
+          "name": "Manufacturer",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "MPN",
+          "name": "MPN",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Value",
+          "name": "Value",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Datasheet",
+          "name": "Datasheet",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        }
+      ],
+      "properties": {
+        "description": "Description",
+        "exclude_from_bom": "Exclude from BOM",
+        "exclude_from_board": "Exclude from Board",
+        "exclude_from_sim": "Exclude from Sim"
+      }
+    },
+    {
+      "name": "Card Edge Connectors",
+      "table": "Connectors | Card Edge Connectors",
+      "key": "Part UID",
+      "symbols": "Schematic Symbol",
+      "footprints": "Footprints",
+      "fields": [
+        {
+          "column": "Part UID",
+          "name": "Part UID",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Manufacturer",
+          "name": "Manufacturer",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "MPN",
+          "name": "MPN",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Value",
+          "name": "Value",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Datasheet",
+          "name": "Datasheet",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Package",
+          "name": "Package",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        }
+      ],
+      "properties": {
+        "description": "Description",
+        "exclude_from_bom": "Exclude from BOM",
+        "exclude_from_board": "Exclude from Board",
+        "exclude_from_sim": "Exclude from Sim"
+      }
+    },
+    {
+      "name": "Headers \u0026 Wire Housings",
+      "table": "Connectors | Headers \u0026 Wire Housings",
+      "key": "Part UID",
+      "symbols": "Schematic Symbol",
+      "footprints": "Footprints",
+      "fields": [
+        {
+          "column": "Part UID",
+          "name": "Part UID",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Manufacturer",
+          "name": "Manufacturer",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "MPN",
+          "name": "MPN",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Value",
+          "name": "Value",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Datasheet",
+          "name": "Datasheet",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Package",
+          "name": "Package",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        }
+      ],
+      "properties": {
+        "description": "Description",
+        "exclude_from_bom": "Exclude from BOM",
+        "exclude_from_board": "Exclude from Board",
+        "exclude_from_sim": "Exclude from Sim"
+      }
+    },
+    {
+      "name": "RF",
+      "table": "Connectors | RF",
+      "key": "Part UID",
+      "symbols": "Schematic Symbol",
+      "footprints": "Footprints",
+      "fields": [
+        {
+          "column": "Part UID",
+          "name": "Part UID",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Manufacturer",
+          "name": "Manufacturer",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "MPN",
+          "name": "MPN",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Value",
+          "name": "Value",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Datasheet",
+          "name": "Datasheet",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "BOM Comments",
+          "name": "BOM Comments",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Package",
+          "name": "Package",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        }
+      ],
+      "properties": {
+        "description": "Description",
+        "exclude_from_bom": "Exclude from BOM",
+        "exclude_from_board": "Exclude from Board",
+        "exclude_from_sim": "Exclude from Sim"
+      }
+    },
+    {
+      "name": "Schottky",
+      "table": "Diodes | Schottky",
+      "key": "Part UID",
+      "symbols": "Schematic Symbol",
+      "footprints": "Footprints",
+      "fields": [
+        {
+          "column": "Part UID",
+          "name": "Part UID",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Manufacturer",
+          "name": "Manufacturer",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "MPN",
+          "name": "MPN",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Value",
+          "name": "Value",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Datasheet",
+          "name": "Datasheet",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Notes",
+          "name": "Notes",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        }
+      ],
+      "properties": {
+        "description": "Description",
+        "exclude_from_bom": "Exclude from BOM",
+        "exclude_from_board": "Exclude from Board",
+        "exclude_from_sim": "Exclude from Sim"
+      }
+    },
+    {
+      "name": "TVS",
+      "table": "Diodes | TVS",
+      "key": "Part UID",
+      "symbols": "Schematic Symbol",
+      "footprints": "Footprints",
+      "fields": [
+        {
+          "column": "Part UID",
+          "name": "Part UID",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Manufacturer",
+          "name": "Manufacturer",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "MPN",
+          "name": "MPN",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Value",
+          "name": "Value",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Datasheet",
+          "name": "Datasheet",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Notes",
+          "name": "Notes",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        }
+      ],
+      "properties": {
+        "description": "Description",
+        "exclude_from_bom": "Exclude from BOM",
+        "exclude_from_board": "Exclude from Board",
+        "exclude_from_sim": "Exclude from Sim"
+      }
+    },
+    {
+      "name": "Zener",
+      "table": "Diodes | Zener",
+      "key": "Part UID",
+      "symbols": "Schematic Symbol",
+      "footprints": "Footprints",
+      "fields": [
+        {
+          "column": "Part UID",
+          "name": "Part UID",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Manufacturer",
+          "name": "Manufacturer",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "MPN",
+          "name": "MPN",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Value",
+          "name": "Value",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Datasheet",
+          "name": "Datasheet",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Notes",
+          "name": "Notes",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        }
+      ],
+      "properties": {
+        "description": "Description",
+        "exclude_from_bom": "Exclude from BOM",
+        "exclude_from_board": "Exclude from Board",
+        "exclude_from_sim": "Exclude from Sim"
+      }
+    },
+    {
+      "name": "Crystals",
+      "table": "Frequency \u0026 Timing | Crystals",
+      "key": "Part UID",
+      "symbols": "Schematic Symbol",
+      "footprints": "Footprints",
+      "fields": [
+        {
+          "column": "Part UID",
+          "name": "Part UID",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Manufacturer",
+          "name": "Manufacturer",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "MPN",
+          "name": "MPN",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Value",
+          "name": "Value",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Datasheet",
+          "name": "Datasheet",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        }
+      ],
+      "properties": {
+        "description": "Description",
+        "exclude_from_bom": "Exclude from BOM",
+        "exclude_from_board": "Exclude from Board",
+        "exclude_from_sim": "Exclude from Sim"
+      }
+    },
+    {
+      "name": "Oscillators",
+      "table": "Frequency \u0026 Timing | Oscillators",
+      "key": "Part UID",
+      "symbols": "Schematic Symbol",
+      "footprints": "Footprints",
+      "fields": [
+        {
+          "column": "Part UID",
+          "name": "Part UID",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Manufacturer",
+          "name": "Manufacturer",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "MPN",
+          "name": "MPN",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Value",
+          "name": "Value",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Datasheet",
+          "name": "Datasheet",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        }
+      ],
+      "properties": {
+        "description": "Description",
+        "exclude_from_bom": "Exclude from BOM",
+        "exclude_from_board": "Exclude from Board",
+        "exclude_from_sim": "Exclude from Sim"
+      }
+    },
+    {
+      "name": "SMA",
+      "table": "Connectors | RF | SMA",
+      "key": "Part UID",
+      "symbols": "Schematic Symbol",
+      "footprints": "Footprints",
+      "fields": [
+        {
+          "column": "Part UID",
+          "name": "Part UID",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Manufacturer",
+          "name": "Manufacturer",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "MPN",
+          "name": "MPN",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Value",
+          "name": "Value",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Datasheet",
+          "name": "Datasheet",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "BOM Comments",
+          "name": "BOM Comments",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        },
+        {
+          "column": "Package",
+          "name": "Package",
+          "visible_in_chooser": true,
+          "inherit_properties": true
+        }
+      ],
+      "properties": {
+        "description": "Description",
+        "exclude_from_bom": "Exclude from BOM",
+        "exclude_from_board": "Exclude from Board",
+        "exclude_from_sim": "Exclude from Sim"
+      }
+    }
+  ]
 }

@@ -428,7 +428,7 @@ namespace KiCad_DB_Editor.Model
                 // Have to create a JsonLibrary to serialise it
 
                 JsonLibrary jsonLibrary = new JsonLibrary(this);
-                jsonLibrary.WriteToFile(tempProjectPath, autosave);
+                if (!jsonLibrary.WriteToFile(tempProjectPath, autosave)) return false;
 
                 Dictionary<Category, string> categoryToCategoryStringMap = new();
                 foreach (Category category in AllCategories)
@@ -600,7 +600,7 @@ namespace KiCad_DB_Editor.Model
                     categoryToKiCadExportCategoryStringMap[category] = path;
                 }
 
-                KiCadDblLibraryData kiCadDblLibraryData = new(this.KiCadExportPartLibraryName, this.KiCadExportPartLibraryDescription, this.KiCadExportOdbcName);
+                JsonKiCadDblFile jsonKiCadDblFile = new(this.KiCadExportPartLibraryName, this.KiCadExportPartLibraryDescription, this.KiCadExportOdbcName);
 
                 File.Delete(tempSqlitePath);
                 using (var connection = new SqliteConnection($"Data Source={tempSqlitePath}"))
@@ -612,22 +612,22 @@ namespace KiCad_DB_Editor.Model
 
                         string tableName = categoryToKiCadExportCategoryStringMap[category];
 
-                        KiCadDblTableData kiCadDblTableData = new(category.Name, tableName, "Part UID", "Schematic Symbol", "Footprints");
-                        kiCadDblLibraryData.kiCadDblTableDatas.Add(kiCadDblTableData);
+                        JsonKiCadDbl_Library jsonKiCadDbl_Library = new(category.Name, tableName, "Part UID", "Schematic Symbol", "Footprints");
+                        jsonKiCadDblFile.jsonKiCadDbl_Libraries.Add(jsonKiCadDbl_Library);
 
                         // Fields
-                        kiCadDblTableData.kiCadDblFieldDatas.Add(new("Part UID", "Part UID", true, true));
-                        kiCadDblTableData.kiCadDblFieldDatas.Add(new("Manufacturer", "Manufacturer", true, true));
-                        kiCadDblTableData.kiCadDblFieldDatas.Add(new("MPN", "MPN", true, true));
-                        kiCadDblTableData.kiCadDblFieldDatas.Add(new("Value", "Value", true, true));
-                        kiCadDblTableData.kiCadDblFieldDatas.Add(new("Datasheet", "Datasheet", true, true));
+                        jsonKiCadDbl_Library.jsonKiCadDbl_Library_Fields.Add(new("Part UID", "Part UID", true, true));
+                        jsonKiCadDbl_Library.jsonKiCadDbl_Library_Fields.Add(new("Manufacturer", "Manufacturer", true, true));
+                        jsonKiCadDbl_Library.jsonKiCadDbl_Library_Fields.Add(new("MPN", "MPN", true, true));
+                        jsonKiCadDbl_Library.jsonKiCadDbl_Library_Fields.Add(new("Value", "Value", true, true));
+                        jsonKiCadDbl_Library.jsonKiCadDbl_Library_Fields.Add(new("Datasheet", "Datasheet", true, true));
 
                         // Properties
                         // Not sure why description is here instead of in fields but it's KiCad's rule
-                        kiCadDblTableData.kiCadDblPropertyDatas.Add(new("description", "Description"));
-                        kiCadDblTableData.kiCadDblPropertyDatas.Add(new("exclude_from_bom", "Exclude from BOM"));
-                        kiCadDblTableData.kiCadDblPropertyDatas.Add(new("exclude_from_board", "Exclude from Board"));
-                        kiCadDblTableData.kiCadDblPropertyDatas.Add(new("exclude_from_sim", "Exclude from Sim"));
+                        jsonKiCadDbl_Library.jsonKiCadDbl_Library_Properties.Add("description", "Description");
+                        jsonKiCadDbl_Library.jsonKiCadDbl_Library_Properties.Add("exclude_from_bom", "Exclude from BOM");
+                        jsonKiCadDbl_Library.jsonKiCadDbl_Library_Properties.Add("exclude_from_board", "Exclude from Board");
+                        jsonKiCadDbl_Library.jsonKiCadDbl_Library_Properties.Add("exclude_from_sim", "Exclude from Sim");
 
                         string createTableSql = $"CREATE TABLE \"{tableName.Replace("\"", "\"\"")}\" (" +
                             "\"Part UID\" TEXT, " +
@@ -640,7 +640,7 @@ namespace KiCad_DB_Editor.Model
                         var categoryParametersInOrder = AllParameters.Intersect(category.InheritedAndNormalParameters);
                         foreach (var parameter in categoryParametersInOrder)
                         {
-                            kiCadDblTableData.kiCadDblFieldDatas.Add(new(parameter.Name, parameter.Name, true, true));
+                            jsonKiCadDbl_Library.jsonKiCadDbl_Library_Fields.Add(new(parameter.Name, parameter.Name, true, true));
                             createTableSql += $"\"{parameter.Name.Replace("\"", "\"\"")}\" TEXT, ";
                         }
 
@@ -716,7 +716,7 @@ namespace KiCad_DB_Editor.Model
                 }
                 SqliteConnection.ClearAllPools();
 
-                File.WriteAllText(tempDbConfPath, KiCadDblConfig.Generate(kiCadDblLibraryData));
+                if (!jsonKiCadDblFile.WriteToFile(tempDbConfPath)) return false;
 
                 File.Move(tempDbConfPath, kiCadDbConfFilePath, overwrite: true);
                 File.Move(tempSqlitePath, kiCadSqliteFilePath, overwrite: true);

@@ -2,7 +2,7 @@
   "part_uid_scheme": "CMP-#######-####",
   "part_lib_name": "Sample Part Lib",
   "part_lib_desc": "Sample part library used for testing and demonstrating the KiCad DB Editor",
-  "export_odbc_name": "ODBC_STRING",
+  "export_odbc_name": "sample_kicad_db",
   "auto_export": true,
   "auto_export_relative_path": "sample_kicad_library/kicad_db.kicad_dbl",
   "parameters": [

@@ -48,6 +48,7 @@ namespace KiCAD_DB_Editor.Model
 
                 JsonLibrary jsonLibrary = JsonLibrary.FromFile(projectFilePath);
 
+                library.PartUIDScheme = jsonLibrary.PartUIDScheme;
                 library.AllParameters.AddRange(jsonLibrary.AllParameters.Select(jP => new Parameter(jP)));
                 library.TopLevelCategories.AddRange(jsonLibrary.TopLevelCategories.Select(c => new Category(c, library, null)));
                 library.AllCategories.AddRange(library.TopLevelCategories);

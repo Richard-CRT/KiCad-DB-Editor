@@ -95,14 +95,14 @@ namespace KiCAD_DB_Editor.ViewModel
         public ObservableCollectionEx<CategoryVM> TopLevelCategoryVMs
         {
             get { return _topLevelCategoryVMs; }
-            set { if (_topLevelCategoryVMs != value) _topLevelCategoryVMs = value; InvokePropertyChanged(); }
+            set { if (_topLevelCategoryVMs != value) { _topLevelCategoryVMs = value; InvokePropertyChanged(); } }
         }
 
         private ObservableCollectionEx<PartVM> _allPartVMs;
         public ObservableCollectionEx<PartVM> AllPartVMs
         {
             get { return _allPartVMs; }
-            set { if (_allPartVMs != value) _allPartVMs = value; InvokePropertyChanged(); }
+            set { if (_allPartVMs != value) { _allPartVMs = value; InvokePropertyChanged(); } }
         }
 
         private PartVM[] _selectedPartVMs = Array.Empty<PartVM>();

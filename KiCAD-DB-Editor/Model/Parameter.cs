@@ -23,7 +23,7 @@ namespace KiCAD_DB_Editor.Model
         public string Name
         {
             get { return _name; }
-            set { if (_name != value) _name = value; InvokePropertyChanged(); }
+            set { if (_name != value) { _name = value; InvokePropertyChanged(); } }
         }
 
         #endregion Notify Properties

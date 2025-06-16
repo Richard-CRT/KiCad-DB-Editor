@@ -48,14 +48,14 @@ namespace KiCAD_DB_Editor.ViewModel
         public ObservableCollectionEx<CategoryVM> CategoryVMs
         {
             get { return _categoryVMs; }
-            set { if (_categoryVMs != value) _categoryVMs = value; InvokePropertyChanged(); }
+            set { if (_categoryVMs != value) { _categoryVMs = value; InvokePropertyChanged(); } }
         }
 
         private ObservableCollectionEx<PartVM> _partVMs;
         public ObservableCollectionEx<PartVM> PartVMs
         {
             get { return _partVMs; }
-            set { if (_partVMs != value) _partVMs = value; InvokePropertyChanged(); }
+            set { if (_partVMs != value) { _partVMs = value; InvokePropertyChanged(); } }
         }
 
         private Parameter? _selectedUnusedParameter = null;

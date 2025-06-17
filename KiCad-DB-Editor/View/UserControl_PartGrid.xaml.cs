@@ -161,7 +161,7 @@ namespace KiCad_DB_Editor.View
                     p.PropertyChanged += Parameter_PropertyChanged;
             }
 
-            redoColumns_PotentialParametersColumnChange();
+            redoColumns_PotentialParametersColumnChange(e);
         }
 
         private void Parameter_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -370,33 +370,59 @@ namespace KiCad_DB_Editor.View
 
         private List<Parameter> parametersThatHaveColumns = new();
         private Dictionary<Parameter, DataGridTextColumn> parameterToDataGridColumn = new();
-        private void redoColumns_PotentialParametersColumnChange()
+        private void redoColumns_PotentialParametersColumnChange(NotifyCollectionChangedEventArgs e)
         {
             if (Parameters is not null)
             {
-                var parametersThatNeedANewColumn = Parameters.Except(parametersThatHaveColumns).ToArray();
-                var parametersThatNeedToBeRemoved = parametersThatHaveColumns.Except(Parameters).ToArray();
-
-                foreach (Parameter parameter in parametersThatNeedToBeRemoved)
+                switch (e.Action)
                 {
-                    DataGridTextColumn column = parameterToDataGridColumn[parameter];
-                    dataGrid_Main.Columns.Remove(column);
-                    parametersThatHaveColumns.Remove(parameter);
-                    parameterToDataGridColumn.Remove(parameter);
-                }
-
-                foreach (Parameter parameter in parametersThatNeedANewColumn)
-                {
-                    int indexOfPVMToBeAddedInParentCollection = Parameters.IndexOf(parameter);
-                    int newIndex;
-                    for (newIndex = 0; newIndex < parametersThatHaveColumns.Count; newIndex++)
-                    {
-                        if (indexOfPVMToBeAddedInParentCollection < Parameters.IndexOf(parametersThatHaveColumns[newIndex]))
+                    case NotifyCollectionChangedAction.Add:
                         {
-                            break;
+                            Debug.Assert(e.NewItems is not null && e.NewItems.Count == 1);
+                            Parameter parameterThatNeedsANewColumn = (e.NewItems[0] as Parameter)!;
+                            int indexOfPToBeAddedInParentCollection = e.NewStartingIndex;
+                            int newIndex;
+                            for (newIndex = 0; newIndex < parametersThatHaveColumns.Count; newIndex++)
+                                if (indexOfPToBeAddedInParentCollection < Parameters.IndexOf(parametersThatHaveColumns[newIndex]))
+                                    break;
+                            newParameterColumn(parameterThatNeedsANewColumn, newIndex);
                         }
-                    }
-                    newParameterColumn(parameter, newIndex);
+                        break;
+                    case NotifyCollectionChangedAction.Remove:
+                        {
+                            Debug.Assert(e.OldItems is not null && e.OldItems.Count == 1);
+                            var parameterThatNeedsToBeRemoved = (e.OldItems[0] as Parameter)!;
+                            DataGridTextColumn column = parameterToDataGridColumn[parameterThatNeedsToBeRemoved];
+                            dataGrid_Main.Columns.Remove(column);
+                            parametersThatHaveColumns.Remove(parameterThatNeedsToBeRemoved);
+                            parameterToDataGridColumn.Remove(parameterThatNeedsToBeRemoved);
+                        }
+                        break;
+                    case NotifyCollectionChangedAction.Reset:
+                    default:
+                        {
+                            var parametersThatNeedANewColumn = Parameters.Except(parametersThatHaveColumns).ToArray();
+                            var parametersThatNeedToBeRemoved = parametersThatHaveColumns.Except(Parameters).ToArray();
+
+                            foreach (Parameter parameter in parametersThatNeedToBeRemoved)
+                            {
+                                DataGridTextColumn column = parameterToDataGridColumn[parameter];
+                                dataGrid_Main.Columns.Remove(column);
+                                parametersThatHaveColumns.Remove(parameter);
+                                parameterToDataGridColumn.Remove(parameter);
+                            }
+
+                            foreach (Parameter parameter in parametersThatNeedANewColumn)
+                            {
+                                int indexOfPToBeAddedInParentCollection = Parameters.IndexOf(parameter);
+                                int newIndex;
+                                for (newIndex = 0; newIndex < parametersThatHaveColumns.Count; newIndex++)
+                                    if (indexOfPToBeAddedInParentCollection < Parameters.IndexOf(parametersThatHaveColumns[newIndex]))
+                                        break;
+                                newParameterColumn(parameter, newIndex);
+                            }
+                        }
+                        break;
                 }
             }
             else

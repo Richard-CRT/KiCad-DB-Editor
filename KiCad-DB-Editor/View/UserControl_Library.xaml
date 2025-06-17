@@ -46,7 +46,7 @@
             <TabItem Header="Structure">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*" MinWidth="150" />
+                        <ColumnDefinition Width="2*" MinWidth="180" />
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="3*" MinWidth="160"/>
                         <ColumnDefinition Width="Auto"/>
@@ -69,8 +69,16 @@
                         <TextBox DockPanel.Dock="Bottom" Text="{Binding LibraryVM.NewParameterName, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock DockPanel.Dock="Bottom" HorizontalAlignment="Center">Parameter</TextBlock>
                         <Separator DockPanel.Dock="Bottom" Margin="0,10,0,10" />
-                        <Button DockPanel.Dock="Bottom" Content="Delete Parameter" Padding="5,1,5,1"
-                            Command="{Binding LibraryVM.DeleteParameterCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />
+                        <DockPanel DockPanel.Dock="Bottom">
+                            <Button Content="▼" DockPanel.Dock="Right" Width="{Binding ActualHeight, Mode=OneWay, RelativeSource={RelativeSource Self}}" 
+                                    Command="{Binding LibraryVM.MoveParameterDownCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
+                                    />
+                            <Button Content="▲" DockPanel.Dock="Right" Width="{Binding ActualHeight, Mode=OneWay, RelativeSource={RelativeSource Self}}" 
+                                    Command="{Binding LibraryVM.MoveParameterUpCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
+                                    />
+                            <Button Content="Delete Parameter" Padding="5,1,5,1"
+                                    Command="{Binding LibraryVM.DeleteParameterCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />
+                        </DockPanel>
                         <ListBox ItemsSource="{Binding LibraryVM.Library.AllParameters, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" DisplayMemberPath="Name" MinHeight="60" SelectedItem="{Binding LibraryVM.SelectedParameter, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />
                     </DockPanel>
                     <GridSplitter Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="3,0,3,0" Width="3" />

@@ -243,6 +243,8 @@ namespace KiCad_DB_Editor.ViewModel
             NewParameterCommand = new BasicCommand(NewParameterCommandExecuted, NewParameterCommandCanExecute);
             RenameParameterCommand = new BasicCommand(RenameParameterCommandExecuted, RenameParameterCommandCanExecute);
             DeleteParameterCommand = new BasicCommand(DeleteParameterCommandExecuted, DeleteParameterCommandCanExecute);
+            MoveParameterUpCommand = new BasicCommand(MoveParameterUpCommandExecuted, MoveParameterUpCommandCanExecute);
+            MoveParameterDownCommand = new BasicCommand(MoveParameterDownCommandExecuted, MoveParameterDownCommandCanExecute);
             BrowseKiCadSymbolLibraryCommand = new BasicCommand(BrowseKiCadSymbolLibraryCommandExecuted, BrowseKiCadSymbolLibraryCommandCanExecute);
             NewKiCadSymbolLibraryCommand = new BasicCommand(NewKiCadSymbolLibraryCommandExecuted, NewKiCadSymbolLibraryCommandCanExecute);
             UpdateKiCadSymbolLibraryCommand = new BasicCommand(UpdateKiCadSymbolLibraryCommandExecuted, UpdateKiCadSymbolLibraryCommandCanExecute);
@@ -267,9 +269,24 @@ namespace KiCad_DB_Editor.ViewModel
 
         private void AllParts_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            // Make sure PartVM unsubscribes before we lose the objects
-            if (AllPartVMs is not null) foreach (var pVM in AllPartVMs) pVM.Unsubscribe();
-            AllPartVMs = new(Library.AllParts.Select(p => new PartVM(p)));
+            switch (e.Action)
+            {
+                // Handle some of these more precisely than Reset for efficiency
+                case NotifyCollectionChangedAction.Add:
+                    Debug.Assert(e.NewItems is not null && e.NewItems.Count == 1);
+                    Part newPart = (e.NewItems[0] as Part)!;
+                    AllPartVMs.Insert(e.NewStartingIndex, new(newPart));
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    AllPartVMs.RemoveAt(e.OldStartingIndex);
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                default:
+                    // Make sure PartVM unsubscribes before we lose the objects
+                    if (AllPartVMs is not null) foreach (var pVM in AllPartVMs) pVM.Unsubscribe();
+                    AllPartVMs = new(Library.AllParts.Select(p => new PartVM(p)));
+                    break;
+            }
         }
 
         private void Library_TopLevelCategories_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -319,6 +336,8 @@ namespace KiCad_DB_Editor.ViewModel
         public IBasicCommand NewParameterCommand { get; }
         public IBasicCommand RenameParameterCommand { get; }
         public IBasicCommand DeleteParameterCommand { get; }
+        public IBasicCommand MoveParameterUpCommand { get; }
+        public IBasicCommand MoveParameterDownCommand { get; }
         public IBasicCommand AddFootprintCommand { get; }
         public IBasicCommand RemoveFootprintCommand { get; }
         public IBasicCommand BrowseKiCadSymbolLibraryCommand { get; }
@@ -408,8 +427,9 @@ namespace KiCad_DB_Editor.ViewModel
 
         private void NewParameterCommandExecuted(object? parameter)
         {
-            Library.AllParameters.Add(new(this.NewParameterName));
-            this.NewParameterName = "";
+            Parameter newParameter = new(this.NewParameterName);
+            Library.AllParameters.Add(newParameter);
+            SelectedParameter = newParameter;
         }
 
         private bool RenameParameterCommandCanExecute(object? parameter)
@@ -445,6 +465,32 @@ namespace KiCad_DB_Editor.ViewModel
             Library.AllParameters.Remove(SelectedParameter);
 
             SelectedParameter = Library.AllParameters.FirstOrDefault();
+        }
+
+        private bool MoveParameterUpCommandCanExecute(object? parameter)
+        {
+            return SelectedParameter is not null && Library.AllParameters.First() != SelectedParameter;
+        }
+
+        private void MoveParameterUpCommandExecuted(object? parameter)
+        {
+            Debug.Assert(SelectedParameter is not null);
+            int oldIndex = Library.AllParameters.IndexOf(SelectedParameter);
+            Debug.Assert(oldIndex > 0);
+            Library.AllParameters.Move(oldIndex, oldIndex - 1);
+        }
+
+        private bool MoveParameterDownCommandCanExecute(object? parameter)
+        {
+            return SelectedParameter is not null && Library.AllParameters.Last() != SelectedParameter;
+        }
+
+        private void MoveParameterDownCommandExecuted(object? parameter)
+        {
+            Debug.Assert(SelectedParameter is not null);
+            int oldIndex = Library.AllParameters.IndexOf(SelectedParameter);
+            Debug.Assert(oldIndex < Library.AllParameters.Count - 1);
+            Library.AllParameters.Move(oldIndex, oldIndex + 1);
         }
 
         private bool AddFootprintCommandCanExecute(object? parameter)

@@ -39,5 +39,10 @@ namespace KiCad_DB_Editor.Model
             this._uuid = Guid.NewGuid().ToString();
             this.Name = name;
         }
+
+        public override string ToString()
+        {
+            return $"{UUID} {Name}";
+        }
     }
 }

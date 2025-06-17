@@ -134,7 +134,7 @@ namespace KiCad_DB_Editor.Model
         {
             _parentLibrary = parentLibrary;
             _parentCategory = parentCategory;
-            
+
             Name = name;
 
             _parameters = new();
@@ -145,7 +145,31 @@ namespace KiCad_DB_Editor.Model
 
         public void ParentLibrary_AllParameters_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
+            // The values and order of this one may have changed, so invoke updates
             InvokePropertyChanged(nameof(AvailableParameters));
+
+            // The order of these 2 may have changed, so invoke updates
+            InvokePropertyChanged(nameof(InheritedParameters));
+            InvokePropertyChanged(nameof(InheritedAndNormalParameters));
+
+            // Potentially need to reorder Parameters
+            // If there's no reordering to be done, Parameters isn't shuffled, so, Parameters_CollectionChanged is not called, so we can't rely on its InvokePropertyChange calls
+            // hence the calls above may duplicate it
+            int categoryParameterIndex = 0;
+            for (int libraryParameterIndex = 0; libraryParameterIndex < ParentLibrary.AllParameters.Count; libraryParameterIndex++)
+            {
+                Parameter libraryParameter = ParentLibrary.AllParameters[libraryParameterIndex];
+                int originalCategoryParameterIndex = Parameters.IndexOf(libraryParameter);
+                if (originalCategoryParameterIndex != -1)
+                {
+                    if (categoryParameterIndex != originalCategoryParameterIndex)
+                    {
+                        // Paramater is later in the category list than it is in the category-subset of the Library list
+                        Parameters.Move(originalCategoryParameterIndex, categoryParameterIndex);
+                    }
+                    categoryParameterIndex++;
+                }
+            }
 
             foreach (Part part in Parts)
             {

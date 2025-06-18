@@ -583,6 +583,9 @@ $symbol_name, ");
                             insertPartsSqlStringBuilder.Append(')');
                             command.CommandText = insertPartsSqlStringBuilder.ToString();
 
+                            // Doesn't actually seem to affect performance, but adding for completeness
+                            command.Prepare();
+
                             foreach (Part part in AllParts)
                             {
                                 categoryStringParameter.Value = categoryToCategoryStringMap[part.ParentCategory];
@@ -606,8 +609,8 @@ $symbol_name, ");
                                     }
                                     else
                                     {
-                                        footprintLibNameParameters[i].Value = "";
-                                        footprintNameParameters[i].Value = "";
+                                        footprintLibNameParameters[i].Value = System.DBNull.Value;
+                                        footprintNameParameters[i].Value = System.DBNull.Value;
                                     }
                                 }
                                 for (int i = 0; i < AllParameters.Count; i++)
@@ -615,7 +618,7 @@ $symbol_name, ");
                                     if (part.ParameterValues.TryGetValue(AllParameters[i], out string? value))
                                         partParameterParameters[i].Value = value;
                                     else
-                                        partParameterParameters[i].Value = "";
+                                        partParameterParameters[i].Value = System.DBNull.Value;
                                 }
                                 command.ExecuteNonQuery();
                             }
@@ -626,7 +629,7 @@ $symbol_name, ");
 
                 }
                 SqliteConnection.ClearAllPools();
-
+                
                 File.Copy(tempProjectPath, projectFilePath, overwrite: true);
                 File.Copy(tempComponentsPath, componentsFilePath, overwrite: true);
 

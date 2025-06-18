@@ -401,8 +401,26 @@ namespace KiCad_DB_Editor.View
                     case NotifyCollectionChangedAction.Reset:
                     default:
                         {
-                            var parametersThatNeedANewColumn = Parameters.Except(parametersThatHaveColumns).ToArray();
-                            var parametersThatNeedToBeRemoved = parametersThatHaveColumns.Except(Parameters).ToArray();
+                            var parametersThatNeedANewColumn = Parameters.Except(parametersThatHaveColumns).ToList();
+                            var parametersThatNeedToBeRemoved = parametersThatHaveColumns.Except(Parameters).ToList();
+                            
+                            // Identify the ones that aren't in the right index anymore, and add them to the pile of ones requiring removal & (re)creation
+                            int parametersThatHaveColumnsIndex = 0;
+                            for (int sourceParameterIndex = 0; sourceParameterIndex < Parameters.Count; sourceParameterIndex++)
+                            {
+                                Parameter sourceParameter = Parameters[sourceParameterIndex];
+                                int originalParametersThatHaveColumnsIndex = parametersThatHaveColumns.IndexOf(sourceParameter);
+                                if (originalParametersThatHaveColumnsIndex != -1)
+                                {
+                                    if (parametersThatHaveColumnsIndex != originalParametersThatHaveColumnsIndex)
+                                    {
+                                        // Parameter is later in the parametersThatHaveColumns list than it is in the parametersThatHaveColumns-subset of the source list
+                                        parametersThatNeedANewColumn.Add(sourceParameter);
+                                        parametersThatNeedToBeRemoved.Add(sourceParameter);
+                                    }
+                                    parametersThatHaveColumnsIndex++;
+                                }
+                            }
 
                             foreach (Parameter parameter in parametersThatNeedToBeRemoved)
                             {
@@ -412,6 +430,7 @@ namespace KiCad_DB_Editor.View
                                 parameterToDataGridColumn.Remove(parameter);
                             }
 
+                            // Inserts parameter columns at the right index
                             foreach (Parameter parameter in parametersThatNeedANewColumn)
                             {
                                 int indexOfPToBeAddedInParentCollection = Parameters.IndexOf(parameter);

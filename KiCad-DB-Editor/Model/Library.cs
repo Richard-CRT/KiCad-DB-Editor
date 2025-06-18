@@ -421,8 +421,11 @@ namespace KiCad_DB_Editor.Model
                     componentsFilePath += ".autosave";
                 }
 
+                string tempProjectPath = $"proj.tmp";
+                string tempComponentsPath = $"components.tmp";
+
                 JsonLibrary jsonLibrary = new JsonLibrary(this);
-                if (!jsonLibrary.WriteToFile(projectFilePath, autosave)) return false;
+                if (!jsonLibrary.WriteToFile(tempProjectPath, autosave)) return false;
 
                 Dictionary<Category, string> categoryToCategoryStringMap = new();
                 foreach (Category category in AllCategories)
@@ -441,8 +444,8 @@ namespace KiCad_DB_Editor.Model
                 foreach (Part part in AllParts)
                     maxFootprints = Math.Max(maxFootprints, part.FootprintPairs.Count);
 
-                File.Delete(componentsFilePath);
-                using (var connection = new SqliteConnection($"Data Source={componentsFilePath}"))
+                File.Delete(tempComponentsPath);
+                using (var connection = new SqliteConnection($"Data Source={tempComponentsPath}"))
                 {
                     connection.Open();
 
@@ -624,6 +627,9 @@ $symbol_name, ");
                 }
                 SqliteConnection.ClearAllPools();
 
+                File.Copy(tempProjectPath, projectFilePath, overwrite: true);
+                File.Copy(tempComponentsPath, componentsFilePath, overwrite: true);
+
                 return true;
             }
             catch (Exception)
@@ -787,12 +793,8 @@ $symbol_name, ");
 
                 if (!jsonKiCadDblFile.WriteToFile(tempDbConfPath)) return false;
 
-                // SqliteConnection might not have properly closed the file at this point, force a GC to ensure it's closed
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-
-                File.Move(tempDbConfPath, kiCadDbConfFilePath, overwrite: true);
-                File.Move(tempSqlitePath, kiCadSqliteFilePath, overwrite: true);
+                File.Copy(tempDbConfPath, kiCadDbConfFilePath, overwrite: true);
+                File.Copy(tempSqlitePath, kiCadSqliteFilePath, overwrite: true);
 
                 return true;
             }

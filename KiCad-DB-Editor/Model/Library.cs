@@ -448,42 +448,42 @@ namespace KiCad_DB_Editor.Model
                 using (var connection = new SqliteConnection($"Data Source={tempComponentsPath}"))
                 {
                     connection.Open();
-
-                    // Worse DB structure but simpler for humans
-
-                    var createTableCommand = connection.CreateCommand();
-                    StringBuilder createTableSqlStringBuilder = new();
-                    createTableSqlStringBuilder.Append(@"
-CREATE TABLE ""Components"" (
-""Category"" TEXT, 
-""Part UID"" TEXT, 
-""Description"" TEXT, 
-""Manufacturer"" TEXT, 
-""MPN"" TEXT, 
-""Value"" TEXT, 
-""Datasheet"" TEXT, 
-""Exclude from BOM"" INTEGER, 
-""Exclude from Board"" INTEGER, 
-""Exclude from Sim"" INTEGER, 
-""Symbol Library Name"" TEXT,
-""Symbol Name"" TEXT,");
-
-                    for (int i = 1; i <= maxFootprints; i++)
-                        createTableSqlStringBuilder.AppendFormat("\"Footprint {0} Library Name\" TEXT, \"Footprint {0} Name\" TEXT, ", i);
-                    foreach (Parameter parameter in AllParameters)
-                        // Can't use prepared statements for column titles, so use .Replace("\"", "\"\"") to escape any potential quotes (even though we controlled the input)
-                        createTableSqlStringBuilder.AppendFormat("\"{0} {1}\" TEXT, ", parameter.Name.Replace("\"", "\"\""), parameter.UUID);
-
-                    createTableSqlStringBuilder.Remove(createTableSqlStringBuilder.Length - 2, 2);
-                    createTableSqlStringBuilder.Append(')');
-
-                    createTableCommand.CommandText = createTableSqlStringBuilder.ToString();
-
-                    createTableCommand.ExecuteNonQuery();
-
-                    if (AllParts.Count > 0)
+                    using (var transaction = connection.BeginTransaction())
                     {
-                        using (var transaction = connection.BeginTransaction())
+
+                        // Worse DB structure but simpler for humans
+
+                        var createTableCommand = connection.CreateCommand();
+                        StringBuilder createTableSqlStringBuilder = new();
+                        createTableSqlStringBuilder.Append(@"
+    CREATE TABLE ""Components"" (
+    ""Category"" TEXT, 
+    ""Part UID"" TEXT, 
+    ""Description"" TEXT, 
+    ""Manufacturer"" TEXT, 
+    ""MPN"" TEXT, 
+    ""Value"" TEXT, 
+    ""Datasheet"" TEXT, 
+    ""Exclude from BOM"" INTEGER, 
+    ""Exclude from Board"" INTEGER, 
+    ""Exclude from Sim"" INTEGER, 
+    ""Symbol Library Name"" TEXT,
+    ""Symbol Name"" TEXT,");
+
+                        for (int i = 1; i <= maxFootprints; i++)
+                            createTableSqlStringBuilder.AppendFormat("\"Footprint {0} Library Name\" TEXT, \"Footprint {0} Name\" TEXT, ", i);
+                        foreach (Parameter parameter in AllParameters)
+                            // Can't use prepared statements for column titles, so use .Replace("\"", "\"\"") to escape any potential quotes (even though we controlled the input)
+                            createTableSqlStringBuilder.AppendFormat("\"{0} {1}\" TEXT, ", parameter.Name.Replace("\"", "\"\""), parameter.UUID);
+
+                        createTableSqlStringBuilder.Remove(createTableSqlStringBuilder.Length - 2, 2);
+                        createTableSqlStringBuilder.Append(')');
+
+                        createTableCommand.CommandText = createTableSqlStringBuilder.ToString();
+
+                        createTableCommand.ExecuteNonQuery();
+
+                        if (AllParts.Count > 0)
                         {
                             var command = connection.CreateCommand();
                             StringBuilder insertPartsSqlStringBuilder = new();
@@ -622,9 +622,9 @@ $symbol_name, ");
                                 }
                                 command.ExecuteNonQuery();
                             }
-
-                            transaction.Commit();
                         }
+
+                        transaction.Commit();
                     }
 
                 }

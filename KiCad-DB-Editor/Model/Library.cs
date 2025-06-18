@@ -455,18 +455,18 @@ namespace KiCad_DB_Editor.Model
                         var createTableCommand = connection.CreateCommand();
                         StringBuilder createTableSqlStringBuilder = new();
                         createTableSqlStringBuilder.Append(@"
-    CREATE TABLE ""Components"" (
-    ""Category"" TEXT, 
-    ""Part UID"" TEXT, 
-    ""Description"" TEXT, 
-    ""Manufacturer"" TEXT, 
-    ""MPN"" TEXT, 
-    ""Value"" TEXT, 
-    ""Datasheet"" TEXT, 
-    ""Exclude from BOM"" INTEGER, 
-    ""Exclude from Board"" INTEGER, 
-    ""Exclude from Sim"" INTEGER, 
-    ""Symbol Library Name"" TEXT,
+CREATE TABLE ""Components"" (
+""Category"" TEXT,
+""Part UID"" TEXT,
+""Description"" TEXT,
+""Manufacturer"" TEXT,
+""MPN"" TEXT,
+""Value"" TEXT,
+""Datasheet"" TEXT,
+""Exclude from BOM"" INTEGER,
+""Exclude from Board"" INTEGER,
+""Exclude from Sim"" INTEGER,
+""Symbol Library Name"" TEXT,
 ""Symbol Name"" TEXT,"
 );
 
@@ -629,7 +629,7 @@ $symbol_name, "
                     }
                 }
                 SqliteConnection.ClearAllPools();
-                
+
                 File.Copy(tempProjectPath, projectFilePath, overwrite: true);
                 File.Copy(tempDataPath, componentsFilePath, overwrite: true);
 
@@ -683,113 +683,167 @@ $symbol_name, "
                 using (var connection = new SqliteConnection($"Data Source={tempSqlitePath}"))
                 {
                     connection.Open();
-
-                    foreach (Category category in AllCategories)
+                    using (var transaction = connection.BeginTransaction())
                     {
-
-                        string tableName = categoryToKiCadExportCategoryStringMap[category];
-
-                        JsonKiCadDbl_Library jsonKiCadDbl_Library = new(tableName, tableName, "Part UID", "Schematic Symbol", "Footprints");
-                        jsonKiCadDblFile.jsonKiCadDbl_Libraries.Add(jsonKiCadDbl_Library);
-
-                        // Fields
-                        jsonKiCadDbl_Library.jsonKiCadDbl_Library_Fields.Add(new("Part UID", "Part UID", true, true));
-                        jsonKiCadDbl_Library.jsonKiCadDbl_Library_Fields.Add(new("Manufacturer", "Manufacturer", true, true));
-                        jsonKiCadDbl_Library.jsonKiCadDbl_Library_Fields.Add(new("MPN", "MPN", true, true));
-                        jsonKiCadDbl_Library.jsonKiCadDbl_Library_Fields.Add(new("Value", "Value", true, true));
-                        jsonKiCadDbl_Library.jsonKiCadDbl_Library_Fields.Add(new("Datasheet", "Datasheet", true, true));
-
-                        // Properties
-                        // Not sure why description is here instead of in fields but it's KiCad's rule
-                        jsonKiCadDbl_Library.jsonKiCadDbl_Library_Properties.Add("description", "Description");
-                        jsonKiCadDbl_Library.jsonKiCadDbl_Library_Properties.Add("exclude_from_bom", "Exclude from BOM");
-                        jsonKiCadDbl_Library.jsonKiCadDbl_Library_Properties.Add("exclude_from_board", "Exclude from Board");
-                        jsonKiCadDbl_Library.jsonKiCadDbl_Library_Properties.Add("exclude_from_sim", "Exclude from Sim");
-
-                        string createTableSql = $"CREATE TABLE \"{tableName.Replace("\"", "\"\"")}\" (" +
-                            "\"Part UID\" TEXT, " +
-                            "\"Description\" TEXT, " +
-                            "\"Manufacturer\" TEXT, " +
-                            "\"MPN\" TEXT, " +
-                            "\"Value\" TEXT, " +
-                            "\"Datasheet\" TEXT, ";
-
-                        // Should already be in order as we reshuffle the lists accordingly, but may as well do the .Intersect just to confirm it
-                        var categoryParametersInOrder = AllParameters.Intersect(category.InheritedAndNormalParameters);
-                        foreach (var parameter in categoryParametersInOrder)
+                        foreach (Category category in AllCategories)
                         {
-                            jsonKiCadDbl_Library.jsonKiCadDbl_Library_Fields.Add(new(parameter.Name, parameter.Name, true, true));
-                            createTableSql += $"\"{parameter.Name.Replace("\"", "\"\"")}\" TEXT, ";
-                        }
+                            string tableName = categoryToKiCadExportCategoryStringMap[category];
 
-                        createTableSql +=
-                            "\"Schematic Symbol\" TEXT, " +
-                            "\"Footprints\" TEXT, " +
-                            "\"Exclude from BOM\" TEXT, " +
-                            "\"Exclude from Board\" TEXT, " +
-                            "\"Exclude from Sim\" TEXT)";
+                            JsonKiCadDbl_Library jsonKiCadDbl_Library = new(tableName, tableName, "Part UID", "Schematic Symbol", "Footprints");
+                            jsonKiCadDblFile.jsonKiCadDbl_Libraries.Add(jsonKiCadDbl_Library);
 
-                        var createTableCommand = connection.CreateCommand();
-                        createTableCommand.CommandText = createTableSql;
+                            // Fields
+                            jsonKiCadDbl_Library.jsonKiCadDbl_Library_Fields.Add(new("Part UID", "Part UID", true, true));
+                            jsonKiCadDbl_Library.jsonKiCadDbl_Library_Fields.Add(new("Manufacturer", "Manufacturer", true, true));
+                            jsonKiCadDbl_Library.jsonKiCadDbl_Library_Fields.Add(new("MPN", "MPN", true, true));
+                            jsonKiCadDbl_Library.jsonKiCadDbl_Library_Fields.Add(new("Value", "Value", true, true));
+                            jsonKiCadDbl_Library.jsonKiCadDbl_Library_Fields.Add(new("Datasheet", "Datasheet", true, true));
 
-                        createTableCommand.ExecuteNonQuery();
+                            // Properties
+                            // Not sure why description is here instead of in fields but it's KiCad's rule
+                            jsonKiCadDbl_Library.jsonKiCadDbl_Library_Properties.Add("description", "Description");
+                            jsonKiCadDbl_Library.jsonKiCadDbl_Library_Properties.Add("exclude_from_bom", "Exclude from BOM");
+                            jsonKiCadDbl_Library.jsonKiCadDbl_Library_Properties.Add("exclude_from_board", "Exclude from Board");
+                            jsonKiCadDbl_Library.jsonKiCadDbl_Library_Properties.Add("exclude_from_sim", "Exclude from Sim");
 
-                        if (category.Parts.Count > 0)
-                        {
-                            string insertPartsSql = $"INSERT INTO \"{categoryToKiCadExportCategoryStringMap[category].Replace("\"", "\"\"")}\" (" +
-                                "\"Part UID\", " +
-                                "\"Description\", " +
-                                "\"Manufacturer\", " +
-                                "\"MPN\", " +
-                                "\"Value\", " +
-                                "\"Datasheet\", ";
+                            var createTableCommand = connection.CreateCommand();
+                            StringBuilder createTableSqlStringBuilder = new();
+                            createTableSqlStringBuilder.Append($@"
+CREATE TABLE ""{tableName.Replace("\"", "\"\"")}"" (
+""Part UID"" TEXT, 
+""Description"" TEXT, 
+""Manufacturer"" TEXT, 
+""MPN"" TEXT, 
+""Value"" TEXT, 
+""Datasheet"" TEXT,
+""Schematic Symbol"" TEXT,
+""Footprints"" TEXT,
+""Exclude from BOM"" TEXT,
+""Exclude from Board"" TEXT,
+""Exclude from Sim"" TEXT,"
+);
 
-                            foreach (var parameter in categoryParametersInOrder)
-                                insertPartsSql += $"\"{parameter.Name.Replace("\"", "\"\"")}\", ";
-
-                            insertPartsSql +=
-                                "\"Schematic Symbol\", " +
-                                "\"Footprints\", " +
-                                "\"Exclude from BOM\", " +
-                                "\"Exclude from Board\", " +
-                                "\"Exclude from Sim\") VALUES ";
-                            foreach (Part part in category.Parts)
+                            // Already in order as InheritedAndNormalParameters already does a ParentLibrary.AllParameters.Intersect(...)
+                            // Cache a local copy of category.InheritedAndNormalParameters as we use it multiple times and it's an expensive property to get
+                            var categoryParametersInOrder = category.InheritedAndNormalParameters;
+                            foreach (var parameter in category.InheritedAndNormalParameters)
                             {
-                                string footprintsString = "";
-                                for (int i = 0; i < part.FootprintPairs.Count; i++)
+                                jsonKiCadDbl_Library.jsonKiCadDbl_Library_Fields.Add(new(parameter.Name, parameter.Name, true, true));
+                                // Can't use prepared statements for column titles, so use .Replace("\"", "\"\"") to escape any potential quotes (even though we controlled the input)
+                                createTableSqlStringBuilder.AppendFormat("\"{0}\" TEXT, ", parameter.Name.Replace("\"", "\"\""));
+                            }
+
+                            createTableSqlStringBuilder.Remove(createTableSqlStringBuilder.Length - 2, 2);
+                            createTableSqlStringBuilder.Append(')');
+
+                            createTableCommand.CommandText = createTableSqlStringBuilder.ToString();
+                            createTableCommand.ExecuteNonQuery();
+
+                            if (category.Parts.Count > 0)
+                            {
+                                var insertPartCommand = connection.CreateCommand();
+                                StringBuilder insertPartSqlStringBuilder = new();
+                                // Can't use prepared statements for column titles, so use .Replace("\"", "\"\"") to escape any potential quotes (even though we controlled the input)
+                                insertPartSqlStringBuilder.Append($@"
+INSERT INTO ""{tableName.Replace("\"", "\"\"")}""
+VALUES (
+$part_uid,
+$description,
+$manufacturer,
+$mpn,
+$value,
+$datasheet,
+$schematic_symbol,
+$footprints,
+$exclude_from_bom,
+$exclude_from_board,
+$exclude_from_sim, "
+);
+
+                                var partUIDParameter = insertPartCommand.CreateParameter();
+                                partUIDParameter.ParameterName = "$part_uid";
+                                insertPartCommand.Parameters.Add(partUIDParameter);
+
+                                var descriptionParameter = insertPartCommand.CreateParameter();
+                                descriptionParameter.ParameterName = "$description";
+                                insertPartCommand.Parameters.Add(descriptionParameter);
+
+                                var manufacturerParameter = insertPartCommand.CreateParameter();
+                                manufacturerParameter.ParameterName = "$manufacturer";
+                                insertPartCommand.Parameters.Add(manufacturerParameter);
+
+                                var mpnParameter = insertPartCommand.CreateParameter();
+                                mpnParameter.ParameterName = "$mpn";
+                                insertPartCommand.Parameters.Add(mpnParameter);
+
+                                var valueParameter = insertPartCommand.CreateParameter();
+                                valueParameter.ParameterName = "$value";
+                                insertPartCommand.Parameters.Add(valueParameter);
+
+                                var datasheetParameter = insertPartCommand.CreateParameter();
+                                datasheetParameter.ParameterName = "$datasheet";
+                                insertPartCommand.Parameters.Add(datasheetParameter);
+
+                                var schematicSymbolParameter = insertPartCommand.CreateParameter();
+                                schematicSymbolParameter.ParameterName = "$schematic_symbol";
+                                insertPartCommand.Parameters.Add(schematicSymbolParameter);
+
+                                var footprintsParameter = insertPartCommand.CreateParameter();
+                                footprintsParameter.ParameterName = "$footprints";
+                                insertPartCommand.Parameters.Add(footprintsParameter);
+
+                                var excludeFromBomParameter = insertPartCommand.CreateParameter();
+                                excludeFromBomParameter.ParameterName = "$exclude_from_bom";
+                                insertPartCommand.Parameters.Add(excludeFromBomParameter);
+
+                                var excludeFromBoardParameter = insertPartCommand.CreateParameter();
+                                excludeFromBoardParameter.ParameterName = "$exclude_from_board";
+                                insertPartCommand.Parameters.Add(excludeFromBoardParameter);
+
+                                var excludeFromSimParameter = insertPartCommand.CreateParameter();
+                                excludeFromSimParameter.ParameterName = "$exclude_from_sim";
+                                insertPartCommand.Parameters.Add(excludeFromSimParameter);
+
+                                List<SqliteParameter> partParameterParameters = new();
+                                for (int i = 0; i < categoryParametersInOrder.Count; i++)
                                 {
-                                    footprintsString += $"{part.FootprintPairs[i].Item1}:{part.FootprintPairs[i].Item2}";
-                                    if (i < part.FootprintPairs.Count - 1)
-                                        footprintsString += ";";
+                                    insertPartSqlStringBuilder.AppendFormat("$param_{0}, ", i);
+
+                                    var partParameterParameter = insertPartCommand.CreateParameter();
+                                    partParameterParameter.ParameterName = $"$param_{i}";
+                                    insertPartCommand.Parameters.Add(partParameterParameter);
+                                    partParameterParameters.Add(partParameterParameter);
                                 }
 
-                                insertPartsSql +=
-                                    "(" +
-                                    $"'{part.PartUID.Replace("'", "''")}', " +
-                                    $"'{part.Description.Replace("'", "''")}', " +
-                                    $"'{part.Manufacturer.Replace("'", "''")}', " +
-                                    $"'{part.MPN.Replace("'", "''")}', " +
-                                    $"'{part.Value.Replace("'", "''")}', " +
-                                    $"'{part.Datasheet.Replace("'", "''")}', ";
+                                insertPartSqlStringBuilder.Remove(insertPartSqlStringBuilder.Length - 2, 2);
+                                insertPartSqlStringBuilder.Append(')');
+                                insertPartCommand.CommandText = insertPartSqlStringBuilder.ToString();
 
-                                foreach (var parameter in categoryParametersInOrder)
-                                    insertPartsSql += $"\"{part.ParameterValues[parameter].Replace("\"", "\"\"")}\", ";
+                                // Doesn't actually seem to affect performance, but adding for completeness
+                                insertPartCommand.Prepare();
 
-                                insertPartsSql +=
-                                    $"'{part.SymbolLibraryName.Replace("'", "''")}:{part.SymbolName.Replace("'", "''")}', " +
-                                    $"'{footprintsString.Replace("'", "''")}', " +
-                                    $"{(part.ExcludeFromBOM ? 1 : 0)}, " +
-                                    $"{(part.ExcludeFromBoard ? 1 : 0)}, " +
-                                    $"{(part.ExcludeFromSim ? 1 : 0)}), ";
+                                foreach (Part part in category.Parts)
+                                {
+                                    partUIDParameter.Value = part.PartUID;
+                                    descriptionParameter.Value = part.Description;
+                                    manufacturerParameter.Value = part.Manufacturer;
+                                    mpnParameter.Value = part.MPN;
+                                    valueParameter.Value = part.Value;
+                                    datasheetParameter.Value = part.Datasheet;
+                                    schematicSymbolParameter.Value = (part.SymbolLibraryName != "" || part.SymbolName != "") ? $"{part.SymbolLibraryName}:{part.SymbolName}" : "";
+                                    footprintsParameter.Value = $"{string.Join(';', part.FootprintPairs.Select(pair => $"{pair.Item1}:{pair.Item2}"))}";
+                                    excludeFromBomParameter.Value = part.ExcludeFromBOM ? 1 : 0;
+                                    excludeFromBoardParameter.Value = part.ExcludeFromBoard ? 1 : 0;
+                                    excludeFromSimParameter.Value = part.ExcludeFromSim ? 1 : 0;
+                                    for (int i = 0; i < categoryParametersInOrder.Count; i++)
+                                        partParameterParameters[i].Value = part.ParameterValues[categoryParametersInOrder[i]];
+
+                                    insertPartCommand.ExecuteNonQuery();
+                                }
                             }
-                            insertPartsSql = insertPartsSql[..^2];
-
-                            var insertPartsCommand = connection.CreateCommand();
-                            insertPartsCommand.CommandText = insertPartsSql;
-
-                            insertPartsCommand.ExecuteNonQuery();
                         }
 
+                        transaction.Commit();
                     }
                 }
                 SqliteConnection.ClearAllPools();

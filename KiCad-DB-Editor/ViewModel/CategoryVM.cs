@@ -313,7 +313,6 @@ namespace KiCad_DB_Editor.ViewModel
         {
             foreach (PartVM pVM in SelectedPartVMs)
             {
-                // Always needs to be done in tandem
                 pVM.Part.FootprintPairs.Add(("", ""));
             }
         }
@@ -327,7 +326,6 @@ namespace KiCad_DB_Editor.ViewModel
         {
             foreach (PartVM pVM in SelectedPartVMs)
             {
-                // Always needs to be done in tandem
                 pVM.Part.FootprintPairs.RemoveAt(pVM.Part.FootprintPairs.Count - 1);
             }
         }

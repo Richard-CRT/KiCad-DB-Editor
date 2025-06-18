@@ -25,9 +25,9 @@ namespace KiCad_DB_Editor.ViewModel
         {
             get
             {
-                string path = Part.ParentCategory.Name;
-                var c = Part.ParentCategory;
-                while (c.ParentCategory is not null)
+                string path = this.Part.ParentCategory.Name;
+                var c = Part.ParentCategory.ParentCategory;
+                while (c is not null)
                 {
                     path = $"{c.Name}/{path}";
                     c = c.ParentCategory;

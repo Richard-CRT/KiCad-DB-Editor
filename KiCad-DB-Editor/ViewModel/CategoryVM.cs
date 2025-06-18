@@ -37,8 +37,8 @@ namespace KiCad_DB_Editor.ViewModel
             get
             {
                 string path = this.Category.Name;
-                var c = this.Category;
-                while (c.ParentCategory is not null)
+                var c = this.Category.ParentCategory;
+                while (c is not null)
                 {
                     path = $"{c.Name}/{path}";
                     c = c.ParentCategory;

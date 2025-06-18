@@ -11,8 +11,14 @@
         <conv:Boolean_to_Visibility_Converter x:Key="Boolean_to_Visibility_Converter" />
     </UserControl.Resources>
     <DockPanel>
+        <DockPanel DockPanel.Dock="Top">
+            <CheckBox DockPanel.Dock="Right" Content="Show Parameters" Margin="5,0,0,0" VerticalContentAlignment="Center"
+                      IsChecked="{Binding ShowParameterColumns, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_PartGrid}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"/>
+            <TextBox DockPanel.Dock="Top"></TextBox>
+        </DockPanel>
+
         <!-- This framework element is there for the express purpose of having a named source for DataGridColumns to bind via as they are outside the visual tree -->
-        <FrameworkElement x:Name="dummyElementToGetDataContext"
+        <FrameworkElement DockPanel.Dock="Top" x:Name="dummyElementToGetDataContext"
                           DataContext="{Binding Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}"
                           Visibility="Collapsed" />
         <DataGrid x:Name="dataGrid_Main" AutoGenerateColumns="False" SelectionUnit="CellOrRowHeader" CanUserResizeRows="False"
@@ -94,9 +100,6 @@
                 <DataGridTextColumn Header="Part UID"
                                     Binding="{Binding Part.PartUID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                     />
-                <DataGridTextColumn Header="Description"
-                                    Binding="{Binding Part.Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    />
                 <DataGridTextColumn Header="Manufacturer"
                                     Binding="{Binding Part.Manufacturer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                                     />
@@ -105,6 +108,9 @@
                                     />
                 <DataGridTextColumn Header="Value"
                                     Binding="{Binding Part.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                    />
+                <DataGridTextColumn Header="Description"
+                                    Binding="{Binding Part.Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                     />
                 <DataGridTextColumn Header="Datasheet"
                                     Binding="{Binding Part.Datasheet, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 

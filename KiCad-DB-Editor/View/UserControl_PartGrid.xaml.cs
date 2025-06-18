@@ -47,6 +47,27 @@ namespace KiCad_DB_Editor.View
             set => SetValue(DisplayPartCategoryProperty, value);
         }
 
+        public static readonly DependencyProperty ShowParameterColumnsProperty = DependencyProperty.Register(
+            nameof(ShowParameterColumns),
+            typeof(bool),
+            typeof(UserControl_PartGrid),
+            new PropertyMetadata(true, new PropertyChangedCallback(ShowParameterColumnsPropertyChangedCallback))
+            );
+
+        private static void ShowParameterColumnsPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is UserControl_PartGrid uc_pg)
+            {
+                uc_pg.ShowParameterColumnsPropertyChanged();
+            }
+        }
+
+        public bool ShowParameterColumns
+        {
+            get => (bool)GetValue(ShowParameterColumnsProperty);
+            set => SetValue(ShowParameterColumnsProperty, value);
+        }
+
         public static readonly DependencyProperty SelectedPartVMsProperty = DependencyProperty.Register(
             nameof(SelectedPartVMs),
             typeof(PartVM[]),
@@ -132,6 +153,11 @@ namespace KiCad_DB_Editor.View
             {
                 uc_pg.PartVMsPropertyChanged();
             }
+        }
+
+        private void ShowParameterColumnsPropertyChanged()
+        {
+            redoColumns_PotentialParametersColumnChange();
         }
 
         private ObservableCollectionEx<Parameter>? oldParameters = null;
@@ -356,7 +382,7 @@ namespace KiCad_DB_Editor.View
             parameterToDataGridColumn[parameter] = dataGridTextColumn;
             parametersThatHaveColumns.Insert(index, parameter);
 
-            const int baseColumnIndexToInsertAt = 8;
+            const int baseColumnIndexToInsertAt = 6;
             dataGrid_Main.Columns.Insert(baseColumnIndexToInsertAt + index, dataGridTextColumn);
 
             return dataGridTextColumn;
@@ -370,15 +396,23 @@ namespace KiCad_DB_Editor.View
 
         private List<Parameter> parametersThatHaveColumns = new();
         private Dictionary<Parameter, DataGridTextColumn> parameterToDataGridColumn = new();
-        private void redoColumns_PotentialParametersColumnChange(NotifyCollectionChangedEventArgs e)
+        private void redoColumns_PotentialParametersColumnChange(NotifyCollectionChangedEventArgs? e = null)
         {
-            if (Parameters is not null)
+            if (Parameters is not null && ShowParameterColumns)
             {
-                switch (e.Action)
+                NotifyCollectionChangedAction action;
+                if (e is not null)
+                    action = e.Action;
+                else
+                    action = NotifyCollectionChangedAction.Reset;
+
+                // The Add & Remove branches are only used by the Library part grid, as the Category part grids only fire PropertyChanged (i.e. Reset) for their
+                // inherited & normal etc properties
+                switch (action)
                 {
                     case NotifyCollectionChangedAction.Add:
                         {
-                            Debug.Assert(e.NewItems is not null && e.NewItems.Count == 1);
+                            Debug.Assert(e!.NewItems is not null && e.NewItems.Count == 1);
                             Parameter parameterThatNeedsANewColumn = (e.NewItems[0] as Parameter)!;
                             int indexOfPToBeAddedInParentCollection = e.NewStartingIndex;
                             int newIndex;
@@ -390,7 +424,7 @@ namespace KiCad_DB_Editor.View
                         break;
                     case NotifyCollectionChangedAction.Remove:
                         {
-                            Debug.Assert(e.OldItems is not null && e.OldItems.Count == 1);
+                            Debug.Assert(e!.OldItems is not null && e.OldItems.Count == 1);
                             var parameterThatNeedsToBeRemoved = (e.OldItems[0] as Parameter)!;
                             DataGridTextColumn column = parameterToDataGridColumn[parameterThatNeedsToBeRemoved];
                             dataGrid_Main.Columns.Remove(column);
@@ -403,7 +437,7 @@ namespace KiCad_DB_Editor.View
                         {
                             var parametersThatNeedANewColumn = Parameters.Except(parametersThatHaveColumns).ToList();
                             var parametersThatNeedToBeRemoved = parametersThatHaveColumns.Except(Parameters).ToList();
-                            
+
                             // Identify the ones that aren't in the right index anymore, and add them to the pile of ones requiring removal & (re)creation
                             int parametersThatHaveColumnsIndex = 0;
                             for (int sourceParameterIndex = 0; sourceParameterIndex < Parameters.Count; sourceParameterIndex++)

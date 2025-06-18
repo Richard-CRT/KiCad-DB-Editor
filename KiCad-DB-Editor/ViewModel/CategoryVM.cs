@@ -222,6 +222,7 @@ namespace KiCad_DB_Editor.ViewModel
             foreach (Parameter parameter in Category.InheritedAndNormalParameters)
                 part.ParameterValues.Add(parameter, "");
             Category.Parts.Add(part);
+            Category.ParentLibrary.AllParts.Add(part);
         }
 
         #region Commands

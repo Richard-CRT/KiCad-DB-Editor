@@ -504,36 +504,47 @@ $symbol_name, ");
                             var categoryStringParameter = command.CreateParameter();
                             categoryStringParameter.ParameterName = "$category_string";
                             command.Parameters.Add(categoryStringParameter);
+
                             var partUIDParameter = command.CreateParameter();
                             partUIDParameter.ParameterName = "$part_uid";
                             command.Parameters.Add(partUIDParameter);
+
                             var descriptionParameter = command.CreateParameter();
                             descriptionParameter.ParameterName = "$description";
                             command.Parameters.Add(descriptionParameter);
+
                             var manufacturerParameter = command.CreateParameter();
                             manufacturerParameter.ParameterName = "$manufacturer";
                             command.Parameters.Add(manufacturerParameter);
+
                             var mpnParameter = command.CreateParameter();
                             mpnParameter.ParameterName = "$mpn";
                             command.Parameters.Add(mpnParameter);
+
                             var valueParameter = command.CreateParameter();
                             valueParameter.ParameterName = "$value";
                             command.Parameters.Add(valueParameter);
+
                             var datasheetParameter = command.CreateParameter();
                             datasheetParameter.ParameterName = "$datasheet";
                             command.Parameters.Add(datasheetParameter);
+
                             var excludeFromBomParameter = command.CreateParameter();
                             excludeFromBomParameter.ParameterName = "$exclude_from_bom";
                             command.Parameters.Add(excludeFromBomParameter);
+
                             var excludeFromBoardParameter = command.CreateParameter();
                             excludeFromBoardParameter.ParameterName = "$exclude_from_board";
                             command.Parameters.Add(excludeFromBoardParameter);
+
                             var excludeFromSimParameter = command.CreateParameter();
                             excludeFromSimParameter.ParameterName = "$exclude_from_sim";
                             command.Parameters.Add(excludeFromSimParameter);
+
                             var symbolLibNameParameter = command.CreateParameter();
                             symbolLibNameParameter.ParameterName = "$symbol_lib_name";
                             command.Parameters.Add(symbolLibNameParameter);
+
                             var symbolNameParameter = command.CreateParameter();
                             symbolNameParameter.ParameterName = "$symbol_name";
                             command.Parameters.Add(symbolNameParameter);

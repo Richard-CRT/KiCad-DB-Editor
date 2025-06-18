@@ -54,8 +54,10 @@
         <GridSplitter Grid.Row="4" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0,3,0,3" Height="3" />
         <DockPanel Grid.Row="5">
             <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,5,0,0">
-                <Button Content="New Part" Padding="5,1,5,1"
-                        Command="{Binding CategoryVM.NewPartCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
+                <TextBox d:Text="1" Padding="0,1,0,1" MinWidth="20" MaxWidth="50" HorizontalContentAlignment="Center"
+                         Text="{Binding CategoryVM.NumNewParts, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" />
+                <Button Content="New Parts" Padding="5,1,5,1" Margin="5,0,0,0"
+                        Command="{Binding CategoryVM.NewPartsCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
                 <Button Content="Delete Parts" Padding="5,1,5,1" Margin="5,0,0,0"
                         Command="{Binding CategoryVM.DeletePartsCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
                 <Button Content="Add Footprint" Padding="5,1,5,1" Margin="5,0,0,0"

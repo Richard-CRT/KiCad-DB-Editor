@@ -20,12 +20,15 @@ using System.Security.Cryptography;
 using System.Windows.Media;
 using System.Formats.Asn1;
 using System.Diagnostics.CodeAnalysis;
+using System.Windows.Threading;
 
 namespace KiCad_DB_Editor.ViewModel
 {
     public class CategoryVM : NotifyObject
     {
         public Category Category { get; }
+        private DispatcherTimer _newPartsLoopTimer;
+        private int _newPartsRemainingNumNewParts;
 
         #region Notify Properties
 
@@ -41,6 +44,25 @@ namespace KiCad_DB_Editor.ViewModel
                     c = c.ParentCategory;
                 }
                 return path;
+            }
+        }
+
+        private int _numNewParts = 1;
+        public int NumNewParts
+        {
+            get { return _numNewParts; }
+            set
+            {
+                if (_numNewParts != value)
+                {
+                    if (value < 1)
+                        throw new Exceptions.ArgumentValidationException("Number of new parts can't be less than 1");
+                    else if (value > 10_000)
+                        throw new Exceptions.ArgumentValidationException("Number of new parts can't be more than 10,000");
+
+                    _numNewParts = value;
+                    InvokePropertyChanged();
+                }
             }
         }
 
@@ -111,10 +133,16 @@ namespace KiCad_DB_Editor.ViewModel
             // Setup commands
             AddParameterCommand = new BasicCommand(AddParameterCommandExecuted, AddParameterCommandCanExecute);
             RemoveParameterCommand = new BasicCommand(RemoveParameterCommandExecuted, RemoveParameterCommandCanExecute);
-            NewPartCommand = new BasicCommand(NewPartCommandExecuted, null);
+            NewPartsCommand = new BasicCommand(NewPartsCommandExecuted, null);
             DeletePartsCommand = new BasicCommand(DeletePartCommandExecuted, DeletePartsCommandCanExecute);
             AddFootprintCommand = new BasicCommand(AddFootprintCommandExecuted, AddFootprintCommandCanExecute);
             RemoveFootprintCommand = new BasicCommand(RemoveFootprintCommandExecuted, RemoveFootprintCommandCanExecute);
+
+            _newPartsLoopTimer = new();
+            // Guarantees generated part numbers are at least 1 millisecond apart
+            // When testing the loop fired much less frequently than that anyway, so probably not that critical
+            _newPartsLoopTimer.Interval = TimeSpan.FromMilliseconds(2);
+            _newPartsLoopTimer.Tick += _newPartsLoopTimer_Tick;
         }
 
         public void Unsubscribe()
@@ -175,11 +203,32 @@ namespace KiCad_DB_Editor.ViewModel
                 pVM.InvokePropertyChanged_Path();
         }
 
+        private void _newPartsLoopTimer_Tick(object? sender, EventArgs e)
+        {
+            if (_newPartsRemainingNumNewParts > 0)
+            {
+                _newPart();
+                _newPartsRemainingNumNewParts--;
+            }
+
+            if (_newPartsRemainingNumNewParts == 0)
+                _newPartsLoopTimer.Stop();
+        }
+
+        private void _newPart()
+        {
+            string partUID = Util.GeneratePartUID(Category.ParentLibrary.PartUIDScheme);
+            Part part = new(partUID, Category.ParentLibrary, Category);
+            foreach (Parameter parameter in Category.InheritedAndNormalParameters)
+                part.ParameterValues.Add(parameter, "");
+            Category.Parts.Add(part);
+        }
+
         #region Commands
 
         public IBasicCommand AddParameterCommand { get; }
         public IBasicCommand RemoveParameterCommand { get; }
-        public IBasicCommand NewPartCommand { get; }
+        public IBasicCommand NewPartsCommand { get; }
         public IBasicCommand DeletePartsCommand { get; }
         public IBasicCommand AddFootprintCommand { get; }
         public IBasicCommand RemoveFootprintCommand { get; }
@@ -228,13 +277,15 @@ namespace KiCad_DB_Editor.ViewModel
             SelectedParameter = Category.Parameters.FirstOrDefault();
         }
 
-        private void NewPartCommandExecuted(object? _)
+        private void NewPartsCommandExecuted(object? _)
         {
-            string partUID = Util.GeneratePartUID(Category.ParentLibrary.PartUIDScheme);
-            Part part = new(partUID, Category.ParentLibrary, Category);
-            foreach (Parameter parameter in Category.InheritedAndNormalParameters)
-                part.ParameterValues.Add(parameter, "");
-            Category.Parts.Add(part);
+            if (NumNewParts == 1)
+                _newPart();
+            else
+            {
+                _newPartsRemainingNumNewParts += NumNewParts;
+                _newPartsLoopTimer.Start();
+            }
         }
 
         private bool DeletePartsCommandCanExecute(object? parameter)

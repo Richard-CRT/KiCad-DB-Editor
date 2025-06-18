@@ -721,6 +721,10 @@ namespace KiCad_DB_Editor.Model
 
                 if (!jsonKiCadDblFile.WriteToFile(tempDbConfPath)) return false;
 
+                // SqliteConnection hasn't properly closed the file at this point, force a GC to ensure it's closed
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+
                 File.Move(tempDbConfPath, kiCadDbConfFilePath, overwrite: true);
                 File.Move(tempSqlitePath, kiCadSqliteFilePath, overwrite: true);
 

@@ -55,8 +55,8 @@ namespace KiCad_DB_Editor.ViewModel
 
             _autoSaveTimer = new();
             _autoSaveTimer.Interval = TimeSpan.FromMinutes(5);
-            _autoSaveTimer.IsEnabled = true;
             _autoSaveTimer.Tick += _autoSaveTimer_Tick;
+            _autoSaveTimer.Start();
         }
 
         public void WindowLoaded()

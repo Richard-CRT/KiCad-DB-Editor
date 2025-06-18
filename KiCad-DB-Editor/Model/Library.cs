@@ -422,7 +422,7 @@ namespace KiCad_DB_Editor.Model
                 }
 
                 string tempProjectPath = $"proj.tmp";
-                string tempComponentsPath = $"components.tmp";
+                string tempDataPath = $"data.tmp";
 
                 JsonLibrary jsonLibrary = new JsonLibrary(this);
                 if (!jsonLibrary.WriteToFile(tempProjectPath, autosave)) return false;
@@ -444,13 +444,12 @@ namespace KiCad_DB_Editor.Model
                 foreach (Part part in AllParts)
                     maxFootprints = Math.Max(maxFootprints, part.FootprintPairs.Count);
 
-                File.Delete(tempComponentsPath);
-                using (var connection = new SqliteConnection($"Data Source={tempComponentsPath}"))
+                File.Delete(tempDataPath);
+                using (var connection = new SqliteConnection($"Data Source={tempDataPath}"))
                 {
                     connection.Open();
                     using (var transaction = connection.BeginTransaction())
                     {
-
                         // Worse DB structure but simpler for humans
 
                         var createTableCommand = connection.CreateCommand();
@@ -468,7 +467,8 @@ namespace KiCad_DB_Editor.Model
     ""Exclude from Board"" INTEGER, 
     ""Exclude from Sim"" INTEGER, 
     ""Symbol Library Name"" TEXT,
-    ""Symbol Name"" TEXT,");
+""Symbol Name"" TEXT,"
+);
 
                         for (int i = 1; i <= maxFootprints; i++)
                             createTableSqlStringBuilder.AppendFormat("\"Footprint {0} Library Name\" TEXT, \"Footprint {0} Name\" TEXT, ", i);
@@ -480,14 +480,13 @@ namespace KiCad_DB_Editor.Model
                         createTableSqlStringBuilder.Append(')');
 
                         createTableCommand.CommandText = createTableSqlStringBuilder.ToString();
-
                         createTableCommand.ExecuteNonQuery();
 
                         if (AllParts.Count > 0)
                         {
-                            var command = connection.CreateCommand();
-                            StringBuilder insertPartsSqlStringBuilder = new();
-                            insertPartsSqlStringBuilder.Append(@"
+                            var insertPartCommand = connection.CreateCommand();
+                            StringBuilder insertPartSqlStringBuilder = new();
+                            insertPartSqlStringBuilder.Append(@"
 INSERT INTO ""Components""
 VALUES (
 $category_string,
@@ -501,90 +500,91 @@ $exclude_from_bom,
 $exclude_from_board,
 $exclude_from_sim,
 $symbol_lib_name,
-$symbol_name, ");
+$symbol_name, "
+);
 
-                            var categoryStringParameter = command.CreateParameter();
+                            var categoryStringParameter = insertPartCommand.CreateParameter();
                             categoryStringParameter.ParameterName = "$category_string";
-                            command.Parameters.Add(categoryStringParameter);
+                            insertPartCommand.Parameters.Add(categoryStringParameter);
 
-                            var partUIDParameter = command.CreateParameter();
+                            var partUIDParameter = insertPartCommand.CreateParameter();
                             partUIDParameter.ParameterName = "$part_uid";
-                            command.Parameters.Add(partUIDParameter);
+                            insertPartCommand.Parameters.Add(partUIDParameter);
 
-                            var descriptionParameter = command.CreateParameter();
+                            var descriptionParameter = insertPartCommand.CreateParameter();
                             descriptionParameter.ParameterName = "$description";
-                            command.Parameters.Add(descriptionParameter);
+                            insertPartCommand.Parameters.Add(descriptionParameter);
 
-                            var manufacturerParameter = command.CreateParameter();
+                            var manufacturerParameter = insertPartCommand.CreateParameter();
                             manufacturerParameter.ParameterName = "$manufacturer";
-                            command.Parameters.Add(manufacturerParameter);
+                            insertPartCommand.Parameters.Add(manufacturerParameter);
 
-                            var mpnParameter = command.CreateParameter();
+                            var mpnParameter = insertPartCommand.CreateParameter();
                             mpnParameter.ParameterName = "$mpn";
-                            command.Parameters.Add(mpnParameter);
+                            insertPartCommand.Parameters.Add(mpnParameter);
 
-                            var valueParameter = command.CreateParameter();
+                            var valueParameter = insertPartCommand.CreateParameter();
                             valueParameter.ParameterName = "$value";
-                            command.Parameters.Add(valueParameter);
+                            insertPartCommand.Parameters.Add(valueParameter);
 
-                            var datasheetParameter = command.CreateParameter();
+                            var datasheetParameter = insertPartCommand.CreateParameter();
                             datasheetParameter.ParameterName = "$datasheet";
-                            command.Parameters.Add(datasheetParameter);
+                            insertPartCommand.Parameters.Add(datasheetParameter);
 
-                            var excludeFromBomParameter = command.CreateParameter();
+                            var excludeFromBomParameter = insertPartCommand.CreateParameter();
                             excludeFromBomParameter.ParameterName = "$exclude_from_bom";
-                            command.Parameters.Add(excludeFromBomParameter);
+                            insertPartCommand.Parameters.Add(excludeFromBomParameter);
 
-                            var excludeFromBoardParameter = command.CreateParameter();
+                            var excludeFromBoardParameter = insertPartCommand.CreateParameter();
                             excludeFromBoardParameter.ParameterName = "$exclude_from_board";
-                            command.Parameters.Add(excludeFromBoardParameter);
+                            insertPartCommand.Parameters.Add(excludeFromBoardParameter);
 
-                            var excludeFromSimParameter = command.CreateParameter();
+                            var excludeFromSimParameter = insertPartCommand.CreateParameter();
                             excludeFromSimParameter.ParameterName = "$exclude_from_sim";
-                            command.Parameters.Add(excludeFromSimParameter);
+                            insertPartCommand.Parameters.Add(excludeFromSimParameter);
 
-                            var symbolLibNameParameter = command.CreateParameter();
+                            var symbolLibNameParameter = insertPartCommand.CreateParameter();
                             symbolLibNameParameter.ParameterName = "$symbol_lib_name";
-                            command.Parameters.Add(symbolLibNameParameter);
+                            insertPartCommand.Parameters.Add(symbolLibNameParameter);
 
-                            var symbolNameParameter = command.CreateParameter();
+                            var symbolNameParameter = insertPartCommand.CreateParameter();
                             symbolNameParameter.ParameterName = "$symbol_name";
-                            command.Parameters.Add(symbolNameParameter);
+                            insertPartCommand.Parameters.Add(symbolNameParameter);
 
                             List<SqliteParameter> footprintLibNameParameters = new();
                             List<SqliteParameter> footprintNameParameters = new();
                             for (int i = 0; 0 < maxFootprints; i++)
                             {
-                                insertPartsSqlStringBuilder.AppendFormat("$footprint_lib_name_{0}, $footprint_name_{0}, ", i);
+                                insertPartSqlStringBuilder.AppendFormat("$footprint_lib_name_{0}, $footprint_name_{0}, ", i);
 
-                                var footprintLibNameParameter = command.CreateParameter();
+                                var footprintLibNameParameter = insertPartCommand.CreateParameter();
                                 footprintLibNameParameter.ParameterName = $"$footprint_lib_name_{i}";
-                                command.Parameters.Add(footprintLibNameParameter);
+                                insertPartCommand.Parameters.Add(footprintLibNameParameter);
                                 footprintLibNameParameters.Add(footprintLibNameParameter);
 
-                                var footprintNameParameter = command.CreateParameter();
+                                var footprintNameParameter = insertPartCommand.CreateParameter();
                                 footprintNameParameter.ParameterName = $"$footprint_name_{i}";
-                                command.Parameters.Add(footprintNameParameter);
+                                insertPartCommand.Parameters.Add(footprintNameParameter);
                                 footprintNameParameters.Add(footprintNameParameter);
                             }
 
                             List<SqliteParameter> partParameterParameters = new();
                             for (int i = 0; i < AllParameters.Count; i++)
                             {
-                                insertPartsSqlStringBuilder.AppendFormat("$param_{0}, ", i);
+                                insertPartSqlStringBuilder.AppendFormat("$param_{0}, ", i);
 
-                                var partParameterParameter = command.CreateParameter();
+                                var partParameterParameter = insertPartCommand.CreateParameter();
                                 partParameterParameter.ParameterName = $"$param_{i}";
-                                command.Parameters.Add(partParameterParameter);
+                                insertPartCommand.Parameters.Add(partParameterParameter);
                                 partParameterParameters.Add(partParameterParameter);
                             }
 
-                            insertPartsSqlStringBuilder.Remove(insertPartsSqlStringBuilder.Length - 2, 2);
-                            insertPartsSqlStringBuilder.Append(')');
-                            command.CommandText = insertPartsSqlStringBuilder.ToString();
+                            insertPartSqlStringBuilder.Remove(insertPartSqlStringBuilder.Length - 2, 2);
+                            insertPartSqlStringBuilder.Append(')');
+                            insertPartCommand.CommandText = insertPartSqlStringBuilder.ToString();
 
                             // Doesn't actually seem to affect performance, but adding for completeness
-                            command.Prepare();
+                            insertPartCommand.Prepare();
 
                             foreach (Part part in AllParts)
                             {
@@ -620,18 +620,18 @@ $symbol_name, ");
                                     else
                                         partParameterParameters[i].Value = System.DBNull.Value;
                                 }
-                                command.ExecuteNonQuery();
+
+                                insertPartCommand.ExecuteNonQuery();
                             }
                         }
 
                         transaction.Commit();
                     }
-
                 }
                 SqliteConnection.ClearAllPools();
                 
                 File.Copy(tempProjectPath, projectFilePath, overwrite: true);
-                File.Copy(tempComponentsPath, componentsFilePath, overwrite: true);
+                File.Copy(tempDataPath, componentsFilePath, overwrite: true);
 
                 return true;
             }

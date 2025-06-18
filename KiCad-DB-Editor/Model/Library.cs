@@ -398,8 +398,6 @@ namespace KiCad_DB_Editor.Model
 
         public bool WriteToFile(string projectFilePath, bool autosave = false)
         {
-            // For this function we don't rely on anything being DB sanitised, even though we controlled the inputs
-            // of some things. Hence lots of .Replace("'", "''") and .Replace("\"", "\"\"")
             try
             {
                 projectFilePath = (new Uri(projectFilePath)).AbsolutePath;
@@ -470,6 +468,7 @@ CREATE TABLE ""Components"" (
                     for (int i = 1; i <= maxFootprints; i++)
                         createTableSqlStringBuilder.AppendFormat("\"Footprint {0} Library Name\" TEXT, \"Footprint {0} Name\" TEXT, ", i);
                     foreach (Parameter parameter in AllParameters)
+                        // Can't use prepared statements for column titles, so use .Replace("\"", "\"\"") to escape any potential quotes (even though we controlled the input)
                         createTableSqlStringBuilder.AppendFormat("\"{0} {1}\" TEXT, ", parameter.Name.Replace("\"", "\"\""), parameter.UUID);
 
                     createTableSqlStringBuilder.Remove(createTableSqlStringBuilder.Length - 2, 2);

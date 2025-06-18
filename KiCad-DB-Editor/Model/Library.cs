@@ -639,6 +639,7 @@ namespace KiCad_DB_Editor.Model
                             "\"Value\" TEXT, " +
                             "\"Datasheet\" TEXT, ";
 
+                        // Should already be in order as we reshuffle the lists accordingly, but may as well do the .Intersect just to confirm it
                         var categoryParametersInOrder = AllParameters.Intersect(category.InheritedAndNormalParameters);
                         foreach (var parameter in categoryParametersInOrder)
                         {

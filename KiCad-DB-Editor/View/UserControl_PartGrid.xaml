@@ -21,6 +21,7 @@
         <FrameworkElement DockPanel.Dock="Top" x:Name="dummyElementToGetDataContext"
                           DataContext="{Binding Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}"
                           Visibility="Collapsed" />
+        <!-- EnableRowVirtualization must be true or it creates every single part row even if not displayed -->
         <DataGrid x:Name="dataGrid_Main" AutoGenerateColumns="False" SelectionUnit="CellOrRowHeader" CanUserResizeRows="False"
                   ItemsSource="{Binding PartVMs, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}, UpdateSourceTrigger=PropertyChanged}"
                   d:ItemsSource="{d:SampleData}"
@@ -29,6 +30,8 @@
                   PreviewKeyDown="dataGrid_Main_PreviewKeyDown"
                   BeginningEdit="dataGrid_Main_BeginningEdit"
                   CellEditEnding="dataGrid_Main_CellEditEnding"
+                  EnableRowVirtualization="True"
+                  EnableColumnVirtualization="True"
                   >
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="LightGray"/>

@@ -553,7 +553,7 @@ $symbol_name, "
 
                             List<SqliteParameter> footprintLibNameParameters = new();
                             List<SqliteParameter> footprintNameParameters = new();
-                            for (int i = 0; 0 < maxFootprints; i++)
+                            for (int i = 0; i < maxFootprints; i++)
                             {
                                 insertPartSqlStringBuilder.AppendFormat("$footprint_lib_name_{0}, $footprint_name_{0}, ", i);
 

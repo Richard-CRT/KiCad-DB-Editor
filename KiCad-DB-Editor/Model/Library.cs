@@ -586,7 +586,7 @@ $symbol_name, "
                             // Doesn't actually seem to affect performance, but adding for completeness
                             insertPartCommand.Prepare();
 
-                            foreach (Part part in AllParts)
+                            foreach (Part part in AllParts.OrderBy(p => p.PartUID))
                             {
                                 categoryStringParameter.Value = categoryToCategoryStringMap[part.ParentCategory];
                                 partUIDParameter.Value = part.PartUID;
@@ -822,7 +822,7 @@ $exclude_from_sim, "
                                 // Doesn't actually seem to affect performance, but adding for completeness
                                 insertPartCommand.Prepare();
 
-                                foreach (Part part in category.Parts)
+                                foreach (Part part in category.Parts.OrderBy(p => p.PartUID))
                                 {
                                     partUIDParameter.Value = part.PartUID;
                                     descriptionParameter.Value = part.Description;

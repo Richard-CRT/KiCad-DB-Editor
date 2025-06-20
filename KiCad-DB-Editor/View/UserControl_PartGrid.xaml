@@ -88,6 +88,9 @@
             <DataGrid.Columns>
                 <DataGridTemplateColumn Width="SizeToCells"
                                         IsReadOnly="True"
+                                        CanUserSort="False"
+                                        CanUserReorder="False"
+                                        CanUserResize="False"
                                         >
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>

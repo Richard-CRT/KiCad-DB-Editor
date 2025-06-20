@@ -35,6 +35,8 @@ namespace KiCad_DB_Editor.View
     {
         #region Dependency Properties
 
+        #region DisplayPartCategory DependencyPropertyShowParameterColumns
+
         public static readonly DependencyProperty DisplayPartCategoryProperty = DependencyProperty.Register(
             nameof(DisplayPartCategory),
             typeof(bool),
@@ -47,12 +49,22 @@ namespace KiCad_DB_Editor.View
             set => SetValue(DisplayPartCategoryProperty, value);
         }
 
+        #endregion
+
+        #region ShowParameterColumns DependencyPropertyShowParameterColumns
+
         public static readonly DependencyProperty ShowParameterColumnsProperty = DependencyProperty.Register(
             nameof(ShowParameterColumns),
             typeof(bool),
             typeof(UserControl_PartGrid),
             new PropertyMetadata(true, new PropertyChangedCallback(ShowParameterColumnsPropertyChangedCallback))
             );
+
+        public bool ShowParameterColumns
+        {
+            get => (bool)GetValue(ShowParameterColumnsProperty);
+            set => SetValue(ShowParameterColumnsProperty, value);
+        }
 
         private static void ShowParameterColumnsPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -62,11 +74,14 @@ namespace KiCad_DB_Editor.View
             }
         }
 
-        public bool ShowParameterColumns
+        private void ShowParameterColumnsPropertyChanged()
         {
-            get => (bool)GetValue(ShowParameterColumnsProperty);
-            set => SetValue(ShowParameterColumnsProperty, value);
+            redoColumns_PotentialParametersColumnChange();
         }
+
+        #endregion
+
+        #region SelectedPartVMs DependencyProperty
 
         public static readonly DependencyProperty SelectedPartVMsProperty = DependencyProperty.Register(
             nameof(SelectedPartVMs),
@@ -89,6 +104,27 @@ namespace KiCad_DB_Editor.View
             }
         }
 
+        bool externalSelectedPartVMsPropertyChanged = false;
+        bool internalSelectedPartVMsPropertyChanged = false;
+        protected void SelectedPartVMsPropertyChanged()
+        {
+            if (!internalSelectedPartVMsPropertyChanged)
+            {
+                externalSelectedPartVMsPropertyChanged = true;
+                dataGrid_Main.SelectedItems.Clear();
+                if (SelectedPartVMs is not null)
+                {
+                    foreach (PartVM selectedPartVM in SelectedPartVMs)
+                        dataGrid_Main.SelectedItems.Add(selectedPartVM);
+                }
+                externalSelectedPartVMsPropertyChanged = false;
+            }
+        }
+
+        #endregion
+
+        #region KiCadSymbolLibraries DependencyProperty
+
         public static readonly DependencyProperty KiCadSymbolLibrariesProperty = DependencyProperty.Register(
             nameof(KiCadSymbolLibraries),
             typeof(ObservableCollectionEx<KiCadSymbolLibrary>),
@@ -101,6 +137,10 @@ namespace KiCad_DB_Editor.View
             set => SetValue(KiCadSymbolLibrariesProperty, value);
         }
 
+        #endregion
+
+        #region KiCadFootprintLibraries DependencyProperty
+
         public static readonly DependencyProperty KiCadFootprintLibraryVMsProperty = DependencyProperty.Register(
             nameof(KiCadFootprintLibraries),
             typeof(ObservableCollectionEx<KiCadFootprintLibrary>),
@@ -112,6 +152,10 @@ namespace KiCad_DB_Editor.View
             get => (ObservableCollectionEx<KiCadFootprintLibrary>)GetValue(KiCadFootprintLibraryVMsProperty);
             set => SetValue(KiCadFootprintLibraryVMsProperty, value);
         }
+
+        #endregion
+
+        #region Parameters DependencyProperty
 
         public static readonly DependencyProperty ParametersProperty = DependencyProperty.Register(
             nameof(Parameters),
@@ -132,32 +176,6 @@ namespace KiCad_DB_Editor.View
             {
                 uc_pg.ParametersPropertyChanged();
             }
-        }
-
-        public static readonly DependencyProperty PartVMsProperty = DependencyProperty.Register(
-            nameof(PartVMs),
-            typeof(ObservableCollectionEx<PartVM>),
-            typeof(UserControl_PartGrid),
-            new PropertyMetadata(new PropertyChangedCallback(PartVMsPropertyChangedCallback))
-            );
-
-        public ObservableCollectionEx<PartVM> PartVMs
-        {
-            get => (ObservableCollectionEx<PartVM>)GetValue(PartVMsProperty);
-            set => SetValue(PartVMsProperty, value);
-        }
-
-        private static void PartVMsPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            if (d is UserControl_PartGrid uc_pg)
-            {
-                uc_pg.PartVMsPropertyChanged();
-            }
-        }
-
-        private void ShowParameterColumnsPropertyChanged()
-        {
-            redoColumns_PotentialParametersColumnChange();
         }
 
         private ObservableCollectionEx<Parameter>? oldParameters = null;
@@ -199,9 +217,51 @@ namespace KiCad_DB_Editor.View
             }
         }
 
+        #endregion
+
+        #region PartVMsCollectionView DependencyProperty
+
+        public static readonly DependencyProperty PartVMsCollectionViewProperty = DependencyProperty.Register(
+            nameof(PartVMsCollectionView),
+            typeof(CollectionView),
+            typeof(UserControl_PartGrid)
+            );
+
+        public CollectionView PartVMsCollectionView
+        {
+            get => (CollectionView)GetValue(PartVMsCollectionViewProperty);
+            set => SetValue(PartVMsCollectionViewProperty, value);
+        }
+
+        #endregion
+
+        #region PartVMs DependencyProperty
+
+        public static readonly DependencyProperty PartVMsProperty = DependencyProperty.Register(
+            nameof(PartVMs),
+            typeof(ObservableCollectionEx<PartVM>),
+            typeof(UserControl_PartGrid),
+            new PropertyMetadata(new PropertyChangedCallback(PartVMsPropertyChangedCallback))
+            );
+
+        public ObservableCollectionEx<PartVM> PartVMs
+        {
+            get => (ObservableCollectionEx<PartVM>)GetValue(PartVMsProperty);
+            set => SetValue(PartVMsProperty, value);
+        }
+
+        private static void PartVMsPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is UserControl_PartGrid uc_pg)
+                uc_pg.PartVMsPropertyChanged();
+        }
+
         private ObservableCollectionEx<PartVM>? oldPartVMs = null;
         protected void PartVMsPropertyChanged()
         {
+            PartVMsCollectionView = (CollectionView)CollectionViewSource.GetDefaultView(PartVMs);
+            PartVMsCollectionView.Filter = OnFilterPartVMsCollectionView;
+
             if (oldPartVMs is not null)
                 oldPartVMs.CollectionChanged -= PartVMs_CollectionChanged;
             oldPartVMs = PartVMs;
@@ -243,24 +303,74 @@ namespace KiCad_DB_Editor.View
                 redoColumns_PotentialFootprintColumnChange();
         }
 
-        bool externalSelectedPartVMsPropertyChanged = false;
-        bool internalSelectedPartVMsPropertyChanged = false;
-        protected void SelectedPartVMsPropertyChanged()
-        {
-            if (!internalSelectedPartVMsPropertyChanged)
-            {
-                externalSelectedPartVMsPropertyChanged = true;
-                dataGrid_Main.SelectedItems.Clear();
-                if (SelectedPartVMs is not null)
-                {
-                    foreach (PartVM selectedPartVM in SelectedPartVMs)
-                        dataGrid_Main.SelectedItems.Add(selectedPartVM);
-                }
-                externalSelectedPartVMsPropertyChanged = false;
-            }
-        }
+        #endregion
+
+        #region Filter DependencyProperties
+
+        public static readonly DependencyProperty CategoryFilterProperty = DependencyProperty.Register(nameof(CategoryFilter), typeof(string), typeof(UserControl_PartGrid),
+            new PropertyMetadata(new PropertyChangedCallback(CategoryFilterPropertyChangedCallback)));
+        public string CategoryFilter { get => (string)GetValue(CategoryFilterProperty); set => SetValue(CategoryFilterProperty, value); }
+        private static void CategoryFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.CategoryFilterPropertyChanged(); }
+        protected void CategoryFilterPropertyChanged() { PartVMsCollectionView.Refresh(); }
+
+        public static readonly DependencyProperty PartUIDFilterProperty = DependencyProperty.Register(nameof(PartUIDFilter), typeof(string), typeof(UserControl_PartGrid),
+            new PropertyMetadata(new PropertyChangedCallback(PartUIDFilterPropertyChangedCallback)));
+        public string PartUIDFilter { get => (string)GetValue(PartUIDFilterProperty); set => SetValue(PartUIDFilterProperty, value); }
+        private static void PartUIDFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.PartUIDFilterPropertyChanged(); }
+        protected void PartUIDFilterPropertyChanged() { PartVMsCollectionView.Refresh(); }
+
+
+        public static readonly DependencyProperty ManufacturerFilterProperty = DependencyProperty.Register(nameof(ManufacturerFilter), typeof(string), typeof(UserControl_PartGrid),
+            new PropertyMetadata(new PropertyChangedCallback(ManufacturerFilterPropertyChangedCallback)));
+        public string ManufacturerFilter { get => (string)GetValue(ManufacturerFilterProperty); set => SetValue(ManufacturerFilterProperty, value); }
+        private static void ManufacturerFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.PartUIDFilterPropertyChanged(); }
+        protected void ManufacturerFilterPropertyChanged() { PartVMsCollectionView.Refresh(); }
+
+
+        public static readonly DependencyProperty MPNFilterProperty = DependencyProperty.Register(nameof(MPNFilter), typeof(string), typeof(UserControl_PartGrid),
+            new PropertyMetadata(new PropertyChangedCallback(MPNFilterPropertyChangedCallback)));
+        public string MPNFilter { get => (string)GetValue(MPNFilterProperty); set => SetValue(MPNFilterProperty, value); }
+        private static void MPNFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.PartUIDFilterPropertyChanged(); }
+        protected void MPNFilterPropertyChanged() { PartVMsCollectionView.Refresh(); }
+
+
+        public static readonly DependencyProperty ValueFilterProperty = DependencyProperty.Register(nameof(ValueFilter), typeof(string), typeof(UserControl_PartGrid),
+            new PropertyMetadata(new PropertyChangedCallback(ValueFilterPropertyChangedCallback)));
+        public string ValueFilter { get => (string)GetValue(ValueFilterProperty); set => SetValue(ValueFilterProperty, value); }
+        private static void ValueFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.PartUIDFilterPropertyChanged(); }
+        protected void ValueFilterPropertyChanged() { PartVMsCollectionView.Refresh(); }
+
+
+        public static readonly DependencyProperty DescriptionFilterProperty = DependencyProperty.Register(nameof(DescriptionFilter), typeof(string), typeof(UserControl_PartGrid),
+            new PropertyMetadata(new PropertyChangedCallback(DescriptionFilterPropertyChangedCallback)));
+        public string DescriptionFilter { get => (string)GetValue(DescriptionFilterProperty); set => SetValue(DescriptionFilterProperty, value); }
+        private static void DescriptionFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.PartUIDFilterPropertyChanged(); }
+        protected void DescriptionFilterPropertyChanged() { PartVMsCollectionView.Refresh(); }
+
+
+        public static readonly DependencyProperty DatasheetFilterProperty = DependencyProperty.Register(nameof(DatasheetFilter), typeof(string), typeof(UserControl_PartGrid),
+            new PropertyMetadata(new PropertyChangedCallback(DatasheetFilterPropertyChangedCallback)));
+        public string DatasheetFilter { get => (string)GetValue(DatasheetFilterProperty); set => SetValue(DatasheetFilterProperty, value); }
+        private static void DatasheetFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.PartUIDFilterPropertyChanged(); }
+        protected void DatasheetFilterPropertyChanged() { PartVMsCollectionView.Refresh(); }
 
         #endregion
+
+        #endregion
+
+        bool OnFilterPartVMsCollectionView(object item)
+        {
+            PartVM partVM = (PartVM)item;
+            Part part = partVM.Part;
+            return
+                (CategoryFilter is null || CategoryFilter == "" || partVM.Path.Contains(CategoryFilter)) &&
+                (PartUIDFilter is null || PartUIDFilter == "" || part.PartUID.Contains(PartUIDFilter)) &&
+                (ManufacturerFilter is null || ManufacturerFilter == "" || part.Manufacturer.Contains(ManufacturerFilter)) &&
+                (MPNFilter is null || MPNFilter == "" || part.MPN.Contains(MPNFilter)) &&
+                (ValueFilter is null || ValueFilter == "" || part.Value.Contains(ValueFilter)) &&
+                (DescriptionFilter is null || DescriptionFilter == "" || part.Description.Contains(DescriptionFilter)) &&
+                (DatasheetFilter is null || DatasheetFilter == "" || part.Datasheet.Contains(DatasheetFilter));
+        }
 
         private DataGridTemplateColumn newFootprintColumn(int footprintIndex, bool libraryColumn)
         {

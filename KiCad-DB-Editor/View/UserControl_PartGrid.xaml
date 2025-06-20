@@ -23,7 +23,7 @@
                           Visibility="Collapsed" />
         <!-- EnableRowVirtualization must be true or it creates every single part row even if not displayed -->
         <DataGrid x:Name="dataGrid_Main" AutoGenerateColumns="False" SelectionUnit="CellOrRowHeader" CanUserResizeRows="False"
-                  ItemsSource="{Binding PartVMs, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}, UpdateSourceTrigger=PropertyChanged}"
+                  ItemsSource="{Binding PartVMsCollectionView, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}, UpdateSourceTrigger=PropertyChanged}"
                   d:ItemsSource="{d:SampleData}"
                   SelectedCellsChanged="dataGrid_Main_SelectedCellsChanged"
                   KeyDown="dataGrid_Main_KeyDown"
@@ -85,10 +85,15 @@
                     <Setter Property="IsEnabled" Value="True" />
                 </Style>
             </DataGrid.Resources>
+            <DataGrid.ColumnHeaderStyle>
+                <Style TargetType="{x:Type DataGridColumnHeader}">
+                    <!-- Necessary to make the filter textboxes fill the width -->
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
             <DataGrid.Columns>
                 <DataGridTemplateColumn Width="SizeToCells"
                                         IsReadOnly="True"
-                                        CanUserSort="False"
                                         CanUserReorder="False"
                                         CanUserResize="False"
                                         >
@@ -98,28 +103,64 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="Category"
-                                    Binding="{Binding Path, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                <DataGridTextColumn Binding="{Binding Path, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                                     Visibility="{Binding DataContext.DisplayPartCategory, Source={x:Reference dummyElementToGetDataContext}, Converter={StaticResource Boolean_to_Visibility_Converter}}"
-                                    />
-                <DataGridTextColumn Header="Part UID"
-                                    Binding="{Binding Part.PartUID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    />
-                <DataGridTextColumn Header="Manufacturer"
-                                    Binding="{Binding Part.Manufacturer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                    />
-                <DataGridTextColumn Header="MPN"
-                                    Binding="{Binding Part.MPN, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                    />
-                <DataGridTextColumn Header="Value"
-                                    Binding="{Binding Part.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                    />
-                <DataGridTextColumn Header="Description"
-                                    Binding="{Binding Part.Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    />
-                <DataGridTextColumn Header="Datasheet"
-                                    Binding="{Binding Part.Datasheet, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                    />
+                                    >
+                    <DataGridTextColumn.Header>
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="Category" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                            <TextBox Text="{Binding DataContext.CategoryFilter, Mode=TwoWay, Source={x:Reference dummyElementToGetDataContext}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"/>
+                        </StackPanel>
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Part.PartUID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                    <DataGridTextColumn.Header>
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="Part UID" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                            <TextBox Text="{Binding DataContext.PartUIDFilter, Mode=TwoWay, Source={x:Reference dummyElementToGetDataContext}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"/>
+                        </StackPanel>
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Part.Manufacturer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                    <DataGridTextColumn.Header>
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="Manufacturer" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                            <TextBox Text="{Binding DataContext.ManufacturerFilter, Mode=TwoWay, Source={x:Reference dummyElementToGetDataContext}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"/>
+                        </StackPanel>
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Part.MPN, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                    <DataGridTextColumn.Header>
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="MPN" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                            <TextBox Text="{Binding DataContext.MPNFilter, Mode=TwoWay, Source={x:Reference dummyElementToGetDataContext}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"/>
+                        </StackPanel>
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Part.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                    <DataGridTextColumn.Header>
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="Value" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                            <TextBox Text="{Binding DataContext.ValueFilter, Mode=TwoWay, Source={x:Reference dummyElementToGetDataContext}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"/>
+                        </StackPanel>
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Part.Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                    <DataGridTextColumn.Header>
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="Description" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                            <TextBox Text="{Binding DataContext.DescriptionFilter, Mode=TwoWay, Source={x:Reference dummyElementToGetDataContext}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"/>
+                        </StackPanel>
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Part.Datasheet, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                    <DataGridTextColumn.Header>
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="Datasheet" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                            <TextBox Text="{Binding DataContext.DatasheetFilter, Mode=TwoWay, Source={x:Reference dummyElementToGetDataContext}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"/>
+                        </StackPanel>
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
                 <DataGridCheckBoxColumn Header="Excl. BOM"
                                         Binding="{Binding Part.ExcludeFromBOM, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         >

@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KiCad_DB_Editor.Model
+namespace KiCad_DB_Editor
 {
     public class NotifyObject : INotifyPropertyChanged
     {

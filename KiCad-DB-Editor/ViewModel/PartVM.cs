@@ -144,7 +144,9 @@ namespace KiCad_DB_Editor.ViewModel
         {
             get
             {
-                if (OwnerPartVM.Part.ParameterValues.TryGetValue(OwnerPartVM.Part.ParentLibrary.AllParameters.First(p => p.UUID == parameterUUID), out string? val))
+                Parameter? parameter = OwnerPartVM.Part.ParentLibrary.AllParameters.FirstOrDefault(p => p!.UUID == parameterUUID, null);
+                Debug.Assert(parameter is not null); // I want to know if this is null
+                if (OwnerPartVM.Part.ParameterValues.TryGetValue(parameter, out string? val))
                     return val;
                 else
                     return null;

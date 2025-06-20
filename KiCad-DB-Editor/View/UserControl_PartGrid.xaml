@@ -108,7 +108,7 @@
                                     >
                     <DataGridTextColumn.Header>
                         <StackPanel Orientation="Vertical">
-                            <TextBlock Text="Category" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                            <TextBlock Text="Category" HorizontalAlignment="Center" />
                             <TextBox Text="{Binding DataContext.CategoryFilter, Mode=TwoWay, Source={x:Reference dummyElementToGetDataContext}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"/>
                         </StackPanel>
                     </DataGridTextColumn.Header>
@@ -116,7 +116,7 @@
                 <DataGridTextColumn Binding="{Binding Part.PartUID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
                     <DataGridTextColumn.Header>
                         <StackPanel Orientation="Vertical">
-                            <TextBlock Text="Part UID" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                            <TextBlock Text="Part UID" HorizontalAlignment="Center" />
                             <TextBox Text="{Binding DataContext.PartUIDFilter, Mode=TwoWay, Source={x:Reference dummyElementToGetDataContext}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"/>
                         </StackPanel>
                     </DataGridTextColumn.Header>
@@ -124,7 +124,7 @@
                 <DataGridTextColumn Binding="{Binding Part.Manufacturer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
                     <DataGridTextColumn.Header>
                         <StackPanel Orientation="Vertical">
-                            <TextBlock Text="Manufacturer" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                            <TextBlock Text="Manufacturer" HorizontalAlignment="Center" />
                             <TextBox Text="{Binding DataContext.ManufacturerFilter, Mode=TwoWay, Source={x:Reference dummyElementToGetDataContext}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"/>
                         </StackPanel>
                     </DataGridTextColumn.Header>
@@ -132,7 +132,7 @@
                 <DataGridTextColumn Binding="{Binding Part.MPN, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
                     <DataGridTextColumn.Header>
                         <StackPanel Orientation="Vertical">
-                            <TextBlock Text="MPN" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                            <TextBlock Text="MPN" HorizontalAlignment="Center" />
                             <TextBox Text="{Binding DataContext.MPNFilter, Mode=TwoWay, Source={x:Reference dummyElementToGetDataContext}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"/>
                         </StackPanel>
                     </DataGridTextColumn.Header>
@@ -140,7 +140,7 @@
                 <DataGridTextColumn Binding="{Binding Part.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
                     <DataGridTextColumn.Header>
                         <StackPanel Orientation="Vertical">
-                            <TextBlock Text="Value" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                            <TextBlock Text="Value" HorizontalAlignment="Center" />
                             <TextBox Text="{Binding DataContext.ValueFilter, Mode=TwoWay, Source={x:Reference dummyElementToGetDataContext}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"/>
                         </StackPanel>
                     </DataGridTextColumn.Header>
@@ -148,7 +148,7 @@
                 <DataGridTextColumn Binding="{Binding Part.Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
                     <DataGridTextColumn.Header>
                         <StackPanel Orientation="Vertical">
-                            <TextBlock Text="Description" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                            <TextBlock Text="Description" HorizontalAlignment="Center" />
                             <TextBox Text="{Binding DataContext.DescriptionFilter, Mode=TwoWay, Source={x:Reference dummyElementToGetDataContext}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"/>
                         </StackPanel>
                     </DataGridTextColumn.Header>
@@ -156,7 +156,7 @@
                 <DataGridTextColumn Binding="{Binding Part.Datasheet, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
                     <DataGridTextColumn.Header>
                         <StackPanel Orientation="Vertical">
-                            <TextBlock Text="Datasheet" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                            <TextBlock Text="Datasheet" HorizontalAlignment="Center" />
                             <TextBox Text="{Binding DataContext.DatasheetFilter, Mode=TwoWay, Source={x:Reference dummyElementToGetDataContext}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"/>
                         </StackPanel>
                     </DataGridTextColumn.Header>

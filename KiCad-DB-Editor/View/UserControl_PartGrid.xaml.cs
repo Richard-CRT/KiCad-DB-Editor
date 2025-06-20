@@ -205,6 +205,19 @@ namespace KiCad_DB_Editor.View
                     p.PropertyChanged += Parameter_PropertyChanged;
             }
 
+            // Need to update the keys of the ParameterFilterValues dict for the accessor,
+            // but don't delete the values if the parameter is staying (otherwise the existing
+            // filters would be deleted, which would be annoying)
+            if (Parameters is null)
+                ParameterFilterValues.Clear();
+            else
+            {
+                foreach (Parameter parameterToAdd in Parameters.Except(ParameterFilterValues.Keys))
+                    ParameterFilterValues.Add(parameterToAdd, "");
+
+                foreach (Parameter parameterToRemove in ParameterFilterValues.Keys.Except(Parameters))
+                    ParameterFilterValues.Remove(parameterToRemove);
+            }
             redoColumns_PotentialParametersColumnChange(e);
         }
 
@@ -354,22 +367,41 @@ namespace KiCad_DB_Editor.View
         private static void DatasheetFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.PartUIDFilterPropertyChanged(); }
         protected void DatasheetFilterPropertyChanged() { PartVMsCollectionView.Refresh(); }
 
+
+        public static readonly DependencyProperty ParameterFilterAccessorProperty = DependencyProperty.Register(nameof(ParameterFilterAccessor), typeof(ParameterFilterAccessor), typeof(UserControl_PartGrid));
+        public ParameterFilterAccessor ParameterFilterAccessor { get => (ParameterFilterAccessor)GetValue(ParameterFilterAccessorProperty); private set => SetValue(ParameterFilterAccessorProperty, value); }
+
         #endregion
 
         #endregion
+
+        public Dictionary<Parameter, string> ParameterFilterValues { get; set; } = new();
 
         bool OnFilterPartVMsCollectionView(object item)
         {
             PartVM partVM = (PartVM)item;
             Part part = partVM.Part;
-            return
-                (CategoryFilter is null || CategoryFilter == "" || partVM.Path.Contains(CategoryFilter)) &&
+            bool match = (CategoryFilter is null || CategoryFilter == "" || partVM.Path.Contains(CategoryFilter)) &&
                 (PartUIDFilter is null || PartUIDFilter == "" || part.PartUID.Contains(PartUIDFilter)) &&
                 (ManufacturerFilter is null || ManufacturerFilter == "" || part.Manufacturer.Contains(ManufacturerFilter)) &&
                 (MPNFilter is null || MPNFilter == "" || part.MPN.Contains(MPNFilter)) &&
                 (ValueFilter is null || ValueFilter == "" || part.Value.Contains(ValueFilter)) &&
                 (DescriptionFilter is null || DescriptionFilter == "" || part.Description.Contains(DescriptionFilter)) &&
                 (DatasheetFilter is null || DatasheetFilter == "" || part.Datasheet.Contains(DatasheetFilter));
+            if (match)
+            {
+                foreach ((Parameter parameter, string filterValue) in ParameterFilterValues)
+                {
+                    if (filterValue != "" && part.ParameterValues.TryGetValue(parameter, out string? val) && !val.Contains(filterValue))
+                    {
+                        match = false;
+                        break;
+                    }
+                }
+                return match;
+            }
+            else
+                return false;
         }
 
         private DataGridTemplateColumn newFootprintColumn(int footprintIndex, bool libraryColumn)
@@ -457,8 +489,6 @@ namespace KiCad_DB_Editor.View
 
         private void updateParameterBindings(DataGridTextColumn column, Parameter parameter)
         {
-            column.Header = parameter.Name.Replace("_", "__");
-
             Binding valueBinding = new($"ParameterAccessor[{parameter.UUID}]");
             valueBinding.Mode = BindingMode.TwoWay;
             valueBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
@@ -476,16 +506,44 @@ namespace KiCad_DB_Editor.View
             column.CellStyle = cellStyle;
         }
 
+        private StackPanel generateParameterColumnHeader(Parameter parameter)
+        {
+            /*
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Category" HorizontalAlignment="Center" />
+                <TextBox Text="{Binding DataContext.CategoryFilter, Mode=TwoWay, Source={x:Reference dummyElementToGetDataContext}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"/>
+            </StackPanel>
+            */
+
+            StackPanel stackPanel = new();
+            stackPanel.Orientation = Orientation.Vertical;
+
+            TextBlock headerTextBlock = new();
+            headerTextBlock.Text = parameter.Name;
+            headerTextBlock.HorizontalAlignment = HorizontalAlignment.Center;
+            stackPanel.Children.Add(headerTextBlock);
+
+            TextBox headerTextBox = new();
+            Binding valueBinding = new($"DataContext.ParameterFilterAccessor[{parameter.UUID}]");
+            valueBinding.Mode = BindingMode.TwoWay;
+            valueBinding.Source = dummyElementToGetDataContext;
+            valueBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+            valueBinding.ValidatesOnExceptions = true;
+            headerTextBox.SetBinding(TextBox.TextProperty, valueBinding);
+            stackPanel.Children.Add(headerTextBox);
+
+            DataGridTextColumn dataGridTextColumn = new();
+            dataGridTextColumn.Header = stackPanel;
+
+            return stackPanel;
+        }
+
         private DataGridTextColumn newParameterColumn(Parameter parameter, int index)
         {
-            DataGridTextColumn dataGridTextColumn;
-            dataGridTextColumn = new();
-            dataGridTextColumn.Header = parameter.Name.Replace("_", "__");
+            StackPanel stackPanel = generateParameterColumnHeader(parameter);
 
-            Binding valueBinding = new($"ParameterAccessor[{parameter.UUID}]");
-            valueBinding.Mode = BindingMode.TwoWay;
-            valueBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-            dataGridTextColumn.Binding = valueBinding;
+            DataGridTextColumn dataGridTextColumn = new();
+            dataGridTextColumn.Header = stackPanel;
 
             updateParameterBindings(dataGridTextColumn, parameter);
 
@@ -501,7 +559,8 @@ namespace KiCad_DB_Editor.View
         private void redoColumns_ParameterNameChange(Parameter parameterWithNameChange)
         {
             DataGridTextColumn columnToUpdate = parameterToDataGridColumn[parameterWithNameChange];
-            columnToUpdate.Header = parameterWithNameChange.Name.Replace("_", "__");
+            StackPanel stackPanel = generateParameterColumnHeader(parameterWithNameChange);
+            columnToUpdate.Header = stackPanel;
         }
 
         private List<Parameter> parametersThatHaveColumns = new();
@@ -649,6 +708,8 @@ namespace KiCad_DB_Editor.View
         public UserControl_PartGrid()
         {
             InitializeComponent();
+
+            ParameterFilterAccessor = new(this);
         }
 
         private void dataGrid_Main_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
@@ -931,6 +992,51 @@ namespace KiCad_DB_Editor.View
             {
                 comboBox.Focus();
             }
+        }
+    }
+
+    public class ParameterFilterAccessor : NotifyObject
+    {
+        public readonly UserControl_PartGrid OwnerUserControl_PartGrid;
+
+        #region Notify Properties
+
+        public string? this[string parameterUUID]
+        {
+            get
+            {
+                Parameter? parameter = OwnerUserControl_PartGrid.Parameters.FirstOrDefault(p => p!.UUID == parameterUUID, null);
+                // This will get null if you remove a parameter i.e. remove a column, then edit a different column's filtering,
+                // before GC happens. The binding to the old parameter UUID will still exist, and then parameter will be null
+                // Instead of erroring, we direct it towards return null; until GC comes along
+                if (parameter is not null && OwnerUserControl_PartGrid.ParameterFilterValues.TryGetValue(parameter, out string? val))
+                    return val;
+                else
+                    return null;
+            }
+            set
+            {
+                if (value is not null)
+                {
+                    Parameter parameter = OwnerUserControl_PartGrid.Parameters.First(p => p.UUID == parameterUUID);
+                    if (OwnerUserControl_PartGrid.ParameterFilterValues.TryGetValue(parameter, out string? s))
+                    {
+                        if (s != value)
+                        {
+                            OwnerUserControl_PartGrid.ParameterFilterValues[parameter] = value;
+                            InvokePropertyChanged($"Item[]");
+                            OwnerUserControl_PartGrid.PartVMsCollectionView.Refresh();
+                        }
+                    }
+                }
+            }
+        }
+
+        #endregion Notify Properties
+
+        public ParameterFilterAccessor(UserControl_PartGrid ownerUC_PG)
+        {
+            OwnerUserControl_PartGrid = ownerUC_PG;
         }
     }
 }

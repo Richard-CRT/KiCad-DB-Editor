@@ -390,7 +390,7 @@ namespace KiCad_DB_Editor.View
             PartVM partVM = (PartVM)item;
             Part part = partVM.Part;
 
-            bool overallFilterMatch = OverallFilter is null || OverallFilter == "" ||
+            bool overallFilterMatch = string.IsNullOrEmpty(OverallFilter) ||
                 partVM.Path.Contains(OverallFilter) ||
                 part.PartUID.Contains(OverallFilter) ||
                 part.Manufacturer.Contains(OverallFilter) ||
@@ -399,13 +399,13 @@ namespace KiCad_DB_Editor.View
                 part.Description.Contains(OverallFilter) ||
                 part.Datasheet.Contains(OverallFilter);
 
-            bool specialParameterMatch = (CategoryFilter is null || CategoryFilter == "" || partVM.Path.Contains(CategoryFilter)) &&
-                (PartUIDFilter is null || PartUIDFilter == "" || part.PartUID.Contains(PartUIDFilter)) &&
-                (ManufacturerFilter is null || ManufacturerFilter == "" || part.Manufacturer.Contains(ManufacturerFilter)) &&
-                (MPNFilter is null || MPNFilter == "" || part.MPN.Contains(MPNFilter)) &&
-                (ValueFilter is null || ValueFilter == "" || part.Value.Contains(ValueFilter)) &&
-                (DescriptionFilter is null || DescriptionFilter == "" || part.Description.Contains(DescriptionFilter)) &&
-                (DatasheetFilter is null || DatasheetFilter == "" || part.Datasheet.Contains(DatasheetFilter));
+            bool specialParameterMatch = (string.IsNullOrEmpty(CategoryFilter) || partVM.Path.Contains(CategoryFilter)) &&
+                (string.IsNullOrEmpty(PartUIDFilter) || part.PartUID.Contains(PartUIDFilter)) &&
+                (string.IsNullOrEmpty(ManufacturerFilter) || part.Manufacturer.Contains(ManufacturerFilter)) &&
+                (string.IsNullOrEmpty(MPNFilter) || part.MPN.Contains(MPNFilter)) &&
+                (string.IsNullOrEmpty(ValueFilter) || part.Value.Contains(ValueFilter)) &&
+                (string.IsNullOrEmpty(DescriptionFilter) || part.Description.Contains(DescriptionFilter)) &&
+                (string.IsNullOrEmpty(DatasheetFilter) || part.Datasheet.Contains(DatasheetFilter));
 
 
             if (specialParameterMatch)

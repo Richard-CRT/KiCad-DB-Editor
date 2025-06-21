@@ -32,10 +32,14 @@ namespace KiCad_DB_Editor.ViewModel
 
         #region Notify Properties
 
+        private string? _pathCache = null;
         public string Path
         {
             get
             {
+                if (_pathCache is not null)
+                    return _pathCache;
+
                 string path = this.Category.Name;
                 var c = this.Category.ParentCategory;
                 while (c is not null)
@@ -43,6 +47,7 @@ namespace KiCad_DB_Editor.ViewModel
                     path = $"{c.Name}/{path}";
                     c = c.ParentCategory;
                 }
+                _pathCache = path;
                 return path;
             }
         }
@@ -196,6 +201,8 @@ namespace KiCad_DB_Editor.ViewModel
 
         public void InvokePropertyChanged_Path()
         {
+            // Need to remember to void the Path cache
+            _pathCache = null;
             InvokePropertyChanged(nameof(this.Path));
             foreach (CategoryVM cVM in CategoryVMs)
                 cVM.InvokePropertyChanged_Path();

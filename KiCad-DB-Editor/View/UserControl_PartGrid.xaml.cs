@@ -320,11 +320,19 @@ namespace KiCad_DB_Editor.View
 
         #region Filter DependencyProperties
 
+        public static readonly DependencyProperty OverallFilterProperty = DependencyProperty.Register(nameof(OverallFilter), typeof(string), typeof(UserControl_PartGrid),
+            new PropertyMetadata(new PropertyChangedCallback(OverallFilterPropertyChangedCallback)));
+        public string OverallFilter { get => (string)GetValue(OverallFilterProperty); set => SetValue(OverallFilterProperty, value); }
+        private static void OverallFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.OverallFilterPropertyChanged(); }
+        protected void OverallFilterPropertyChanged() { PartVMsCollectionView.Refresh(); }
+
+
         public static readonly DependencyProperty CategoryFilterProperty = DependencyProperty.Register(nameof(CategoryFilter), typeof(string), typeof(UserControl_PartGrid),
             new PropertyMetadata(new PropertyChangedCallback(CategoryFilterPropertyChangedCallback)));
         public string CategoryFilter { get => (string)GetValue(CategoryFilterProperty); set => SetValue(CategoryFilterProperty, value); }
         private static void CategoryFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.CategoryFilterPropertyChanged(); }
         protected void CategoryFilterPropertyChanged() { PartVMsCollectionView.Refresh(); }
+
 
         public static readonly DependencyProperty PartUIDFilterProperty = DependencyProperty.Register(nameof(PartUIDFilter), typeof(string), typeof(UserControl_PartGrid),
             new PropertyMetadata(new PropertyChangedCallback(PartUIDFilterPropertyChangedCallback)));
@@ -381,24 +389,47 @@ namespace KiCad_DB_Editor.View
         {
             PartVM partVM = (PartVM)item;
             Part part = partVM.Part;
-            bool match = (CategoryFilter is null || CategoryFilter == "" || partVM.Path.Contains(CategoryFilter)) &&
+
+            bool overallFilterMatch = OverallFilter is null || OverallFilter == "" ||
+                partVM.Path.Contains(OverallFilter) ||
+                part.PartUID.Contains(OverallFilter) ||
+                part.Manufacturer.Contains(OverallFilter) ||
+                part.MPN.Contains(OverallFilter) ||
+                part.Value.Contains(OverallFilter) ||
+                part.Description.Contains(OverallFilter) ||
+                part.Datasheet.Contains(OverallFilter);
+
+            bool specialParameterMatch = (CategoryFilter is null || CategoryFilter == "" || partVM.Path.Contains(CategoryFilter)) &&
                 (PartUIDFilter is null || PartUIDFilter == "" || part.PartUID.Contains(PartUIDFilter)) &&
                 (ManufacturerFilter is null || ManufacturerFilter == "" || part.Manufacturer.Contains(ManufacturerFilter)) &&
                 (MPNFilter is null || MPNFilter == "" || part.MPN.Contains(MPNFilter)) &&
                 (ValueFilter is null || ValueFilter == "" || part.Value.Contains(ValueFilter)) &&
                 (DescriptionFilter is null || DescriptionFilter == "" || part.Description.Contains(DescriptionFilter)) &&
                 (DatasheetFilter is null || DatasheetFilter == "" || part.Datasheet.Contains(DatasheetFilter));
-            if (match)
+
+
+            if (specialParameterMatch)
             {
+                bool parameterMatch = true;
                 foreach ((Parameter parameter, string filterValue) in ParameterFilterValues)
                 {
-                    if (filterValue != "" && part.ParameterValues.TryGetValue(parameter, out string? val) && !val.Contains(filterValue))
+                    string? paramVal = null;
+                    if (filterValue != "" && part.ParameterValues.TryGetValue(parameter, out paramVal) && !paramVal.Contains(filterValue))
                     {
-                        match = false;
+                        parameterMatch = false;
                         break;
                     }
+
+                    if (!overallFilterMatch)
+                    {
+                        // Means overall filter is set but not yet satisfied
+                        if ((paramVal is not null || part.ParameterValues.TryGetValue(parameter, out paramVal)) && paramVal.Contains(OverallFilter!))
+                        {
+                            overallFilterMatch = true;
+                        }
+                    }
                 }
-                return match;
+                return overallFilterMatch && parameterMatch;
             }
             else
                 return false;

@@ -14,7 +14,7 @@
         <DockPanel DockPanel.Dock="Top">
             <CheckBox DockPanel.Dock="Right" Content="Show Parameters" Margin="5,0,0,0" VerticalContentAlignment="Center"
                       IsChecked="{Binding ShowParameterColumns, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_PartGrid}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"/>
-            <TextBox DockPanel.Dock="Top"></TextBox>
+            <TextBox DockPanel.Dock="Top" Text="{Binding OverallFilter, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" />
         </DockPanel>
 
         <!-- This framework element is there for the express purpose of having a named source for DataGridColumns to bind via as they are outside the visual tree -->

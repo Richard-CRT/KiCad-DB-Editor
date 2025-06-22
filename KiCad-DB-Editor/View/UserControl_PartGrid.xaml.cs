@@ -290,13 +290,21 @@ namespace KiCad_DB_Editor.View
             if (oldPartVMsCopy is not null)
             {
                 foreach (PartVM pVM in oldPartVMsCopy)
+                {
                     pVM.PropertyChanged -= PartVM_PropertyChanged;
+                    pVM.ParameterAccessor.PropertyChanged -= PartVM_ParameterAccessor_PropertyChanged;
+                    pVM.Part.PropertyChanged -= PartVM_Part_PropertyChanged;
+                }
             }
             oldPartVMsCopy = PartVMs is not null ? new(PartVMs) : null;
             if (oldPartVMsCopy is not null)
             {
                 foreach (PartVM pVM in oldPartVMsCopy)
+                {
                     pVM.PropertyChanged += PartVM_PropertyChanged;
+                    pVM.ParameterAccessor.PropertyChanged += PartVM_ParameterAccessor_PropertyChanged;
+                    pVM.Part.PropertyChanged += PartVM_Part_PropertyChanged;
+                }
             }
 
             redoColumns_PotentialFootprintColumnChange();
@@ -312,8 +320,37 @@ namespace KiCad_DB_Editor.View
 
         private void PartVM_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(PartVM.FootprintCount))
-                redoColumns_PotentialFootprintColumnChange();
+            switch (e.PropertyName)
+            {
+                case nameof(PartVM.FootprintCount):
+                    redoColumns_PotentialFootprintColumnChange();
+                    break;
+            }
+        }
+
+        private void PartVM_ParameterAccessor_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case "Item[]":
+                    PartVMsCollectionView.Refresh();
+                    break;
+            }
+        }
+
+        private void PartVM_Part_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(Part.PartUID):
+                case nameof(Part.Manufacturer):
+                case nameof(Part.MPN):
+                case nameof(Part.Value):
+                case nameof(Part.Description):
+                case nameof(Part.Datasheet):
+                    PartVMsCollectionView.Refresh();
+                    break;
+            }
         }
 
         #endregion
@@ -756,6 +793,47 @@ namespace KiCad_DB_Editor.View
             }
         }
 
+        private void writeToFrameworkElement(FrameworkElement frameworkElement, string value, KeyEventArgs e)
+        {
+            // Updating the data via the frameworkElement requires Mode=TwoWay && UpdateSourceTrigger=PropertyChanged
+            if (frameworkElement is TextBlock textBlock)
+            {
+                textBlock.Text = value;
+                e.Handled = true;
+            }
+            else if (frameworkElement is ComboBox comboBox)
+            {
+                comboBox.Text = value;
+                e.Handled = true;
+            }
+            else if (frameworkElement is CheckBox checkBox)
+            {
+                checkBox.IsChecked = value.ToLower() == "true" || value == "1";
+                e.Handled = true;
+            }
+            else if (frameworkElement is ContentPresenter contentPresenter && VisualTreeHelper.GetChildrenCount(contentPresenter) == 1 &&
+                    VisualTreeHelper.GetChild(contentPresenter, 0) is FrameworkElement frameworkElementSubsidiary
+                    )
+            {
+                if (frameworkElementSubsidiary is TextBlock textBlockSubsidiary)
+                {
+                    textBlockSubsidiary.Text = value;
+                    e.Handled = true;
+                }
+                else if (frameworkElementSubsidiary is ComboBox comboBoxSubsidiary)
+                {
+                    comboBoxSubsidiary.Text = value;
+                    e.Handled = true;
+                }
+                else if (frameworkElementSubsidiary is CheckBox checkBoxSubsidiary)
+                {
+                    checkBoxSubsidiary.IsChecked = value.ToLower() == "true" || value == "1";
+                    e.Handled = true;
+                }
+
+            }
+        }
+
         private void dataGrid_Main_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.V && Keyboard.Modifiers == ModifierKeys.Control)
@@ -802,68 +880,57 @@ namespace KiCad_DB_Editor.View
                             int rowIndex = row.GetIndex();
                             selectedCellCoords.Add((columnIndex, rowIndex));
                         }
-                        int minX = selectedCellCoords.MinBy(c => c.Item1).Item1;
-                        int minY = selectedCellCoords.MinBy(c => c.Item2).Item2;
-                        int maxX = selectedCellCoords.MaxBy(c => c.Item1).Item1;
-                        int maxY = selectedCellCoords.MaxBy(c => c.Item2).Item2;
-                        int destWidth = maxX - minX + 1;
-                        int destHeight = maxY - minY + 1;
-                        if (sourceWidth == destWidth && sourceHeight == destHeight)
-                        {
-                            int area = destWidth * destHeight;
-                            if (area == selectedCellCoords.Count)
+
+                        Dictionary<(FrameworkElement, int, int), (int, int)> destCoordToSrcCoord = new();
+                        if (sourceHeight == 1 && sourceWidth == 1)
+                            foreach ((int destX, int destY) in selectedCellCoords)
                             {
-                                for (int srcY = 0; srcY < sourceHeight; srcY++)
+                                DataGridColumn column = dataGrid_Main.Columns[destX];
+                                object item = dataGrid_Main.Items[destY];
+                                FrameworkElement fE = column.GetCellContent(item);
+                                destCoordToSrcCoord[(fE, destX, destY)] = (0, 0);
+                            }
+                        else
+                        {
+                            int minX = selectedCellCoords.MinBy(c => c.Item1).Item1;
+                            int minY = selectedCellCoords.MinBy(c => c.Item2).Item2;
+                            int maxX = selectedCellCoords.MaxBy(c => c.Item1).Item1;
+                            int maxY = selectedCellCoords.MaxBy(c => c.Item2).Item2;
+                            int destWidth = maxX - minX + 1;
+                            int destHeight = maxY - minY + 1;
+                            if (sourceWidth == destWidth && sourceHeight == destHeight)
+                            {
+                                int area = destWidth * destHeight;
+                                if (area == selectedCellCoords.Count)
                                 {
-                                    for (int srcX = 0; srcX < sourceWidth; srcX++)
+                                    for (int srcY = 0; srcY < sourceHeight; srcY++)
                                     {
-                                        int destX = minX + srcX;
-                                        int destY = minY + srcY;
-                                        DataGridColumn column = dataGrid_Main.Columns[destX];
-                                        object item = dataGrid_Main.Items[destY];
-                                        FrameworkElement frameworkElement = column.GetCellContent(item);
-                                        // Updating the data via the frameworkElement requires Mode=TwoWay && UpdateSourceTrigger=PropertyChanged
-                                        if (frameworkElement is TextBlock textBlock)
+                                        for (int srcX = 0; srcX < sourceWidth; srcX++)
                                         {
-                                            textBlock.Text = sourceData[srcY][srcX];
-                                            e.Handled = true;
-                                        }
-                                        else if (frameworkElement is ComboBox comboBox)
-                                        {
-                                            comboBox.Text = sourceData[srcY][srcX];
-                                            e.Handled = true;
-                                        }
-                                        else if (frameworkElement is CheckBox checkBox)
-                                        {
-                                            string s = sourceData[srcY][srcX];
-                                            checkBox.IsChecked = s.ToLower() == "true" || s == "1";
-                                            e.Handled = true;
-                                        }
-                                        else if (frameworkElement is ContentPresenter contentPresenter && VisualTreeHelper.GetChildrenCount(contentPresenter) == 1 &&
-                                                VisualTreeHelper.GetChild(contentPresenter, 0) is FrameworkElement frameworkElementSubsidiary
-                                                )
-                                        {
-                                            if (frameworkElementSubsidiary is TextBlock textBlockSubsidiary)
-                                            {
-                                                textBlockSubsidiary.Text = sourceData[srcY][srcX];
-                                                e.Handled = true;
-                                            }
-                                            else if (frameworkElementSubsidiary is ComboBox comboBoxSubsidiary)
-                                            {
-                                                comboBoxSubsidiary.Text = sourceData[srcY][srcX];
-                                                e.Handled = true;
-                                            }
-                                            else if (frameworkElementSubsidiary is CheckBox checkBoxSubsidiary)
-                                            {
-                                                string s = sourceData[srcY][srcX];
-                                                checkBoxSubsidiary.IsChecked = s.ToLower() == "true" || s == "1";
-                                                e.Handled = true;
-                                            }
+                                            int destX = minX + srcX;
+                                            int destY = minY + srcY;
+
+                                            DataGridColumn column = dataGrid_Main.Columns[destX];
+                                            object item = dataGrid_Main.Items[destY];
+                                            FrameworkElement fE = column.GetCellContent(item);
+
+                                            destCoordToSrcCoord[(fE, destX, destY)] = (srcX, srcY);
                                         }
                                     }
                                 }
                             }
                         }
+
+                        using (PartVMsCollectionView.DeferRefresh())
+                        {
+                            foreach (((FrameworkElement fE, int destX, int destY), (int srcX, int srcY)) in destCoordToSrcCoord)
+                            {
+                                writeToFrameworkElement(fE, sourceData[srcY][srcX], e);
+                            }
+                        }
+                        // Even though .Refresh() is called in the property changed, the defer ignores it
+                        // so we need to recall it here
+                        PartVMsCollectionView.Refresh();
                     }
                 }
             }
@@ -880,41 +947,7 @@ namespace KiCad_DB_Editor.View
                     {
                         DataGridColumn column = selectedCell.Column;
                         FrameworkElement frameworkElement = column.GetCellContent(selectedCell.Item);
-                        if (frameworkElement is TextBlock textBlock)
-                        {
-                            textBlock.Text = "";
-                            e.Handled = true;
-                        }
-                        else if (frameworkElement is ComboBox comboBox)
-                        {
-                            comboBox.Text = "";
-                            e.Handled = true;
-                        }
-                        else if (frameworkElement is CheckBox checkBox)
-                        {
-                            checkBox.IsChecked = false;
-                            e.Handled = true;
-                        }
-                        else if (frameworkElement is ContentPresenter contentPresenter && VisualTreeHelper.GetChildrenCount(contentPresenter) == 1 &&
-                                VisualTreeHelper.GetChild(contentPresenter, 0) is FrameworkElement frameworkElementSubsidiary
-                                )
-                        {
-                            if (frameworkElementSubsidiary is TextBlock textBlockSubsidiary)
-                            {
-                                textBlockSubsidiary.Text = "";
-                                e.Handled = true;
-                            }
-                            else if (frameworkElementSubsidiary is ComboBox comboBoxSubsidiary)
-                            {
-                                comboBoxSubsidiary.Text = "";
-                                e.Handled = true;
-                            }
-                            else if (frameworkElementSubsidiary is CheckBox checkBoxSubsidiary)
-                            {
-                                checkBoxSubsidiary.IsChecked = false;
-                                e.Handled = true;
-                            }
-                        }
+                        writeToFrameworkElement(frameworkElement, "", e);
                     }
                 }
             }

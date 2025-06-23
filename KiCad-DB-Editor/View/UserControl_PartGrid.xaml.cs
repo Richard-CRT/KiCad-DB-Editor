@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Data.Common;
 using System.Diagnostics;
 using System.Drawing;
@@ -330,26 +331,34 @@ namespace KiCad_DB_Editor.View
 
         private void PartVM_ParameterAccessor_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            switch (e.PropertyName)
+            IEditableCollectionView itemsView = dataGrid_Main.Items;
+            if (!itemsView.IsAddingNew && !itemsView.IsEditingItem)
             {
-                case "Item[]":
-                    PartVMsCollectionView.Refresh();
-                    break;
+                switch (e.PropertyName)
+                {
+                    case "Item[]":
+                        PartVMsCollectionView.Refresh();
+                        break;
+                }
             }
         }
 
         private void PartVM_Part_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            switch (e.PropertyName)
+            IEditableCollectionView itemsView = dataGrid_Main.Items;
+            if (!itemsView.IsAddingNew && !itemsView.IsEditingItem)
             {
-                case nameof(Part.PartUID):
-                case nameof(Part.Manufacturer):
-                case nameof(Part.MPN):
-                case nameof(Part.Value):
-                case nameof(Part.Description):
-                case nameof(Part.Datasheet):
-                    PartVMsCollectionView.Refresh();
-                    break;
+                switch (e.PropertyName)
+                {
+                    case nameof(Part.PartUID):
+                    case nameof(Part.Manufacturer):
+                    case nameof(Part.MPN):
+                    case nameof(Part.Value):
+                    case nameof(Part.Description):
+                    case nameof(Part.Datasheet):
+                        PartVMsCollectionView.Refresh();
+                        break;
+                }
             }
         }
 
@@ -360,57 +369,57 @@ namespace KiCad_DB_Editor.View
         public static readonly DependencyProperty OverallFilterProperty = DependencyProperty.Register(nameof(OverallFilter), typeof(string), typeof(UserControl_PartGrid),
             new PropertyMetadata(new PropertyChangedCallback(OverallFilterPropertyChangedCallback)));
         public string OverallFilter { get => (string)GetValue(OverallFilterProperty); set => SetValue(OverallFilterProperty, value); }
-        private static void OverallFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.OverallFilterPropertyChanged(); }
-        protected void OverallFilterPropertyChanged() { PartVMsCollectionView.Refresh(); }
+        private static void OverallFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.SpecialParameterFilterPropertyChanged(); }
 
 
         public static readonly DependencyProperty CategoryFilterProperty = DependencyProperty.Register(nameof(CategoryFilter), typeof(string), typeof(UserControl_PartGrid),
             new PropertyMetadata(new PropertyChangedCallback(CategoryFilterPropertyChangedCallback)));
         public string CategoryFilter { get => (string)GetValue(CategoryFilterProperty); set => SetValue(CategoryFilterProperty, value); }
-        private static void CategoryFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.CategoryFilterPropertyChanged(); }
-        protected void CategoryFilterPropertyChanged() { PartVMsCollectionView.Refresh(); }
+        private static void CategoryFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.SpecialParameterFilterPropertyChanged(); }
 
 
         public static readonly DependencyProperty PartUIDFilterProperty = DependencyProperty.Register(nameof(PartUIDFilter), typeof(string), typeof(UserControl_PartGrid),
             new PropertyMetadata(new PropertyChangedCallback(PartUIDFilterPropertyChangedCallback)));
         public string PartUIDFilter { get => (string)GetValue(PartUIDFilterProperty); set => SetValue(PartUIDFilterProperty, value); }
-        private static void PartUIDFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.PartUIDFilterPropertyChanged(); }
-        protected void PartUIDFilterPropertyChanged() { PartVMsCollectionView.Refresh(); }
+        private static void PartUIDFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.SpecialParameterFilterPropertyChanged(); }
 
 
         public static readonly DependencyProperty ManufacturerFilterProperty = DependencyProperty.Register(nameof(ManufacturerFilter), typeof(string), typeof(UserControl_PartGrid),
             new PropertyMetadata(new PropertyChangedCallback(ManufacturerFilterPropertyChangedCallback)));
         public string ManufacturerFilter { get => (string)GetValue(ManufacturerFilterProperty); set => SetValue(ManufacturerFilterProperty, value); }
-        private static void ManufacturerFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.PartUIDFilterPropertyChanged(); }
-        protected void ManufacturerFilterPropertyChanged() { PartVMsCollectionView.Refresh(); }
+        private static void ManufacturerFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.SpecialParameterFilterPropertyChanged(); }
 
 
         public static readonly DependencyProperty MPNFilterProperty = DependencyProperty.Register(nameof(MPNFilter), typeof(string), typeof(UserControl_PartGrid),
             new PropertyMetadata(new PropertyChangedCallback(MPNFilterPropertyChangedCallback)));
         public string MPNFilter { get => (string)GetValue(MPNFilterProperty); set => SetValue(MPNFilterProperty, value); }
-        private static void MPNFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.PartUIDFilterPropertyChanged(); }
-        protected void MPNFilterPropertyChanged() { PartVMsCollectionView.Refresh(); }
+        private static void MPNFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.SpecialParameterFilterPropertyChanged(); }
 
 
         public static readonly DependencyProperty ValueFilterProperty = DependencyProperty.Register(nameof(ValueFilter), typeof(string), typeof(UserControl_PartGrid),
             new PropertyMetadata(new PropertyChangedCallback(ValueFilterPropertyChangedCallback)));
         public string ValueFilter { get => (string)GetValue(ValueFilterProperty); set => SetValue(ValueFilterProperty, value); }
-        private static void ValueFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.PartUIDFilterPropertyChanged(); }
-        protected void ValueFilterPropertyChanged() { PartVMsCollectionView.Refresh(); }
+        private static void ValueFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.SpecialParameterFilterPropertyChanged(); }
 
 
         public static readonly DependencyProperty DescriptionFilterProperty = DependencyProperty.Register(nameof(DescriptionFilter), typeof(string), typeof(UserControl_PartGrid),
             new PropertyMetadata(new PropertyChangedCallback(DescriptionFilterPropertyChangedCallback)));
         public string DescriptionFilter { get => (string)GetValue(DescriptionFilterProperty); set => SetValue(DescriptionFilterProperty, value); }
-        private static void DescriptionFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.PartUIDFilterPropertyChanged(); }
-        protected void DescriptionFilterPropertyChanged() { PartVMsCollectionView.Refresh(); }
+        private static void DescriptionFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.SpecialParameterFilterPropertyChanged(); }
 
 
         public static readonly DependencyProperty DatasheetFilterProperty = DependencyProperty.Register(nameof(DatasheetFilter), typeof(string), typeof(UserControl_PartGrid),
             new PropertyMetadata(new PropertyChangedCallback(DatasheetFilterPropertyChangedCallback)));
         public string DatasheetFilter { get => (string)GetValue(DatasheetFilterProperty); set => SetValue(DatasheetFilterProperty, value); }
-        private static void DatasheetFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.PartUIDFilterPropertyChanged(); }
-        protected void DatasheetFilterPropertyChanged() { PartVMsCollectionView.Refresh(); }
+        private static void DatasheetFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.SpecialParameterFilterPropertyChanged(); }
+
+        protected void SpecialParameterFilterPropertyChanged()
+        {
+            IEditableCollectionView itemsView = dataGrid_Main.Items;
+            if (itemsView.IsAddingNew) itemsView.CommitNew();
+            if (itemsView.IsEditingItem) itemsView.CommitEdit();
+            PartVMsCollectionView.Refresh();
+        }
 
 
         public static readonly DependencyProperty ParameterFilterAccessorProperty = DependencyProperty.Register(nameof(ParameterFilterAccessor), typeof(ParameterFilterAccessor), typeof(UserControl_PartGrid));
@@ -497,7 +506,7 @@ namespace KiCad_DB_Editor.View
 
             Binding valueBinding = new(valueBindingTarget);
             valueBinding.Mode = BindingMode.TwoWay;
-            valueBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+            valueBinding.UpdateSourceTrigger = UpdateSourceTrigger.Default;
 
             // Like the XAML symbol example but for footprint columns
             DataTemplate cellTemplate = new();
@@ -559,7 +568,7 @@ namespace KiCad_DB_Editor.View
         {
             Binding valueBinding = new($"ParameterAccessor[{parameter.UUID}]");
             valueBinding.Mode = BindingMode.TwoWay;
-            valueBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+            valueBinding.UpdateSourceTrigger = UpdateSourceTrigger.Default;
             column.Binding = valueBinding;
 
             // Use as a baseline the style I defined in XAML
@@ -795,15 +804,18 @@ namespace KiCad_DB_Editor.View
 
         private void writeToFrameworkElement(FrameworkElement frameworkElement, string value, KeyEventArgs e)
         {
-            // Updating the data via the frameworkElement requires Mode=TwoWay && UpdateSourceTrigger=PropertyChanged
+            // Updating the data via the frameworkElement requires Mode=TwoWay && (UpdateSourceTrigger=PropertyChanged || call UpdateSource() manually )
+            // Text boxes and comboboxes are configured to use UpdateSourceTrigger=Default for Text, the others are PropertyChanged
             if (frameworkElement is TextBlock textBlock)
             {
                 textBlock.Text = value;
+                textBlock.GetBindingExpression(TextBlock.TextProperty).UpdateSource();
                 e.Handled = true;
             }
             else if (frameworkElement is ComboBox comboBox)
             {
                 comboBox.Text = value;
+                comboBox.GetBindingExpression(ComboBox.TextProperty).UpdateSource();
                 e.Handled = true;
             }
             else if (frameworkElement is CheckBox checkBox)
@@ -818,11 +830,13 @@ namespace KiCad_DB_Editor.View
                 if (frameworkElementSubsidiary is TextBlock textBlockSubsidiary)
                 {
                     textBlockSubsidiary.Text = value;
+                    textBlockSubsidiary.GetBindingExpression(TextBlock.TextProperty).UpdateSource();
                     e.Handled = true;
                 }
                 else if (frameworkElementSubsidiary is ComboBox comboBoxSubsidiary)
                 {
                     comboBoxSubsidiary.Text = value;
+                    comboBoxSubsidiary.GetBindingExpression(ComboBox.TextProperty).UpdateSource();
                     e.Handled = true;
                 }
                 else if (frameworkElementSubsidiary is CheckBox checkBoxSubsidiary)
@@ -881,6 +895,8 @@ namespace KiCad_DB_Editor.View
                             selectedCellCoords.Add((columnIndex, rowIndex));
                         }
 
+                        IEditableCollectionView itemsView = dataGrid_Main.Items;
+
                         Dictionary<(FrameworkElement, int, int), (int, int)> destCoordToSrcCoord = new();
                         if (sourceHeight == 1 && sourceWidth == 1)
                             foreach ((int destX, int destY) in selectedCellCoords)
@@ -888,7 +904,9 @@ namespace KiCad_DB_Editor.View
                                 DataGridColumn column = dataGrid_Main.Columns[destX];
                                 object item = dataGrid_Main.Items[destY];
                                 FrameworkElement fE = column.GetCellContent(item);
-                                destCoordToSrcCoord[(fE, destX, destY)] = (0, 0);
+                                itemsView.EditItem(item); // Import to prevent updates causing Refresh while editing
+                                writeToFrameworkElement(fE, sourceData[0][0], e);
+                                itemsView.CommitEdit();
                             }
                         else
                         {
@@ -913,23 +931,15 @@ namespace KiCad_DB_Editor.View
                                             DataGridColumn column = dataGrid_Main.Columns[destX];
                                             object item = dataGrid_Main.Items[destY];
                                             FrameworkElement fE = column.GetCellContent(item);
-
-                                            destCoordToSrcCoord[(fE, destX, destY)] = (srcX, srcY);
+                                            itemsView.EditItem(item); // Import to prevent updates causing Refresh while editing
+                                            writeToFrameworkElement(fE, sourceData[srcY][srcX], e);
+                                            itemsView.CommitEdit();
                                         }
                                     }
                                 }
                             }
                         }
 
-                        using (PartVMsCollectionView.DeferRefresh())
-                        {
-                            foreach (((FrameworkElement fE, int destX, int destY), (int srcX, int srcY)) in destCoordToSrcCoord)
-                            {
-                                writeToFrameworkElement(fE, sourceData[srcY][srcX], e);
-                            }
-                        }
-                        // Even though .Refresh() is called in the property changed, the defer ignores it
-                        // so we need to recall it here
                         PartVMsCollectionView.Refresh();
                     }
                 }
@@ -943,12 +953,16 @@ namespace KiCad_DB_Editor.View
                 var selectedCells = dataGrid_Main.SelectedCells;
                 if (selectedCells.Count > 0)
                 {
+                    IEditableCollectionView itemsView = dataGrid_Main.Items;
                     foreach (var selectedCell in selectedCells)
                     {
                         DataGridColumn column = selectedCell.Column;
                         FrameworkElement frameworkElement = column.GetCellContent(selectedCell.Item);
+                        itemsView.EditItem(selectedCell.Item); // Import to prevent updates causing Refresh while editing
                         writeToFrameworkElement(frameworkElement, "", e);
+                        itemsView.CommitEdit();
                     }
+                    PartVMsCollectionView.Refresh();
                 }
             }
             else if (e.Key == Key.C && Keyboard.Modifiers == ModifierKeys.Control)
@@ -1057,6 +1071,11 @@ namespace KiCad_DB_Editor.View
                 comboBox.Focus();
             }
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            ((PartVM)PartVMsCollectionView.GetItemAt(0)).Part.Value = "hello";
+        }
     }
 
     public class ParameterFilterAccessor : NotifyObject
@@ -1089,6 +1108,10 @@ namespace KiCad_DB_Editor.View
                         {
                             OwnerUserControl_PartGrid.ParameterFilterValues[parameter] = value;
                             InvokePropertyChanged($"Item[]");
+
+                            IEditableCollectionView itemsView = OwnerUserControl_PartGrid.dataGrid_Main.Items;
+                            if (itemsView.IsAddingNew) itemsView.CommitNew();
+                            if (itemsView.IsEditingItem) itemsView.CommitEdit();
                             OwnerUserControl_PartGrid.PartVMsCollectionView.Refresh();
                         }
                     }

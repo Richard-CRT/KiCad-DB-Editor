@@ -11,6 +11,7 @@
         <conv:Boolean_to_Visibility_Converter x:Key="Boolean_to_Visibility_Converter" />
     </UserControl.Resources>
     <DockPanel>
+        <Button DockPanel.Dock="Top" Content="Button" Width="NaN" Click="Button_Click"/>
         <DockPanel DockPanel.Dock="Top">
             <CheckBox DockPanel.Dock="Right" Content="Show Parameters" Margin="5,0,0,0" VerticalContentAlignment="Center"
                       IsChecked="{Binding ShowParameterColumns, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_PartGrid}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"/>
@@ -103,7 +104,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Binding="{Binding Path, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                <DataGridTextColumn Binding="{Binding Path, Mode=OneWay, UpdateSourceTrigger=Default}"
                                     Visibility="{Binding DataContext.DisplayPartCategory, Source={x:Reference dummyElementToGetDataContext}, Converter={StaticResource Boolean_to_Visibility_Converter}}"
                                     >
                     <DataGridTextColumn.Header>
@@ -113,7 +114,7 @@
                         </StackPanel>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Part.PartUID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                <DataGridTextColumn Binding="{Binding Part.PartUID, Mode=TwoWay, UpdateSourceTrigger=Default}" >
                     <DataGridTextColumn.Header>
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="Part UID" HorizontalAlignment="Center" />
@@ -121,7 +122,7 @@
                         </StackPanel>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Part.Manufacturer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                <DataGridTextColumn Binding="{Binding Part.Manufacturer, Mode=TwoWay, UpdateSourceTrigger=Default}" >
                     <DataGridTextColumn.Header>
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="Manufacturer" HorizontalAlignment="Center" />
@@ -129,7 +130,7 @@
                         </StackPanel>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Part.MPN, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                <DataGridTextColumn Binding="{Binding Part.MPN, Mode=TwoWay, UpdateSourceTrigger=Default}" >
                     <DataGridTextColumn.Header>
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="MPN" HorizontalAlignment="Center" />
@@ -137,7 +138,7 @@
                         </StackPanel>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Part.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                <DataGridTextColumn Binding="{Binding Part.Value, Mode=TwoWay, UpdateSourceTrigger=Default}" >
                     <DataGridTextColumn.Header>
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="Value" HorizontalAlignment="Center" />
@@ -145,7 +146,7 @@
                         </StackPanel>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Part.Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                <DataGridTextColumn Binding="{Binding Part.Description, Mode=TwoWay, UpdateSourceTrigger=Default}" >
                     <DataGridTextColumn.Header>
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="Description" HorizontalAlignment="Center" />
@@ -153,7 +154,7 @@
                         </StackPanel>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Part.Datasheet, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                <DataGridTextColumn Binding="{Binding Part.Datasheet, Mode=TwoWay, UpdateSourceTrigger=Default}" >
                     <DataGridTextColumn.Header>
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="Datasheet" HorizontalAlignment="Center" />
@@ -211,13 +212,13 @@
                                         >
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Part.SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock Text="{Binding Part.SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=Default}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
                             <ComboBox IsEditable="True"
-                                      Text="{Binding Part.SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      Text="{Binding Part.SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=Default}"
                                       ItemsSource="{Binding KiCadSymbolLibraries, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}"
                                       DisplayMemberPath="Nickname"
                                       Loaded="TemplateColumn_ComboBox_Loaded"
@@ -230,13 +231,13 @@
                                         >
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Part.SymbolName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock Text="{Binding Part.SymbolName, Mode=TwoWay, UpdateSourceTrigger=Default}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
                             <ComboBox IsEditable="True"
-                                      Text="{Binding Part.SymbolName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      Text="{Binding Part.SymbolName, Mode=TwoWay, UpdateSourceTrigger=Default}"
                                       ItemsSource="{Binding SelectedKiCadSymbolLibrary.KiCadSymbolNames}"
                                       Loaded="TemplateColumn_ComboBox_Loaded"
                                       />

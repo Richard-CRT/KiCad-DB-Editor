@@ -1071,11 +1071,6 @@ namespace KiCad_DB_Editor.View
                 comboBox.Focus();
             }
         }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            ((PartVM)PartVMsCollectionView.GetItemAt(0)).Part.Value = "hello";
-        }
     }
 
     public class ParameterFilterAccessor : NotifyObject

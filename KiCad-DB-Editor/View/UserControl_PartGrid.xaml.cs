@@ -156,6 +156,22 @@ namespace KiCad_DB_Editor.View
 
         #endregion
 
+        #region ParameterNamesWithVarWrapping DependencyProperty
+
+        public static readonly DependencyProperty ParameterNamesWithVarWrappingProperty = DependencyProperty.Register(
+            nameof(ParameterNamesWithVarWrapping),
+            typeof(ObservableCollection<string>),
+            typeof(UserControl_PartGrid)
+            );
+
+        public ObservableCollection<string> ParameterNamesWithVarWrapping
+        {
+            get => (ObservableCollection<string>)GetValue(ParameterNamesWithVarWrappingProperty);
+            set => SetValue(ParameterNamesWithVarWrappingProperty, value);
+        }
+
+        #endregion
+
         #region Parameters DependencyProperty
 
         public static readonly DependencyProperty ParametersProperty = DependencyProperty.Register(
@@ -206,13 +222,19 @@ namespace KiCad_DB_Editor.View
                     p.PropertyChanged += Parameter_PropertyChanged;
             }
 
+            // Need to regenerate the list of the Parameters with variable wrapping i.e. ${...}
             // Need to update the keys of the ParameterFilterValues dict for the accessor,
             // but don't delete the values if the parameter is staying (otherwise the existing
             // filters would be deleted, which would be annoying)
             if (Parameters is null)
+            {
+                ParameterNamesWithVarWrapping.Clear();
                 ParameterFilterValues.Clear();
+            }
             else
             {
+                ParameterNamesWithVarWrapping = new(Parameters.Select(p => $"${{{p.Name}}}"));
+
                 foreach (Parameter parameterToAdd in Parameters.Except(ParameterFilterValues.Keys))
                     ParameterFilterValues.Add(parameterToAdd, "");
 

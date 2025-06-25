@@ -137,6 +137,7 @@
                         </StackPanel>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
+                <!--
                 <DataGridTextColumn Binding="{Binding Part.Value, Mode=TwoWay, UpdateSourceTrigger=Default}" >
                     <DataGridTextColumn.Header>
                         <StackPanel Orientation="Vertical">
@@ -145,6 +146,30 @@
                         </StackPanel>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
+                -->
+                <DataGridTemplateColumn SortMemberPath="Value"
+						>
+                    <DataGridTemplateColumn.Header>
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="Value" HorizontalAlignment="Center" />
+                            <TextBox Text="{Binding DataContext.ValueFilter, Mode=TwoWay, Source={x:Reference dummyElementToGetDataContext}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"/>
+                        </StackPanel>
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Part.Value, Mode=TwoWay, UpdateSourceTrigger=Default}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <ComboBox IsEditable="True"
+					                  Text="{Binding Part.Value, Mode=TwoWay, UpdateSourceTrigger=Default}"
+					                  ItemsSource="{Binding ParameterNamesWithVarWrapping, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}"
+					                  Loaded="TemplateColumn_ComboBox_Loaded"
+					  />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTextColumn Binding="{Binding Part.Description, Mode=TwoWay, UpdateSourceTrigger=Default}" >
                     <DataGridTextColumn.Header>
                         <StackPanel Orientation="Vertical">

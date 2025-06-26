@@ -207,6 +207,7 @@ namespace KiCad_DB_Editor.View
             Parameters_CollectionChanged(this, new(NotifyCollectionChangedAction.Reset));
         }
 
+        private static readonly string[] specialParameterNamesWithVarWrapping = (new string[] { "Part UID", "Manufacturer", "MPN" }).Select(pN => $"${{{pN}}}").ToArray();
         private ObservableCollectionEx<Parameter>? oldParametersCopy = null;
         private void Parameters_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
@@ -233,7 +234,7 @@ namespace KiCad_DB_Editor.View
             }
             else
             {
-                ParameterNamesWithVarWrapping = new(Parameters.Select(p => $"${{{p.Name}}}"));
+                ParameterNamesWithVarWrapping = new(specialParameterNamesWithVarWrapping.Concat(Parameters.Select(p => $"${{{p.Name}}}")));
 
                 foreach (Parameter parameterToAdd in Parameters.Except(ParameterFilterValues.Keys))
                     ParameterFilterValues.Add(parameterToAdd, "");
@@ -249,8 +250,11 @@ namespace KiCad_DB_Editor.View
             if (sender is Parameter parameter)
             {
                 if (e.PropertyName == nameof(Parameter.Name))
+                {
+                    ParameterNamesWithVarWrapping = new(specialParameterNamesWithVarWrapping.Concat(Parameters.Select(p => $"${{{p.Name}}}")));
                     redoColumns_ParameterNameChange(parameter);
             }
+        }
         }
 
         #endregion

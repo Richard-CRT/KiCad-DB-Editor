@@ -253,8 +253,8 @@ namespace KiCad_DB_Editor.View
                 {
                     ParameterNamesWithVarWrapping = new(specialParameterNamesWithVarWrapping.Concat(Parameters.Select(p => $"${{{p.Name}}}")));
                     redoColumns_ParameterNameChange(parameter);
+                }
             }
-        }
         }
 
         #endregion
@@ -834,20 +834,32 @@ namespace KiCad_DB_Editor.View
             // Text boxes and comboboxes are configured to use UpdateSourceTrigger=Default for Text, the others are PropertyChanged
             if (frameworkElement is TextBlock textBlock)
             {
-                textBlock.Text = value;
-                textBlock.GetBindingExpression(TextBlock.TextProperty).UpdateSource();
-                e.Handled = true;
+                BindingExpression? bE = textBlock.GetBindingExpression(TextBlock.TextProperty);
+                if (bE is not null && bE.ParentBinding.Mode != BindingMode.OneWay)
+                {
+                    textBlock.Text = value;
+                    bE.UpdateSource();
+                    e.Handled = true;
+                }
             }
             else if (frameworkElement is ComboBox comboBox)
             {
-                comboBox.Text = value;
-                comboBox.GetBindingExpression(ComboBox.TextProperty).UpdateSource();
-                e.Handled = true;
+                BindingExpression? bE = comboBox.GetBindingExpression(ComboBox.TextProperty);
+                if (bE is not null && bE.ParentBinding.Mode != BindingMode.OneWay)
+                {
+                    comboBox.Text = value;
+                    comboBox.GetBindingExpression(ComboBox.TextProperty)?.UpdateSource();
+                    e.Handled = true;
+                }
             }
             else if (frameworkElement is CheckBox checkBox)
             {
-                checkBox.IsChecked = value.ToLower() == "true" || value == "1";
-                e.Handled = true;
+                BindingExpression? bE = checkBox.GetBindingExpression(CheckBox.IsCheckedProperty);
+                if (bE is not null && bE.ParentBinding.Mode != BindingMode.OneWay)
+                {
+                    checkBox.IsChecked = value.ToLower() == "true" || value == "1";
+                    e.Handled = true;
+                }
             }
             else if (frameworkElement is ContentPresenter contentPresenter && VisualTreeHelper.GetChildrenCount(contentPresenter) == 1 &&
                     VisualTreeHelper.GetChild(contentPresenter, 0) is FrameworkElement frameworkElementSubsidiary
@@ -855,20 +867,32 @@ namespace KiCad_DB_Editor.View
             {
                 if (frameworkElementSubsidiary is TextBlock textBlockSubsidiary)
                 {
-                    textBlockSubsidiary.Text = value;
-                    textBlockSubsidiary.GetBindingExpression(TextBlock.TextProperty).UpdateSource();
-                    e.Handled = true;
+                    BindingExpression? bE = textBlockSubsidiary.GetBindingExpression(TextBlock.TextProperty);
+                    if (bE is not null && bE.ParentBinding.Mode != BindingMode.OneWay)
+                    {
+                        textBlockSubsidiary.Text = value;
+                        textBlockSubsidiary.GetBindingExpression(TextBlock.TextProperty)?.UpdateSource();
+                        e.Handled = true;
+                    }
                 }
                 else if (frameworkElementSubsidiary is ComboBox comboBoxSubsidiary)
                 {
-                    comboBoxSubsidiary.Text = value;
-                    comboBoxSubsidiary.GetBindingExpression(ComboBox.TextProperty).UpdateSource();
-                    e.Handled = true;
+                    BindingExpression? bE = comboBoxSubsidiary.GetBindingExpression(ComboBox.TextProperty);
+                    if (bE is not null && bE.ParentBinding.Mode != BindingMode.OneWay)
+                    {
+                        comboBoxSubsidiary.Text = value;
+                        comboBoxSubsidiary.GetBindingExpression(ComboBox.TextProperty)?.UpdateSource();
+                        e.Handled = true;
+                    }
                 }
                 else if (frameworkElementSubsidiary is CheckBox checkBoxSubsidiary)
                 {
-                    checkBoxSubsidiary.IsChecked = value.ToLower() == "true" || value == "1";
-                    e.Handled = true;
+                    BindingExpression? bE = checkBoxSubsidiary.GetBindingExpression(CheckBox.IsCheckedProperty);
+                    if (bE is not null && bE.ParentBinding.Mode != BindingMode.OneWay)
+                    {
+                        checkBoxSubsidiary.IsChecked = value.ToLower() == "true" || value == "1";
+                        e.Handled = true;
+                    }
                 }
 
             }
@@ -930,7 +954,7 @@ namespace KiCad_DB_Editor.View
                                 DataGridColumn column = dataGrid_Main.Columns[destX];
                                 object item = dataGrid_Main.Items[destY];
                                 FrameworkElement fE = column.GetCellContent(item);
-                                itemsView.EditItem(item); // Import to prevent updates causing Refresh while editing
+                                itemsView.EditItem(item); // Important to prevent updates causing Refresh while editing
                                 writeToFrameworkElement(fE, sourceData[0][0], e);
                                 itemsView.CommitEdit();
                             }
@@ -957,7 +981,7 @@ namespace KiCad_DB_Editor.View
                                             DataGridColumn column = dataGrid_Main.Columns[destX];
                                             object item = dataGrid_Main.Items[destY];
                                             FrameworkElement fE = column.GetCellContent(item);
-                                            itemsView.EditItem(item); // Import to prevent updates causing Refresh while editing
+                                            itemsView.EditItem(item); // Important to prevent updates causing Refresh while editing
                                             writeToFrameworkElement(fE, sourceData[srcY][srcX], e);
                                             itemsView.CommitEdit();
                                         }
@@ -965,8 +989,6 @@ namespace KiCad_DB_Editor.View
                                 }
                             }
                         }
-
-                        PartVMsCollectionView.Refresh();
                     }
                 }
             }
@@ -984,7 +1006,7 @@ namespace KiCad_DB_Editor.View
                     {
                         DataGridColumn column = selectedCell.Column;
                         FrameworkElement frameworkElement = column.GetCellContent(selectedCell.Item);
-                        itemsView.EditItem(selectedCell.Item); // Import to prevent updates causing Refresh while editing
+                        itemsView.EditItem(selectedCell.Item); // Important to prevent updates causing Refresh while editing
                         writeToFrameworkElement(frameworkElement, "", e);
                         itemsView.CommitEdit();
                     }

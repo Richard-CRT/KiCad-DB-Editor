@@ -1043,14 +1043,12 @@ namespace KiCad_DB_Editor.View
                         {
                             PartVM item = (PartVM)dataGrid_Main.Items[rowIndex];
                             FrameworkElement frameworkElement = column.GetCellContent(item);
-                            if (frameworkElement is TextBlock textBlock)
-                            {
+                            if (frameworkElement is TextBox textBox)
+                                selectedCellCoords[coord] = textBox.Text;
+                            else if (frameworkElement is TextBlock textBlock)
                                 selectedCellCoords[coord] = textBlock.Text;
-                            }
                             else if (frameworkElement is ComboBox comboBox)
-                            {
                                 selectedCellCoords[coord] = comboBox.Text;
-                            }
                             else if (frameworkElement is CheckBox checkBox)
                             {
                                 if (checkBox.IsChecked is null)
@@ -1063,13 +1061,9 @@ namespace KiCad_DB_Editor.View
                                     )
                             {
                                 if (frameworkElementSubsidiary is TextBlock textBlockSubsidiary)
-                                {
                                     selectedCellCoords[coord] = textBlockSubsidiary.Text;
-                                }
                                 else if (frameworkElementSubsidiary is ComboBox comboBoxSubsidiary)
-                                {
                                     selectedCellCoords[coord] = comboBoxSubsidiary.Text;
-                                }
                                 else if (frameworkElementSubsidiary is CheckBox checkBoxSubsidiary)
                                 {
                                     if (checkBoxSubsidiary.IsChecked is null)
@@ -1078,9 +1072,7 @@ namespace KiCad_DB_Editor.View
                                         selectedCellCoords[coord] = (bool)checkBoxSubsidiary.IsChecked ? "True" : "False";
                                 }
                                 else
-                                {
                                     selectedCellCoords[coord] = "";
-                                }
                             }
                             else
                                 selectedCellCoords[coord] = "";

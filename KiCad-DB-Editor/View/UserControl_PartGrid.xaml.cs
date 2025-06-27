@@ -1023,7 +1023,6 @@ namespace KiCad_DB_Editor.View
                         writeToFrameworkElement(frameworkElement, "", e);
                         itemsView.CommitEdit();
                     }
-                    PartVMsCollectionView.Refresh();
                 }
             }
             else if (e.Key == Key.C && Keyboard.Modifiers == ModifierKeys.Control)

@@ -1125,13 +1125,17 @@ namespace KiCad_DB_Editor.View
             if (sender is ComboBox comboBox)
             {
                 comboBox.Focus();
-                comboBox.Text = previewedTextInput;
-                TextBox editableTextBox = (TextBox)comboBox.Template.FindName("PART_EditableTextBox", comboBox);
-                editableTextBox.CaretIndex = comboBox.Text.Length;
+                if (previewedTextInput is not null)
+                {
+                    comboBox.Text = previewedTextInput;
+                    TextBox editableTextBox = (TextBox)comboBox.Template.FindName("PART_EditableTextBox", comboBox);
+                    editableTextBox.CaretIndex = previewedTextInput.Length;
+                    previewedTextInput = null;
+                }
             }
         }
 
-        private string previewedTextInput = "";
+        private string? previewedTextInput = null;
         private void dataGrid_Main_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             if (e.Source is DataGrid dg && e.OriginalSource is DataGridCell cell && !cell.IsEditing && !cell.IsReadOnly && cell.Column is DataGridTemplateColumn column)

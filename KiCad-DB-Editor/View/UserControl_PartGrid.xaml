@@ -137,16 +137,6 @@
                         </StackPanel>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
-                <!--
-                <DataGridTextColumn Binding="{Binding Part.Value, Mode=TwoWay, UpdateSourceTrigger=Default}" >
-                    <DataGridTextColumn.Header>
-                        <StackPanel Orientation="Vertical">
-                            <TextBlock Text="Value" HorizontalAlignment="Center" />
-                            <TextBox Text="{Binding DataContext.ValueFilter, Mode=TwoWay, Source={x:Reference dummyElementToGetDataContext}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"/>
-                        </StackPanel>
-                    </DataGridTextColumn.Header>
-                </DataGridTextColumn>
-                -->
                 <DataGridTemplateColumn SortMemberPath="Value"
 						>
                     <DataGridTemplateColumn.Header>

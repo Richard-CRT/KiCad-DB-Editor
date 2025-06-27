@@ -41,6 +41,40 @@ namespace KiCad_DB_Editor.ViewModel
             }
         }
 
+        private Parameter? _selectedParameterForValueColumn;
+        public Parameter? SelectedParameterForValueColumn
+        {
+            get { return _selectedParameterForValueColumn; }
+            set
+            {
+                if (_selectedParameterForValueColumn != value)
+                {
+                    if (_selectedParameterForValueColumn is not null)
+                        _selectedParameterForValueColumn.PropertyChanged -= SelectedParameterForValueColumn_PropertyChanged;
+                    _selectedParameterForValueColumn = value;
+
+                    InvokePropertyChanged();
+
+                    if (_selectedParameterForValueColumn is not null)
+                    {
+                        _selectedParameterForValueColumn.PropertyChanged += SelectedParameterForValueColumn_PropertyChanged;
+                        SelectedParameterForValueColumn_PropertyChanged(this, new PropertyChangedEventArgs(nameof(Parameter.Name)));
+                    }
+                }
+            }
+        }
+
+        private void SelectedParameterForValueColumn_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(Parameter.Name):
+                    if (SelectedParameterForValueColumn is not null)
+                        Part.Value = $"${{{SelectedParameterForValueColumn.Name}}}";
+                    break;
+            }
+        }
+
         public string SymbolLibraryName
         {
             get { return Part.SymbolLibraryName; }
@@ -87,10 +121,18 @@ namespace KiCad_DB_Editor.ViewModel
             FootprintLibraryNameAccessor = new(this);
             FootprintNameAccessor = new(this);
             SelectedFootprintLibraryAccessor = new(this);
+
+            if (Part.Value.StartsWith("${") && Part.Value.EndsWith('}'))
+            {
+                string parameterNameToSearchFor = Part.Value[2..^1];
+                Parameter? matchingParameter = Part.ParentLibrary.AllParameters.FirstOrDefault(p => p!.Name == parameterNameToSearchFor, null);
+                SelectedParameterForValueColumn = matchingParameter;
+            }
         }
 
         public void Unsubscribe()
         {
+            if (SelectedParameterForValueColumn is not null) SelectedParameterForValueColumn.PropertyChanged -= SelectedParameterForValueColumn_PropertyChanged;
             Part.PropertyChanged -= Part_PropertyChanged;
             Part.FootprintPairs.CollectionChanged -= FootprintPairs_CollectionChanged;
         }
@@ -108,6 +150,17 @@ namespace KiCad_DB_Editor.ViewModel
         {
             switch (e.PropertyName)
             {
+                case nameof(Part.Value):
+                    if (Part.Value.StartsWith("${") && Part.Value.EndsWith('}'))
+                    {
+                        string parameterNameToSearchFor = Part.Value[2..^1];
+                        if (SelectedParameterForValueColumn is null || SelectedParameterForValueColumn.Name != parameterNameToSearchFor)
+                        {
+                            Parameter? matchingParameter = Part.ParentLibrary.AllParameters.FirstOrDefault(p => p!.Name == parameterNameToSearchFor, null);
+                            SelectedParameterForValueColumn = matchingParameter;
+                        }
+                    }
+                    break;
                 case nameof(Part.SymbolLibraryName):
                     // We have to wrap this, as at the VM level we add SelectedKiCadSymbolLibrary
                     InvokePropertyChanged(nameof(PartVM.SymbolLibraryName));

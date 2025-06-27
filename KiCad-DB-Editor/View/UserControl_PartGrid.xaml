@@ -154,9 +154,12 @@
                         <DataTemplate>
                             <ComboBox IsEditable="True"
 					                  Text="{Binding Part.Value, Mode=TwoWay, UpdateSourceTrigger=Default}"
-					                  ItemsSource="{Binding ParameterNamesWithVarWrapping, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}"
+                                      SelectedItem="{Binding SelectedParameterForValueColumn, Mode=TwoWay, UpdateSourceTrigger=Default, ValidatesOnExceptions=True}"
+					                  ItemsSource="{Binding Parameters, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}"
+                                      DisplayMemberPath="Name"
+                                      ItemStringFormat="↪ {0}"
 					                  Loaded="TemplateColumn_ComboBox_Loaded"
-					  />
+					                  />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>

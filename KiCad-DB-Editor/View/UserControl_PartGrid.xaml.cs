@@ -312,6 +312,7 @@ namespace KiCad_DB_Editor.View
         }
 
         private ObservableCollectionEx<PartVM>? oldPartVMsCopy = null;
+        private Dictionary<Part, PartVM>? partToPartVMMap = null;
         private void PartVMs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             if (oldPartVMsCopy is not null)
@@ -333,6 +334,8 @@ namespace KiCad_DB_Editor.View
                     pVM.Part.PropertyChanged += PartVM_Part_PropertyChanged;
                 }
             }
+
+            partToPartVMMap = PartVMs?.ToDictionary(pVM => pVM.Part);
 
             redoColumns_PotentialFootprintColumnChange();
 
@@ -363,7 +366,12 @@ namespace KiCad_DB_Editor.View
                 switch (e.PropertyName)
                 {
                     case "Item[]":
-                        PartVMsCollectionView.Refresh();
+                        if (sender is ParameterAccessor pA)
+                        {
+                            // Force refresh but only of 1 item (as opposed to calling PartVMsCollectionView.Refresh() )
+                            itemsView.EditItem(pA.OwnerPartVM);
+                            itemsView.CommitEdit();
+                        }
                         break;
                 }
             }
@@ -382,7 +390,12 @@ namespace KiCad_DB_Editor.View
                     case nameof(Part.Value):
                     case nameof(Part.Description):
                     case nameof(Part.Datasheet):
-                        PartVMsCollectionView.Refresh();
+                        if (sender is Part part && partToPartVMMap is not null)
+                        {
+                            // Force refresh but only of 1 item (as opposed to calling PartVMsCollectionView.Refresh() )
+                            itemsView.EditItem(partToPartVMMap[part]);
+                            itemsView.CommitEdit();
+                        }
                         break;
                 }
             }
@@ -952,7 +965,7 @@ namespace KiCad_DB_Editor.View
                             foreach ((int destX, int destY) in selectedCellCoords)
                             {
                                 DataGridColumn column = dataGrid_Main.Columns[destX];
-                                object item = dataGrid_Main.Items[destY];
+                                PartVM item = (PartVM)dataGrid_Main.Items[destY];
                                 FrameworkElement fE = column.GetCellContent(item);
                                 itemsView.EditItem(item); // Important to prevent updates causing Refresh while editing
                                 writeToFrameworkElement(fE, sourceData[0][0], e);
@@ -979,7 +992,7 @@ namespace KiCad_DB_Editor.View
                                             int destY = minY + srcY;
 
                                             DataGridColumn column = dataGrid_Main.Columns[destX];
-                                            object item = dataGrid_Main.Items[destY];
+                                            PartVM item = (PartVM)dataGrid_Main.Items[destY];
                                             FrameworkElement fE = column.GetCellContent(item);
                                             itemsView.EditItem(item); // Important to prevent updates causing Refresh while editing
                                             writeToFrameworkElement(fE, sourceData[srcY][srcX], e);
@@ -1028,7 +1041,7 @@ namespace KiCad_DB_Editor.View
                         (int, int) coord = (columnIndex, rowIndex);
                         if (!selectedCellCoords.ContainsKey(coord))
                         {
-                            object item = dataGrid_Main.Items[rowIndex];
+                            PartVM item = (PartVM)dataGrid_Main.Items[rowIndex];
                             FrameworkElement frameworkElement = column.GetCellContent(item);
                             if (frameworkElement is TextBlock textBlock)
                             {

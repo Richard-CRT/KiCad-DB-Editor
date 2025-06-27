@@ -841,7 +841,7 @@ namespace KiCad_DB_Editor.View
             }
         }
 
-        private void writeToFrameworkElement(FrameworkElement frameworkElement, string value, KeyEventArgs e)
+        private void writeToFrameworkElement(FrameworkElement frameworkElement, string value, RoutedEventArgs e)
         {
             // Updating the data via the frameworkElement requires Mode=TwoWay && (UpdateSourceTrigger=PropertyChanged || call UpdateSource() manually )
             // Text boxes and comboboxes are configured to use UpdateSourceTrigger=Default for Text, the others are PropertyChanged
@@ -1117,11 +1117,27 @@ namespace KiCad_DB_Editor.View
             editing = false;
         }
 
+        // This relies on us only ever using ComboBox DataTemplateColumns, or the dataGrid_Main_PreviewTextInput
+        // will save text to be entered that never gets entered, and will auto-type weird stuff when we load
+        // a ComboBox DataGridTemplateColumns
         private void TemplateColumn_ComboBox_Loaded(object sender, RoutedEventArgs e)
         {
             if (sender is ComboBox comboBox)
             {
                 comboBox.Focus();
+                comboBox.Text = previewedTextInput;
+                TextBox editableTextBox = (TextBox)comboBox.Template.FindName("PART_EditableTextBox", comboBox);
+                editableTextBox.CaretIndex = comboBox.Text.Length;
+            }
+        }
+
+        private string previewedTextInput = "";
+        private void dataGrid_Main_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            if (e.Source is DataGrid dg && e.OriginalSource is DataGridCell cell && !cell.IsEditing && !cell.IsReadOnly && cell.Column is DataGridTemplateColumn column)
+            {
+                dg.BeginEdit();
+                previewedTextInput = e.Text;
             }
         }
     }

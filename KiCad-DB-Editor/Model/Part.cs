@@ -1,4 +1,5 @@
-﻿using KiCad_DB_Editor.ViewModel;
+﻿using KiCad_DB_Editor.Utilities;
+using KiCad_DB_Editor.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -90,6 +91,13 @@ namespace KiCad_DB_Editor.Model
             get { return _footprintPairs; }
         }
 
+        // No setter, to prevent the VM needing to listening PropertyChanged events
+        private ObservableDictionary<Parameter, string> _parameterValues;
+        public ObservableDictionary<Parameter, string> ParameterValues
+        {
+            get { return _parameterValues; }
+        }
+
         private bool _excludeFromBOM = false;
         public bool ExcludeFromBOM
         {
@@ -113,8 +121,6 @@ namespace KiCad_DB_Editor.Model
 
         #endregion Notify Properties
 
-        public Dictionary<Parameter, string> ParameterValues { get; set; } = new();
-
         public Part(string partUID, Library parentLibrary, Category parentCategory)
         {
             _parentLibrary = parentLibrary;
@@ -123,6 +129,7 @@ namespace KiCad_DB_Editor.Model
 
             // Initialise collection with events
             _footprintPairs = new();
+            _parameterValues = new();
         }
 
         public override string ToString()

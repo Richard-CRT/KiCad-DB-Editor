@@ -114,8 +114,8 @@ namespace KiCad_DB_Editor.ViewModel
             Part = part;
 
             Part.PropertyChanged += Part_PropertyChanged;
-            // We rely on FootprintLibraryNames and FootprintNames changing at the same time, so we don't subscribe to both
             Part.FootprintPairs.CollectionChanged += FootprintPairs_CollectionChanged;
+            Part.ParameterValues.CollectionChanged += Part_ParameterValues_CollectionChanged;
 
             ParameterAccessor = new(this);
             FootprintLibraryNameAccessor = new(this);
@@ -135,6 +135,7 @@ namespace KiCad_DB_Editor.ViewModel
             if (SelectedParameterForValueColumn is not null) SelectedParameterForValueColumn.PropertyChanged -= SelectedParameterForValueColumn_PropertyChanged;
             Part.PropertyChanged -= Part_PropertyChanged;
             Part.FootprintPairs.CollectionChanged -= FootprintPairs_CollectionChanged;
+            Part.ParameterValues.CollectionChanged -= Part_ParameterValues_CollectionChanged;
         }
 
         private void FootprintPairs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -144,6 +145,11 @@ namespace KiCad_DB_Editor.ViewModel
             // This is needed to update the table's existing cells
             FootprintLibraryNameAccessor.InvokePropertyChanged("Item[]");
             FootprintNameAccessor.InvokePropertyChanged("Item[]");
+        }
+
+        private void Part_ParameterValues_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            ParameterAccessor.InvokePropertyChanged("Item[]");
         }
 
         private void Part_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -221,7 +227,9 @@ namespace KiCad_DB_Editor.ViewModel
                         if (s != value)
                         {
                             OwnerPartVM.Part.ParameterValues[parameter] = value;
-                            InvokePropertyChanged("Item[]");
+
+                            // Don't need to InvokePropertyChanged for this as changing OwnerPartVM.Part.ParameterValues
+                            // already causes that
                         }
                     }
                 }
@@ -259,8 +267,9 @@ namespace KiCad_DB_Editor.ViewModel
                     {
                         // Changing the selected footprint library should prompt clearing the footprint name
                         OwnerPartVM.Part.FootprintPairs[index] = (value, "");
-                        InvokePropertyChanged("Item[]");
-                        OwnerPartVM.FootprintNameAccessor.InvokePropertyChanged("Item[]");
+
+                        // Don't need to InvokePropertyChanged for this or FootprintNameAccessor as changing OwnerPartVM.Part.FootprintPairs
+                        // already causes that
 
                         // Doesn't seem to be technically required as the bindings for the ComboBoxes I'm designing this for only load
                         // when the cells are edited, but if not then I'd need to do this to prompt the ComboBoxes to refetch the value
@@ -304,7 +313,9 @@ namespace KiCad_DB_Editor.ViewModel
                     if (OwnerPartVM.Part.FootprintPairs.Count > index)
                     {
                         OwnerPartVM.Part.FootprintPairs[index] = (OwnerPartVM.Part.FootprintPairs[index].Item1, value);
-                        InvokePropertyChanged("Item[]");
+
+                        // Don't need to InvokePropertyChanged for this as changing OwnerPartVM.Part.FootprintPairs
+                        // already causes that
                     }
                 }
             }

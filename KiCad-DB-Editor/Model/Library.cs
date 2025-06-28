@@ -840,7 +840,9 @@ $exclude_from_sim, "
                                     mpnParameter.Value = part.MPN;
                                     valueParameter.Value = part.Value;
                                     // Best way I can come up with for checking for web URL and absolute-ing the file-based datasheet paths
-                                    if (part.Datasheet.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                                    if (string.IsNullOrWhiteSpace(part.Datasheet))
+                                        datasheetParameter.Value = "";
+                                    else if (part.Datasheet.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
                                         part.Datasheet.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
                                         datasheetParameter.Value = part.Datasheet;
                                     else

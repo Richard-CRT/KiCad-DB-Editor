@@ -168,14 +168,39 @@
                         </StackPanel>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Part.Datasheet, Mode=TwoWay, UpdateSourceTrigger=Default}" >
-                    <DataGridTextColumn.Header>
+                <DataGridTemplateColumn SortMemberPath="Part.Datasheet">
+                    <DataGridTemplateColumn.Header>
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="Datasheet" HorizontalAlignment="Center" />
                             <TextBox Text="{Binding DataContext.DatasheetFilter, Mode=TwoWay, Source={x:Reference dummyElementToGetDataContext}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"/>
                         </StackPanel>
-                    </DataGridTextColumn.Header>
-                </DataGridTextColumn>
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Part.Datasheet, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <DockPanel>
+                                <Button DockPanel.Dock="Right"
+                                        Width="{Binding ActualHeight, Mode=OneWay, RelativeSource={RelativeSource Self}}"
+                                        Margin="2,0,0,0"
+                                        Command="{Binding OpenDatasheetFileCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}"
+                                        >🗗</Button>
+                                <Button DockPanel.Dock="Right"
+                                        Width="{Binding ActualHeight, Mode=OneWay, RelativeSource={RelativeSource Self}}"
+                                        Margin="2,0,0,0"
+                                        Command="{Binding BrowseDatasheetFileCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}"
+                                        >🖿</Button>
+                                <TextBox
+                                    Text="{Binding Part.Datasheet, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    VerticalAlignment="Center"
+                                    Loaded="TemplateColumn_TextBox_Loaded"/>
+                            </DockPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
                 <DataGridCheckBoxColumn Header="Excl. BOM"
                                         Binding="{Binding Part.ExcludeFromBOM, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         >

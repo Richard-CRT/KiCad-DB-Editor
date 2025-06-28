@@ -1,5 +1,7 @@
-﻿using KiCad_DB_Editor.Model;
+﻿using KiCad_DB_Editor.Commands;
+using KiCad_DB_Editor.Model;
 using KiCad_DB_Editor.ViewModel;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -317,7 +319,7 @@ namespace KiCad_DB_Editor.View
         {
             PartVMsCollectionView = (CollectionView)CollectionViewSource.GetDefaultView(PartVMs);
             if (PartVMsCollectionView is not null)
-            PartVMsCollectionView.Filter = OnFilterPartVMsCollectionView;
+                PartVMsCollectionView.Filter = OnFilterPartVMsCollectionView;
 
             if (oldPartVMs is not null)
                 oldPartVMs.CollectionChanged -= PartVMs_CollectionChanged;
@@ -843,6 +845,9 @@ namespace KiCad_DB_Editor.View
             InitializeComponent();
 
             ParameterFilterAccessor = new(this);
+
+            OpenDatasheetFileCommand = new BasicCommand(OpenDatasheetFileCommandExecuted, OpenDatasheetFileCommandCanExecute);
+            BrowseDatasheetFileCommand = new BasicCommand(BrowseDatasheetFileCommandExecuted, BrowseDatasheetFileCommandCanExecute);
         }
 
         private void dataGrid_Main_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
@@ -1128,9 +1133,6 @@ namespace KiCad_DB_Editor.View
             editing = false;
         }
 
-        // This relies on us only ever using ComboBox DataTemplateColumns, or the dataGrid_Main_PreviewTextInput
-        // will save text to be entered that never gets entered, and will auto-type weird stuff when we load
-        // a ComboBox DataGridTemplateColumns
         private void TemplateColumn_ComboBox_Loaded(object sender, RoutedEventArgs e)
         {
             if (sender is ComboBox comboBox)
@@ -1146,14 +1148,78 @@ namespace KiCad_DB_Editor.View
             }
         }
 
+        private void TemplateColumn_TextBox_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox)
+            {
+                textBox.Focus();
+                if (previewedTextInput is not null)
+                {
+                    textBox.Text = previewedTextInput;
+                    textBox.CaretIndex = previewedTextInput.Length;
+                    previewedTextInput = null;
+                }
+                else
+                    textBox.SelectAll();
+            }
+        }
+
         private string? previewedTextInput = null;
+
+        // This relies on us only ever using DataTemplateColumns that we handle the text entry on Loaded, or
+        // the dataGrid_Main_PreviewTextInput will save text to be entered that never gets entered, and will
+        // auto-type weird stuff when we load a DataGridTemplateColumn that we have handled
         private void dataGrid_Main_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            if (e.Source is DataGrid dg && e.OriginalSource is DataGridCell cell && !cell.IsEditing && !cell.IsReadOnly && cell.Column is DataGridTemplateColumn column)
+            if (e.Source is DataGrid dg && e.OriginalSource is DataGridCell cell && !cell.IsEditing && !cell.IsReadOnly)
             {
-                dg.BeginEdit();
-                previewedTextInput = e.Text;
+                if (cell.Column is DataGridTemplateColumn)
+                {
+                    dg.BeginEdit();
+                    previewedTextInput = e.Text;
+                }
             }
+        }
+
+        public IBasicCommand OpenDatasheetFileCommand { get; }
+
+        private bool OpenDatasheetFileCommandCanExecute(object? parameter)
+        {
+            PartVM partVM = (PartVM)dataGrid_Main.CurrentItem;
+            return partVM is not null && partVM.Part.Datasheet != "";
+        }
+
+        private void OpenDatasheetFileCommandExecuted(object? parameter)
+        {
+            PartVM partVM = (PartVM)dataGrid_Main.CurrentItem;
+            string url = partVM.Part.Datasheet;
+            Debug.Assert(url != "");
+            try
+            {
+                Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
+            }
+            catch (Win32Exception)
+            {
+
+            }
+        }
+
+        public IBasicCommand BrowseDatasheetFileCommand { get; }
+
+        private bool BrowseDatasheetFileCommandCanExecute(object? parameter)
+        {
+            return ProjectDirectoryPath != "";
+        }
+        
+        private void BrowseDatasheetFileCommandExecuted(object? parameter)
+        {
+            Debug.Assert(ProjectDirectoryPath != "");
+            PartVM partVM = (PartVM)dataGrid_Main.CurrentItem;
+            OpenFileDialog openFileDialog = new();
+            openFileDialog.Title = "Open Datasheet File";
+            openFileDialog.Filter = "All files (*.*)|*.*";
+            if (openFileDialog.ShowDialog() == true)
+                partVM.Part.Datasheet = System.IO.Path.GetRelativePath(ProjectDirectoryPath, openFileDialog.FileName);
         }
     }
 

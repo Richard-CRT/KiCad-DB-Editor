@@ -36,7 +36,23 @@ namespace KiCad_DB_Editor.View
     {
         #region Dependency Properties
 
-        #region DisplayPartCategory DependencyPropertyShowParameterColumns
+        #region ProjectDirectoryPath DependencyProperty
+
+        public static readonly DependencyProperty ProjectDirectoryPathProperty = DependencyProperty.Register(
+            nameof(ProjectDirectoryPath),
+            typeof(string),
+            typeof(UserControl_PartGrid)
+            );
+
+        public string ProjectDirectoryPath
+        {
+            get => (string)GetValue(ProjectDirectoryPathProperty);
+            set => SetValue(ProjectDirectoryPathProperty, value);
+        }
+
+        #endregion
+
+        #region DisplayPartCategory DependencyProperty
 
         public static readonly DependencyProperty DisplayPartCategoryProperty = DependencyProperty.Register(
             nameof(DisplayPartCategory),

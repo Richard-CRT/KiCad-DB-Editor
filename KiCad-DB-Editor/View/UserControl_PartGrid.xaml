@@ -103,7 +103,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Binding="{Binding Path, Mode=OneWay, UpdateSourceTrigger=Default}"
+                <DataGridTextColumn Binding="{Binding Path, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                                     Visibility="{Binding DataContext.DisplayPartCategory, Source={x:Reference dummyElementToGetDataContext}, Converter={StaticResource Boolean_to_Visibility_Converter}}"
                                     >
                     <DataGridTextColumn.Header>
@@ -113,7 +113,7 @@
                         </StackPanel>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Part.PartUID, Mode=TwoWay, UpdateSourceTrigger=Default}" >
+                <DataGridTextColumn Binding="{Binding Part.PartUID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
                     <DataGridTextColumn.Header>
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="Part UID" HorizontalAlignment="Center" />
@@ -121,7 +121,7 @@
                         </StackPanel>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Part.Manufacturer, Mode=TwoWay, UpdateSourceTrigger=Default}" >
+                <DataGridTextColumn Binding="{Binding Part.Manufacturer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
                     <DataGridTextColumn.Header>
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="Manufacturer" HorizontalAlignment="Center" />
@@ -129,7 +129,7 @@
                         </StackPanel>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Part.MPN, Mode=TwoWay, UpdateSourceTrigger=Default}" >
+                <DataGridTextColumn Binding="{Binding Part.MPN, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
                     <DataGridTextColumn.Header>
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="MPN" HorizontalAlignment="Center" />
@@ -146,7 +146,7 @@
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Part.Value, Mode=TwoWay, UpdateSourceTrigger=Default}"/>
+                            <TextBlock Text="{Binding Part.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
@@ -160,7 +160,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Binding="{Binding Part.Description, Mode=TwoWay, UpdateSourceTrigger=Default}" >
+                <DataGridTextColumn Binding="{Binding Part.Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
                     <DataGridTextColumn.Header>
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="Description" HorizontalAlignment="Center" />
@@ -225,7 +225,7 @@
                                         SortMemberPath="Part.SymbolLibraryName">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Part.SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=Default}"/>
+                            <TextBlock Text="{Binding Part.SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
@@ -243,7 +243,7 @@
                                         SortMemberPath="Part.SymbolName">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Part.SymbolName, Mode=TwoWay, UpdateSourceTrigger=Default}"/>
+                            <TextBlock Text="{Binding Part.SymbolName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>

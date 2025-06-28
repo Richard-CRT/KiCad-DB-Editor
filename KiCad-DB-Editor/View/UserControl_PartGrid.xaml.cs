@@ -861,14 +861,12 @@ namespace KiCad_DB_Editor.View
         private void writeToFrameworkElement(FrameworkElement frameworkElement, string value, RoutedEventArgs e)
         {
             // Updating the data via the frameworkElement requires Mode=TwoWay && (UpdateSourceTrigger=PropertyChanged || call UpdateSource() manually )
-            // Text boxes and comboboxes are configured to use UpdateSourceTrigger=Default for Text, the others are PropertyChanged
             if (frameworkElement is TextBlock textBlock)
             {
                 BindingExpression? bE = textBlock.GetBindingExpression(TextBlock.TextProperty);
                 if (bE is not null && bE.ParentBinding.Mode != BindingMode.OneWay)
                 {
                     textBlock.Text = value;
-                    bE.UpdateSource();
                     e.Handled = true;
                 }
             }
@@ -878,7 +876,6 @@ namespace KiCad_DB_Editor.View
                 if (bE is not null && bE.ParentBinding.Mode != BindingMode.OneWay)
                 {
                     comboBox.Text = value;
-                    bE.UpdateSource();
                     e.Handled = true;
                 }
             }
@@ -901,7 +898,6 @@ namespace KiCad_DB_Editor.View
                     if (bE is not null && bE.ParentBinding.Mode != BindingMode.OneWay)
                     {
                         textBlockSubsidiary.Text = value;
-                        bE.UpdateSource();
                         e.Handled = true;
                     }
                 }
@@ -911,7 +907,6 @@ namespace KiCad_DB_Editor.View
                     if (bE is not null && bE.ParentBinding.Mode != BindingMode.OneWay)
                     {
                         comboBoxSubsidiary.Text = value;
-                        bE.UpdateSource();
                         e.Handled = true;
                     }
                 }

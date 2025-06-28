@@ -96,8 +96,7 @@
                 <DataGridTemplateColumn Width="SizeToCells"
                                         IsReadOnly="True"
                                         CanUserReorder="False"
-                                        CanUserResize="False"
-                                        >
+                                        CanUserResize="False">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Image Source="/View/Resources/Component.png" Height="18" Margin="0,3,0,3" />
@@ -138,8 +137,7 @@
                         </StackPanel>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
-                <DataGridTemplateColumn SortMemberPath="Value"
-						>
+                <DataGridTemplateColumn SortMemberPath="Value">
                     <DataGridTemplateColumn.Header>
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="Value" HorizontalAlignment="Center" />
@@ -224,8 +222,7 @@
                     </DataGridCheckBoxColumn.ElementStyle>
                 </DataGridCheckBoxColumn>
                 <DataGridTemplateColumn Header="Sym. Library"
-                                        SortMemberPath="SymbolLibraryName"
-                                        >
+                                        SortMemberPath="SymbolLibraryName">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Part.SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=Default}"/>
@@ -243,8 +240,7 @@
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="Sym. Name"
-                                        SortMemberPath="SymbolName"
-                                        >
+                                        SortMemberPath="SymbolName">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Part.SymbolName, Mode=TwoWay, UpdateSourceTrigger=Default}"/>

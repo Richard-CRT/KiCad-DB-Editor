@@ -839,7 +839,12 @@ $exclude_from_sim, "
                                     manufacturerParameter.Value = part.Manufacturer;
                                     mpnParameter.Value = part.MPN;
                                     valueParameter.Value = part.Value;
-                                    datasheetParameter.Value = part.Datasheet;
+                                    // Best way I can come up with for checking for web URL and absolute-ing the file-based datasheet paths
+                                    if (part.Datasheet.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                                        part.Datasheet.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                                        datasheetParameter.Value = part.Datasheet;
+                                    else
+                                        datasheetParameter.Value = Path.GetFullPath(Path.Combine(ProjectDirectoryPath, part.Datasheet));
                                     schematicSymbolParameter.Value = (part.SymbolLibraryName != "" || part.SymbolName != "") ? $"{part.SymbolLibraryName}:{part.SymbolName}" : "";
                                     footprintsParameter.Value = $"{string.Join(';', part.FootprintPairs.Select(pair => $"{pair.Item1}:{pair.Item2}"))}";
                                     excludeFromBomParameter.Value = part.ExcludeFromBOM ? 1 : 0;

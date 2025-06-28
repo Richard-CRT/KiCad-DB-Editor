@@ -1196,7 +1196,15 @@ namespace KiCad_DB_Editor.View
             Debug.Assert(url != "");
             try
             {
-                Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
+                // Best way I can come up with for checking for web URL and absolute-ing the file-based datasheet paths
+                if (url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                    url.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                    Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
+                else
+                {
+                    string absUrl = System.IO.Path.GetFullPath(System.IO.Path.Combine(ProjectDirectoryPath, url));
+                    Process.Start(new ProcessStartInfo { FileName = absUrl, UseShellExecute = true });
+                }
             }
             catch (Win32Exception)
             {

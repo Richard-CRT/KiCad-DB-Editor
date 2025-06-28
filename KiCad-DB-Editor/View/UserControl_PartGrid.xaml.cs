@@ -300,6 +300,7 @@ namespace KiCad_DB_Editor.View
         protected void PartVMsPropertyChanged()
         {
             PartVMsCollectionView = (CollectionView)CollectionViewSource.GetDefaultView(PartVMs);
+            if (PartVMsCollectionView is not null)
             PartVMsCollectionView.Filter = OnFilterPartVMsCollectionView;
 
             if (oldPartVMs is not null)

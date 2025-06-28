@@ -68,7 +68,7 @@ namespace KiCad_DB_Editor.View
 
         #endregion
 
-        #region ShowParameterColumns DependencyPropertyShowParameterColumns
+        #region ShowParameterColumns DependencyProperty
 
         public static readonly DependencyProperty ShowParameterColumnsProperty = DependencyProperty.Register(
             nameof(ShowParameterColumns),
@@ -878,7 +878,7 @@ namespace KiCad_DB_Editor.View
                 if (bE is not null && bE.ParentBinding.Mode != BindingMode.OneWay)
                 {
                     comboBox.Text = value;
-                    comboBox.GetBindingExpression(ComboBox.TextProperty)?.UpdateSource();
+                    bE.UpdateSource();
                     e.Handled = true;
                 }
             }
@@ -901,7 +901,7 @@ namespace KiCad_DB_Editor.View
                     if (bE is not null && bE.ParentBinding.Mode != BindingMode.OneWay)
                     {
                         textBlockSubsidiary.Text = value;
-                        textBlockSubsidiary.GetBindingExpression(TextBlock.TextProperty)?.UpdateSource();
+                        bE.UpdateSource();
                         e.Handled = true;
                     }
                 }
@@ -911,7 +911,7 @@ namespace KiCad_DB_Editor.View
                     if (bE is not null && bE.ParentBinding.Mode != BindingMode.OneWay)
                     {
                         comboBoxSubsidiary.Text = value;
-                        comboBoxSubsidiary.GetBindingExpression(ComboBox.TextProperty)?.UpdateSource();
+                        bE.UpdateSource();
                         e.Handled = true;
                     }
                 }

@@ -277,6 +277,20 @@ namespace KiCad_DB_Editor.Model
 
         #region Notify Properties
 
+        private string _projectDirectoryPath = "";
+        public string ProjectDirectoryPath
+        {
+            get { return _projectDirectoryPath; }
+            set { if (_projectDirectoryPath != value) { _projectDirectoryPath = value; InvokePropertyChanged(); } }
+        }
+
+        private string _projectName = "";
+        public string ProjectName
+        {
+            get { return _projectName; }
+            set { if (_projectName != value) { _projectName = value; InvokePropertyChanged(); } }
+        }
+
         private string _partUIDScheme { get; set; } = "CMP-#######-####";
         public string PartUIDScheme
         {
@@ -373,10 +387,6 @@ namespace KiCad_DB_Editor.Model
         }
 
         #endregion Notify Properties
-
-        public string ProjectDirectoryPath { get; set; } = "";
-
-        public string ProjectName { get; set; } = "";
 
         public Library()
         {

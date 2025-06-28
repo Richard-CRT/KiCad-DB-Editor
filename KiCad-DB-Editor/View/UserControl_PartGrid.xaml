@@ -137,7 +137,7 @@
                         </StackPanel>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
-                <DataGridTemplateColumn SortMemberPath="Value">
+                <DataGridTemplateColumn SortMemberPath="Part.Value">
                     <DataGridTemplateColumn.Header>
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="Value" HorizontalAlignment="Center" />
@@ -152,7 +152,7 @@
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
                             <ComboBox IsEditable="True"
-					                  Text="{Binding Part.Value, Mode=TwoWay, UpdateSourceTrigger=Default}"
+					                  Text="{Binding Part.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
 					                  ItemsSource="{Binding ParameterNamesWithVarWrapping, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}"
                                       ItemStringFormat="↪ {0}"
 					                  Loaded="TemplateColumn_ComboBox_Loaded"
@@ -222,7 +222,7 @@
                     </DataGridCheckBoxColumn.ElementStyle>
                 </DataGridCheckBoxColumn>
                 <DataGridTemplateColumn Header="Sym. Library"
-                                        SortMemberPath="SymbolLibraryName">
+                                        SortMemberPath="Part.SymbolLibraryName">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Part.SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=Default}"/>
@@ -231,7 +231,7 @@
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
                             <ComboBox IsEditable="True"
-                                      Text="{Binding Part.SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=Default}"
+                                      Text="{Binding Part.SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       ItemsSource="{Binding KiCadSymbolLibraries, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}"
                                       DisplayMemberPath="Nickname"
                                       Loaded="TemplateColumn_ComboBox_Loaded"
@@ -240,7 +240,7 @@
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="Sym. Name"
-                                        SortMemberPath="SymbolName">
+                                        SortMemberPath="Part.SymbolName">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Part.SymbolName, Mode=TwoWay, UpdateSourceTrigger=Default}"/>
@@ -249,7 +249,7 @@
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
                             <ComboBox IsEditable="True"
-                                      Text="{Binding Part.SymbolName, Mode=TwoWay, UpdateSourceTrigger=Default}"
+                                      Text="{Binding Part.SymbolName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       ItemsSource="{Binding SelectedKiCadSymbolLibrary.KiCadSymbolNames}"
                                       Loaded="TemplateColumn_ComboBox_Loaded"
                                       />

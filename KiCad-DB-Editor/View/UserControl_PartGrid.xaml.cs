@@ -562,7 +562,7 @@ namespace KiCad_DB_Editor.View
 
             Binding valueBinding = new(valueBindingTarget);
             valueBinding.Mode = BindingMode.TwoWay;
-            valueBinding.UpdateSourceTrigger = UpdateSourceTrigger.Default;
+            valueBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
 
             // Like the XAML symbol example but for footprint columns
             DataTemplate cellTemplate = new();
@@ -624,7 +624,7 @@ namespace KiCad_DB_Editor.View
         {
             Binding valueBinding = new($"ParameterAccessor[{parameter.UUID}]");
             valueBinding.Mode = BindingMode.TwoWay;
-            valueBinding.UpdateSourceTrigger = UpdateSourceTrigger.Default;
+            valueBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
             column.Binding = valueBinding;
 
             // Use as a baseline the style I defined in XAML

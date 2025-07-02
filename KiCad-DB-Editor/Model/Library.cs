@@ -846,7 +846,7 @@ $exclude_from_sim, "
                                         part.Datasheet.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
                                         datasheetParameter.Value = part.Datasheet;
                                     else
-                                        datasheetParameter.Value = Path.GetFullPath(Path.Combine(ProjectDirectoryPath, part.Datasheet));
+                                        datasheetParameter.Value = Path.Combine("${KICAD_PART_LIBRARY_PROJECT_DIR}", part.Datasheet);
                                     schematicSymbolParameter.Value = (part.SymbolLibraryName != "" || part.SymbolName != "") ? $"{part.SymbolLibraryName}:{part.SymbolName}" : "";
                                     footprintsParameter.Value = $"{string.Join(';', part.FootprintPairs.Select(pair => $"{pair.Item1}:{pair.Item2}"))}";
                                     excludeFromBomParameter.Value = part.ExcludeFromBOM ? 1 : 0;

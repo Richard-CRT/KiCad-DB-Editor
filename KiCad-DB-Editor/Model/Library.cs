@@ -52,6 +52,7 @@ namespace KiCad_DB_Editor.Model
                 library.PartUIDScheme = jsonLibrary.PartUIDScheme;
                 library.KiCadExportPartLibraryName = jsonLibrary.KiCadExportPartLibraryName;
                 library.KiCadExportPartLibraryDescription = jsonLibrary.KiCadExportPartLibraryDescription;
+                library.KiCadExportPartLibraryEnvironmentVariable = jsonLibrary.KiCadExportPartLibraryEnvironmentVariable;
                 library.KiCadExportOdbcName = jsonLibrary.KiCadExportOdbcName;
                 library.KiCadAutoExportOnSave = jsonLibrary.KiCadAutoExportOnSave;
                 library.KiCadAutoExportRelativePath = jsonLibrary.KiCadAutoExportRelativePath;
@@ -327,6 +328,13 @@ namespace KiCad_DB_Editor.Model
         {
             get { return _kiCadExportOdbcName; }
             set { if (_kiCadExportOdbcName != value) { _kiCadExportOdbcName = value; InvokePropertyChanged(); } }
+        }
+
+        private string _kiCadExportPartLibraryEnvironmentVariable { get; set; } = "${KICAD_PART_LIBRARY_PROJECT_DIR}";
+        public string KiCadExportPartLibraryEnvironmentVariable
+        {
+            get { return _kiCadExportPartLibraryEnvironmentVariable; }
+            set { if (_kiCadExportPartLibraryEnvironmentVariable != value) { _kiCadExportPartLibraryEnvironmentVariable = value; InvokePropertyChanged(); } }
         }
 
         private bool _kiCadAutoExportOnSave { get; set; } = false;
@@ -846,7 +854,7 @@ $exclude_from_sim, "
                                         part.Datasheet.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
                                         datasheetParameter.Value = part.Datasheet;
                                     else
-                                        datasheetParameter.Value = Path.Combine("${KICAD_PART_LIBRARY_PROJECT_DIR}", part.Datasheet);
+                                        datasheetParameter.Value = Path.Combine(this.KiCadExportPartLibraryEnvironmentVariable, part.Datasheet);
                                     schematicSymbolParameter.Value = (part.SymbolLibraryName != "" || part.SymbolName != "") ? $"{part.SymbolLibraryName}:{part.SymbolName}" : "";
                                     footprintsParameter.Value = $"{string.Join(';', part.FootprintPairs.Select(pair => $"{pair.Item1}:{pair.Item2}"))}";
                                     excludeFromBomParameter.Value = part.ExcludeFromBOM ? 1 : 0;

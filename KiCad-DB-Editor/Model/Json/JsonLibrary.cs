@@ -63,22 +63,25 @@ namespace KiCad_DB_Editor.Model.Json
         [JsonPropertyName("export_odbc_name"), JsonPropertyOrder(4)]
         public string KiCadExportOdbcName { get; set; } = "";
 
-        [JsonPropertyName("auto_export"), JsonPropertyOrder(5)]
+        [JsonPropertyName("kicad_part_lib_env_var"), JsonPropertyOrder(5)]
+        public string KiCadExportPartLibraryEnvironmentVariable { get; set; } = "";
+
+        [JsonPropertyName("auto_export"), JsonPropertyOrder(6)]
         public bool KiCadAutoExportOnSave { get; set; } = false;
 
-        [JsonPropertyName("auto_export_relative_path"), JsonPropertyOrder(6)]
+        [JsonPropertyName("auto_export_relative_path"), JsonPropertyOrder(7)]
         public string KiCadAutoExportRelativePath { get; set; } = "";
 
-        [JsonPropertyName("parameters"), JsonPropertyOrder(7)]
+        [JsonPropertyName("parameters"), JsonPropertyOrder(8)]
         public List<JsonParameter> AllParameters { get; set; } = new();
 
-        [JsonPropertyName("top_level_categories"), JsonPropertyOrder(8)]
+        [JsonPropertyName("top_level_categories"), JsonPropertyOrder(9)]
         public List<JsonCategory> TopLevelCategories { get; set; } = new();
 
-        [JsonPropertyName("kicad_symbol_libraries"), JsonPropertyOrder(9)]
+        [JsonPropertyName("kicad_symbol_libraries"), JsonPropertyOrder(10)]
         public List<JsonKiCadSymbolLibrary> KiCadSymbolLibraries { get; set; } = new();
 
-        [JsonPropertyName("kicad_footprint_libraries"), JsonPropertyOrder(10)]
+        [JsonPropertyName("kicad_footprint_libraries"), JsonPropertyOrder(11)]
         public List<JsonKiCadFootprintLibrary> KiCadFootprintLibraries { get; set; } = new();
 
         [JsonConstructor]
@@ -90,6 +93,7 @@ namespace KiCad_DB_Editor.Model.Json
             KiCadExportPartLibraryName = library.KiCadExportPartLibraryName;
             KiCadExportPartLibraryDescription = library.KiCadExportPartLibraryDescription;
             KiCadExportOdbcName = library.KiCadExportOdbcName;
+            KiCadExportPartLibraryEnvironmentVariable = library.KiCadExportPartLibraryEnvironmentVariable;
             KiCadAutoExportOnSave = library.KiCadAutoExportOnSave;
             KiCadAutoExportRelativePath = library.KiCadAutoExportRelativePath;
             AllParameters = new(library.AllParameters.Select(p => new JsonParameter(p)));

@@ -257,7 +257,7 @@
                         <DataTemplate>
                             <ComboBox IsEditable="True"
                                       Text="{Binding Part.SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                      ItemsSource="{Binding KiCadSymbolLibraries, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}"
+                                      ItemsSource="{Binding Part.ParentLibrary.KiCadSymbolLibraries, UpdateSourceTrigger=PropertyChanged}"
                                       DisplayMemberPath="Nickname"
                                       Loaded="TemplateColumn_ComboBox_Loaded"
                                       />
@@ -275,7 +275,7 @@
                         <DataTemplate>
                             <ComboBox IsEditable="True"
                                       Text="{Binding Part.SymbolName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                      ItemsSource="{Binding SelectedKiCadSymbolLibrary.KiCadSymbolNames}"
+                                      ItemsSource="{Binding SelectedKiCadSymbolLibrary.KiCadSymbolNames, UpdateSourceTrigger=PropertyChanged}"
                                       Loaded="TemplateColumn_ComboBox_Loaded"
                                       />
                         </DataTemplate>

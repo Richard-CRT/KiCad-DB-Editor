@@ -38,22 +38,6 @@ namespace KiCad_DB_Editor.View
     {
         #region Dependency Properties
 
-        #region ProjectDirectoryPath DependencyProperty
-
-        public static readonly DependencyProperty ProjectDirectoryPathProperty = DependencyProperty.Register(
-            nameof(ProjectDirectoryPath),
-            typeof(string),
-            typeof(UserControl_PartGrid)
-            );
-
-        public string ProjectDirectoryPath
-        {
-            get => (string)GetValue(ProjectDirectoryPathProperty);
-            set => SetValue(ProjectDirectoryPathProperty, value);
-        }
-
-        #endregion
-
         #region DisplayPartCategory DependencyProperty
 
         public static readonly DependencyProperty DisplayPartCategoryProperty = DependencyProperty.Register(
@@ -138,38 +122,6 @@ namespace KiCad_DB_Editor.View
                 }
                 externalSelectedPartVMsPropertyChanged = false;
             }
-        }
-
-        #endregion
-
-        #region KiCadSymbolLibraries DependencyProperty
-
-        public static readonly DependencyProperty KiCadSymbolLibrariesProperty = DependencyProperty.Register(
-            nameof(KiCadSymbolLibraries),
-            typeof(ObservableCollectionEx<KiCadSymbolLibrary>),
-            typeof(UserControl_PartGrid)
-            );
-
-        public ObservableCollectionEx<KiCadSymbolLibrary> KiCadSymbolLibraries
-        {
-            get => (ObservableCollectionEx<KiCadSymbolLibrary>)GetValue(KiCadSymbolLibrariesProperty);
-            set => SetValue(KiCadSymbolLibrariesProperty, value);
-        }
-
-        #endregion
-
-        #region KiCadFootprintLibraries DependencyProperty
-
-        public static readonly DependencyProperty KiCadFootprintLibraryVMsProperty = DependencyProperty.Register(
-            nameof(KiCadFootprintLibraries),
-            typeof(ObservableCollectionEx<KiCadFootprintLibrary>),
-            typeof(UserControl_PartGrid)
-            );
-
-        public ObservableCollectionEx<KiCadFootprintLibrary> KiCadFootprintLibraries
-        {
-            get => (ObservableCollectionEx<KiCadFootprintLibrary>)GetValue(KiCadFootprintLibraryVMsProperty);
-            set => SetValue(KiCadFootprintLibraryVMsProperty, value);
         }
 
         #endregion
@@ -548,7 +500,7 @@ namespace KiCad_DB_Editor.View
             {
                 header = $"Fprt. {footprintIndex + 1} Library";
                 valueBindingTarget = $"FootprintLibraryNameAccessor[{footprintIndex}]";
-                optionsBindingTarget = "KiCadFootprintLibraries";
+                optionsBindingTarget = "Part.ParentLibrary.KiCadFootprintLibraries";
             }
             else
             {
@@ -1202,7 +1154,7 @@ namespace KiCad_DB_Editor.View
                     Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
                 else
                 {
-                    string absUrl = System.IO.Path.GetFullPath(System.IO.Path.Combine(ProjectDirectoryPath, url));
+                    string absUrl = System.IO.Path.GetFullPath(System.IO.Path.Combine(partVM.Part.ParentLibrary.ProjectDirectoryPath, url));
                     Process.Start(new ProcessStartInfo { FileName = absUrl, UseShellExecute = true });
                 }
             }
@@ -1216,18 +1168,19 @@ namespace KiCad_DB_Editor.View
 
         private bool BrowseDatasheetFileCommandCanExecute(object? parameter)
         {
-            return ProjectDirectoryPath != "";
+            PartVM partVM = (PartVM)dataGrid_Main.CurrentItem;
+            return partVM is not null && partVM.Part.ParentLibrary.ProjectDirectoryPath != "";
         }
         
         private void BrowseDatasheetFileCommandExecuted(object? parameter)
         {
-            Debug.Assert(ProjectDirectoryPath != "");
             PartVM partVM = (PartVM)dataGrid_Main.CurrentItem;
+            Debug.Assert(partVM.Part.ParentLibrary.ProjectDirectoryPath != "");
             OpenFileDialog openFileDialog = new();
             openFileDialog.Title = "Open Datasheet File";
             openFileDialog.Filter = "All files (*.*)|*.*";
             if (openFileDialog.ShowDialog() == true)
-                partVM.Part.Datasheet = System.IO.Path.GetRelativePath(ProjectDirectoryPath, openFileDialog.FileName);
+                partVM.Part.Datasheet = System.IO.Path.GetRelativePath(partVM.Part.ParentLibrary.ProjectDirectoryPath, openFileDialog.FileName);
         }
     }
 

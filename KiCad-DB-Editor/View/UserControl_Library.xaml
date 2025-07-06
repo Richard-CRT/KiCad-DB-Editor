@@ -108,13 +108,9 @@
                     </StackPanel>
                     <local:UserControl_PartGrid 
                     Grid.Row="2"
-                    KiCadSymbolLibraries="{Binding LibraryVM.Library.KiCadSymbolLibraries, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"
-                    KiCadFootprintLibraries="{Binding LibraryVM.Library.KiCadFootprintLibraries, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"
                     Parameters="{Binding LibraryVM.Library.AllParameters, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"           
                     PartVMs="{Binding LibraryVM.AllPartVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"
-                    SelectedPartVMs="{Binding LibraryVM.SelectedPartVMs, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}, UpdateSourceTrigger=PropertyChanged}"
-                    ProjectDirectoryPath="{Binding LibraryVM.Library.ProjectDirectoryPath, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}, UpdateSourceTrigger=PropertyChanged}"
-                    DisplayPartCategory="True"
+                    SelectedPartVMs="{Binding LibraryVM.SelectedPartVMs, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}, UpdateSourceTrigger=PropertyChanged}"                    DisplayPartCategory="True"
                     />
                 </DockPanel>
             </TabItem>

@@ -121,14 +121,28 @@
                         </StackPanel>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Part.Manufacturer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
-                    <DataGridTextColumn.Header>
+                <DataGridTemplateColumn SortMemberPath="Part.Manufacturer">
+                    <DataGridTemplateColumn.Header>
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="Manufacturer" HorizontalAlignment="Center" />
                             <TextBox Text="{Binding DataContext.ManufacturerFilter, Mode=TwoWay, Source={x:Reference dummyElementToGetDataContext}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"/>
                         </StackPanel>
-                    </DataGridTextColumn.Header>
-                </DataGridTextColumn>
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Part.Manufacturer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <ComboBox IsEditable="True"
+					                  Text="{Binding Part.Manufacturer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      ItemsSource="{Binding Part.ParentLibrary.AllManufacturers, UpdateSourceTrigger=PropertyChanged}"
+                                      Loaded="TemplateColumn_ComboBox_Loaded"
+					                  />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTextColumn Binding="{Binding Part.MPN, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
                     <DataGridTextColumn.Header>
                         <StackPanel Orientation="Vertical">

@@ -379,6 +379,11 @@ namespace KiCad_DB_Editor.Model
             get { return _topLevelCategories; }
         }
 
+        public ObservableCollectionEx<string> AllManufacturers
+        {
+            get { return new ObservableCollectionEx<string>(AllParts.Select(p => p.Manufacturer).ToHashSet().Where(m => !string.IsNullOrEmpty(m)).Order()); }
+        }
+
         // No setter, to prevent the VM needing to listening PropertyChanged events
         private ObservableCollectionEx<KiCadSymbolLibrary> _kiCadSymbolLibraries;
         public ObservableCollectionEx<KiCadSymbolLibrary> KiCadSymbolLibraries

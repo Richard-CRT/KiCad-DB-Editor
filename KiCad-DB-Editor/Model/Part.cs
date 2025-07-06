@@ -46,7 +46,15 @@ namespace KiCad_DB_Editor.Model
         public string Manufacturer
         {
             get { return _manufacturer; }
-            set { if (_manufacturer != value) { _manufacturer = value; InvokePropertyChanged(); } }
+            set
+            {
+                if (_manufacturer != value)
+                {
+                    _manufacturer = value;
+                    InvokePropertyChanged();
+                    ParentLibrary.InvokePropertyChanged(nameof(ParentLibrary.AllManufacturers));
+                }
+            }
         }
 
         private string _mpn = "";

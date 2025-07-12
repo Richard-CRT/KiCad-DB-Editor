@@ -174,7 +174,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Binding="{Binding Part.Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                <DataGridTextColumn Binding="{Binding Part.Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="200" >
                     <DataGridTextColumn.Header>
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="Description" HorizontalAlignment="Center" />
@@ -182,7 +182,7 @@
                         </StackPanel>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
-                <DataGridTemplateColumn SortMemberPath="Part.Datasheet">
+                <DataGridTemplateColumn SortMemberPath="Part.Datasheet" Width="200">
                     <DataGridTemplateColumn.Header>
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="Datasheet" HorizontalAlignment="Center" />

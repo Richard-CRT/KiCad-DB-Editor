@@ -1,5 +1,6 @@
 ﻿using KiCad_DB_Editor.Commands;
 using KiCad_DB_Editor.Model;
+using KiCad_DB_Editor.View.Converters;
 using KiCad_DB_Editor.ViewModel;
 using Microsoft.Win32;
 using System;
@@ -60,26 +61,13 @@ namespace KiCad_DB_Editor.View
             nameof(ShowCADLinkColumns),
             typeof(bool),
             typeof(UserControl_PartGrid),
-            new PropertyMetadata(false, new PropertyChangedCallback(ShowCADLinkColumnsPropertyChangedCallback))
+            new PropertyMetadata(false)
             );
 
         public bool ShowCADLinkColumns
         {
             get => (bool)GetValue(ShowCADLinkColumnsProperty);
             set => SetValue(ShowCADLinkColumnsProperty, value);
-        }
-
-        private static void ShowCADLinkColumnsPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            if (d is UserControl_PartGrid uc_pg)
-            {
-                uc_pg.ShowCADLinkColumnsPropertyChanged();
-            }
-        }
-
-        private void ShowCADLinkColumnsPropertyChanged()
-        {
-            redoColumns_PotentialFootprintColumnChange();
         }
 
         #endregion
@@ -90,26 +78,13 @@ namespace KiCad_DB_Editor.View
             nameof(ShowParameterColumns),
             typeof(bool),
             typeof(UserControl_PartGrid),
-            new PropertyMetadata(true, new PropertyChangedCallback(ShowParameterColumnsPropertyChangedCallback))
+            new PropertyMetadata(true)
             );
 
         public bool ShowParameterColumns
         {
             get => (bool)GetValue(ShowParameterColumnsProperty);
             set => SetValue(ShowParameterColumnsProperty, value);
-        }
-
-        private static void ShowParameterColumnsPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            if (d is UserControl_PartGrid uc_pg)
-            {
-                uc_pg.ShowParameterColumnsPropertyChanged();
-            }
-        }
-
-        private void ShowParameterColumnsPropertyChanged()
-        {
-            redoColumns_PotentialParametersColumnChange();
         }
 
         #endregion
@@ -548,6 +523,24 @@ namespace KiCad_DB_Editor.View
             valueBinding.Mode = BindingMode.TwoWay;
             valueBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
 
+            dataGridTemplateColumn.ClipboardContentBinding = valueBinding;
+
+            // Like the XAML symbol example but for footprint columns
+            Binding visibilityBinding = new("DataContext.ShowCADLinkColumns")
+            {
+                Source = dummyElementToGetDataContext,
+                Converter = (Boolean_to_Visibility_Converter)this.Resources["Boolean_to_Visibility_Converter"]
+            };
+            BindingOperations.SetBinding(dataGridTemplateColumn, DataGridTemplateColumn.VisibilityProperty, visibilityBinding);
+
+            // Like the XAML symbol example but for footprint columns
+            Binding isReadOnlyBinding = new("DataContext.ShowCADLinkColumns")
+            {
+                Source = dummyElementToGetDataContext,
+                Converter = (Boolean_to_NotBoolean_Converter)this.Resources["Boolean_to_NotBoolean_Converter"]
+            };
+            BindingOperations.SetBinding(dataGridTemplateColumn, DataGridTemplateColumn.IsReadOnlyProperty, isReadOnlyBinding);
+
             // Like the XAML symbol example but for footprint columns
             DataTemplate cellTemplate = new();
             FrameworkElementFactory cellTemplateFrameworkElementFactory = new(typeof(TextBlock));
@@ -662,6 +655,20 @@ namespace KiCad_DB_Editor.View
             DataGridTextColumn dataGridTextColumn = new();
             dataGridTextColumn.Header = stackPanel;
 
+            Binding visibilityBinding = new("DataContext.ShowParameterColumns")
+            {
+                Source = dummyElementToGetDataContext,
+                Converter = (Boolean_to_Visibility_Converter)this.Resources["Boolean_to_Visibility_Converter"]
+            };
+            BindingOperations.SetBinding(dataGridTextColumn, DataGridTextColumn.VisibilityProperty, visibilityBinding);
+
+            Binding isReadOnlyBinding = new("DataContext.ShowParameterColumns")
+            {
+                Source = dummyElementToGetDataContext,
+                Converter = (Boolean_to_NotBoolean_Converter)this.Resources["Boolean_to_NotBoolean_Converter"]
+            };
+            BindingOperations.SetBinding(dataGridTextColumn, DataGridTextColumn.IsReadOnlyProperty, isReadOnlyBinding);
+
             updateParameterBindings(dataGridTextColumn, parameter);
 
             parameterToDataGridColumn[parameter] = dataGridTextColumn;
@@ -683,7 +690,7 @@ namespace KiCad_DB_Editor.View
         private Dictionary<Parameter, DataGridTextColumn> parameterToDataGridColumn = new();
         private void redoColumns_PotentialParametersColumnChange(NotifyCollectionChangedEventArgs? e = null)
         {
-            if (Parameters is not null && ShowParameterColumns)
+            if (Parameters is not null)
             {
                 NotifyCollectionChangedAction action;
                 if (e is not null)
@@ -777,7 +784,7 @@ namespace KiCad_DB_Editor.View
         private Dictionary<int, DataGridColumn> footprintIndexToNameDataGridColumn = new();
         private void redoColumns_PotentialFootprintColumnChange()
         {
-            if (PartVMs is not null && ShowCADLinkColumns)
+            if (PartVMs is not null)
             {
                 int maxFootprints = 0;
                 foreach (PartVM partVM in PartVMs)
@@ -845,68 +852,68 @@ namespace KiCad_DB_Editor.View
             }
         }
 
-        private void writeToFrameworkElement(FrameworkElement frameworkElement, string value, RoutedEventArgs e)
+        private void _editPropertyByReflection(DataGridCellInfo cell, string newValue)
         {
-            // Updating the data via the frameworkElement requires Mode=TwoWay && (UpdateSourceTrigger=PropertyChanged || call UpdateSource() manually )
-            if (frameworkElement is TextBlock textBlock)
+            DataGridColumn column = cell.Column;
+            if (!column.IsReadOnly)
             {
-                BindingExpression? bE = textBlock.GetBindingExpression(TextBlock.TextProperty);
-                if (bE is not null && bE.ParentBinding.Mode != BindingMode.OneWay)
-                {
-                    textBlock.Text = value;
-                    e.Handled = true;
-                }
-            }
-            else if (frameworkElement is ComboBox comboBox)
-            {
-                BindingExpression? bE = comboBox.GetBindingExpression(ComboBox.TextProperty);
-                if (bE is not null && bE.ParentBinding.Mode != BindingMode.OneWay)
-                {
-                    comboBox.Text = value;
-                    e.Handled = true;
-                }
-            }
-            else if (frameworkElement is CheckBox checkBox)
-            {
-                BindingExpression? bE = checkBox.GetBindingExpression(CheckBox.IsCheckedProperty);
-                if (bE is not null && bE.ParentBinding.Mode != BindingMode.OneWay)
-                {
-                    checkBox.IsChecked = value.ToLower() == "true" || value == "1";
-                    e.Handled = true;
-                }
-            }
-            else if (frameworkElement is ContentPresenter contentPresenter && VisualTreeHelper.GetChildrenCount(contentPresenter) == 1 &&
-                    VisualTreeHelper.GetChild(contentPresenter, 0) is FrameworkElement frameworkElementSubsidiary
-                    )
-            {
-                if (frameworkElementSubsidiary is TextBlock textBlockSubsidiary)
-                {
-                    BindingExpression? bE = textBlockSubsidiary.GetBindingExpression(TextBlock.TextProperty);
-                    if (bE is not null && bE.ParentBinding.Mode != BindingMode.OneWay)
-                    {
-                        textBlockSubsidiary.Text = value;
-                        e.Handled = true;
-                    }
-                }
-                else if (frameworkElementSubsidiary is ComboBox comboBoxSubsidiary)
-                {
-                    BindingExpression? bE = comboBoxSubsidiary.GetBindingExpression(ComboBox.TextProperty);
-                    if (bE is not null && bE.ParentBinding.Mode != BindingMode.OneWay)
-                    {
-                        comboBoxSubsidiary.Text = value;
-                        e.Handled = true;
-                    }
-                }
-                else if (frameworkElementSubsidiary is CheckBox checkBoxSubsidiary)
-                {
-                    BindingExpression? bE = checkBoxSubsidiary.GetBindingExpression(CheckBox.IsCheckedProperty);
-                    if (bE is not null && bE.ParentBinding.Mode != BindingMode.OneWay)
-                    {
-                        checkBoxSubsidiary.IsChecked = value.ToLower() == "true" || value == "1";
-                        e.Handled = true;
-                    }
-                }
+                var bindingBase = column.ClipboardContentBinding;
 
+                Debug.Assert(cell.Item is PartVM);
+                PartVM partVM = (PartVM)cell.Item;
+                Debug.Assert(bindingBase is Binding);
+                var binding = (Binding)bindingBase;
+                Debug.Assert(binding.Path is not null);
+
+                string path = binding.Path.Path;
+                var pathSplit = path.Split('.').ToList();
+
+                object iterObject = partVM;
+                for (int i = 0; i < pathSplit.Count - 1; i++)
+                {
+                    var propertyInfo = iterObject.GetType().GetProperty(pathSplit[i]);
+                    iterObject = propertyInfo!.GetValue(iterObject)!;
+                }
+                string lastElement = pathSplit.Last();
+
+                object[]? index;
+                PropertyInfo propertyInfoToSetValueOn;
+                object objectToSetValueOn;
+
+                if (lastElement.Contains('[') && lastElement.Contains(']'))
+                {
+                    int openSquareIndex = path.IndexOf('[');
+                    int closeSquareIndex = path.IndexOf(']');
+                    string indexString = lastElement[(openSquareIndex + 1)..closeSquareIndex];
+                    if (int.TryParse(indexString, out int indexInt))
+                        index = [indexInt];
+                    else
+                        index = [indexString];
+                    lastElement = lastElement[..openSquareIndex];
+                    var objectWithIndexPropertyInfo = iterObject.GetType().GetProperty(lastElement)!;
+                    objectToSetValueOn = objectWithIndexPropertyInfo.GetValue(iterObject)!;
+                    propertyInfoToSetValueOn = objectToSetValueOn.GetType().GetProperty("Item")!;
+                }
+                else
+                {
+                    index = null;
+                    objectToSetValueOn = iterObject;
+                    propertyInfoToSetValueOn = objectToSetValueOn.GetType().GetProperty(lastElement)!;
+                }
+                if (propertyInfoToSetValueOn.PropertyType == typeof(string))
+                    propertyInfoToSetValueOn.SetValue(objectToSetValueOn, newValue, index);
+                else if (propertyInfoToSetValueOn.PropertyType == typeof(bool))
+                {
+                    string lowerNewValue = newValue.ToLower();
+                    bool? newValueBool = null;
+                    if (lowerNewValue == "true") newValueBool = true;
+                    else if (lowerNewValue == "false") newValueBool = false;
+
+                    if (newValueBool is not null)
+                        propertyInfoToSetValueOn.SetValue(objectToSetValueOn, newValueBool, index);
+                }
+                else
+                    Debug.Assert(false);
             }
         }
 
@@ -946,36 +953,36 @@ namespace KiCad_DB_Editor.View
                         int sourceWidth = sourceData[0].Length;
                         int sourceHeight = sourceData.Count;
 
-                        HashSet<(int, int)> selectedCellCoords = new();
+                        Dictionary<(int, int), DataGridCellInfo> selectedCellCoords = new();
                         var selectedCells = dataGrid_Main.SelectedCells;
                         foreach (var selectedCell in selectedCells)
                         {
                             DataGridColumn column = selectedCell.Column;
                             int columnIndex = column.DisplayIndex;
-                            DataGridRow row = DataGridRow.GetRowContainingElement(column.GetCellContent(selectedCell.Item));
-                            int rowIndex = row.GetIndex();
-                            selectedCellCoords.Add((columnIndex, rowIndex));
+                            int rowIndex = dataGrid_Main.Items.IndexOf(selectedCell.Item);
+                            selectedCellCoords.Add((columnIndex, rowIndex), selectedCell);
                         }
 
                         IEditableCollectionView itemsView = dataGrid_Main.Items;
 
                         Dictionary<(FrameworkElement, int, int), (int, int)> destCoordToSrcCoord = new();
                         if (sourceHeight == 1 && sourceWidth == 1)
-                            foreach ((int destX, int destY) in selectedCellCoords)
+                        {
+                            foreach (((int destX, int destY), DataGridCellInfo selectedCell) in selectedCellCoords)
                             {
-                                DataGridColumn column = dataGrid_Main.Columns[destX];
-                                PartVM item = (PartVM)dataGrid_Main.Items[destY];
-                                FrameworkElement fE = column.GetCellContent(item);
+                                PartVM item = (PartVM)selectedCell.Item;
                                 itemsView.EditItem(item); // Important to prevent updates causing Refresh while editing
-                                writeToFrameworkElement(fE, sourceData[0][0], e);
+                                _editPropertyByReflection(selectedCell, sourceData[0][0]);
                                 itemsView.CommitEdit();
                             }
+                            e.Handled = true;
+                        }
                         else
                         {
-                            int minX = selectedCellCoords.MinBy(c => c.Item1).Item1;
-                            int minY = selectedCellCoords.MinBy(c => c.Item2).Item2;
-                            int maxX = selectedCellCoords.MaxBy(c => c.Item1).Item1;
-                            int maxY = selectedCellCoords.MaxBy(c => c.Item2).Item2;
+                            int minX = selectedCellCoords.MinBy(kvp => kvp.Key.Item1).Key.Item1;
+                            int minY = selectedCellCoords.MinBy(kvp => kvp.Key.Item2).Key.Item2;
+                            int maxX = selectedCellCoords.MaxBy(kvp => kvp.Key.Item1).Key.Item1;
+                            int maxY = selectedCellCoords.MaxBy(kvp => kvp.Key.Item2).Key.Item2;
                             int destWidth = maxX - minX + 1;
                             int destHeight = maxY - minY + 1;
                             if (sourceWidth == destWidth && sourceHeight == destHeight)
@@ -990,14 +997,15 @@ namespace KiCad_DB_Editor.View
                                             int destX = minX + srcX;
                                             int destY = minY + srcY;
 
-                                            DataGridColumn column = dataGrid_Main.Columns[destX];
-                                            PartVM item = (PartVM)dataGrid_Main.Items[destY];
-                                            FrameworkElement fE = column.GetCellContent(item);
+                                            DataGridCellInfo selectedCell = selectedCellCoords[(destX, destY)];
+
+                                            PartVM item = (PartVM)selectedCell.Item;
                                             itemsView.EditItem(item); // Important to prevent updates causing Refresh while editing
-                                            writeToFrameworkElement(fE, sourceData[srcY][srcX], e);
+                                            _editPropertyByReflection(selectedCell, sourceData[srcY][srcX]);
                                             itemsView.CommitEdit();
                                         }
                                     }
+                                    e.Handled = true;
                                 }
                             }
                         }
@@ -1016,85 +1024,10 @@ namespace KiCad_DB_Editor.View
                     IEditableCollectionView itemsView = dataGrid_Main.Items;
                     foreach (var selectedCell in selectedCells)
                     {
-                        DataGridColumn column = selectedCell.Column;
-                        FrameworkElement frameworkElement = column.GetCellContent(selectedCell.Item);
                         itemsView.EditItem(selectedCell.Item); // Important to prevent updates causing Refresh while editing
-                        writeToFrameworkElement(frameworkElement, "", e);
+                        _editPropertyByReflection(selectedCell, "");
                         itemsView.CommitEdit();
                     }
-                }
-            }
-            else if (e.Key == Key.C && Keyboard.Modifiers == ModifierKeys.Control)
-            {
-                var selectedCells = dataGrid_Main.SelectedCells;
-                if (selectedCells.Count > 0)
-                {
-                    Dictionary<(int, int), string> selectedCellCoords = new();
-                    foreach (var selectedCell in selectedCells)
-                    {
-                        DataGridColumn column = selectedCell.Column;
-                        int columnIndex = column.DisplayIndex;
-                        DataGridRow row = DataGridRow.GetRowContainingElement(column.GetCellContent(selectedCell.Item));
-                        int rowIndex = row.GetIndex();
-                        (int, int) coord = (columnIndex, rowIndex);
-                        if (!selectedCellCoords.ContainsKey(coord))
-                        {
-                            PartVM item = (PartVM)dataGrid_Main.Items[rowIndex];
-                            FrameworkElement frameworkElement = column.GetCellContent(item);
-                            if (frameworkElement is TextBox textBox)
-                                selectedCellCoords[coord] = textBox.Text;
-                            else if (frameworkElement is TextBlock textBlock)
-                                selectedCellCoords[coord] = textBlock.Text;
-                            else if (frameworkElement is ComboBox comboBox)
-                                selectedCellCoords[coord] = comboBox.Text;
-                            else if (frameworkElement is CheckBox checkBox)
-                            {
-                                if (checkBox.IsChecked is null)
-                                    selectedCellCoords[coord] = "";
-                                else
-                                    selectedCellCoords[coord] = (bool)checkBox.IsChecked ? "True" : "False";
-                            }
-                            else if (frameworkElement is ContentPresenter contentPresenter && VisualTreeHelper.GetChildrenCount(contentPresenter) == 1 &&
-                                    VisualTreeHelper.GetChild(contentPresenter, 0) is FrameworkElement frameworkElementSubsidiary
-                                    )
-                            {
-                                if (frameworkElementSubsidiary is TextBlock textBlockSubsidiary)
-                                    selectedCellCoords[coord] = textBlockSubsidiary.Text;
-                                else if (frameworkElementSubsidiary is ComboBox comboBoxSubsidiary)
-                                    selectedCellCoords[coord] = comboBoxSubsidiary.Text;
-                                else if (frameworkElementSubsidiary is CheckBox checkBoxSubsidiary)
-                                {
-                                    if (checkBoxSubsidiary.IsChecked is null)
-                                        selectedCellCoords[coord] = "";
-                                    else
-                                        selectedCellCoords[coord] = (bool)checkBoxSubsidiary.IsChecked ? "True" : "False";
-                                }
-                                else
-                                    selectedCellCoords[coord] = "";
-                            }
-                            else
-                                selectedCellCoords[coord] = "";
-                        }
-                    }
-                    int minX = selectedCellCoords.Keys.MinBy(c => c.Item1).Item1;
-                    int minY = selectedCellCoords.Keys.MinBy(c => c.Item2).Item2;
-                    int maxX = selectedCellCoords.Keys.MaxBy(c => c.Item1).Item1;
-                    int maxY = selectedCellCoords.Keys.MaxBy(c => c.Item2).Item2;
-                    int sourceWidth = maxX - minX + 1;
-                    int sourceHeight = maxY - minY + 1;
-                    string[][] data = new string[sourceHeight][];
-                    for (int y = 0; y < sourceHeight; y++)
-                    {
-                        data[y] = new string[sourceWidth];
-                        for (int x = 0; x < sourceWidth; x++)
-                            data[y][x] = "";
-                    }
-                    foreach (((int x, int y), string value) in selectedCellCoords)
-                        data[y - minY][x - minX] = value;
-
-                    string clipboardText = string.Join(Environment.NewLine, data.Select(s => string.Join('\t', s)));
-                    Clipboard.SetText(clipboardText);
-                    e.Handled = true;
                 }
             }
         }
@@ -1201,7 +1134,7 @@ namespace KiCad_DB_Editor.View
             PartVM partVM = (PartVM)dataGrid_Main.CurrentItem;
             return partVM is not null && partVM.Part.ParentLibrary.ProjectDirectoryPath != "";
         }
-        
+
         private void BrowseDatasheetFileCommandExecuted(object? parameter)
         {
             PartVM partVM = (PartVM)dataGrid_Main.CurrentItem;

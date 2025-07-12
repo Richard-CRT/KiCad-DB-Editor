@@ -9,6 +9,7 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <conv:Boolean_to_Visibility_Converter x:Key="Boolean_to_Visibility_Converter" />
+        <conv:Boolean_to_NotBoolean_Converter x:Key="Boolean_to_NotBoolean_Converter" />
     </UserControl.Resources>
     <DockPanel>
         <DockPanel DockPanel.Dock="Top">
@@ -116,7 +117,8 @@
                         </StackPanel>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Part.PartUID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                <DataGridTextColumn Binding="{Binding Part.PartUID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    >
                     <DataGridTextColumn.Header>
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="Part UID" HorizontalAlignment="Center" />
@@ -124,7 +126,8 @@
                         </StackPanel>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
-                <DataGridTemplateColumn SortMemberPath="Part.Manufacturer">
+                <DataGridTemplateColumn SortMemberPath="Part.Manufacturer"
+                                        ClipboardContentBinding="{Binding Part.Manufacturer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                     <DataGridTemplateColumn.Header>
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="Manufacturer" HorizontalAlignment="Center" />
@@ -154,7 +157,8 @@
                         </StackPanel>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
-                <DataGridTemplateColumn SortMemberPath="Part.Value">
+                <DataGridTemplateColumn SortMemberPath="Part.Value"
+                                        ClipboardContentBinding="{Binding Part.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                     <DataGridTemplateColumn.Header>
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="Value" HorizontalAlignment="Center" />
@@ -179,7 +183,9 @@
                 </DataGridTemplateColumn>
 
                 <DataGridTemplateColumn SortMemberPath="Part.SymbolLibraryName"
+                                        ClipboardContentBinding="{Binding Part.SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         Visibility="{Binding DataContext.ShowCADLinkColumns, Source={x:Reference dummyElementToGetDataContext}, Converter={StaticResource Boolean_to_Visibility_Converter}}"
+                                        IsReadOnly="{Binding DataContext.ShowCADLinkColumns, Source={x:Reference dummyElementToGetDataContext}, Converter={StaticResource Boolean_to_NotBoolean_Converter}}"
                                         >
                     <DataGridTemplateColumn.Header>
                         <StackPanel>
@@ -204,7 +210,9 @@
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn SortMemberPath="Part.SymbolName"
+                                        ClipboardContentBinding="{Binding Part.SymbolName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         Visibility="{Binding DataContext.ShowCADLinkColumns, Source={x:Reference dummyElementToGetDataContext}, Converter={StaticResource Boolean_to_Visibility_Converter}}"
+                                        IsReadOnly="{Binding DataContext.ShowCADLinkColumns, Source={x:Reference dummyElementToGetDataContext}, Converter={StaticResource Boolean_to_NotBoolean_Converter}}"
                                         >
                     <DataGridTemplateColumn.Header>
                         <StackPanel>
@@ -235,7 +243,10 @@
                         </StackPanel>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
-                <DataGridTemplateColumn SortMemberPath="Part.Datasheet" Width="200">
+                <DataGridTemplateColumn SortMemberPath="Part.Datasheet" 
+                                        ClipboardContentBinding="{Binding Part.Datasheet, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        Width="200"
+                                        >
                     <DataGridTemplateColumn.Header>
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="Datasheet" HorizontalAlignment="Center" />

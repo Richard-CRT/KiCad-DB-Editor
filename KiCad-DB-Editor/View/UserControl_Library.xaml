@@ -28,11 +28,11 @@
             <TabItem Header="Structure">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*" MinWidth="180" />
+                        <ColumnDefinition Width="0*" MinWidth="180" />
                         <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="3*" MinWidth="160"/>
+                        <ColumnDefinition Width="0*" MinWidth="200"/>
                         <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="10*" MinWidth="500"/>
+                        <ColumnDefinition Width="1*" MinWidth="500"/>
                     </Grid.ColumnDefinitions>
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" HorizontalAlignment="Center">Special Parameters</TextBlock>

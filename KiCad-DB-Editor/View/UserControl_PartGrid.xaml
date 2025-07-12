@@ -34,6 +34,7 @@
                   CellEditEnding="dataGrid_Main_CellEditEnding"
                   EnableRowVirtualization="True"
                   PreviewTextInput="dataGrid_Main_PreviewTextInput"
+                  CanUserReorderColumns="False"                  
                   >
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="LightGray"/>

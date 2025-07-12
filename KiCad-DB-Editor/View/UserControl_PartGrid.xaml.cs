@@ -526,9 +526,6 @@ namespace KiCad_DB_Editor.View
             dataGridTemplateColumn.CellTemplate = cellTemplate;
 
             Binding optionsBinding = new(optionsBindingTarget);
-            if (libraryColumn)
-                // Note this not present for footprint names
-                optionsBinding.RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, typeof(UserControl_PartGrid), 1); // 1 means nearest
 
             // Like the XAML symbol example but for footprint columns
             DataTemplate cellEditingTemplate = new();

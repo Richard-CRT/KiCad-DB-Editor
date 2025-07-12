@@ -14,6 +14,8 @@
         <DockPanel DockPanel.Dock="Top">
             <CheckBox DockPanel.Dock="Right" Content="Show Parameters" Margin="5,0,0,0" VerticalContentAlignment="Center"
                       IsChecked="{Binding ShowParameterColumns, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_PartGrid}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"/>
+            <CheckBox DockPanel.Dock="Right" Content="Show CAD Link Columns" Margin="5,0,0,0" VerticalContentAlignment="Center"
+                      IsChecked="{Binding ShowCADLinkColumns, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_PartGrid}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"/>
             <TextBox DockPanel.Dock="Top" Text="{Binding OverallFilter, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" />
         </DockPanel>
 
@@ -174,6 +176,56 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn SortMemberPath="Part.SymbolLibraryName"
+                                        Visibility="{Binding DataContext.ShowCADLinkColumns, Source={x:Reference dummyElementToGetDataContext}, Converter={StaticResource Boolean_to_Visibility_Converter}}"
+                                        >
+                    <DataGridTemplateColumn.Header>
+                        <StackPanel>
+                            <TextBlock Text="Sym. Library" HorizontalAlignment="Center" />
+                            <TextBlock Text="" HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Part.SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <ComboBox IsEditable="True"
+                                      Text="{Binding Part.SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      ItemsSource="{Binding Part.ParentLibrary.KiCadSymbolLibraries, UpdateSourceTrigger=PropertyChanged}"
+                                      DisplayMemberPath="Nickname"
+                                      Loaded="TemplateColumn_ComboBox_Loaded"
+                                      />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn SortMemberPath="Part.SymbolName"
+                                        Visibility="{Binding DataContext.ShowCADLinkColumns, Source={x:Reference dummyElementToGetDataContext}, Converter={StaticResource Boolean_to_Visibility_Converter}}"
+                                        >
+                    <DataGridTemplateColumn.Header>
+                        <StackPanel>
+                            <TextBlock Text="Sym. Name" HorizontalAlignment="Center" />
+                            <TextBlock Text="" HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Part.SymbolName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <ComboBox IsEditable="True"
+                                      Text="{Binding Part.SymbolName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      ItemsSource="{Binding SelectedKiCadSymbolLibrary.KiCadSymbolNames, UpdateSourceTrigger=PropertyChanged}"
+                                      Loaded="TemplateColumn_ComboBox_Loaded"
+                                      />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTextColumn Binding="{Binding Part.Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="200" >
                     <DataGridTextColumn.Header>
                         <StackPanel Orientation="Vertical">
@@ -215,9 +267,14 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
-                <DataGridCheckBoxColumn Header="Excl. BOM"
-                                        Binding="{Binding Part.ExcludeFromBOM, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                <DataGridCheckBoxColumn Binding="{Binding Part.ExcludeFromBOM, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         >
+                    <DataGridCheckBoxColumn.Header>
+                        <StackPanel>
+                            <TextBlock Text="Excl. BOM" HorizontalAlignment="Center" />
+                            <TextBlock Text="" HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </DataGridCheckBoxColumn.Header>
                     <DataGridCheckBoxColumn.ElementStyle>
                         <Style TargetType="{x:Type CheckBox}">
                             <Setter Property="Padding" Value="0,0,0,0" />
@@ -230,9 +287,14 @@
                         </Style>
                     </DataGridCheckBoxColumn.ElementStyle>
                 </DataGridCheckBoxColumn>
-                <DataGridCheckBoxColumn Header="Excl. Board"
-                                        Binding="{Binding Part.ExcludeFromBoard, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                <DataGridCheckBoxColumn Binding="{Binding Part.ExcludeFromBoard, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         >
+                    <DataGridCheckBoxColumn.Header>
+                        <StackPanel>
+                            <TextBlock Text="Excl. Board" HorizontalAlignment="Center" />
+                            <TextBlock Text="" HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </DataGridCheckBoxColumn.Header>
                     <DataGridCheckBoxColumn.ElementStyle>
                         <Style TargetType="{x:Type CheckBox}">
                             <Setter Property="Padding" Value="0,0,0,0" />
@@ -245,9 +307,14 @@
                         </Style>
                     </DataGridCheckBoxColumn.ElementStyle>
                 </DataGridCheckBoxColumn>
-                <DataGridCheckBoxColumn Header="Excl. Sim"
-                                        Binding="{Binding Part.ExcludeFromSim, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                <DataGridCheckBoxColumn Binding="{Binding Part.ExcludeFromSim, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         >
+                    <DataGridCheckBoxColumn.Header>
+                        <StackPanel>
+                            <TextBlock Text="Excl. Sim" HorizontalAlignment="Center" />
+                            <TextBlock Text="" HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </DataGridCheckBoxColumn.Header>
                     <DataGridCheckBoxColumn.ElementStyle>
                         <Style TargetType="{x:Type CheckBox}">
                             <Setter Property="Padding" Value="0,0,0,0" />
@@ -260,41 +327,6 @@
                         </Style>
                     </DataGridCheckBoxColumn.ElementStyle>
                 </DataGridCheckBoxColumn>
-                <DataGridTemplateColumn Header="Sym. Library"
-                                        SortMemberPath="Part.SymbolLibraryName">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Part.SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                    <DataGridTemplateColumn.CellEditingTemplate>
-                        <DataTemplate>
-                            <ComboBox IsEditable="True"
-                                      Text="{Binding Part.SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                      ItemsSource="{Binding Part.ParentLibrary.KiCadSymbolLibraries, UpdateSourceTrigger=PropertyChanged}"
-                                      DisplayMemberPath="Nickname"
-                                      Loaded="TemplateColumn_ComboBox_Loaded"
-                                      />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellEditingTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Sym. Name"
-                                        SortMemberPath="Part.SymbolName">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Part.SymbolName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                    <DataGridTemplateColumn.CellEditingTemplate>
-                        <DataTemplate>
-                            <ComboBox IsEditable="True"
-                                      Text="{Binding Part.SymbolName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                      ItemsSource="{Binding SelectedKiCadSymbolLibrary.KiCadSymbolNames, UpdateSourceTrigger=PropertyChanged}"
-                                      Loaded="TemplateColumn_ComboBox_Loaded"
-                                      />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellEditingTemplate>
-                </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
     </DockPanel>

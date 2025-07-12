@@ -54,6 +54,36 @@ namespace KiCad_DB_Editor.View
 
         #endregion
 
+        #region ShowCADLinkColumns DependencyProperty
+
+        public static readonly DependencyProperty ShowCADLinkColumnsProperty = DependencyProperty.Register(
+            nameof(ShowCADLinkColumns),
+            typeof(bool),
+            typeof(UserControl_PartGrid),
+            new PropertyMetadata(false, new PropertyChangedCallback(ShowCADLinkColumnsPropertyChangedCallback))
+            );
+
+        public bool ShowCADLinkColumns
+        {
+            get => (bool)GetValue(ShowCADLinkColumnsProperty);
+            set => SetValue(ShowCADLinkColumnsProperty, value);
+        }
+
+        private static void ShowCADLinkColumnsPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is UserControl_PartGrid uc_pg)
+            {
+                uc_pg.ShowCADLinkColumnsPropertyChanged();
+            }
+        }
+
+        private void ShowCADLinkColumnsPropertyChanged()
+        {
+            redoColumns_PotentialFootprintColumnChange();
+        }
+
+        #endregion
+
         #region ShowParameterColumns DependencyProperty
 
         public static readonly DependencyProperty ShowParameterColumnsProperty = DependencyProperty.Register(
@@ -126,22 +156,6 @@ namespace KiCad_DB_Editor.View
 
         #endregion
 
-        #region ParameterNamesWithVarWrapping DependencyProperty
-
-        public static readonly DependencyProperty ParameterNamesWithVarWrappingProperty = DependencyProperty.Register(
-            nameof(ParameterNamesWithVarWrapping),
-            typeof(ObservableCollection<string>),
-            typeof(UserControl_PartGrid)
-            );
-
-        public ObservableCollection<string> ParameterNamesWithVarWrapping
-        {
-            get => (ObservableCollection<string>)GetValue(ParameterNamesWithVarWrappingProperty);
-            set => SetValue(ParameterNamesWithVarWrappingProperty, value);
-        }
-
-        #endregion
-
         #region Parameters DependencyProperty
 
         public static readonly DependencyProperty ParametersProperty = DependencyProperty.Register(
@@ -204,7 +218,8 @@ namespace KiCad_DB_Editor.View
             }
             else
             {
-                ParameterNamesWithVarWrapping = new(specialParameterNamesWithVarWrapping.Concat(Parameters.Select(p => $"${{{p.Name}}}")));
+                ParameterNamesWithVarWrapping.Clear();
+                ParameterNamesWithVarWrapping.AddRange(specialParameterNamesWithVarWrapping.Concat(Parameters.Select(p => $"${{{p.Name}}}")));
 
                 foreach (Parameter parameterToAdd in Parameters.Except(ParameterFilterValues.Keys))
                     ParameterFilterValues.Add(parameterToAdd, "");
@@ -221,7 +236,8 @@ namespace KiCad_DB_Editor.View
             {
                 if (e.PropertyName == nameof(Parameter.Name))
                 {
-                    ParameterNamesWithVarWrapping = new(specialParameterNamesWithVarWrapping.Concat(Parameters.Select(p => $"${{{p.Name}}}")));
+                    ParameterNamesWithVarWrapping.Clear();
+                    ParameterNamesWithVarWrapping.AddRange(specialParameterNamesWithVarWrapping.Concat(Parameters.Select(p => $"${{{p.Name}}}")));
                     redoColumns_ParameterNameChange(parameter);
                 }
             }
@@ -439,7 +455,14 @@ namespace KiCad_DB_Editor.View
 
         #endregion
 
+        private ObservableCollectionEx<string> _parameterNamesWithVarWrapping = new();
+        public ObservableCollectionEx<string> ParameterNamesWithVarWrapping
+        {
+            get { return _parameterNamesWithVarWrapping; }
+        }
+
         public Dictionary<Parameter, string> ParameterFilterValues { get; set; } = new();
+
 
         bool OnFilterPartVMsCollectionView(object item)
         {
@@ -511,8 +534,15 @@ namespace KiCad_DB_Editor.View
 
             DataGridTemplateColumn dataGridTemplateColumn;
             dataGridTemplateColumn = new();
-            dataGridTemplateColumn.Header = header.Replace("_", "__");
             dataGridTemplateColumn.SortMemberPath = valueBindingTarget;
+
+            // Like the XAML symbol example but for footprint columns
+            var stackPanel = new StackPanel();
+            var headerTextBlock = new TextBlock();
+            headerTextBlock.Text = header;
+            stackPanel.Children.Add(headerTextBlock);
+            stackPanel.Children.Add(new TextBlock());
+            dataGridTemplateColumn.Header = stackPanel;
 
             Binding valueBinding = new(valueBindingTarget);
             valueBinding.Mode = BindingMode.TwoWay;
@@ -556,7 +586,10 @@ namespace KiCad_DB_Editor.View
             else
                 footprintIndexToNameDataGridColumn[footprintIndex] = dataGridTemplateColumn;
 
-            dataGrid_Main.Columns.Add(dataGridTemplateColumn);
+            const int baseColumnIndexToInsertFootprintColumnsAt = 8;
+            // Need to add footprintIndex * 2 because we always insert starting at the low number first
+            // so in order for columns to count up left to right we need to move along
+            dataGrid_Main.Columns.Insert(baseColumnIndexToInsertFootprintColumnsAt + (footprintIndex * 2), dataGridTemplateColumn);
 
             return dataGridTemplateColumn;
         }
@@ -634,8 +667,7 @@ namespace KiCad_DB_Editor.View
             parameterToDataGridColumn[parameter] = dataGridTextColumn;
             parametersThatHaveColumns.Insert(index, parameter);
 
-            const int baseColumnIndexToInsertAt = 6;
-            dataGrid_Main.Columns.Insert(baseColumnIndexToInsertAt + index, dataGridTextColumn);
+            dataGrid_Main.Columns.Insert(dataGrid_Main.Columns.Count - 5, dataGridTextColumn);
 
             return dataGridTextColumn;
         }
@@ -745,7 +777,7 @@ namespace KiCad_DB_Editor.View
         private Dictionary<int, DataGridColumn> footprintIndexToNameDataGridColumn = new();
         private void redoColumns_PotentialFootprintColumnChange()
         {
-            if (PartVMs is not null)
+            if (PartVMs is not null && ShowCADLinkColumns)
             {
                 int maxFootprints = 0;
                 foreach (PartVM partVM in PartVMs)
@@ -786,6 +818,7 @@ namespace KiCad_DB_Editor.View
                 foreach (DataGridColumn columnToRemove in footprintIndexToNameDataGridColumn.Values)
                     dataGrid_Main.Columns.Remove(columnToRemove);
                 footprintIndexToNameDataGridColumn.Clear();
+                previousMaxFootprints = 0;
             }
         }
 

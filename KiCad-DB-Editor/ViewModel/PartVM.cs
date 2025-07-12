@@ -126,8 +126,6 @@ namespace KiCad_DB_Editor.ViewModel
                     // I want at all
                     InvokePropertyChanged(nameof(this.SelectedKiCadSymbolLibrary));
 
-                    // Changing the selected symbol library should prompt clearing the symbol name
-                    SymbolName = "";
                     break;
             }
         }
@@ -212,8 +210,7 @@ namespace KiCad_DB_Editor.ViewModel
                 {
                     if (OwnerPartVM.Part.FootprintPairs.Count > index)
                     {
-                        // Changing the selected footprint library should prompt clearing the footprint name
-                        OwnerPartVM.Part.FootprintPairs[index] = (value, "");
+                        OwnerPartVM.Part.FootprintPairs[index] = (value, OwnerPartVM.Part.FootprintPairs[index].Item2);
 
                         // Don't need to InvokePropertyChanged for this or FootprintNameAccessor as changing OwnerPartVM.Part.FootprintPairs
                         // already causes that

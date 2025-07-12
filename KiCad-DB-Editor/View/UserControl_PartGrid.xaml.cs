@@ -900,8 +900,15 @@ namespace KiCad_DB_Editor.View
                     objectToSetValueOn = iterObject;
                     propertyInfoToSetValueOn = objectToSetValueOn.GetType().GetProperty(lastElement)!;
                 }
+
+                IEditableCollectionView itemsView = dataGrid_Main.Items;
+
                 if (propertyInfoToSetValueOn.PropertyType == typeof(string))
+                {
+                    itemsView.EditItem(partVM); // Important to prevent updates causing Refresh while editing
                     propertyInfoToSetValueOn.SetValue(objectToSetValueOn, newValue, index);
+                    itemsView.CommitEdit();
+                }
                 else if (propertyInfoToSetValueOn.PropertyType == typeof(bool))
                 {
                     string lowerNewValue = newValue.ToLower();
@@ -910,7 +917,11 @@ namespace KiCad_DB_Editor.View
                     else if (lowerNewValue == "false") newValueBool = false;
 
                     if (newValueBool is not null)
+                    {
+                        itemsView.EditItem(partVM); // Important to prevent updates causing Refresh while editing
                         propertyInfoToSetValueOn.SetValue(objectToSetValueOn, newValueBool, index);
+                        itemsView.CommitEdit();
+                    }
                 }
                 else
                     Debug.Assert(false);
@@ -970,10 +981,7 @@ namespace KiCad_DB_Editor.View
                         {
                             foreach (((int destX, int destY), DataGridCellInfo selectedCell) in selectedCellCoords)
                             {
-                                PartVM item = (PartVM)selectedCell.Item;
-                                itemsView.EditItem(item); // Important to prevent updates causing Refresh while editing
                                 _editPropertyByReflection(selectedCell, sourceData[0][0]);
-                                itemsView.CommitEdit();
                             }
                             e.Handled = true;
                         }
@@ -998,11 +1006,7 @@ namespace KiCad_DB_Editor.View
                                             int destY = minY + srcY;
 
                                             DataGridCellInfo selectedCell = selectedCellCoords[(destX, destY)];
-
-                                            PartVM item = (PartVM)selectedCell.Item;
-                                            itemsView.EditItem(item); // Important to prevent updates causing Refresh while editing
                                             _editPropertyByReflection(selectedCell, sourceData[srcY][srcX]);
-                                            itemsView.CommitEdit();
                                         }
                                     }
                                     e.Handled = true;
@@ -1024,9 +1028,7 @@ namespace KiCad_DB_Editor.View
                     IEditableCollectionView itemsView = dataGrid_Main.Items;
                     foreach (var selectedCell in selectedCells)
                     {
-                        itemsView.EditItem(selectedCell.Item); // Important to prevent updates causing Refresh while editing
                         _editPropertyByReflection(selectedCell, "");
-                        itemsView.CommitEdit();
                     }
                 }
             }

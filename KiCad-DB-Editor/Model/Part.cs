@@ -1,5 +1,4 @@
 ﻿using KiCad_DB_Editor.Utilities;
-using KiCad_DB_Editor.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

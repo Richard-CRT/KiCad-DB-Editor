@@ -1,5 +1,6 @@
 ﻿using KiCad_DB_Editor.Commands;
 using KiCad_DB_Editor.Model;
+using KiCad_DB_Editor.Utilities;
 using KiCad_DB_Editor.View.Converters;
 using KiCad_DB_Editor.ViewModel;
 using Microsoft.Win32;

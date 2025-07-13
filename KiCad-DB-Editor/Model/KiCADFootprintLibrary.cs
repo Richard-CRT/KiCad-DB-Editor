@@ -1,5 +1,4 @@
 ﻿using KiCad_DB_Editor.Model.Json;
-using KiCad_DB_Editor.ViewModel;
 using KiCad_DB_Editor.Utilities;
 using System;
 using System.Collections.Generic;

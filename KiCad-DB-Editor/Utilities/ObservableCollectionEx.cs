@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KiCad_DB_Editor.ViewModel
+namespace KiCad_DB_Editor.Utilities
 {
     public class ObservableCollectionEx<T> : ObservableCollection<T>
     {
@@ -24,7 +24,7 @@ namespace KiCad_DB_Editor.ViewModel
                 _supressNotification = value;
                 if (_supressNotification == false && _notificationSupressed)
                 {
-                    this.OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+                    OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
                     _notificationSupressed = false;
                 }
             }
@@ -32,11 +32,11 @@ namespace KiCad_DB_Editor.ViewModel
 
         public void AddRange(IEnumerable<T> range)
         {
-            var backUp = this.SupressNotification;
-            this.SupressNotification = true;
+            var backUp = SupressNotification;
+            SupressNotification = true;
             foreach (var item in range)
-                this.Add(item);
-            this.SupressNotification = backUp;
+                Add(item);
+            SupressNotification = backUp;
         }
 
         protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)

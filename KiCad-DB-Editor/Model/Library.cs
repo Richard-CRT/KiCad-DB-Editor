@@ -1,6 +1,5 @@
 ﻿using KiCad_DB_Editor.Commands;
 using KiCad_DB_Editor.Model.Json;
-using KiCad_DB_Editor.ViewModel;
 using KiCad_DB_Editor.Utilities;
 using Microsoft.Data.Sqlite;
 using System;

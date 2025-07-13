@@ -61,12 +61,6 @@ namespace KiCad_DB_Editor.ViewModel
             get { return Part.ParentLibrary.KiCadSymbolLibraries.FirstOrDefault(kSLVM => kSLVM!.Nickname == SymbolLibraryName, null); }
         }
 
-        public string SymbolName
-        {
-            get { return Part.SymbolName; }
-            set { if (Part.SymbolName != value) { Part.SymbolName = value; InvokePropertyChanged(); } }
-        }
-
         public int FootprintCount
         {
             get { return Part.FootprintPairs.Count; }

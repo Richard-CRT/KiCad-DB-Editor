@@ -237,24 +237,29 @@ namespace KiCad_DB_Editor.ViewModel
 
             // Setup commands
             ExportToKiCadCommand = new BasicCommand(ExportToKiCadCommandExecuted, null);
+
             NewTopLevelCategoryCommand = new BasicCommand(NewTopLevelCategoryCommandExecuted, NewTopLevelCategoryCommandCanExecute);
             NewSubCategoryCommand = new BasicCommand(NewSubCategoryCommandExecuted, NewSubCategoryCommandCanExecute);
             DeleteCategoryCommand = new BasicCommand(DeleteCategoryCommandExecuted, DeleteCategoryCommandCanExecute);
+
             NewParameterCommand = new BasicCommand(NewParameterCommandExecuted, NewParameterCommandCanExecute);
             RenameParameterCommand = new BasicCommand(RenameParameterCommandExecuted, RenameParameterCommandCanExecute);
             DeleteParameterCommand = new BasicCommand(DeleteParameterCommandExecuted, DeleteParameterCommandCanExecute);
             MoveParameterUpCommand = new BasicCommand(MoveParameterUpCommandExecuted, MoveParameterUpCommandCanExecute);
             MoveParameterDownCommand = new BasicCommand(MoveParameterDownCommandExecuted, MoveParameterDownCommandCanExecute);
+
             BrowseKiCadSymbolLibraryCommand = new BasicCommand(BrowseKiCadSymbolLibraryCommandExecuted, BrowseKiCadSymbolLibraryCommandCanExecute);
             NewKiCadSymbolLibraryCommand = new BasicCommand(NewKiCadSymbolLibraryCommandExecuted, NewKiCadSymbolLibraryCommandCanExecute);
             UpdateKiCadSymbolLibraryCommand = new BasicCommand(UpdateKiCadSymbolLibraryCommandExecuted, UpdateKiCadSymbolLibraryCommandCanExecute);
             DeleteKiCadSymbolLibraryCommand = new BasicCommand(DeleteKiCadSymbolLibraryCommandExecuted, DeleteKiCadSymbolLibraryCommandCanExecute);
             ReparseKiCadSymbolNamesCommand = new BasicCommand(ReparseKiCadSymbolNamesCommandExecuted, ReparseKiCadSymbolNamesCommandCanExecute);
+
             BrowseKiCadFootprintLibraryCommand = new BasicCommand(BrowseKiCadFootprintLibraryCommandExecuted, BrowseKiCadFootprintLibraryCommandCanExecute);
             NewKiCadFootprintLibraryCommand = new BasicCommand(NewKiCadFootprintLibraryCommandExecuted, NewKiCadFootprintLibraryCommandCanExecute);
             UpdateKiCadFootprintLibraryCommand = new BasicCommand(UpdateKiCadFootprintLibraryCommandExecuted, UpdateKiCadFootprintLibraryCommandCanExecute);
             DeleteKiCadFootprintLibraryCommand = new BasicCommand(DeleteKiCadFootprintLibraryCommandExecuted, DeleteKiCadFootprintLibraryCommandCanExecute);
             ReparseKiCadFootprintNamesCommand = new BasicCommand(ReparseKiCadFootprintNamesCommandExecuted, ReparseKiCadFootprintNamesCommandCanExecute);
+            
             AddFootprintCommand = new BasicCommand(AddFootprintCommandExecuted, AddFootprintCommandCanExecute);
             RemoveFootprintCommand = new BasicCommand(RemoveFootprintCommandExecuted, RemoveFootprintCommandCanExecute);
         }
@@ -502,7 +507,7 @@ namespace KiCad_DB_Editor.ViewModel
         {
             foreach (PartVM pVM in SelectedPartVMs)
             {
-                pVM.Part.FootprintPairs.Add(("",""));
+                pVM.Part.FootprintPairs.Add(("", ""));
             }
         }
 

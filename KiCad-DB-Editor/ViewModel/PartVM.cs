@@ -41,19 +41,6 @@ namespace KiCad_DB_Editor.ViewModel
             }
         }
 
-        public string SymbolLibraryName
-        {
-            get { return Part.SymbolLibraryName; }
-            set
-            {
-                if (Part.SymbolLibraryName != value)
-                {
-                    Part.SymbolLibraryName = value;
-                    // We don't InvokePropertyChanged here, as making the change to the Part will trigger Part_PropertyChanged
-                }
-            }
-        }
-
         // Included so the KiCad symbol name drop down has a source
         public KiCadSymbolLibrary? SelectedKiCadSymbolLibrary
         {
@@ -109,9 +96,6 @@ namespace KiCad_DB_Editor.ViewModel
             switch (e.PropertyName)
             {
                 case nameof(Part.SymbolLibraryName):
-                    // We have to wrap this, as at the VM level we add SelectedKiCadSymbolLibrary
-                    InvokePropertyChanged(nameof(PartVM.SymbolLibraryName));
-
                     // Doesn't seem to be technically required as the bindings for the ComboBoxes I'm designing this for only load
                     // when the cells are edited, but if not then I'd need to do this to prompt the ComboBoxes to refetch the value
                     // On future investigation, it's clear that I can't switch to a system where the ComboBoxes are persistent. WPF is

@@ -57,8 +57,8 @@ namespace KiCad_DB_Editor.ViewModel
                     _selectedParameter = value;
                     InvokePropertyChanged();
 
-                    if (SelectedParameter is not null)
-                        NewParameterName = SelectedParameter.Name;
+                    if (_selectedParameter is not null)
+                        NewParameterName = _selectedParameter.Name;
                 }
             }
         }
@@ -566,8 +566,7 @@ namespace KiCad_DB_Editor.ViewModel
             else
                 Library.KiCadSymbolLibraries.Insert(newIndex, newKiCadSymbolLibrary);
 
-            this.NewKiCadSymbolLibraryName = "";
-            this.NewKiCadSymbolLibraryRelativePath = "";
+            SelectedKiCadSymbolLibrary = newKiCadSymbolLibrary;
         }
 
         private bool UpdateKiCadSymbolLibraryCommandCanExecute(object? parameter)
@@ -672,8 +671,7 @@ namespace KiCad_DB_Editor.ViewModel
             else
                 Library.KiCadFootprintLibraries.Insert(newIndex, newKiCadFootprintLibrary);
 
-            this.NewKiCadFootprintLibraryName = "";
-            this.NewKiCadFootprintLibraryRelativePath = "";
+            SelectedKiCadFootprintLibrary = newKiCadFootprintLibrary;
         }
 
         private bool UpdateKiCadFootprintLibraryCommandCanExecute(object? parameter)

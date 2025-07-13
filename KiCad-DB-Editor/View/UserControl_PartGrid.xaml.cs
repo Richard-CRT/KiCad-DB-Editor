@@ -527,26 +527,27 @@ namespace KiCad_DB_Editor.View
             dataGridTemplateColumn.ClipboardContentBinding = valueBinding;
 
             // Like the XAML symbol example but for footprint columns
-            Binding visibilityBinding = new("DataContext.ShowCADLinkColumns")
+            Binding columnVisibilityBinding = new("DataContext.ShowCADLinkColumns")
             {
                 Source = dummyElementToGetDataContext,
                 Converter = (Boolean_to_Visibility_Converter)this.Resources["Boolean_to_Visibility_Converter"]
             };
-            BindingOperations.SetBinding(dataGridTemplateColumn, DataGridTemplateColumn.VisibilityProperty, visibilityBinding);
+            BindingOperations.SetBinding(dataGridTemplateColumn, DataGridTemplateColumn.VisibilityProperty, columnVisibilityBinding);
 
             // Like the XAML symbol example but for footprint columns
-            Binding isReadOnlyBinding = new("DataContext.ShowCADLinkColumns")
+            Binding columnIsReadOnlyBinding = new("DataContext.ShowCADLinkColumns")
             {
                 Source = dummyElementToGetDataContext,
                 Converter = (Boolean_to_NotBoolean_Converter)this.Resources["Boolean_to_NotBoolean_Converter"]
             };
-            BindingOperations.SetBinding(dataGridTemplateColumn, DataGridTemplateColumn.IsReadOnlyProperty, isReadOnlyBinding);
+            BindingOperations.SetBinding(dataGridTemplateColumn, DataGridTemplateColumn.IsReadOnlyProperty, columnIsReadOnlyBinding);
 
             // Like the XAML symbol example but for footprint columns
             DataTemplate cellTemplate = new();
-            FrameworkElementFactory cellTemplateFrameworkElementFactory = new(typeof(TextBlock));
-            cellTemplateFrameworkElementFactory.SetBinding(TextBlock.TextProperty, valueBinding);
-            cellTemplate.VisualTree = cellTemplateFrameworkElementFactory;
+            FrameworkElementFactory textBlockFrameworkElementFactory = new(typeof(TextBlock));
+            textBlockFrameworkElementFactory.SetBinding(TextBlock.TextProperty, valueBinding);
+
+            cellTemplate.VisualTree = textBlockFrameworkElementFactory;
             dataGridTemplateColumn.CellTemplate = cellTemplate;
 
             Binding optionsBinding = new(optionsBindingTarget);
@@ -560,8 +561,11 @@ namespace KiCad_DB_Editor.View
             // Don't need to unhook this as the item holding the delegate is the combobox which is the short lived object
             cellEditingTemplateFrameworkElementFactory.AddHandler(ComboBox.LoadedEvent, new RoutedEventHandler(TemplateColumn_ComboBox_Loaded));
             if (libraryColumn)
+            {
                 // Note this one not present for footprint names
-                cellEditingTemplateFrameworkElementFactory.SetValue(ComboBox.DisplayMemberPathProperty, "Nickname");
+                cellEditingTemplateFrameworkElementFactory.SetValue(ComboBox.DisplayMemberPathProperty, "Nickname");   
+            }
+            cellEditingTemplateFrameworkElementFactory.SetValue(ComboBox.ItemStringFormatProperty, "↪ {0}");
             cellEditingTemplate.VisualTree = cellEditingTemplateFrameworkElementFactory;
             dataGridTemplateColumn.CellEditingTemplate = cellEditingTemplate;
 
@@ -586,6 +590,18 @@ namespace KiCad_DB_Editor.View
             dataGrid_Main.Columns.Insert(baseColumnIndexToInsertFootprintColumnsAt + (footprintIndex * 2), dataGridTemplateColumn);
 
             return dataGridTemplateColumn;
+
+            /*
+            ParserContext context = new ParserContext();
+            context.XmlnsDictionary.Add("", "http://schemas.microsoft.com/winfx/2006/xaml/presentation");
+            context.XmlnsDictionary.Add("x", "http://schemas.microsoft.com/winfx/2006/xaml");
+            byte[] byteArray = Encoding.UTF8.GetBytes("xaml here");
+            DataGridTemplateColumn dataGridTemplateColumn;
+            using (MemoryStream stream = new MemoryStream(byteArray))
+            {
+                dataGridTemplateColumn = (DataGridTemplateColumn)XamlReader.Load(stream, context);
+            }
+            */
         }
 
         private DataGridTemplateColumn newFootprintNameColumn(int footprintIndex)
@@ -810,8 +826,8 @@ namespace KiCad_DB_Editor.View
                     {
                         for (int i = previousMaxFootprints; i < maxFootprints; i++)
                         {
-                            newFootprintLibraryColumn(i);
                             newFootprintNameColumn(i);
+                            newFootprintLibraryColumn(i);
                         }
                     }
 

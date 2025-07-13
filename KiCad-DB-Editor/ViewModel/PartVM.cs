@@ -45,7 +45,7 @@ namespace KiCad_DB_Editor.ViewModel
         public KiCadSymbolLibrary? SelectedKiCadSymbolLibrary
         {
             // Have to do ! as FirstOrDefault needs to think kSLVM could be null in order for me to return null
-            get { return Part.ParentLibrary.KiCadSymbolLibraries.FirstOrDefault(kSLVM => kSLVM!.Nickname == SymbolLibraryName, null); }
+            get { return Part.ParentLibrary.KiCadSymbolLibraries.FirstOrDefault(kSLVM => kSLVM!.Nickname == Part.SymbolLibraryName, null); }
         }
 
         public int FootprintCount
@@ -60,24 +60,22 @@ namespace KiCad_DB_Editor.ViewModel
             // Link model
             Part = part;
 
-            Part.PropertyChanged += Part_PropertyChanged;
-            Part.FootprintPairs.CollectionChanged += FootprintPairs_CollectionChanged;
-            Part.ParameterValues.CollectionChanged += Part_ParameterValues_CollectionChanged;
-
             ParameterAccessor = new(this);
             FootprintLibraryNameAccessor = new(this);
             FootprintNameAccessor = new(this);
             SelectedFootprintLibraryAccessor = new(this);
+
+            Part.FootprintPairs.CollectionChanged += Part_FootprintPairs_CollectionChanged;
+            Part.ParameterValues.CollectionChanged += Part_ParameterValues_CollectionChanged;
         }
 
         public void Unsubscribe()
         {
-            Part.PropertyChanged -= Part_PropertyChanged;
-            Part.FootprintPairs.CollectionChanged -= FootprintPairs_CollectionChanged;
+            Part.FootprintPairs.CollectionChanged -= Part_FootprintPairs_CollectionChanged;
             Part.ParameterValues.CollectionChanged -= Part_ParameterValues_CollectionChanged;
         }
 
-        private void FootprintPairs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        private void Part_FootprintPairs_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             InvokePropertyChanged(nameof(this.FootprintCount));
 
@@ -89,23 +87,6 @@ namespace KiCad_DB_Editor.ViewModel
         private void Part_ParameterValues_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             ParameterAccessor.InvokePropertyChanged("Item[]");
-        }
-
-        private void Part_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            switch (e.PropertyName)
-            {
-                case nameof(Part.SymbolLibraryName):
-                    // Doesn't seem to be technically required as the bindings for the ComboBoxes I'm designing this for only load
-                    // when the cells are edited, but if not then I'd need to do this to prompt the ComboBoxes to refetch the value
-                    // On future investigation, it's clear that I can't switch to a system where the ComboBoxes are persistent. WPF is
-                    // weird: when I clear the SelectedKiCadSymbolLibraryVM, the available items in the symbol name should be blank
-                    // and it does do this, but if the current text is one of those items, it will get cleared, which is not what
-                    // I want at all
-                    InvokePropertyChanged(nameof(this.SelectedKiCadSymbolLibrary));
-
-                    break;
-            }
         }
 
         public void InvokePropertyChanged_Path()
@@ -192,14 +173,6 @@ namespace KiCad_DB_Editor.ViewModel
 
                         // Don't need to InvokePropertyChanged for this or FootprintNameAccessor as changing OwnerPartVM.Part.FootprintPairs
                         // already causes that
-
-                        // Doesn't seem to be technically required as the bindings for the ComboBoxes I'm designing this for only load
-                        // when the cells are edited, but if not then I'd need to do this to prompt the ComboBoxes to refetch the value
-                        // On future investigation, it's clear that I can't switch to a system where the ComboBoxes are persistent. WPF is
-                        // weird: when I clear the SelectedKiCadFootprintLibrary, the available items in the footprint name should be blank
-                        // and it does do this, but if the current text is one of those items, it will get cleared, which is not what
-                        // I want at all
-                        OwnerPartVM.SelectedFootprintLibraryAccessor.InvokePropertyChanged("Item[]");
                     }
                 }
             }

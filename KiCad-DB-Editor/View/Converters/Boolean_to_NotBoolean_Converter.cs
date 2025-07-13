@@ -8,7 +8,7 @@ using System.Windows;
 
 namespace KiCad_DB_Editor.View.Converters
 {
-    class Boolean_to_NotBoolean_Converter : IValueConverter
+    public class Boolean_to_NotBoolean_Converter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {

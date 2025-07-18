@@ -1,1 +1,1 @@
-# KiCAD DB Editor
+# KiCad DB Editor

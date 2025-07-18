@@ -80,7 +80,7 @@ namespace KiCad_DB_Editor.Model
                 foreach (string absoluteFilePath in absoluteFilePaths)
                 {
                     string fileText = File.ReadAllText(absoluteFilePath);
-                    SExpressionToken kiCadFootprintSExpToken = SExpressionToken.FromString(fileText);
+                    SExpressionToken kiCadFootprintSExpToken = new(fileText);
                     if (kiCadFootprintSExpToken.Name != "footprint")
                         throw new FormatException($"Top level S-Expression in provided file is not a KiCad footprint: {absoluteFilePath}");
                     KiCadFootprintNames.Add(kiCadFootprintSExpToken.Attributes[0][1..^1]);

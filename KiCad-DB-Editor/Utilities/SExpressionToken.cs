@@ -12,22 +12,6 @@ namespace KiCad_DB_Editor.Utilities
 {
     public partial class SExpressionToken
     {
-        public static SExpressionToken FromString(string sExpressionString)
-        {
-            HashSet<int> indexesOfStringCharacters = new HashSet<int>();
-
-            var matchCollection = SExpressionStringRegex().Matches(sExpressionString);
-            foreach (Match m in matchCollection)
-            {
-                for (int i = m.Index + 1; i < m.Index + m.Length - 1; i++)
-                    indexesOfStringCharacters.Add(i);
-            }
-
-            return new SExpressionToken(sExpressionString, indexesOfStringCharacters);
-        }
-
-        // ======================================================================
-
         public enum SExpTokenParsingState
         {
             ScanningForOpeningToken,
@@ -42,7 +26,7 @@ namespace KiCad_DB_Editor.Utilities
         public List<string> Attributes { get; set; }
         public List<SExpressionToken> SubTokens { get; set; }
 
-        public SExpressionToken(string sExpressionString, HashSet<int> indexesOfStringCharacters, int scanStart = -1, int scanEnd = -1)
+        public SExpressionToken(string sExpressionString, int scanStart = -1, int scanEnd = -1)
         {
             Name = "";
             Attributes = new();
@@ -58,51 +42,77 @@ namespace KiCad_DB_Editor.Utilities
             if (scanEnd == -1)
                 scanEnd = sExpressionString.Length - 1;
 
-            string stringScanString = sExpressionString[scanStart..(scanEnd + 1)];
+            bool inString = false;
+            int numConsecutiveBackslashes = 0;
 
             SExpTokenParsingState state = SExpTokenParsingState.ScanningForOpeningToken;
             for (int i = scanStart; i <= scanEnd && state != SExpTokenParsingState.FinishedParsingToken; i++)
             {
+                char c = sExpressionString[i];
                 switch (state)
                 {
                     case SExpTokenParsingState.ScanningForOpeningToken:
-                        if (sExpressionString[i] == '(' && !indexesOfStringCharacters.Contains(i))
+                        if (c == '(')
                             state = SExpTokenParsingState.ParsingTokenName;
                         break;
                     case SExpTokenParsingState.ParsingTokenName:
-                        if (!Char.IsWhiteSpace(sExpressionString[i]))
-                            nameInProgress += sExpressionString[i];
-                        else
+                        if (Char.IsWhiteSpace(c))
                         {
                             Name = nameInProgress;
                             state = SExpTokenParsingState.ScanningForTokenSubObject;
                         }
+                        else if (c == ')')
+                        {
+                            Name = nameInProgress;
+                            state = SExpTokenParsingState.FinishedParsingToken;
+                        }
+                        else
+                            nameInProgress += c;
                         break;
                     case SExpTokenParsingState.ScanningForTokenSubObject:
-                        if (!Char.IsWhiteSpace(sExpressionString[i]))
+                        if (!Char.IsWhiteSpace(c))
                         {
-                            if (sExpressionString[i] == ')')
+                            if (c == ')')
                                 state = SExpTokenParsingState.FinishedParsingToken;
-                            else if (sExpressionString[i] == '(')
+                            else if (c == '(')
                             {
                                 state = SExpTokenParsingState.ParsingTokenSubToken;
                                 startIndexOfTokenSubToken = i;
                                 tokenSubTokenDepth = 1;
                             }
+                            else if (c == '"')
+                            {
+                                state = SExpTokenParsingState.ParsingTokenAttribute;
+                                tokenAttributeInProgress = "" + c;
+                                inString = true;
+                                numConsecutiveBackslashes = 0;
+                            }
                             else
                             {
                                 state = SExpTokenParsingState.ParsingTokenAttribute;
-                                tokenAttributeInProgress = "" + sExpressionString[i];
+                                tokenAttributeInProgress = "" + c;
                             }
                         }
                         break;
                     case SExpTokenParsingState.ParsingTokenAttribute:
-                        if (indexesOfStringCharacters.Contains(i))
-                            tokenAttributeInProgress += sExpressionString[i];
-                        else if (!Char.IsWhiteSpace(sExpressionString[i]))
+                        if (inString)
                         {
-                            if (sExpressionString[i] != ')')
-                                tokenAttributeInProgress += sExpressionString[i];
+                            tokenAttributeInProgress += c;
+                            if (c == '"' && (numConsecutiveBackslashes % 2) == 0)
+                            {
+                                inString = false;
+                                Attributes.Add(tokenAttributeInProgress);
+                                state = SExpTokenParsingState.ScanningForTokenSubObject;
+                            }
+                            else if (c == '\\')
+                                numConsecutiveBackslashes++;
+                            else
+                                numConsecutiveBackslashes = 0;
+                        }
+                        else if (!Char.IsWhiteSpace(c))
+                        {
+                            if (c != ')')
+                                tokenAttributeInProgress += c;
                             else
                             {
                                 Attributes.Add(tokenAttributeInProgress);
@@ -116,20 +126,37 @@ namespace KiCad_DB_Editor.Utilities
                         }
                         break;
                     case SExpTokenParsingState.ParsingTokenSubToken:
-                        if (!indexesOfStringCharacters.Contains(i))
+                        if (!inString)
                         {
-                            if (sExpressionString[i] == '(')
-                                tokenSubTokenDepth++;
-                            else if (sExpressionString[i] == ')')
+                            if (c == '"')
                             {
-                                tokenSubTokenDepth--;
-                                if (tokenSubTokenDepth == 0)
+                                inString = true;
+                                numConsecutiveBackslashes = 0;
+                            }
+                            else
+                            {
+                                if (c == '(')
+                                    tokenSubTokenDepth++;
+                                else if (c == ')')
                                 {
-                                    SExpressionToken subToken = new SExpressionToken(sExpressionString, indexesOfStringCharacters, startIndexOfTokenSubToken, i);
-                                    SubTokens.Add(subToken);
-                                    state = SExpTokenParsingState.ScanningForTokenSubObject;
+                                    tokenSubTokenDepth--;
+                                    if (tokenSubTokenDepth == 0)
+                                    {
+                                        SExpressionToken subToken = new SExpressionToken(sExpressionString, startIndexOfTokenSubToken, i);
+                                        SubTokens.Add(subToken);
+                                        state = SExpTokenParsingState.ScanningForTokenSubObject;
+                                    }
                                 }
                             }
+                        }
+                        else
+                        {
+                            if (c == '"' && (numConsecutiveBackslashes % 2) == 0)
+                                inString = false;
+                            else if (c == '\\')
+                                numConsecutiveBackslashes++;
+                            else
+                                numConsecutiveBackslashes = 0;
                         }
                         break;
                 }
@@ -181,8 +208,5 @@ namespace KiCad_DB_Editor.Utilities
         {
             return this.Serialise();
         }
-
-        [GeneratedRegexAttribute(@"(?:"""")|(?:"".*?[^\\](?:\\{2})*"")", RegexOptions.Singleline)]
-        private static partial Regex SExpressionStringRegex();
     }
 }

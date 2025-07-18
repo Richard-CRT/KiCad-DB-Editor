@@ -75,7 +75,7 @@ namespace KiCad_DB_Editor.Model
             if (File.Exists(absolutePath))
             {
                 string fileText = File.ReadAllText(absolutePath);
-                SExpressionToken kiCadSymbolLibSExpToken = SExpressionToken.FromString(fileText);
+                SExpressionToken kiCadSymbolLibSExpToken = new(fileText);
                 if (kiCadSymbolLibSExpToken.Name != "kicad_symbol_lib")
                     throw new FormatException($"Top level S-Expression in provided file is not a KiCad symbol library: {absolutePath}");
                 var kiCadSymbolSExpTokens = kiCadSymbolLibSExpToken.SubTokens.Where(sT => sT.Name == "symbol");

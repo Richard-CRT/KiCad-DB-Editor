@@ -722,16 +722,50 @@ $symbol_name, "
                         Dictionary<Category, Int64> categoryToCategoryId = new();
                         Dictionary<Parameter, Int64> parameterToParameterId = new();
 
-                        {
-                            var createTableCommand = connection.CreateCommand();
-                            createTableCommand.CommandText = @"
+                        var createTablesCommand = connection.CreateCommand();
+                        createTablesCommand.CommandText = @"
 CREATE TABLE ""Categories"" (
     ""ID"" INTEGER,
     ""String"" TEXT,
     PRIMARY KEY(""ID"" AUTOINCREMENT)
-)
+);
+CREATE TABLE ""Parameters"" (
+    ""ID"" INTEGER,
+    ""UUID"" TEXT,
+    ""Name"" TEXT,
+    PRIMARY KEY(""ID"" AUTOINCREMENT)
+);
+CREATE TABLE ""Parts"" (
+    ""ID"" INTEGER,
+    ""Category ID"" INTEGER,
+    ""Part UID"" TEXT,
+    ""Description"" TEXT,
+    ""Manufacturer"" TEXT,
+    ""MPN"" TEXT,
+    ""Value"" TEXT,
+    ""Datasheet"" TEXT,
+    ""Exclude from BOM"" INTEGER,
+    ""Exclude from Board"" INTEGER,
+    ""Exclude from Sim"" INTEGER,
+    ""Symbol Library Name"" TEXT,
+    ""Symbol Name"" TEXT,
+    PRIMARY KEY(""ID"" AUTOINCREMENT)
+);
+CREATE TABLE ""PartParameterLink"" (
+    ""Part ID"" INTEGER,
+    ""Parameter ID"" INTEGER,
+    ""Value"" TEXT,
+    PRIMARY KEY(""Part ID"", ""Parameter ID"")
+);
+CREATE TABLE ""PartFootprints"" (
+    ""ID"" INTEGER,
+    ""Part ID"" INTEGER,
+    ""Library Name"" INTEGER,
+    ""Name"" TEXT,
+    PRIMARY KEY(""ID"" AUTOINCREMENT)
+);
 ";
-                            createTableCommand.ExecuteNonQuery();
+                        createTablesCommand.ExecuteNonQuery();
 
                             var insertCategoryCommand = connection.CreateCommand();
                             insertCategoryCommand.CommandText = @"
@@ -755,19 +789,6 @@ RETURNING ""ID""
                                 var id = (Int64)insertCategoryCommand.ExecuteScalar()!;
                                 categoryToCategoryId[category] = id;
                             }
-                        }
-
-                        {
-                            var createTableCommand = connection.CreateCommand();
-                            createTableCommand.CommandText = @"
-CREATE TABLE ""Parameters"" (
-    ""ID"" INTEGER,
-    ""UUID"" TEXT,
-    ""Name"" TEXT,
-    PRIMARY KEY(""ID"" AUTOINCREMENT)
-)
-";
-                            createTableCommand.ExecuteNonQuery();
 
                             var insertParameterCommand = connection.CreateCommand();
                             insertParameterCommand.CommandText = @"
@@ -798,55 +819,6 @@ RETURNING ""ID""
                                 var id = (Int64)insertParameterCommand.ExecuteScalar()!;
                                 parameterToParameterId[parameter] = id;
                             }
-                        }
-
-                        {
-                            SqliteCommand createTableCommand;
-
-                            createTableCommand = connection.CreateCommand();
-                            createTableCommand.CommandText = @"
-CREATE TABLE ""Parts"" (
-    ""ID"" INTEGER,
-    ""Category ID"" INTEGER,
-    ""Part UID"" TEXT,
-    ""Description"" TEXT,
-    ""Manufacturer"" TEXT,
-    ""MPN"" TEXT,
-    ""Value"" TEXT,
-    ""Datasheet"" TEXT,
-    ""Exclude from BOM"" INTEGER,
-    ""Exclude from Board"" INTEGER,
-    ""Exclude from Sim"" INTEGER,
-    ""Symbol Library Name"" TEXT,
-    ""Symbol Name"" TEXT,
-    PRIMARY KEY(""ID"" AUTOINCREMENT)
-)
-";
-                            createTableCommand.ExecuteNonQuery();
-
-                            createTableCommand = connection.CreateCommand();
-                            createTableCommand.CommandText = @"
-CREATE TABLE ""PartParameterLink"" (
-    ""Part ID"" INTEGER,
-    ""Parameter ID"" INTEGER,
-    ""Value"" TEXT,
-    PRIMARY KEY(""Part ID"", ""Parameter ID"")
-)
-";
-                            createTableCommand.ExecuteNonQuery();
-
-                            createTableCommand = connection.CreateCommand();
-                            createTableCommand.CommandText = @"
-CREATE TABLE ""PartFootprints"" (
-    ""ID"" INTEGER,
-    ""Part ID"" INTEGER,
-    ""Library Name"" INTEGER,
-    ""Name"" TEXT,
-    PRIMARY KEY(""ID"" AUTOINCREMENT)
-)
-";
-                            createTableCommand.ExecuteNonQuery();
-
 
                             var insertPartCommand = connection.CreateCommand();
                             insertPartCommand.CommandText = @"
@@ -1017,7 +989,6 @@ VALUES (
                                     insertPartFootprintCommand.ExecuteNonQuery();
                                 }
                             }
-                        }
 
                         transaction.Commit();
                     }

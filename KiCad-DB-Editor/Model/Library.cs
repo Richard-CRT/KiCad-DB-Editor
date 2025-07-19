@@ -1,11 +1,13 @@
 ﻿using KiCad_DB_Editor.Commands;
 using KiCad_DB_Editor.Model.Json;
 using KiCad_DB_Editor.Utilities;
+using KiCad_DB_Editor.ViewModel;
 using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Data;
+using System.Data.Common;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -16,7 +18,6 @@ using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Documents;
-using System.Data.Common;
 
 namespace KiCad_DB_Editor.Model
 {
@@ -654,6 +655,377 @@ $symbol_name, "
 
                 File.Copy(tempProjectPath, projectFilePath, overwrite: true);
                 File.Copy(tempDataPath, componentsFilePath, overwrite: true);
+
+                return true;
+            }
+            catch (Exception)
+            {
+                SqliteConnection.ClearAllPools();
+                return false;
+            }
+        }
+
+        public bool WriteToFile2(string projectFilePath, bool autosave = false)
+        {
+            try
+            {
+                projectFilePath = (new Uri(projectFilePath)).AbsolutePath;
+
+                string? projectDirectory = Path.GetDirectoryName(projectFilePath);
+                string? projectName = Path.GetFileNameWithoutExtension(projectFilePath);
+                string? fileExtension = Path.GetExtension(projectFilePath);
+
+                if (projectDirectory is null || projectDirectory == "" || !Directory.Exists(projectDirectory) || projectName is null || projectName == "" || fileExtension is null || fileExtension != ".kidbe_proj")
+                    throw new InvalidOperationException();
+
+                this.ProjectDirectoryPath = projectDirectory;
+                this.ProjectName = projectName;
+
+                string dataFilePath = Path.Combine(this.ProjectDirectoryPath, this.ProjectName);
+                dataFilePath += "_dev.sqlite3";
+
+                if (autosave)
+                {
+                    projectFilePath += ".autosave";
+                    dataFilePath += ".autosave";
+                }
+
+                string tempProjectPath = $"proj.tmp";
+                string tempDataPath = $"data.tmp";
+
+                JsonLibrary jsonLibrary = new JsonLibrary(this);
+                if (!jsonLibrary.WriteToFile(tempProjectPath, autosave)) return false;
+
+                Dictionary<Category, string> categoryToCategoryStringMap = new();
+                foreach (Category category in AllCategories)
+                {
+                    string path = $"/{category.Name}";
+                    var c = category;
+                    while (c.ParentCategory is not null)
+                    {
+                        path = $"/{c.ParentCategory.Name}{path}";
+                        c = c.ParentCategory;
+                    }
+                    categoryToCategoryStringMap[category] = path;
+                }
+
+                int maxFootprints = 0;
+                foreach (Part part in AllParts)
+                    maxFootprints = Math.Max(maxFootprints, part.FootprintPairs.Count);
+
+                File.Delete(tempDataPath);
+                using (var connection = new SqliteConnection($"Data Source={tempDataPath}"))
+                {
+                    connection.Open();
+                    using (var transaction = connection.BeginTransaction())
+                    {
+                        Dictionary<Category, Int64> categoryToCategoryId = new();
+                        Dictionary<Parameter, Int64> parameterToParameterId = new();
+
+                        {
+                            var createTableCommand = connection.CreateCommand();
+                            createTableCommand.CommandText = @"
+CREATE TABLE ""Categories"" (
+    ""ID"" INTEGER,
+    ""String"" TEXT,
+    PRIMARY KEY(""ID"" AUTOINCREMENT)
+)
+";
+                            createTableCommand.ExecuteNonQuery();
+
+                            var insertCategoryCommand = connection.CreateCommand();
+                            insertCategoryCommand.CommandText = @"
+INSERT INTO ""Categories"" (""String"")
+VALUES (
+    $category_string
+)
+RETURNING ""ID""
+";
+
+                            // Doesn't actually seem to affect performance, but adding for completeness
+                            insertCategoryCommand.Prepare();
+
+                            var insertCategoryCommand_CategoryStringParameter = insertCategoryCommand.CreateParameter();
+                            insertCategoryCommand_CategoryStringParameter.ParameterName = "$category_string";
+                            insertCategoryCommand.Parameters.Add(insertCategoryCommand_CategoryStringParameter);
+
+                            foreach (var category in AllCategories)
+                            {
+                                insertCategoryCommand_CategoryStringParameter.Value = categoryToCategoryStringMap[category];
+                                var id = (Int64)insertCategoryCommand.ExecuteScalar()!;
+                                categoryToCategoryId[category] = id;
+                            }
+                        }
+
+                        {
+                            var createTableCommand = connection.CreateCommand();
+                            createTableCommand.CommandText = @"
+CREATE TABLE ""Parameters"" (
+    ""ID"" INTEGER,
+    ""UUID"" TEXT,
+    ""Name"" TEXT,
+    PRIMARY KEY(""ID"" AUTOINCREMENT)
+)
+";
+                            createTableCommand.ExecuteNonQuery();
+
+                            var insertParameterCommand = connection.CreateCommand();
+                            insertParameterCommand.CommandText = @"
+INSERT INTO ""Parameters"" (""UUID"", ""Name"")
+VALUES (
+    $uuid,
+    $name
+)
+RETURNING ""ID""
+";
+
+                            var insertParameterCommand_UuidParameter = insertParameterCommand.CreateParameter();
+                            insertParameterCommand_UuidParameter.ParameterName = "$uuid";
+                            insertParameterCommand.Parameters.Add(insertParameterCommand_UuidParameter);
+                            
+                            var insertParameterCommand_NameParameter = insertParameterCommand.CreateParameter();
+                            insertParameterCommand_NameParameter.ParameterName = "name";
+                            insertParameterCommand.Parameters.Add(insertParameterCommand_NameParameter);
+
+                            // Doesn't actually seem to affect performance, but adding for completeness
+                            insertParameterCommand.Prepare();
+
+                            foreach (var parameter in AllParameters)
+                            {
+                                insertParameterCommand_UuidParameter.Value = parameter.UUID;
+                                insertParameterCommand_NameParameter.Value = parameter.Name;
+                                
+                                var id = (Int64)insertParameterCommand.ExecuteScalar()!;
+                                parameterToParameterId[parameter] = id;
+                            }
+                        }
+
+                        {
+                            SqliteCommand createTableCommand;
+
+                            createTableCommand = connection.CreateCommand();
+                            createTableCommand.CommandText = @"
+CREATE TABLE ""Parts"" (
+    ""ID"" INTEGER,
+    ""Category ID"" INTEGER,
+    ""Part UID"" TEXT,
+    ""Description"" TEXT,
+    ""Manufacturer"" TEXT,
+    ""MPN"" TEXT,
+    ""Value"" TEXT,
+    ""Datasheet"" TEXT,
+    ""Exclude from BOM"" INTEGER,
+    ""Exclude from Board"" INTEGER,
+    ""Exclude from Sim"" INTEGER,
+    ""Symbol Library Name"" TEXT,
+    ""Symbol Name"" TEXT,
+    PRIMARY KEY(""ID"" AUTOINCREMENT)
+)
+";
+                            createTableCommand.ExecuteNonQuery();
+
+                            createTableCommand = connection.CreateCommand();
+                            createTableCommand.CommandText = @"
+CREATE TABLE ""PartParameterLink"" (
+    ""Part ID"" INTEGER,
+    ""Parameter ID"" INTEGER,
+    ""Value"" TEXT,
+    PRIMARY KEY(""Part ID"", ""Parameter ID"")
+)
+";
+                            createTableCommand.ExecuteNonQuery();
+
+                            createTableCommand = connection.CreateCommand();
+                            createTableCommand.CommandText = @"
+CREATE TABLE ""PartFootprints"" (
+    ""ID"" INTEGER,
+    ""Part ID"" INTEGER,
+    ""Library Name"" INTEGER,
+    ""Name"" TEXT,
+    PRIMARY KEY(""ID"" AUTOINCREMENT)
+)
+";
+                            createTableCommand.ExecuteNonQuery();
+
+
+                            var insertPartCommand = connection.CreateCommand();
+                            insertPartCommand.CommandText = @"
+INSERT INTO ""Parts"" (
+    ""Category ID"",
+    ""Part UID"",
+    ""Description"",
+    ""Manufacturer"",
+    ""MPN"",
+    ""Value"",
+    ""Datasheet"",
+    ""Exclude from BOM"",
+    ""Exclude from Board"",
+    ""Exclude from Sim"",
+    ""Symbol Library Name"",
+    ""Symbol Name""
+)
+VALUES (
+    $category_id,
+    $part_uid,
+    $description,
+    $manufacturer,
+    $mpn,
+    $value,
+    $datasheet,
+    $exclude_from_bom,
+    $exclude_from_board,
+    $exclude_from_sim,
+    $symbol_lib_name,
+    $symbol_name
+)
+RETURNING ""ID""
+";
+                            var insertPartCommand_CategoryIdParameter = insertPartCommand.CreateParameter();
+                            insertPartCommand_CategoryIdParameter.ParameterName = "$category_id";
+                            insertPartCommand.Parameters.Add(insertPartCommand_CategoryIdParameter);
+
+                            var insertPartCommand_PartUIDParameter = insertPartCommand.CreateParameter();
+                            insertPartCommand_PartUIDParameter.ParameterName = "$part_uid";
+                            insertPartCommand.Parameters.Add(insertPartCommand_PartUIDParameter);
+
+                            var insertPartCommand_DescriptionParameter = insertPartCommand.CreateParameter();
+                            insertPartCommand_DescriptionParameter.ParameterName = "$description";
+                            insertPartCommand.Parameters.Add(insertPartCommand_DescriptionParameter);
+
+                            var insertPartCommand_ManufacturerParameter = insertPartCommand.CreateParameter();
+                            insertPartCommand_ManufacturerParameter.ParameterName = "$manufacturer";
+                            insertPartCommand.Parameters.Add(insertPartCommand_ManufacturerParameter);
+
+                            var insertPartCommand_MpnParameter = insertPartCommand.CreateParameter();
+                            insertPartCommand_MpnParameter.ParameterName = "$mpn";
+                            insertPartCommand.Parameters.Add(insertPartCommand_MpnParameter);
+
+                            var insertPartCommand_ValueParameter = insertPartCommand.CreateParameter();
+                            insertPartCommand_ValueParameter.ParameterName = "$value";
+                            insertPartCommand.Parameters.Add(insertPartCommand_ValueParameter);
+
+                            var insertPartCommand_DatasheetParameter = insertPartCommand.CreateParameter();
+                            insertPartCommand_DatasheetParameter.ParameterName = "$datasheet";
+                            insertPartCommand.Parameters.Add(insertPartCommand_DatasheetParameter);
+
+                            var insertPartCommand_ExcludeFromBomParameter = insertPartCommand.CreateParameter();
+                            insertPartCommand_ExcludeFromBomParameter.ParameterName = "$exclude_from_bom";
+                            insertPartCommand.Parameters.Add(insertPartCommand_ExcludeFromBomParameter);
+
+                            var insertPartCommand_ExcludeFromBoardParameter = insertPartCommand.CreateParameter();
+                            insertPartCommand_ExcludeFromBoardParameter.ParameterName = "$exclude_from_board";
+                            insertPartCommand.Parameters.Add(insertPartCommand_ExcludeFromBoardParameter);
+
+                            var insertPartCommand_ExcludeFromSimParameter = insertPartCommand.CreateParameter();
+                            insertPartCommand_ExcludeFromSimParameter.ParameterName = "$exclude_from_sim";
+                            insertPartCommand.Parameters.Add(insertPartCommand_ExcludeFromSimParameter);
+
+                            var insertPartCommand_SymbolLibNameParameter = insertPartCommand.CreateParameter();
+                            insertPartCommand_SymbolLibNameParameter.ParameterName = "$symbol_lib_name";
+                            insertPartCommand.Parameters.Add(insertPartCommand_SymbolLibNameParameter);
+
+                            var insertPartCommand_SymbolNameParameter = insertPartCommand.CreateParameter();
+                            insertPartCommand_SymbolNameParameter.ParameterName = "$symbol_name";
+                            insertPartCommand.Parameters.Add(insertPartCommand_SymbolNameParameter);
+
+                            // Doesn't actually seem to affect performance, but adding for completeness
+                            insertPartCommand.Prepare();
+
+
+                            var insertPartParameterLinkCommand = connection.CreateCommand();
+                            insertPartParameterLinkCommand.CommandText = @"
+INSERT INTO ""PartParameterLink"" (""Part ID"", ""Parameter ID"", ""Value"")
+VALUES (
+    $part_id,
+    $parameter_id,
+    $value
+)
+";
+                            var insertPartParameterLinkCommand_PartIdParameter = insertPartParameterLinkCommand.CreateParameter();
+                            insertPartParameterLinkCommand_PartIdParameter.ParameterName = "part_id";
+                            insertPartParameterLinkCommand.Parameters.Add(insertPartParameterLinkCommand_PartIdParameter);
+
+                            var insertPartParameterLinkCommand_ParameterIdParameter = insertPartParameterLinkCommand.CreateParameter();
+                            insertPartParameterLinkCommand_ParameterIdParameter.ParameterName = "parameter_id";
+                            insertPartParameterLinkCommand.Parameters.Add(insertPartParameterLinkCommand_ParameterIdParameter);
+
+                            var insertPartParameterLinkCommand_ValueParameter = insertPartParameterLinkCommand.CreateParameter();
+                            insertPartParameterLinkCommand_ValueParameter.ParameterName = "value";
+                            insertPartParameterLinkCommand.Parameters.Add(insertPartParameterLinkCommand_ValueParameter);
+
+                            // Doesn't actually seem to affect performance, but adding for completeness
+                            insertPartParameterLinkCommand.Prepare();
+
+
+                            var insertPartFootprintCommand = connection.CreateCommand();
+                            insertPartFootprintCommand.CommandText = @"
+INSERT INTO ""PartFootprints"" (""Part ID"", ""Library Name"", ""Name"")
+VALUES (
+    $part_id,
+    $library_name,
+    $name
+)
+";
+                            var insertPartFootprintCommand_PartIdParameter = insertPartFootprintCommand.CreateParameter();
+                            insertPartFootprintCommand_PartIdParameter.ParameterName = "part_id";
+                            insertPartFootprintCommand.Parameters.Add(insertPartFootprintCommand_PartIdParameter);
+
+                            var insertPartFootprintCommand_LibraryNameParameter = insertPartFootprintCommand.CreateParameter();
+                            insertPartFootprintCommand_LibraryNameParameter.ParameterName = "library_name";
+                            insertPartFootprintCommand.Parameters.Add(insertPartFootprintCommand_LibraryNameParameter);
+
+                            var insertPartFootprintCommand_NameParameter = insertPartFootprintCommand.CreateParameter();
+                            insertPartFootprintCommand_NameParameter.ParameterName = "name";
+                            insertPartFootprintCommand.Parameters.Add(insertPartFootprintCommand_NameParameter);
+
+                            // Doesn't actually seem to affect performance, but adding for completeness
+                            insertPartFootprintCommand.Prepare();
+
+                            foreach (Part part in AllParts.OrderBy(p => p.PartUID))
+                            {
+                                insertPartCommand_CategoryIdParameter.Value = categoryToCategoryId[part.ParentCategory];
+                                insertPartCommand_PartUIDParameter.Value = part.PartUID;
+                                insertPartCommand_DescriptionParameter.Value = part.Description;
+                                insertPartCommand_ManufacturerParameter.Value = part.Manufacturer;
+                                insertPartCommand_MpnParameter.Value = part.MPN;
+                                insertPartCommand_ValueParameter.Value = part.Value;
+                                insertPartCommand_DatasheetParameter.Value = part.Datasheet;
+                                insertPartCommand_ExcludeFromBomParameter.Value = part.ExcludeFromBOM;
+                                insertPartCommand_ExcludeFromBoardParameter.Value = part.ExcludeFromBoard;
+                                insertPartCommand_ExcludeFromSimParameter.Value = part.ExcludeFromSim;
+                                insertPartCommand_SymbolLibNameParameter.Value = part.SymbolLibraryName;
+                                insertPartCommand_SymbolNameParameter.Value = part.SymbolName;
+
+                                var partId = (Int64)insertPartCommand.ExecuteScalar()!;
+
+                                insertPartParameterLinkCommand_PartIdParameter.Value = partId;
+                                insertPartFootprintCommand_PartIdParameter.Value = partId;
+
+                                foreach ((Parameter parameter, string value) in part.ParameterValues)
+                                {
+                                    Int64 parameterId = parameterToParameterId[parameter];
+                                    insertPartParameterLinkCommand_ParameterIdParameter.Value = parameterId;
+                                    insertPartParameterLinkCommand_ValueParameter.Value = value;
+
+                                    insertPartParameterLinkCommand.ExecuteNonQuery();
+                                }
+                                foreach ((string footprintLibraryName, string footprintName) in part.FootprintPairs)
+                                {
+                                    insertPartFootprintCommand_LibraryNameParameter.Value = footprintLibraryName;
+                                    insertPartFootprintCommand_NameParameter.Value = footprintName;
+
+                                    insertPartFootprintCommand.ExecuteNonQuery();
+                                }
+                            }
+                        }
+
+                        transaction.Commit();
+                    }
+                }
+                SqliteConnection.ClearAllPools();
+
+                File.Copy(tempProjectPath, projectFilePath, overwrite: true);
+                File.Copy(tempDataPath, dataFilePath, overwrite: true);
 
                 return true;
             }

@@ -13,6 +13,8 @@ namespace KiCad_DB_Editor.Model.Json
         public string UUID { get; set; } = Guid.NewGuid().ToString();
         [JsonPropertyName("name"), JsonPropertyOrder(1)]
         public string Name { get; set; } = "";
+        [JsonPropertyName("universal"), JsonPropertyOrder(2)]
+        public bool Universal { get; set; } = false;
 
         [JsonConstructor]
         public JsonParameter() { }
@@ -21,6 +23,7 @@ namespace KiCad_DB_Editor.Model.Json
         {
             UUID = parameter.UUID;
             Name = parameter.Name;
+            Universal = parameter.Universal;
         }
     }
 }

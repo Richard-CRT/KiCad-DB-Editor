@@ -26,12 +26,20 @@ namespace KiCad_DB_Editor.Model
             set { if (_name != value) { _name = value; InvokePropertyChanged(); } }
         }
 
+        private bool _universal = false;
+        public bool Universal
+        {
+            get { return _universal; }
+            set { if (_universal != value) { _universal = value; InvokePropertyChanged(); } }
+        }
+
         #endregion Notify Properties
 
         public Parameter(JsonParameter jsonParameter)
         {
             this._uuid = jsonParameter.UUID;
             this.Name = jsonParameter.Name;
+            this.Universal = jsonParameter.Universal;
         }
 
         public Parameter(string name)

@@ -105,7 +105,7 @@ namespace KiCad_DB_Editor.Model
 
         public ObservableCollectionEx<Parameter> InheritedParameters
         {
-            get { return ParentCategory is null ? new() : new(ParentCategory.InheritedAndNormalParameters); }
+            get { return ParentCategory is null ? new(ParentLibrary.AllParameters.Where(p => p.Universal)) : new(ParentCategory.InheritedAndNormalParameters); }
         }
 
         public ObservableCollectionEx<Parameter> AvailableParameters
@@ -140,6 +140,18 @@ namespace KiCad_DB_Editor.Model
             _parameters.CollectionChanged += Parameters_CollectionChanged;
             _categories = new();
             _parts = new();
+        }
+
+        public void ParentLibrary_AllParameter_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(Parameter.Universal):
+                    // The contents of these 2 may have changed, so invoke updates
+                    InvokePropertyChanged(nameof(InheritedParameters));
+                    InvokePropertyChanged(nameof(InheritedAndNormalParameters));
+                    break;
+            }
         }
 
         public void ParentLibrary_AllParameters_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)

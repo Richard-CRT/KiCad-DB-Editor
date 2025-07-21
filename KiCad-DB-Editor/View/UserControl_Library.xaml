@@ -21,7 +21,7 @@
             <TabItem Header="Structure">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="0*" MinWidth="180" />
+                        <ColumnDefinition Width="0*" MinWidth="200" />
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="0*" MinWidth="200"/>
                         <ColumnDefinition Width="Auto"/>
@@ -54,7 +54,31 @@
                             <Button Content="Delete Parameter" Padding="5,1,5,1"
                                     Command="{Binding LibraryVM.DeleteParameterCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />
                         </DockPanel>
-                        <ListBox ItemsSource="{Binding LibraryVM.Library.AllParameters, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" DisplayMemberPath="Name" MinHeight="60" SelectedItem="{Binding LibraryVM.SelectedParameter, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />
+                        <ListView ItemsSource="{Binding LibraryVM.Library.AllParameters, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
+                                  d:ItemsSource="{d:SampleData}"
+                                  MinHeight="60"
+                                  SelectedItem="{Binding LibraryVM.SelectedParameter, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
+                                  Foreground="Black">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn Header="Name"
+                                                    DisplayMemberBinding="{Binding Name}"
+                                                    Width="130"/>
+                                    <GridViewColumn Header="Universal">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Universal}"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
                     </DockPanel>
                     <GridSplitter Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="3,0,3,0" Width="3" />
                     <DockPanel Grid.Column="2">

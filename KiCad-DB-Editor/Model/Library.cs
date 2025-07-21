@@ -335,9 +335,22 @@ namespace KiCad_DB_Editor.Model
             _kiCadFootprintLibraries = new();
         }
 
+        private Parameter[]? oldAllParameters = null;
         private void _allParameters_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
+            if (oldAllParameters is not null)
+                foreach (var parameter in oldAllParameters)
+                    parameter.PropertyChanged -= AllParameterChanged;
+            oldAllParameters = _allParameters.ToArray();
+            foreach (var parameter in _allParameters)
+                parameter.PropertyChanged += AllParameterChanged;
+
             foreach (var c in AllCategories) c.ParentLibrary_AllParameters_CollectionChanged(sender, e);
+        }
+
+        private void AllParameterChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            foreach (var c in AllCategories) c.ParentLibrary_AllParameter_PropertyChanged(sender, e);
         }
 
         public bool WriteToFile(string projectFilePath, bool autosave = false)

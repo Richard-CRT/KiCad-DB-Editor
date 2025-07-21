@@ -68,7 +68,7 @@
                                 <GridView>
                                     <GridViewColumn Header="Name"
                                                     DisplayMemberBinding="{Binding Name}"
-                                                    Width="130"/>
+                                                    Width="134"/>
                                     <GridViewColumn Header="Universal">
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>

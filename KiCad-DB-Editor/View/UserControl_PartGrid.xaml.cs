@@ -490,6 +490,7 @@ namespace KiCad_DB_Editor.View
                 return false;
         }
 
+        const int _baseColumnIndexToInsertFootprintColumnsAt = 8;
         private DataGridTemplateColumn newFootprintColumn(int footprintIndex, bool libraryColumn)
         {
             string header;
@@ -584,10 +585,9 @@ namespace KiCad_DB_Editor.View
             else
                 footprintIndexToNameDataGridColumn[footprintIndex] = dataGridTemplateColumn;
 
-            const int baseColumnIndexToInsertFootprintColumnsAt = 8;
             // Need to add footprintIndex * 2 because we always insert starting at the low number first
             // so in order for columns to count up left to right we need to move along
-            dataGrid_Main.Columns.Insert(baseColumnIndexToInsertFootprintColumnsAt + (footprintIndex * 2), dataGridTemplateColumn);
+            dataGrid_Main.Columns.Insert(_baseColumnIndexToInsertFootprintColumnsAt + (footprintIndex * 2), dataGridTemplateColumn);
 
             return dataGridTemplateColumn;
 
@@ -691,7 +691,7 @@ namespace KiCad_DB_Editor.View
             parameterToDataGridColumn[parameter] = dataGridTextColumn;
             parametersThatHaveColumns.Insert(index, parameter);
 
-            dataGrid_Main.Columns.Insert(dataGrid_Main.Columns.Count - 5, dataGridTextColumn);
+            dataGrid_Main.Columns.Insert(_baseColumnIndexToInsertFootprintColumnsAt + (2 * _lastMaxFootprints) + index, dataGridTextColumn);
 
             return dataGridTextColumn;
         }
@@ -796,7 +796,7 @@ namespace KiCad_DB_Editor.View
             }
         }
 
-        private int previousMaxFootprints = 0;
+        private int _lastMaxFootprints = 0;
         private Dictionary<int, DataGridColumn> footprintIndexToLibraryDataGridColumn = new();
         private Dictionary<int, DataGridColumn> footprintIndexToNameDataGridColumn = new();
         private void redoColumns_PotentialFootprintColumnChange()
@@ -807,11 +807,11 @@ namespace KiCad_DB_Editor.View
                 foreach (PartVM partVM in PartVMs)
                     maxFootprints = Math.Max(maxFootprints, partVM.FootprintCount);
 
-                if (maxFootprints != previousMaxFootprints)
+                if (maxFootprints != _lastMaxFootprints)
                 {
-                    if (previousMaxFootprints > maxFootprints)
+                    if (_lastMaxFootprints > maxFootprints)
                     {
-                        for (int footprintIndexColumnToRemove = previousMaxFootprints - 1; footprintIndexColumnToRemove >= maxFootprints; footprintIndexColumnToRemove--)
+                        for (int footprintIndexColumnToRemove = _lastMaxFootprints - 1; footprintIndexColumnToRemove >= maxFootprints; footprintIndexColumnToRemove--)
                         {
                             DataGridColumn column1 = footprintIndexToLibraryDataGridColumn[footprintIndexColumnToRemove];
                             dataGrid_Main.Columns.Remove(column1);
@@ -822,16 +822,16 @@ namespace KiCad_DB_Editor.View
                             footprintIndexToNameDataGridColumn.Remove(footprintIndexColumnToRemove);
                         }
                     }
-                    else if (maxFootprints > previousMaxFootprints)
+                    else if (maxFootprints > _lastMaxFootprints)
                     {
-                        for (int i = previousMaxFootprints; i < maxFootprints; i++)
+                        for (int i = _lastMaxFootprints; i < maxFootprints; i++)
                         {
                             newFootprintNameColumn(i);
                             newFootprintLibraryColumn(i);
                         }
                     }
 
-                    previousMaxFootprints = maxFootprints;
+                    _lastMaxFootprints = maxFootprints;
                 }
             }
             else
@@ -842,7 +842,7 @@ namespace KiCad_DB_Editor.View
                 foreach (DataGridColumn columnToRemove in footprintIndexToNameDataGridColumn.Values)
                     dataGrid_Main.Columns.Remove(columnToRemove);
                 footprintIndexToNameDataGridColumn.Clear();
-                previousMaxFootprints = 0;
+                _lastMaxFootprints = 0;
             }
         }
 

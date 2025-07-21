@@ -40,10 +40,10 @@
             <TextBlock Grid.Row="0" Grid.Column="0" DockPanel.Dock="Top" HorizontalAlignment="Center">Available Parameters</TextBlock>
             <ListBox Grid.Row="1" Grid.Column="0" DisplayMemberPath="Name"
                                 ItemsSource="{Binding CategoryVM.Category.AvailableParameters, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}"
-                                SelectedItem="{Binding CategoryVM.SelectedUnusedParameter, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
+                                SelectedItem="{Binding CategoryVM.SelectedAvailableParameter, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
             <StackPanel Grid.Row="1" Grid.Column="1" Margin="5,0,5,0" VerticalAlignment="Center">
-                <Button Content="&gt;&gt;&gt;" Padding="5,1,5,1" Command="{Binding CategoryVM.AddParameterCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}"></Button>
-                <Button Content="&lt;&lt;&lt;" Padding="5,1,5,1" Margin="0,5,0,0" Command="{Binding CategoryVM.RemoveParameterCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}"></Button>
+                <Button Content="▶" Padding="5,1,5,1" Command="{Binding CategoryVM.AddParameterCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}"></Button>
+                <Button Content="◀" Padding="5,1,5,1" Margin="0,5,0,0" Command="{Binding CategoryVM.RemoveParameterCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}"></Button>
             </StackPanel>
             <TextBlock Grid.Row="0" Grid.Column="2" DockPanel.Dock="Top" HorizontalAlignment="Center">Parameters</TextBlock>
             <ListBox  Grid.Row="1" Grid.Column="2"

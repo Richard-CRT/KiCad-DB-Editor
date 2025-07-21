@@ -248,6 +248,9 @@ namespace KiCad_DB_Editor.ViewModel
             MoveParameterUpCommand = new BasicCommand(MoveParameterUpCommandExecuted, MoveParameterUpCommandCanExecute);
             MoveParameterDownCommand = new BasicCommand(MoveParameterDownCommandExecuted, MoveParameterDownCommandCanExecute);
 
+            AddFootprintCommand = new BasicCommand(AddFootprintCommandExecuted, AddFootprintCommandCanExecute);
+            RemoveFootprintCommand = new BasicCommand(RemoveFootprintCommandExecuted, RemoveFootprintCommandCanExecute);
+
             BrowseKiCadSymbolLibraryCommand = new BasicCommand(BrowseKiCadSymbolLibraryCommandExecuted, BrowseKiCadSymbolLibraryCommandCanExecute);
             NewKiCadSymbolLibraryCommand = new BasicCommand(NewKiCadSymbolLibraryCommandExecuted, NewKiCadSymbolLibraryCommandCanExecute);
             UpdateKiCadSymbolLibraryCommand = new BasicCommand(UpdateKiCadSymbolLibraryCommandExecuted, UpdateKiCadSymbolLibraryCommandCanExecute);
@@ -260,8 +263,6 @@ namespace KiCad_DB_Editor.ViewModel
             DeleteKiCadFootprintLibraryCommand = new BasicCommand(DeleteKiCadFootprintLibraryCommandExecuted, DeleteKiCadFootprintLibraryCommandCanExecute);
             ReparseKiCadFootprintNamesCommand = new BasicCommand(ReparseKiCadFootprintNamesCommandExecuted, ReparseKiCadFootprintNamesCommandCanExecute);
             
-            AddFootprintCommand = new BasicCommand(AddFootprintCommandExecuted, AddFootprintCommandCanExecute);
-            RemoveFootprintCommand = new BasicCommand(RemoveFootprintCommandExecuted, RemoveFootprintCommandCanExecute);
         }
 
         public void Unsubscribe()

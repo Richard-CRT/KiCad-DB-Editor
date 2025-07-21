@@ -85,11 +85,11 @@ namespace KiCad_DB_Editor.ViewModel
             set { if (_partVMs != value) { _partVMs = value; InvokePropertyChanged(); } }
         }
 
-        private Parameter? _selectedUnusedParameter = null;
-        public Parameter? SelectedUnusedParameter
+        private Parameter? _selectedAvailableParameter = null;
+        public Parameter? SelectedAvailableParameter
         {
-            get { return _selectedUnusedParameter; }
-            set { if (_selectedUnusedParameter != value) { _selectedUnusedParameter = value; InvokePropertyChanged(); } }
+            get { return _selectedAvailableParameter; }
+            set { if (_selectedAvailableParameter != value) { _selectedAvailableParameter = value; InvokePropertyChanged(); } }
         }
 
         private Parameter? _selectedParameter = null;
@@ -243,14 +243,14 @@ namespace KiCad_DB_Editor.ViewModel
 
         private bool AddParameterCommandCanExecute(object? parameter)
         {
-            return SelectedUnusedParameter is not null;
+            return SelectedAvailableParameter is not null;
         }
 
         private void AddParameterCommandExecuted(object? parameter)
         {
-            Debug.Assert(SelectedUnusedParameter is not null);
+            Debug.Assert(SelectedAvailableParameter is not null);
 
-            Parameter pToBeAdded = SelectedUnusedParameter;
+            Parameter pToBeAdded = SelectedAvailableParameter;
 
             int indexOfPToBeAddedInLibrary = Category.ParentLibrary.AllParameters.IndexOf(pToBeAdded);
             int newIndex;
@@ -266,7 +266,7 @@ namespace KiCad_DB_Editor.ViewModel
             else
                 Category.Parameters.Insert(newIndex, pToBeAdded);
 
-            SelectedUnusedParameter = Category.AvailableParameters.FirstOrDefault();
+            SelectedAvailableParameter = Category.AvailableParameters.FirstOrDefault();
         }
 
         private bool RemoveParameterCommandCanExecute(object? parameter)

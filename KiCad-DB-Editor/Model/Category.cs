@@ -151,9 +151,12 @@ namespace KiCad_DB_Editor.Model
             InvokePropertyChanged(nameof(InheritedParameters));
             InvokePropertyChanged(nameof(InheritedAndNormalParameters));
 
-            // Potentially need to reorder Parameters
-            // If there's no reordering to be done, Parameters isn't shuffled, so, Parameters_CollectionChanged is not called, so we can't rely on its InvokePropertyChange calls
-            // hence the calls above may duplicate it
+            // Potentially need to remove from or reorder Parameters
+            // If there's no changes to be done (e.g. if Parameters doesn't contain the ones that have moved) Parameters isn't shuffled,
+            // so Parameters_CollectionChanged is not called, so we can't rely on its InvokePropertyChange calls hence the calls above may
+            // duplicate it
+            foreach (var parameterToRemove in Parameters.Except(ParentLibrary.AllParameters).ToArray()) // Taking a copy so I can edit it
+                Parameters.Remove(parameterToRemove);
             int categoryParameterIndex = 0;
             for (int libraryParameterIndex = 0; libraryParameterIndex < ParentLibrary.AllParameters.Count; libraryParameterIndex++)
             {

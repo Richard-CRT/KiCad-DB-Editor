@@ -183,9 +183,34 @@ namespace KiCad_DB_Editor.ViewModel
 
         private void Categories_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            // Make sure CategoryVM unsubscribes before we lose the objects
-            if (CategoryVMs is not null) foreach (var cVM in CategoryVMs) cVM.Unsubscribe();
-            CategoryVMs = new(Category.Categories.Select(c => new CategoryVM(c)));
+            // If we reset the list the TreeView selection is lost, so we need to handle proper collection changed events
+            // At least .Move, but we may as well do more
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Move:
+                    // Rely on the indexes being the same as the source Categories list
+                    CategoryVMs.Move(e.OldStartingIndex, e.NewStartingIndex);
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    // Rely on the indexes being the same as the source Categories list
+                    var cVMToRemove = CategoryVMs[e.OldStartingIndex];
+                    cVMToRemove.Unsubscribe();
+                    CategoryVMs.RemoveAt(e.OldStartingIndex);
+                    break;
+                case NotifyCollectionChangedAction.Add:
+                    // Rely on the indexes being the same as the source Categories list
+                    Debug.Assert(e.NewItems is not null && e.NewItems.Count == 1);
+                    var newCategory = (e.NewItems[0] as Category)!;
+                    var cVMToAdd = new CategoryVM(newCategory);
+                    CategoryVMs.Insert(e.NewStartingIndex, cVMToAdd);
+                    break;
+                case NotifyCollectionChangedAction.Replace:
+                default:
+                    // Make sure CategoryVM unsubscribes before we lose the objects
+                    if (CategoryVMs is not null) foreach (var cVM in CategoryVMs) cVM.Unsubscribe();
+                    CategoryVMs = new(Category.Categories.Select(c => new CategoryVM(c)));
+                    break;
+            }
         }
 
         private void Category_PropertyChanged(object? sender, PropertyChangedEventArgs e)

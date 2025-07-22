@@ -297,9 +297,33 @@ namespace KiCad_DB_Editor.ViewModel
 
         private void Library_TopLevelCategories_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            // Make sure TopLevelCategoryVM unsubscribes before we lose the objects
-            if (TopLevelCategoryVMs is not null) foreach (var cVM in TopLevelCategoryVMs) cVM.Unsubscribe();
-            TopLevelCategoryVMs = new(Library.TopLevelCategories.Select(c => new CategoryVM(c)));
+            // If we reset the list the TreeView selection is lost, so we need to handle proper collection changed events
+            // At least .Move, but we may as well do more
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Move:
+                    // Rely on the indexes being the same as the source Categories list
+                    TopLevelCategoryVMs.Move(e.OldStartingIndex, e.NewStartingIndex);
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    // Rely on the indexes being the same as the source Categories list
+                    var cVMToRemove = TopLevelCategoryVMs[e.OldStartingIndex];
+                    cVMToRemove.Unsubscribe();
+                    TopLevelCategoryVMs.RemoveAt(e.OldStartingIndex);
+                    break;
+                case NotifyCollectionChangedAction.Add:
+                    // Rely on the indexes being the same as the source Categories list
+                    Debug.Assert(e.NewItems is not null && e.NewItems.Count == 1);
+                    var newCategory = (e.NewItems[0] as Category)!;
+                    var cVMToAdd = new CategoryVM(newCategory);
+                    TopLevelCategoryVMs.Insert(e.NewStartingIndex, cVMToAdd);
+                    break;
+                default:
+                    // Make sure TopLevelCategoryVM unsubscribes before we lose the objects
+                    if (TopLevelCategoryVMs is not null) foreach (var cVM in TopLevelCategoryVMs) cVM.Unsubscribe();
+                    TopLevelCategoryVMs = new(Library.TopLevelCategories.Select(c => new CategoryVM(c)));
+                    break;
+            }
         }
 
         private bool canNewCategory(ObservableCollectionEx<Category> categoryCollection)

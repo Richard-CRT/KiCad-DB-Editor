@@ -359,7 +359,7 @@ namespace KiCad_DB_Editor.Model
         {
             try
             {
-                projectFilePath = (new Uri(projectFilePath)).AbsolutePath;
+                projectFilePath = Path.GetFullPath(projectFilePath);
 
                 string? projectDirectory = Path.GetDirectoryName(projectFilePath);
                 string? projectName = Path.GetFileNameWithoutExtension(projectFilePath);
@@ -704,7 +704,7 @@ VALUES (
             try
             {
                 if (autoExport)
-                    kiCadDbConfFilePath = (new Uri(Path.Combine(ProjectDirectoryPath, KiCadAutoExportRelativePath))).AbsolutePath;
+                    kiCadDbConfFilePath = Path.GetFullPath((Path.Combine(ProjectDirectoryPath, KiCadAutoExportRelativePath)));
 
                 string? parentDirectory = Path.GetDirectoryName(kiCadDbConfFilePath);
                 string? fileName = Path.GetFileNameWithoutExtension(kiCadDbConfFilePath);

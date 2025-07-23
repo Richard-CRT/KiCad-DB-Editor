@@ -3,20 +3,24 @@
   "part_lib_name": "Sample Part Lib",
   "part_lib_desc": "Sample part library used for testing and demonstrating the KiCad DB Editor",
   "export_odbc_name": "sample_kicad_db",
+  "kicad_part_lib_env_var": "",
   "auto_export": true,
   "auto_export_relative_path": "sample_kicad_library/kicad_db.kicad_dbl",
   "parameters": [
     {
       "uuid": "28268508-1b23-483b-901d-d9756d49e7e6",
-      "name": "BOM Comments"
+      "name": "BOM Comments",
+      "universal": false
     },
     {
       "uuid": "787ebf49-a7ad-4f5f-8bc6-76fcbfe6994c",
-      "name": "Package"
+      "name": "Package",
+      "universal": false
     },
     {
       "uuid": "18902a19-9568-4ad2-9b5b-b6539d64b2b7",
-      "name": "Notes"
+      "name": "Notes",
+      "universal": false
     }
   ],
   "top_level_categories": [

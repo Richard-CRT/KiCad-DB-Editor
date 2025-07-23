@@ -68,7 +68,19 @@ namespace KiCad_DB_Editor.ViewModel
             }
 
             if (Properties.Settings.Default.OpenProjectPath != "New Project" && File.Exists(Properties.Settings.Default.OpenProjectPath))
-                LibraryVM = new(Library.FromFile(Properties.Settings.Default.OpenProjectPath));
+            {
+                if (Library.FromFile(Properties.Settings.Default.OpenProjectPath, out Library? library))
+                    LibraryVM = new(library!);
+                else
+                {
+                    // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
+                    (new View.Dialogs.Window_ErrorDialog("Load failed!")).ShowDialog();
+                    // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
+
+                    Debug.Assert(NewLibraryCommand.CanExecute(null));
+                    NewLibraryCommand.Execute(null);
+                }
+            }
             else
             {
                 Debug.Assert(NewLibraryCommand.CanExecute(null));
@@ -116,11 +128,20 @@ namespace KiCad_DB_Editor.ViewModel
             openFileDialog.Filter = "Project file (*.kidbe_proj)|*.kidbe_proj|All files (*.*)|*.*";
             if (openFileDialog.ShowDialog() == true)
             {
-                LibraryVM = new(Library.FromFile(openFileDialog.FileName));
+                if (Library.FromFile(openFileDialog.FileName, out Library? library))
+                {
+                    LibraryVM = new(library!);
 
-                Properties.Settings.Default.OpenProjectPath = openFileDialog.FileName;
-                Properties.Settings.Default.Save();
-                InvokePropertyChanged(nameof(WindowTitle));
+                    Properties.Settings.Default.OpenProjectPath = openFileDialog.FileName;
+                    Properties.Settings.Default.Save();
+                    InvokePropertyChanged(nameof(WindowTitle));
+                }
+                else
+                {
+                    // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
+                    (new View.Dialogs.Window_ErrorDialog("Load failed!")).ShowDialog();
+                    // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
+                }
             }
         }
 

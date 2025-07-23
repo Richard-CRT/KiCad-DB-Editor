@@ -31,11 +31,11 @@ namespace KiCad_DB_Editor.Model
             return library;
         }
 
-        public static Library FromFile(string projectFilePath)
+        public static bool FromFile(string projectFilePath, out Library? outLibrary)
         {
-            Library library = new();
             try
             {
+                Library library = new();
                 string? projectDirectory = Path.GetDirectoryName(projectFilePath);
                 string? projectName = Path.GetFileNameWithoutExtension(projectFilePath);
                 if (projectDirectory is null || projectDirectory == "" || projectName is null || projectName == "")
@@ -186,13 +186,15 @@ namespace KiCad_DB_Editor.Model
                     }
                 }
                 SqliteConnection.ClearAllPools();
-            }
-            catch (FileNotFoundException)
-            {
-                throw;
-            }
 
-            return library;
+                outLibrary = library;
+                return true;
+            }
+            catch (Exception)
+            {
+                outLibrary = null;
+                return false;
+            }
         }
 
         // ======================================================================

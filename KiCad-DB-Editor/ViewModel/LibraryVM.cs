@@ -95,14 +95,33 @@ namespace KiCad_DB_Editor.ViewModel
         public ObservableCollectionEx<CategoryVM> TopLevelCategoryVMs
         {
             get { return _topLevelCategoryVMs; }
-            set { if (_topLevelCategoryVMs != value) { _topLevelCategoryVMs = value; InvokePropertyChanged(); } }
+            set
+            {
+                if (_topLevelCategoryVMs != value)
+                {
+                    // Make sure TopLevelCategoryVM unsubscribes before we lose the objects
+                    if (_topLevelCategoryVMs is not null) foreach (var cVM in _topLevelCategoryVMs) cVM.Unsubscribe();
+
+                    _topLevelCategoryVMs = value;
+                    InvokePropertyChanged();
+                }
+            }
         }
 
         private ObservableCollectionEx<PartVM> _allPartVMs;
         public ObservableCollectionEx<PartVM> AllPartVMs
         {
             get { return _allPartVMs; }
-            set { if (_allPartVMs != value) { _allPartVMs = value; InvokePropertyChanged(); } }
+            set
+            {
+                if (_allPartVMs != value)
+                {
+                    // Make sure PartVM unsubscribes before we lose the objects
+                    if (_allPartVMs is not null) foreach (var pVM in _allPartVMs) pVM.Unsubscribe();
+
+                    _allPartVMs = value; InvokePropertyChanged();
+                }
+            }
         }
 
         private PartVM[] _selectedPartVMs = Array.Empty<PartVM>();
@@ -224,14 +243,10 @@ namespace KiCad_DB_Editor.ViewModel
             Library = library;
 
             Library.TopLevelCategories.CollectionChanged += Library_TopLevelCategories_CollectionChanged;
-            // Make sure TopLevelCategoryVM unsubscribes before we lose the objects
-            if (TopLevelCategoryVMs is not null) foreach (var cVM in TopLevelCategoryVMs) cVM.Unsubscribe();
             TopLevelCategoryVMs = new(library.TopLevelCategories.Select(c => new CategoryVM(c)));
             Debug.Assert(_topLevelCategoryVMs is not null);
 
             Library.AllParts.CollectionChanged += AllParts_CollectionChanged;
-            // Make sure PartVM unsubscribes before we lose the objects
-            if (AllPartVMs is not null) foreach (var pVM in AllPartVMs) pVM.Unsubscribe();
             AllPartVMs = new(Library.AllParts.Select(p => new PartVM(p)));
             Debug.Assert(_allPartVMs is not null);
 
@@ -262,7 +277,7 @@ namespace KiCad_DB_Editor.ViewModel
             UpdateKiCadFootprintLibraryCommand = new BasicCommand(UpdateKiCadFootprintLibraryCommandExecuted, UpdateKiCadFootprintLibraryCommandCanExecute);
             DeleteKiCadFootprintLibraryCommand = new BasicCommand(DeleteKiCadFootprintLibraryCommandExecuted, DeleteKiCadFootprintLibraryCommandCanExecute);
             ReparseKiCadFootprintNamesCommand = new BasicCommand(ReparseKiCadFootprintNamesCommandExecuted, ReparseKiCadFootprintNamesCommandCanExecute);
-            
+
         }
 
         public void Unsubscribe()
@@ -288,8 +303,6 @@ namespace KiCad_DB_Editor.ViewModel
                     break;
                 case NotifyCollectionChangedAction.Reset:
                 default:
-                    // Make sure PartVM unsubscribes before we lose the objects
-                    if (AllPartVMs is not null) foreach (var pVM in AllPartVMs) pVM.Unsubscribe();
                     AllPartVMs = new(Library.AllParts.Select(p => new PartVM(p)));
                     break;
             }
@@ -319,8 +332,6 @@ namespace KiCad_DB_Editor.ViewModel
                     TopLevelCategoryVMs.Insert(e.NewStartingIndex, cVMToAdd);
                     break;
                 default:
-                    // Make sure TopLevelCategoryVM unsubscribes before we lose the objects
-                    if (TopLevelCategoryVMs is not null) foreach (var cVM in TopLevelCategoryVMs) cVM.Unsubscribe();
                     TopLevelCategoryVMs = new(Library.TopLevelCategories.Select(c => new CategoryVM(c)));
                     break;
             }

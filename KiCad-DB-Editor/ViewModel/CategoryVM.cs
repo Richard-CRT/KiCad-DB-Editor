@@ -75,14 +75,34 @@ namespace KiCad_DB_Editor.ViewModel
         public ObservableCollectionEx<CategoryVM> CategoryVMs
         {
             get { return _categoryVMs; }
-            set { if (_categoryVMs != value) { _categoryVMs = value; InvokePropertyChanged(); } }
+            set
+            {
+                if (_categoryVMs != value)
+                {
+                    // Make sure CategoryVM unsubscribes before we lose the objects
+                    if (_categoryVMs is not null) foreach (var cVM in _categoryVMs) cVM.Unsubscribe();
+
+                    _categoryVMs = value;
+                    InvokePropertyChanged();
+                }
+            }
         }
 
         private ObservableCollectionEx<PartVM> _partVMs;
         public ObservableCollectionEx<PartVM> PartVMs
         {
             get { return _partVMs; }
-            set { if (_partVMs != value) { _partVMs = value; InvokePropertyChanged(); } }
+            set
+            {
+                if (_partVMs != value)
+                {
+                    // Make sure PartVM unsubscribes before we lose the objects
+                    if (_partVMs is not null) foreach (var pVM in _partVMs) pVM.Unsubscribe();
+
+                    _partVMs = value;
+                    InvokePropertyChanged();
+                }
+            }
         }
 
         private Parameter? _selectedAvailableParameter = null;
@@ -104,14 +124,7 @@ namespace KiCad_DB_Editor.ViewModel
         {
             // For some reason I can't do OneWayToSource :(
             get { return _selectedPartVMs; }
-            set
-            {
-                if (_selectedPartVMs != value)
-                {
-                    _selectedPartVMs = value;
-                    InvokePropertyChanged();
-                }
-            }
+            set { if (_selectedPartVMs != value) { _selectedPartVMs = value; InvokePropertyChanged(); } }
         }
 
         #endregion Notify Properties
@@ -124,14 +137,10 @@ namespace KiCad_DB_Editor.ViewModel
             Category.PropertyChanged += Category_PropertyChanged;
 
             Category.Categories.CollectionChanged += Categories_CollectionChanged;
-            // Make sure CategoryVM unsubscribes before we lose the objects
-            if (CategoryVMs is not null) foreach (var cVM in CategoryVMs) cVM.Unsubscribe();
             CategoryVMs = new(Category.Categories.Select(c => new CategoryVM(c)));
             Debug.Assert(_categoryVMs is not null);
 
             Category.Parts.CollectionChanged += Parts_CollectionChanged;
-            // Make sure PartVM unsubscribes before we lose the objects
-            if (PartVMs is not null) foreach (var pVM in PartVMs) pVM.Unsubscribe();
             PartVMs = new(Category.Parts.Select(p => new PartVM(p)));
             Debug.Assert(_partVMs is not null);
 
@@ -174,8 +183,6 @@ namespace KiCad_DB_Editor.ViewModel
                     break;
                 case NotifyCollectionChangedAction.Reset:
                 default:
-                    // Make sure PartVM unsubscribes before we lose the objects
-                    if (PartVMs is not null) foreach (var pVM in PartVMs) pVM.Unsubscribe();
                     PartVMs = new(Category.Parts.Select(p => new PartVM(p)));
                     break;
             }
@@ -206,8 +213,6 @@ namespace KiCad_DB_Editor.ViewModel
                     break;
                 case NotifyCollectionChangedAction.Replace:
                 default:
-                    // Make sure CategoryVM unsubscribes before we lose the objects
-                    if (CategoryVMs is not null) foreach (var cVM in CategoryVMs) cVM.Unsubscribe();
                     CategoryVMs = new(Category.Categories.Select(c => new CategoryVM(c)));
                     break;
             }

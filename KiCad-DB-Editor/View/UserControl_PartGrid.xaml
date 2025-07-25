@@ -194,7 +194,7 @@
                     <DataGridTemplateColumn.Header>
                         <StackPanel>
                             <TextBlock Text="Sym. Library" HorizontalAlignment="Center" />
-                            <TextBlock Text="" HorizontalAlignment="Center" />
+                            <TextBox Text="{Binding DataContext.SymbolLibraryNameFilter, Mode=TwoWay, Source={x:Reference dummyElementToGetDataContext}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"/>
                         </StackPanel>
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
@@ -223,7 +223,7 @@
                     <DataGridTemplateColumn.Header>
                         <StackPanel>
                             <TextBlock Text="Sym. Name" HorizontalAlignment="Center" />
-                            <TextBlock Text="" HorizontalAlignment="Center" />
+                            <TextBox Text="{Binding DataContext.SymbolNameFilter, Mode=TwoWay, Source={x:Reference dummyElementToGetDataContext}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"/>
                         </StackPanel>
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>

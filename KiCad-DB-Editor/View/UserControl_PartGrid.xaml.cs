@@ -149,10 +149,7 @@ namespace KiCad_DB_Editor.View
 
         private static void ParameterVMsPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is UserControl_PartGrid uc_pg)
-            {
-                uc_pg.ParametersPropertyChanged();
-            }
+            if (d is UserControl_PartGrid uc_pg) uc_pg.ParametersPropertyChanged();
         }
 
         private ObservableCollectionEx<Parameter>? oldParameters = null;
@@ -254,8 +251,7 @@ namespace KiCad_DB_Editor.View
 
         private static void PartVMsPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is UserControl_PartGrid uc_pg)
-                uc_pg.PartVMsPropertyChanged();
+            if (d is UserControl_PartGrid uc_pg) uc_pg.PartVMsPropertyChanged();
         }
 
         private ObservableCollectionEx<PartVM>? oldPartVMs = null;
@@ -404,6 +400,18 @@ namespace KiCad_DB_Editor.View
         private static void ValueFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.SpecialParameterFilterPropertyChanged(); }
 
 
+        public static readonly DependencyProperty SymbolLibraryNameFilterProperty = DependencyProperty.Register(nameof(SymbolLibraryNameFilter), typeof(string), typeof(UserControl_PartGrid),
+            new PropertyMetadata(new PropertyChangedCallback(SymbolLibraryNameFilterPropertyChangedCallback)));
+        public string SymbolLibraryNameFilter { get => (string)GetValue(SymbolLibraryNameFilterProperty); set => SetValue(SymbolLibraryNameFilterProperty, value); }
+        private static void SymbolLibraryNameFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.SpecialParameterFilterPropertyChanged(); }
+
+
+        public static readonly DependencyProperty SymbolNameFilterProperty = DependencyProperty.Register(nameof(SymbolNameFilter), typeof(string), typeof(UserControl_PartGrid),
+            new PropertyMetadata(new PropertyChangedCallback(SymbolNameFilterPropertyChangedCallback)));
+        public string SymbolNameFilter { get => (string)GetValue(SymbolNameFilterProperty); set => SetValue(SymbolNameFilterProperty, value); }
+        private static void SymbolNameFilterPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) { if (d is UserControl_PartGrid uc_pg) uc_pg.SpecialParameterFilterPropertyChanged(); }
+
+
         public static readonly DependencyProperty DescriptionFilterProperty = DependencyProperty.Register(nameof(DescriptionFilter), typeof(string), typeof(UserControl_PartGrid),
             new PropertyMetadata(new PropertyChangedCallback(DescriptionFilterPropertyChangedCallback)));
         public string DescriptionFilter { get => (string)GetValue(DescriptionFilterProperty); set => SetValue(DescriptionFilterProperty, value); }
@@ -427,6 +435,12 @@ namespace KiCad_DB_Editor.View
         public static readonly DependencyProperty ParameterFilterAccessorProperty = DependencyProperty.Register(nameof(ParameterFilterAccessor), typeof(ParameterFilterAccessor), typeof(UserControl_PartGrid));
         public ParameterFilterAccessor ParameterFilterAccessor { get => (ParameterFilterAccessor)GetValue(ParameterFilterAccessorProperty); private set => SetValue(ParameterFilterAccessorProperty, value); }
 
+        public static readonly DependencyProperty FootprintLibraryNameFilterAccessorProperty = DependencyProperty.Register(nameof(FootprintLibraryNameFilterAccessor), typeof(FootprintLibraryNameFilterAccessor), typeof(UserControl_PartGrid));
+        public FootprintLibraryNameFilterAccessor FootprintLibraryNameFilterAccessor { get => (FootprintLibraryNameFilterAccessor)GetValue(FootprintLibraryNameFilterAccessorProperty); private set => SetValue(FootprintLibraryNameFilterAccessorProperty, value); }
+
+        public static readonly DependencyProperty FootprintNameFilterAccessorProperty = DependencyProperty.Register(nameof(FootprintNameFilterAccessor), typeof(FootprintNameFilterAccessor), typeof(UserControl_PartGrid));
+        public FootprintNameFilterAccessor FootprintNameFilterAccessor { get => (FootprintNameFilterAccessor)GetValue(FootprintNameFilterAccessorProperty); private set => SetValue(FootprintNameFilterAccessorProperty, value); }
+
         #endregion
 
         #endregion
@@ -438,7 +452,7 @@ namespace KiCad_DB_Editor.View
         }
 
         public Dictionary<Parameter, string> ParameterFilterValues { get; set; } = new();
-
+        public ObservableCollectionEx<(string, string)> FootprintFilterValuePairs = new();
 
         bool OnFilterPartVMsCollectionView(object item)
         {
@@ -451,6 +465,8 @@ namespace KiCad_DB_Editor.View
                 part.Manufacturer.Contains(OverallFilter) ||
                 part.MPN.Contains(OverallFilter) ||
                 part.Value.Contains(OverallFilter) ||
+                part.SymbolLibraryName.Contains(OverallFilter) ||
+                part.SymbolName.Contains(OverallFilter) ||
                 part.Description.Contains(OverallFilter) ||
                 part.Datasheet.Contains(OverallFilter);
 
@@ -459,9 +475,10 @@ namespace KiCad_DB_Editor.View
                 (string.IsNullOrEmpty(ManufacturerFilter) || part.Manufacturer.Contains(ManufacturerFilter)) &&
                 (string.IsNullOrEmpty(MPNFilter) || part.MPN.Contains(MPNFilter)) &&
                 (string.IsNullOrEmpty(ValueFilter) || part.Value.Contains(ValueFilter)) &&
+                (string.IsNullOrEmpty(SymbolLibraryNameFilter) || part.SymbolLibraryName.Contains(SymbolLibraryNameFilter)) &&
+                (string.IsNullOrEmpty(SymbolNameFilter) || part.SymbolName.Contains(SymbolNameFilter)) &&
                 (string.IsNullOrEmpty(DescriptionFilter) || part.Description.Contains(DescriptionFilter)) &&
                 (string.IsNullOrEmpty(DatasheetFilter) || part.Datasheet.Contains(DatasheetFilter));
-
 
             if (specialParameterMatch)
             {
@@ -478,13 +495,44 @@ namespace KiCad_DB_Editor.View
                     if (!overallFilterMatch)
                     {
                         // Means overall filter is set but not yet satisfied
-                        if ((paramVal is not null || part.ParameterValues.TryGetValue(parameter, out paramVal)) && paramVal.Contains(OverallFilter!))
-                        {
+                        if ((paramVal is not null || part.ParameterValues.TryGetValue(parameter, out paramVal)) && paramVal.Contains(OverallFilter))
                             overallFilterMatch = true;
-                        }
                     }
                 }
-                return overallFilterMatch && parameterMatch;
+                if (parameterMatch)
+                {
+                    bool footprintMatch = true;
+                    for (int footprintFilterValuePairIndex = 0; footprintFilterValuePairIndex < FootprintFilterValuePairs.Count; footprintFilterValuePairIndex++)
+                    {
+                        (string libraryNameFilterValue, string nameFilterValue) = FootprintFilterValuePairs[footprintFilterValuePairIndex];
+                        if (footprintFilterValuePairIndex < part.FootprintPairs.Count)
+                        {
+                            (string libraryName, string name) = part.FootprintPairs[footprintFilterValuePairIndex];
+
+                            if ((libraryNameFilterValue != "" && !libraryName.Contains(libraryNameFilterValue)) ||
+                                (nameFilterValue != "" && !name.Contains(nameFilterValue)))
+                            {
+                                footprintMatch = false;
+                                break;
+                            }
+
+                            if (!overallFilterMatch)
+                            {
+                                // Means overall filter is set but not yet satisfied
+                                if (libraryName.Contains(OverallFilter) || name.Contains(OverallFilter))
+                                    overallFilterMatch = true;
+                            }
+                        }
+                        else if (libraryNameFilterValue != "" || nameFilterValue != "")
+                        {
+                            footprintMatch = false;
+                            break;
+                        }
+                    }
+                    return overallFilterMatch && footprintMatch;
+                }
+                else
+                    return false;
             }
             else
                 return false;
@@ -494,17 +542,20 @@ namespace KiCad_DB_Editor.View
         private DataGridTemplateColumn newFootprintColumn(int footprintIndex, bool libraryColumn)
         {
             string header;
+            string headerValueBindingTarget;
             string valueBindingTarget;
             string optionsBindingTarget;
             if (libraryColumn)
             {
                 header = $"Fprt. {footprintIndex + 1} Library";
+                headerValueBindingTarget = $"DataContext.FootprintLibraryNameFilterAccessor[{footprintIndex}]";
                 valueBindingTarget = $"FootprintLibraryNameAccessor[{footprintIndex}]";
                 optionsBindingTarget = "Part.ParentLibrary.KiCadFootprintLibraries";
             }
             else
             {
                 header = $"Fprt. {footprintIndex + 1} Name";
+                headerValueBindingTarget = $"DataContext.FootprintNameFilterAccessor[{footprintIndex}]";
                 valueBindingTarget = $"FootprintNameAccessor[{footprintIndex}]";
                 optionsBindingTarget = $"SelectedFootprintLibraryAccessor[{footprintIndex}].KiCadFootprintNames";
             }
@@ -514,11 +565,19 @@ namespace KiCad_DB_Editor.View
             dataGridTemplateColumn.SortMemberPath = valueBindingTarget;
 
             // Like the XAML symbol example but for footprint columns
-            var stackPanel = new StackPanel();
-            var headerTextBlock = new TextBlock();
+            StackPanel stackPanel = new();
+            TextBlock headerTextBlock = new();
             headerTextBlock.Text = header;
             stackPanel.Children.Add(headerTextBlock);
-            stackPanel.Children.Add(new TextBlock());
+
+            TextBox headerTextBox = new();
+            Binding headerValueBinding = new(headerValueBindingTarget);
+            headerValueBinding.Mode = BindingMode.TwoWay;
+            headerValueBinding.Source = dummyElementToGetDataContext;
+            headerValueBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+            headerValueBinding.ValidatesOnExceptions = true;
+            headerTextBox.SetBinding(TextBox.TextProperty, headerValueBinding);
+            stackPanel.Children.Add(headerTextBox);
             dataGridTemplateColumn.Header = stackPanel;
 
             Binding valueBinding = new(valueBindingTarget);
@@ -564,7 +623,7 @@ namespace KiCad_DB_Editor.View
             if (libraryColumn)
             {
                 // Note this one not present for footprint names
-                cellEditingTemplateFrameworkElementFactory.SetValue(ComboBox.DisplayMemberPathProperty, "Nickname");   
+                cellEditingTemplateFrameworkElementFactory.SetValue(ComboBox.DisplayMemberPathProperty, "Nickname");
             }
             cellEditingTemplateFrameworkElementFactory.SetValue(ComboBox.ItemStringFormatProperty, "↪ {0}");
             cellEditingTemplate.VisualTree = cellEditingTemplateFrameworkElementFactory;
@@ -737,6 +796,7 @@ namespace KiCad_DB_Editor.View
                             var parameterThatNeedsToBeRemoved = (e.OldItems[0] as Parameter)!;
                             DataGridTextColumn column = parameterToDataGridColumn[parameterThatNeedsToBeRemoved];
                             dataGrid_Main.Columns.Remove(column);
+                            BindingOperations.ClearAllBindings(column); // Not sure this is necessary but can't hurt
                             parametersThatHaveColumns.Remove(parameterThatNeedsToBeRemoved);
                             parameterToDataGridColumn.Remove(parameterThatNeedsToBeRemoved);
                         }
@@ -769,6 +829,7 @@ namespace KiCad_DB_Editor.View
                             {
                                 DataGridTextColumn column = parameterToDataGridColumn[parameter];
                                 dataGrid_Main.Columns.Remove(column);
+                                BindingOperations.ClearAllBindings(column); // Not sure this is necessary but can't hurt
                                 parametersThatHaveColumns.Remove(parameter);
                                 parameterToDataGridColumn.Remove(parameter);
                             }
@@ -790,7 +851,10 @@ namespace KiCad_DB_Editor.View
             else
             {
                 foreach (DataGridTextColumn columnToRemove in parameterToDataGridColumn.Values)
+                {
                     dataGrid_Main.Columns.Remove(columnToRemove);
+                    BindingOperations.ClearAllBindings(columnToRemove); // Not sure this is necessary but can't hurt
+                }
                 parametersThatHaveColumns.Clear();
                 parameterToDataGridColumn.Clear();
             }
@@ -813,12 +877,16 @@ namespace KiCad_DB_Editor.View
                     {
                         for (int footprintIndexColumnToRemove = _lastMaxFootprints - 1; footprintIndexColumnToRemove >= maxFootprints; footprintIndexColumnToRemove--)
                         {
+                            FootprintFilterValuePairs.RemoveAt(footprintIndexColumnToRemove);
+
                             DataGridColumn column1 = footprintIndexToLibraryDataGridColumn[footprintIndexColumnToRemove];
                             dataGrid_Main.Columns.Remove(column1);
+                            BindingOperations.ClearAllBindings(column1); // Not sure this is necessary but can't hurt
                             footprintIndexToLibraryDataGridColumn.Remove(footprintIndexColumnToRemove);
 
                             DataGridColumn column2 = footprintIndexToNameDataGridColumn[footprintIndexColumnToRemove];
                             dataGrid_Main.Columns.Remove(column2);
+                            BindingOperations.ClearAllBindings(column2); // Not sure this is necessary but can't hurt
                             footprintIndexToNameDataGridColumn.Remove(footprintIndexColumnToRemove);
                         }
                     }
@@ -826,6 +894,8 @@ namespace KiCad_DB_Editor.View
                     {
                         for (int i = _lastMaxFootprints; i < maxFootprints; i++)
                         {
+                            FootprintFilterValuePairs.Add(("", ""));
+
                             newFootprintNameColumn(i);
                             newFootprintLibraryColumn(i);
                         }
@@ -837,10 +907,16 @@ namespace KiCad_DB_Editor.View
             else
             {
                 foreach (DataGridColumn columnToRemove in footprintIndexToLibraryDataGridColumn.Values)
+                {
                     dataGrid_Main.Columns.Remove(columnToRemove);
+                    BindingOperations.ClearAllBindings(columnToRemove); // Not sure this is necessary but can't hurt
+                }
                 footprintIndexToLibraryDataGridColumn.Clear();
                 foreach (DataGridColumn columnToRemove in footprintIndexToNameDataGridColumn.Values)
+                {
                     dataGrid_Main.Columns.Remove(columnToRemove);
+                    BindingOperations.ClearAllBindings(columnToRemove); // Not sure this is necessary but can't hurt
+                }
                 footprintIndexToNameDataGridColumn.Clear();
                 _lastMaxFootprints = 0;
             }
@@ -851,6 +927,8 @@ namespace KiCad_DB_Editor.View
             InitializeComponent();
 
             ParameterFilterAccessor = new(this);
+            FootprintNameFilterAccessor = new(this);
+            FootprintLibraryNameFilterAccessor = new(this);
 
             OpenDatasheetFileCommand = new BasicCommand(OpenDatasheetFileCommandExecuted, OpenDatasheetFileCommandCanExecute);
             BrowseDatasheetFileCommand = new BasicCommand(BrowseDatasheetFileCommandExecuted, BrowseDatasheetFileCommandCanExecute);
@@ -1214,4 +1292,87 @@ namespace KiCad_DB_Editor.View
             OwnerUserControl_PartGrid = ownerUC_PG;
         }
     }
+
+    public class FootprintLibraryNameFilterAccessor : NotifyObject
+    {
+        public readonly UserControl_PartGrid OwnerUserControl_PartGrid;
+
+        #region Notify Properties
+
+        public string? this[int index]
+        {
+            get
+            {
+                if (OwnerUserControl_PartGrid.FootprintFilterValuePairs.Count > index)
+                    return OwnerUserControl_PartGrid.FootprintFilterValuePairs[index].Item1;
+                else
+                    return null;
+            }
+            set
+            {
+                if (value is not null)
+                {
+                    if (OwnerUserControl_PartGrid.FootprintFilterValuePairs.Count > index)
+                    {
+                        OwnerUserControl_PartGrid.FootprintFilterValuePairs[index] = (value, OwnerUserControl_PartGrid.FootprintFilterValuePairs[index].Item2);
+                        InvokePropertyChanged($"Item[]");
+
+                        IEditableCollectionView itemsView = OwnerUserControl_PartGrid.dataGrid_Main.Items;
+                        if (itemsView.IsAddingNew) itemsView.CommitNew();
+                        if (itemsView.IsEditingItem) itemsView.CommitEdit();
+                        OwnerUserControl_PartGrid.PartVMsCollectionView.Refresh();
+                    }
+                }
+            }
+        }
+
+        #endregion Notify Properties
+
+        public FootprintLibraryNameFilterAccessor(UserControl_PartGrid ownerUC_PG)
+        {
+            OwnerUserControl_PartGrid = ownerUC_PG;
+        }
+    }
+
+    public class FootprintNameFilterAccessor : NotifyObject
+    {
+        public readonly UserControl_PartGrid OwnerUserControl_PartGrid;
+
+        #region Notify Properties
+
+        public string? this[int index]
+        {
+            get
+            {
+                if (OwnerUserControl_PartGrid.FootprintFilterValuePairs.Count > index)
+                    return OwnerUserControl_PartGrid.FootprintFilterValuePairs[index].Item2;
+                else
+                    return null;
+            }
+            set
+            {
+                if (value is not null)
+                {
+                    if (OwnerUserControl_PartGrid.FootprintFilterValuePairs.Count > index)
+                    {
+                        OwnerUserControl_PartGrid.FootprintFilterValuePairs[index] = (OwnerUserControl_PartGrid.FootprintFilterValuePairs[index].Item1, value);
+                        InvokePropertyChanged($"Item[]");
+
+                        IEditableCollectionView itemsView = OwnerUserControl_PartGrid.dataGrid_Main.Items;
+                        if (itemsView.IsAddingNew) itemsView.CommitNew();
+                        if (itemsView.IsEditingItem) itemsView.CommitEdit();
+                        OwnerUserControl_PartGrid.PartVMsCollectionView.Refresh();
+                    }
+                }
+            }
+        }
+
+        #endregion Notify Properties
+
+        public FootprintNameFilterAccessor(UserControl_PartGrid ownerUC_PG)
+        {
+            OwnerUserControl_PartGrid = ownerUC_PG;
+        }
+    }
+
 }

@@ -41,8 +41,7 @@ namespace KiCad_DB_Editor.Model
                 if (projectDirectory is null || projectDirectory == "" || projectName is null || projectName == "")
                     throw new InvalidOperationException();
 
-                string dataFilePath = Path.Combine(projectDirectory, projectName);
-                dataFilePath += ".sqlite3";
+                string dataFilePath = Path.Combine(projectDirectory, projectName) + ".sqlite3";
 
                 // Must populate these before KiCadSymbolLibraries and KiCadFootprintLibraries
                 library.ProjectDirectoryPath = projectDirectory;
@@ -372,7 +371,6 @@ namespace KiCad_DB_Editor.Model
                 this.ProjectName = projectName;
 
                 string dataFilePath = Path.Combine(this.ProjectDirectoryPath, this.ProjectName) + ".sqlite3";
-                dataFilePath += ".sqlite3";
 
                 if (autosave)
                 {

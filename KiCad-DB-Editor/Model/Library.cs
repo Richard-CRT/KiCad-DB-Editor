@@ -371,7 +371,7 @@ namespace KiCad_DB_Editor.Model
                 this.ProjectDirectoryPath = projectDirectory;
                 this.ProjectName = projectName;
 
-                string dataFilePath = Path.Combine(this.ProjectDirectoryPath, this.ProjectName);
+                string dataFilePath = Path.Combine(this.ProjectDirectoryPath, this.ProjectName) + ".sqlite3";
                 dataFilePath += ".sqlite3";
 
                 if (autosave)
@@ -380,8 +380,8 @@ namespace KiCad_DB_Editor.Model
                     dataFilePath += ".autosave";
                 }
 
-                string tempProjectPath = $"proj.tmp";
-                string tempDataPath = $"data.tmp";
+                string tempProjectPath = "project_file.tmp";
+                string tempDataPath = "project_data.tmp";
 
                 JsonLibrary jsonLibrary = new JsonLibrary(this);
                 if (!jsonLibrary.WriteToFile(tempProjectPath, autosave)) return false;
@@ -688,6 +688,9 @@ VALUES (
                 File.Copy(tempProjectPath, projectFilePath, overwrite: true);
                 File.Copy(tempDataPath, dataFilePath, overwrite: true);
 
+                File.Delete(tempProjectPath);
+                File.Delete(tempDataPath);
+
                 return true;
             }
             catch (Exception)
@@ -713,11 +716,10 @@ VALUES (
                 if (parentDirectory is null || parentDirectory == "" || !Directory.Exists(parentDirectory) || fileName is null || fileName == "" || fileExtension is null || fileExtension != ".kicad_dbl")
                     throw new InvalidOperationException();
 
-                string kiCadSqliteFilePath = Path.Combine(parentDirectory, fileName);
-                kiCadSqliteFilePath += ".sqlite3";
+                string kiCadSqliteFilePath = Path.Combine(parentDirectory, fileName) + ".sqlite3";
 
-                string tempDbConfPath = $"db_conf.tmp";
-                string tempSqlitePath = $"sqlite.tmp";
+                string tempDbConfPath = "kicad_db_conf.tmp";
+                string tempSqlitePath = "kicad_db_sqlite.tmp";
 
                 Dictionary<Category, string> categoryToKiCadExportCategoryStringMap = new();
                 foreach (Category category in AllCategories)
@@ -914,6 +916,9 @@ $exclude_from_sim, "
 
                 File.Copy(tempDbConfPath, kiCadDbConfFilePath, overwrite: true);
                 File.Copy(tempSqlitePath, kiCadSqliteFilePath, overwrite: true);
+
+                File.Delete(tempDbConfPath);
+                File.Delete(tempSqlitePath);
 
                 return true;
             }

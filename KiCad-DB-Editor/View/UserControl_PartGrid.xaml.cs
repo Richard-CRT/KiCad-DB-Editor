@@ -28,6 +28,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -425,10 +426,7 @@ namespace KiCad_DB_Editor.View
 
         protected void SpecialParameterFilterPropertyChanged()
         {
-            IEditableCollectionView itemsView = dataGrid_Main.Items;
-            if (itemsView.IsAddingNew) itemsView.CommitNew();
-            if (itemsView.IsEditingItem) itemsView.CommitEdit();
-            PartVMsCollectionView.Refresh();
+            PartVMsCollectionViewStartFilterTimer();
         }
 
 
@@ -453,6 +451,23 @@ namespace KiCad_DB_Editor.View
 
         public Dictionary<Parameter, string> ParameterFilterValues { get; set; } = new();
         public ObservableCollectionEx<(string, string)> FootprintFilterValuePairs = new();
+
+        private DispatcherTimer _partVMsCollectionViewFilterTimer;
+        public void PartVMsCollectionViewStartFilterTimer()
+        {
+            // Reset the interval
+            _partVMsCollectionViewFilterTimer.Stop();
+            _partVMsCollectionViewFilterTimer.Start();
+        }
+
+        private void _partVMsCollectionViewFilterTimer_Tick(object? sender, EventArgs e)
+        {
+            _partVMsCollectionViewFilterTimer.Stop();
+            IEditableCollectionView itemsView = dataGrid_Main.Items;
+            if (itemsView.IsAddingNew) itemsView.CommitNew();
+            if (itemsView.IsEditingItem) itemsView.CommitEdit();
+            PartVMsCollectionView.Refresh();
+        }
 
         bool OnFilterPartVMsCollectionView(object item)
         {
@@ -932,6 +947,10 @@ namespace KiCad_DB_Editor.View
 
             OpenDatasheetFileCommand = new BasicCommand(OpenDatasheetFileCommandExecuted, OpenDatasheetFileCommandCanExecute);
             BrowseDatasheetFileCommand = new BasicCommand(BrowseDatasheetFileCommandExecuted, BrowseDatasheetFileCommandCanExecute);
+
+            _partVMsCollectionViewFilterTimer = new();
+            _partVMsCollectionViewFilterTimer.Interval = TimeSpan.FromMilliseconds(400);
+            _partVMsCollectionViewFilterTimer.Tick += _partVMsCollectionViewFilterTimer_Tick;
         }
 
         private void dataGrid_Main_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
@@ -1275,10 +1294,7 @@ namespace KiCad_DB_Editor.View
                             OwnerUserControl_PartGrid.ParameterFilterValues[parameter] = value;
                             InvokePropertyChanged($"Item[]");
 
-                            IEditableCollectionView itemsView = OwnerUserControl_PartGrid.dataGrid_Main.Items;
-                            if (itemsView.IsAddingNew) itemsView.CommitNew();
-                            if (itemsView.IsEditingItem) itemsView.CommitEdit();
-                            OwnerUserControl_PartGrid.PartVMsCollectionView.Refresh();
+                            OwnerUserControl_PartGrid.PartVMsCollectionViewStartFilterTimer();
                         }
                     }
                 }
@@ -1317,10 +1333,7 @@ namespace KiCad_DB_Editor.View
                         OwnerUserControl_PartGrid.FootprintFilterValuePairs[index] = (value, OwnerUserControl_PartGrid.FootprintFilterValuePairs[index].Item2);
                         InvokePropertyChanged($"Item[]");
 
-                        IEditableCollectionView itemsView = OwnerUserControl_PartGrid.dataGrid_Main.Items;
-                        if (itemsView.IsAddingNew) itemsView.CommitNew();
-                        if (itemsView.IsEditingItem) itemsView.CommitEdit();
-                        OwnerUserControl_PartGrid.PartVMsCollectionView.Refresh();
+                        OwnerUserControl_PartGrid.PartVMsCollectionViewStartFilterTimer();
                     }
                 }
             }
@@ -1358,10 +1371,7 @@ namespace KiCad_DB_Editor.View
                         OwnerUserControl_PartGrid.FootprintFilterValuePairs[index] = (OwnerUserControl_PartGrid.FootprintFilterValuePairs[index].Item1, value);
                         InvokePropertyChanged($"Item[]");
 
-                        IEditableCollectionView itemsView = OwnerUserControl_PartGrid.dataGrid_Main.Items;
-                        if (itemsView.IsAddingNew) itemsView.CommitNew();
-                        if (itemsView.IsEditingItem) itemsView.CommitEdit();
-                        OwnerUserControl_PartGrid.PartVMsCollectionView.Refresh();
+                        OwnerUserControl_PartGrid.PartVMsCollectionViewStartFilterTimer();
                     }
                 }
             }

@@ -97,10 +97,10 @@ namespace KiCad_DB_Editor.ViewModel
         {
             if (LibraryVM is not null && Properties.Settings.Default.OpenProjectPath != "" && Properties.Settings.Default.OpenProjectPath != "New Project")
             {
-                if (!LibraryVM.Library.WriteToFile(Properties.Settings.Default.OpenProjectPath, autosave: true))
+                if (!LibraryVM.Library.WriteToFile(Properties.Settings.Default.OpenProjectPath, out string errorMessage, autosave: true))
                 {
                     // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
-                    (new View.Dialogs.Window_ErrorDialog("Save failed!")).ShowDialog();
+                    (new View.Dialogs.Window_ErrorDialog($"Save failed!{Environment.NewLine}{Environment.NewLine}Details:{Environment.NewLine}{errorMessage}")).ShowDialog();
                     // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
                 }
             }
@@ -166,16 +166,16 @@ namespace KiCad_DB_Editor.ViewModel
 
             if (Properties.Settings.Default.OpenProjectPath != "" && Properties.Settings.Default.OpenProjectPath != "New Project")
             {
-                if (!LibraryVM.Library.WriteToFile(Properties.Settings.Default.OpenProjectPath))
+                if (!LibraryVM.Library.WriteToFile(Properties.Settings.Default.OpenProjectPath, out string errorMessage))
                 {
                     // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
-                    (new View.Dialogs.Window_ErrorDialog("Save failed!")).ShowDialog();
+                    (new View.Dialogs.Window_ErrorDialog($"Save failed!{Environment.NewLine}{Environment.NewLine}Details:{Environment.NewLine}{errorMessage}")).ShowDialog();
                     // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
                 }
-                else if (LibraryVM.Library.KiCadAutoExportOnSave && !LibraryVM.Library.ExportToKiCad(true))
+                else if (LibraryVM.Library.KiCadAutoExportOnSave && !LibraryVM.Library.AutoExportToKiCad(out errorMessage))
                 {
                     // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
-                    (new View.Dialogs.Window_ErrorDialog("Export failed!")).ShowDialog();
+                    (new View.Dialogs.Window_ErrorDialog($"Export failed!{Environment.NewLine}{Environment.NewLine}Details:{Environment.NewLine}{errorMessage}")).ShowDialog();
                     // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
                 }
 
@@ -198,23 +198,23 @@ namespace KiCad_DB_Editor.ViewModel
             saveFileDialog.Filter = "Project file (*.kidbe_proj)|*.kidbe_proj|All files (*.*)|*.*";
             if (saveFileDialog.ShowDialog() == true)
             {
-                if (LibraryVM.Library.WriteToFile(saveFileDialog.FileName))
+                if (LibraryVM.Library.WriteToFile(saveFileDialog.FileName, out string errorMessage))
                 {
                     Properties.Settings.Default.OpenProjectPath = saveFileDialog.FileName;
                     Properties.Settings.Default.Save();
                     InvokePropertyChanged(nameof(WindowTitle));
 
-                    if (LibraryVM.Library.KiCadAutoExportOnSave && !LibraryVM.Library.ExportToKiCad(true))
+                    if (LibraryVM.Library.KiCadAutoExportOnSave && !LibraryVM.Library.AutoExportToKiCad(out errorMessage))
                     {
                         // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
-                        (new View.Dialogs.Window_ErrorDialog("Export failed!")).ShowDialog();
+                        (new View.Dialogs.Window_ErrorDialog($"Export failed!{Environment.NewLine}{Environment.NewLine}Details:{Environment.NewLine}{errorMessage}")).ShowDialog();
                         // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
                     }
                 }
                 else
                 {
                     // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
-                    (new View.Dialogs.Window_ErrorDialog("Save failed!")).ShowDialog();
+                    (new View.Dialogs.Window_ErrorDialog($"Save failed!{Environment.NewLine}{Environment.NewLine}Details:{Environment.NewLine}{errorMessage}")).ShowDialog();
                     // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
                 }
             }

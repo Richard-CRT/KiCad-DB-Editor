@@ -354,8 +354,9 @@ namespace KiCad_DB_Editor.Model
             foreach (var c in AllCategories) c.ParentLibrary_AllParameter_PropertyChanged(sender, e);
         }
 
-        public bool WriteToFile(string projectFilePath, bool autosave = false)
+        public bool WriteToFile(string projectFilePath, out string errorMessage, bool autosave = false)
         {
+            errorMessage = "";
             try
             {
                 projectFilePath = Path.GetFullPath(projectFilePath);
@@ -682,22 +683,27 @@ VALUES (
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 SqliteConnection.ClearAllPools();
+                errorMessage = ex.Message;
                 return false;
             }
         }
 
-        public bool ExportToKiCad(bool autoExport, string kiCadDbConfFilePath = "")
+        public bool AutoExportToKiCad(out string errorMessage)
+        {
+            return ExportToKiCad(Path.GetFullPath((Path.Combine(ProjectDirectoryPath, KiCadAutoExportRelativePath))), out errorMessage);
+        }
+
+        public bool ExportToKiCad(string kiCadDbConfFilePath, out string errorMessage)
         {
             // For this function we don't rely on anything being DB sanitised, even though we controlled the inputs
             // of some things. Hence lots of .Replace("'", "''") and .Replace("\"", "\"\"")
+
+            errorMessage = "";
             try
             {
-                if (autoExport)
-                    kiCadDbConfFilePath = Path.GetFullPath((Path.Combine(ProjectDirectoryPath, KiCadAutoExportRelativePath)));
-
                 string? parentDirectory = Path.GetDirectoryName(kiCadDbConfFilePath);
                 string? fileName = Path.GetFileNameWithoutExtension(kiCadDbConfFilePath);
                 string? fileExtension = Path.GetExtension(kiCadDbConfFilePath);
@@ -902,9 +908,10 @@ $exclude_from_sim, "
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 SqliteConnection.ClearAllPools();
+                errorMessage = $"{ex.GetType().Name}: {ex.Message}";
                 return false;
             }
         }

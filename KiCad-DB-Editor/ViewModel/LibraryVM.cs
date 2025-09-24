@@ -401,10 +401,10 @@ namespace KiCad_DB_Editor.ViewModel
             saveFileDialog.Filter = "Project file (*.kicad_dbl)|*.kicad_dbl|All files (*.*)|*.*";
             if (saveFileDialog.ShowDialog() == true)
             {
-                if (!this.Library.ExportToKiCad(false, saveFileDialog.FileName))
+                if (!this.Library.ExportToKiCad(saveFileDialog.FileName, out string errorMessage))
                 {
                     // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
-                    (new View.Dialogs.Window_ErrorDialog("Export failed!")).ShowDialog();
+                    (new View.Dialogs.Window_ErrorDialog($"Export failed!{Environment.NewLine}{Environment.NewLine}Details:{Environment.NewLine}{errorMessage}")).ShowDialog();
                     // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
                 }
             }

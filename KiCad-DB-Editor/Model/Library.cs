@@ -378,11 +378,8 @@ namespace KiCad_DB_Editor.Model
                     dataFilePath += ".autosave";
                 }
 
-                string tempProjectPath = "project_file.tmp";
-                string tempDataPath = "project_data.tmp";
-
                 JsonLibrary jsonLibrary = new JsonLibrary(this);
-                if (!jsonLibrary.WriteToFile(tempProjectPath, autosave)) return false;
+                if (!jsonLibrary.WriteToFile(projectFilePath, autosave)) return false;
 
                 Dictionary<Category, string> categoryToCategoryStringMap = new();
                 foreach (Category category in AllCategories)
@@ -401,8 +398,8 @@ namespace KiCad_DB_Editor.Model
                 foreach (Part part in AllParts)
                     maxFootprints = Math.Max(maxFootprints, part.FootprintPairs.Count);
 
-                File.Delete(tempDataPath);
-                using (var connection = new SqliteConnection($"Data Source={tempDataPath}"))
+                File.Delete(dataFilePath);
+                using (var connection = new SqliteConnection($"Data Source={dataFilePath}"))
                 {
                     connection.Open();
                     using (var transaction = connection.BeginTransaction())
@@ -683,12 +680,6 @@ VALUES (
                 }
                 SqliteConnection.ClearAllPools();
 
-                File.Copy(tempProjectPath, projectFilePath, overwrite: true);
-                File.Copy(tempDataPath, dataFilePath, overwrite: true);
-
-                File.Delete(tempProjectPath);
-                File.Delete(tempDataPath);
-
                 return true;
             }
             catch (Exception)
@@ -716,9 +707,6 @@ VALUES (
 
                 string kiCadSqliteFilePath = Path.Combine(parentDirectory, fileName) + ".sqlite3";
 
-                string tempDbConfPath = "kicad_db_conf.tmp";
-                string tempSqlitePath = "kicad_db_sqlite.tmp";
-
                 Dictionary<Category, string> categoryToKiCadExportCategoryStringMap = new();
                 foreach (Category category in AllCategories)
                 {
@@ -734,8 +722,8 @@ VALUES (
 
                 JsonKiCadDblFile jsonKiCadDblFile = new(this.KiCadExportPartLibraryName, this.KiCadExportPartLibraryDescription, this.KiCadExportOdbcName);
 
-                File.Delete(tempSqlitePath);
-                using (var connection = new SqliteConnection($"Data Source={tempSqlitePath}"))
+                File.Delete(kiCadSqliteFilePath);
+                using (var connection = new SqliteConnection($"Data Source={kiCadSqliteFilePath}"))
                 {
                     connection.Open();
                     using (var transaction = connection.BeginTransaction())
@@ -910,13 +898,7 @@ $exclude_from_sim, "
                 }
                 SqliteConnection.ClearAllPools();
 
-                if (!jsonKiCadDblFile.WriteToFile(tempDbConfPath)) return false;
-
-                File.Copy(tempDbConfPath, kiCadDbConfFilePath, overwrite: true);
-                File.Copy(tempSqlitePath, kiCadSqliteFilePath, overwrite: true);
-
-                File.Delete(tempDbConfPath);
-                File.Delete(tempSqlitePath);
+                if (!jsonKiCadDblFile.WriteToFile(kiCadDbConfFilePath)) return false;
 
                 return true;
             }

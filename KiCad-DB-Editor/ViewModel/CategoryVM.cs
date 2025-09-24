@@ -179,6 +179,9 @@ namespace KiCad_DB_Editor.ViewModel
                     PartVMs.Insert(e.NewStartingIndex, new(newPart));
                     break;
                 case NotifyCollectionChangedAction.Remove:
+                    // Rely on the indexes being the same as the source Parts list
+                    var pVMToRemove = PartVMs[e.OldStartingIndex];
+                    pVMToRemove.Unsubscribe();
                     PartVMs.RemoveAt(e.OldStartingIndex);
                     break;
                 case NotifyCollectionChangedAction.Reset:

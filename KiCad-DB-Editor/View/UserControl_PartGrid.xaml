@@ -145,7 +145,7 @@
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
                             <ComboBox IsEditable="True"
-					                  Text="{Binding Part.Manufacturer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+					                  Text="{Binding Part.Manufacturer, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                                       ItemsSource="{Binding Part.ParentLibrary.AllManufacturers, UpdateSourceTrigger=PropertyChanged}"
                                       ItemStringFormat="↪ {0}"
                                       Loaded="TemplateColumn_ComboBox_Loaded"

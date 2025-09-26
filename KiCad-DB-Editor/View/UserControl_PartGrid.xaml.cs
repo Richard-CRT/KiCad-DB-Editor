@@ -1086,15 +1086,19 @@ namespace KiCad_DB_Editor.View
 
                         Dictionary<(int, int), DataGridCellInfo> selectedCellCoords = new();
                         var selectedCells = dataGrid_Main.SelectedCells;
+                        HashSet<int> hiddenColumnIndexes = new();
                         foreach (var selectedCell in selectedCells)
                         {
                             DataGridColumn column = selectedCell.Column;
                             int columnIndex = column.DisplayIndex;
-                            int rowIndex = dataGrid_Main.Items.IndexOf(selectedCell.Item);
-                            selectedCellCoords.Add((columnIndex, rowIndex), selectedCell);
+                            if (column.Visibility == Visibility.Visible)
+                            {
+                                int rowIndex = dataGrid_Main.Items.IndexOf(selectedCell.Item);
+                                selectedCellCoords.Add((columnIndex, rowIndex), selectedCell);
+                            }
+                            else
+                                hiddenColumnIndexes.Add(columnIndex);
                         }
-
-                        IEditableCollectionView itemsView = dataGrid_Main.Items;
 
                         Dictionary<(FrameworkElement, int, int), (int, int)> destCoordToSrcCoord = new();
                         if (sourceHeight == 1 && sourceWidth == 1)
@@ -1106,22 +1110,34 @@ namespace KiCad_DB_Editor.View
                         }
                         else
                         {
+
+
                             int minX = selectedCellCoords.MinBy(kvp => kvp.Key.Item1).Key.Item1;
                             int minY = selectedCellCoords.MinBy(kvp => kvp.Key.Item2).Key.Item2;
                             int maxX = selectedCellCoords.MaxBy(kvp => kvp.Key.Item1).Key.Item1;
                             int maxY = selectedCellCoords.MaxBy(kvp => kvp.Key.Item2).Key.Item2;
-                            int destWidth = maxX - minX + 1;
+                            int destWidth = maxX - minX + 1 - hiddenColumnIndexes.Count;
                             int destHeight = maxY - minY + 1;
                             if (sourceWidth == destWidth && sourceHeight == destHeight)
                             {
                                 int area = destWidth * destHeight;
                                 if (area == selectedCellCoords.Count)
                                 {
+                                    // Need to do a map from srcX to destX because of hidden columns
+                                    Dictionary<int, int> srcXtoDestXMap = new();
+                                    int destXIter = minX;
+                                    for (int srcX = 0; srcX < sourceWidth; srcX++, destXIter++)
+                                    {
+                                        while (hiddenColumnIndexes.Contains(destXIter))
+                                            destXIter++;
+                                        srcXtoDestXMap[srcX] = destXIter;
+                                    }
+
                                     for (int srcY = 0; srcY < sourceHeight; srcY++)
                                     {
                                         for (int srcX = 0; srcX < sourceWidth; srcX++)
                                         {
-                                            int destX = minX + srcX;
+                                            int destX = srcXtoDestXMap[srcX];
                                             int destY = minY + srcY;
 
                                             DataGridCellInfo selectedCell = selectedCellCoords[(destX, destY)];

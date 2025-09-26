@@ -178,7 +178,7 @@
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
                             <ComboBox IsEditable="True"
-					                  Text="{Binding Part.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+					                  Text="{Binding Part.Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
 					                  ItemsSource="{Binding ParameterNamesWithVarWrapping, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}"
 					                  Loaded="TemplateColumn_ComboBox_Loaded"
 					                  />
@@ -205,7 +205,7 @@
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
                             <ComboBox IsEditable="True"
-                                      Text="{Binding Part.SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      Text="{Binding Part.SymbolLibraryName, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                                       ItemsSource="{Binding Part.ParentLibrary.KiCadSymbolLibraries, UpdateSourceTrigger=PropertyChanged}"
                                       DisplayMemberPath="Nickname"
                                       ItemStringFormat="↪ {0}"
@@ -234,7 +234,7 @@
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
                             <ComboBox IsEditable="True"
-                                      Text="{Binding Part.SymbolName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      Text="{Binding Part.SymbolName, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                                       ItemsSource="{Binding SelectedKiCadSymbolLibrary.KiCadSymbolNames, UpdateSourceTrigger=PropertyChanged}"
                                       ItemStringFormat="↪ {0}"
                                       Loaded="TemplateColumn_ComboBox_Loaded"
@@ -281,7 +281,7 @@
                                         Command="{Binding BrowseDatasheetFileCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}"
                                         >🖿</Button>
                                 <TextBox
-                                    Text="{Binding Part.Datasheet, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    Text="{Binding Part.Datasheet, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                                     VerticalAlignment="Center"
                                     Loaded="TemplateColumn_TextBox_Loaded"/>
                             </DockPanel>

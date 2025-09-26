@@ -627,10 +627,14 @@ namespace KiCad_DB_Editor.View
 
             Binding optionsBinding = new(optionsBindingTarget);
 
+            Binding editingValueBinding = new(valueBindingTarget);
+            editingValueBinding.Mode = BindingMode.TwoWay;
+            editingValueBinding.UpdateSourceTrigger = UpdateSourceTrigger.LostFocus;
+
             // Like the XAML symbol example but for footprint columns
             DataTemplate cellEditingTemplate = new();
             FrameworkElementFactory cellEditingTemplateFrameworkElementFactory = new(typeof(ComboBox));
-            cellEditingTemplateFrameworkElementFactory.SetBinding(ComboBox.TextProperty, valueBinding);
+            cellEditingTemplateFrameworkElementFactory.SetBinding(ComboBox.TextProperty, editingValueBinding);
             cellEditingTemplateFrameworkElementFactory.SetBinding(ComboBox.ItemsSourceProperty, optionsBinding);
             cellEditingTemplateFrameworkElementFactory.SetValue(ComboBox.IsEditableProperty, true);
             // Don't need to unhook this as the item holding the delegate is the combobox which is the short lived object

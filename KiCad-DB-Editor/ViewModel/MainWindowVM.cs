@@ -74,17 +74,7 @@ namespace KiCad_DB_Editor.ViewModel
 
             if (Properties.Settings.Default.OpenProjectPath != "New Project" && File.Exists(Properties.Settings.Default.OpenProjectPath))
             {
-                if (Library.FromFile(Properties.Settings.Default.OpenProjectPath, out Library? library))
-                    LibraryVM = new(library!);
-                else
-                {
-                    // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
-                    (new View.Dialogs.Window_ErrorDialog("Load failed!")).ShowDialog();
-                    // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
-
-                    Debug.Assert(NewLibraryCommand.CanExecute(null));
-                    NewLibraryCommand.Execute(null);
-                }
+                _openProject(Properties.Settings.Default.OpenProjectPath);
             }
             else
             {
@@ -121,6 +111,9 @@ namespace KiCad_DB_Editor.ViewModel
                 // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
                 (new View.Dialogs.Window_ErrorDialog("Load failed!")).ShowDialog();
                 // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
+
+                Debug.Assert(NewLibraryCommand.CanExecute(null));
+                NewLibraryCommand.Execute(null);
             }
         }
 

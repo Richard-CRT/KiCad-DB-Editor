@@ -1046,6 +1046,8 @@ namespace KiCad_DB_Editor.View
         {
             if (e.Key == Key.V && Keyboard.Modifiers == ModifierKeys.Control)
             {
+                // Mark handled regardless as otherwise it bubbles to other places and behaves oddly
+                e.Handled = true;
                 if (Clipboard.ContainsText())
                 {
                     string clipboardText = Clipboard.GetText(TextDataFormat.Text);
@@ -1097,7 +1099,6 @@ namespace KiCad_DB_Editor.View
                             {
                                 _editPropertyByReflection(selectedCell, sourceData[0][0]);
                             }
-                            e.Handled = true;
                         }
                         else
                         {
@@ -1123,7 +1124,6 @@ namespace KiCad_DB_Editor.View
                                             _editPropertyByReflection(selectedCell, sourceData[srcY][srcX]);
                                         }
                                     }
-                                    e.Handled = true;
                                 }
                             }
                         }

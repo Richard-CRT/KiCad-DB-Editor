@@ -73,13 +73,21 @@ namespace KiCad_DB_Editor.Model
             string absolutePath = Path.GetFullPath(Path.Combine(ParentLibrary.ProjectDirectoryPath, RelativePath));
             if (File.Exists(absolutePath))
             {
-                string fileText = File.ReadAllText(absolutePath);
-                SExpressionToken kiCadSymbolLibSExpToken = new(fileText);
-                if (kiCadSymbolLibSExpToken.Name != "kicad_symbol_lib")
-                    throw new FormatException($"Top level S-Expression in provided file is not a KiCad symbol library: {absolutePath}");
-                var kiCadSymbolSExpTokens = kiCadSymbolLibSExpToken.SubTokens.Where(sT => sT.Name == "symbol");
-                KiCadSymbolNames.Clear();
-                KiCadSymbolNames.AddRange(kiCadSymbolSExpTokens.Select(sT => sT.Attributes[0][1..^1]));
+                try
+                {
+                    string fileText = File.ReadAllText(absolutePath);
+                    SExpressionToken kiCadSymbolLibSExpToken = new(fileText);
+                    if (kiCadSymbolLibSExpToken.Name != "kicad_symbol_lib")
+                        throw new FormatException($"Top level S-Expression in provided file is not a KiCad symbol library: {absolutePath}");
+                    var kiCadSymbolSExpTokens = kiCadSymbolLibSExpToken.SubTokens.Where(sT => sT.Name == "symbol");
+                    KiCadSymbolNames.Clear();
+                    KiCadSymbolNames.AddRange(kiCadSymbolSExpTokens.Select(sT => sT.Attributes[0][1..^1]));
+                }
+                catch (FormatException)
+                {
+                    // This should be handled better, but for now suppress the error, just don't parse anything
+                    KiCadSymbolNames.Clear();
+                }
             }
             else
                 KiCadSymbolNames.Clear();

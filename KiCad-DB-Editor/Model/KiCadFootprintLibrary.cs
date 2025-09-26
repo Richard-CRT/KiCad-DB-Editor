@@ -78,11 +78,18 @@ namespace KiCad_DB_Editor.Model
                 KiCadFootprintNames.Clear();
                 foreach (string absoluteFilePath in absoluteFilePaths)
                 {
-                    string fileText = File.ReadAllText(absoluteFilePath);
-                    SExpressionToken kiCadFootprintSExpToken = new(fileText);
-                    if (kiCadFootprintSExpToken.Name != "footprint")
-                        throw new FormatException($"Top level S-Expression in provided file is not a KiCad footprint: {absoluteFilePath}");
-                    KiCadFootprintNames.Add(kiCadFootprintSExpToken.Attributes[0][1..^1]);
+                    try
+                    {
+                        string fileText = File.ReadAllText(absoluteFilePath);
+                        SExpressionToken kiCadFootprintSExpToken = new(fileText);
+                        if (kiCadFootprintSExpToken.Name != "footprint")
+                            throw new FormatException($"Top level S-Expression in provided file is not a KiCad footprint: {absoluteFilePath}");
+                        KiCadFootprintNames.Add(kiCadFootprintSExpToken.Attributes[0][1..^1]);
+                    }
+                    catch (FormatException)
+                    {
+                        // This should be handled better, but for now suppress the error, just don't parse it
+                    }
                 }
             }
             else

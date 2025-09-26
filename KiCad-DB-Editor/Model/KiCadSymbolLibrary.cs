@@ -70,8 +70,7 @@ namespace KiCad_DB_Editor.Model
         public void ParseKiCadSymbolNames()
         {
             // Need to parse the symbols from the provided library
-            string absolutePath = Path.Combine(ParentLibrary.ProjectDirectoryPath, RelativePath);
-            absolutePath = (new Uri(absolutePath)).AbsolutePath;
+            string absolutePath = Path.GetFullPath(Path.Combine(ParentLibrary.ProjectDirectoryPath, RelativePath));
             if (File.Exists(absolutePath))
             {
                 string fileText = File.ReadAllText(absolutePath);

@@ -150,6 +150,21 @@ namespace KiCad_DB_Editor.Model
                     // The contents of these 2 may have changed, so invoke updates
                     InvokePropertyChanged(nameof(InheritedParameters));
                     InvokePropertyChanged(nameof(InheritedAndNormalParameters));
+
+                    // Potentially need to add to or remove from parts
+                    // Do this here instead of in the Part objects as we have more information about the Parameters the category
+                    // already has, whereas the Parts would have to query the ParentCategory a lot
+                    // Also the Part objects are lightweight
+                    Debug.Assert(sender is Parameter);
+                    Parameter parameter = (Parameter)sender;
+                    if (parameter.Universal)
+                        foreach (Part part in Parts)
+                            part.ParameterValues.TryAdd(parameter, "");
+                    // Check if the category is still supposed to have parameter before removing it
+                    else if (!InheritedAndNormalParameters.Contains(parameter))
+                        foreach (Part part in Parts)
+                            part.ParameterValues.Remove(parameter);
+
                     break;
             }
         }
@@ -164,9 +179,9 @@ namespace KiCad_DB_Editor.Model
             InvokePropertyChanged(nameof(InheritedAndNormalParameters));
 
             // Potentially need to remove from or reorder Parameters
-            // If there's no changes to be done (e.g. if Parameters doesn't contain the ones that have moved) Parameters isn't shuffled,
-            // so Parameters_CollectionChanged is not called, so we can't rely on its InvokePropertyChange calls hence the calls above may
-            // duplicate it
+            // If there's no changes performed by this bit (e.g. if Parameters doesn't contain the ones that have moved) Parameters doesn't
+            // get shuffled, so Parameters_CollectionChanged is not called, so we can't rely on its InvokePropertyChange calls hence the calls
+            // above may duplicate it
             foreach (var parameterToRemove in Parameters.Except(ParentLibrary.AllParameters).ToArray()) // Taking a copy so I can edit it
                 Parameters.Remove(parameterToRemove);
             int categoryParameterIndex = 0;

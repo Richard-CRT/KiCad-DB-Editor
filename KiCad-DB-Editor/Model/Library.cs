@@ -341,15 +341,15 @@ namespace KiCad_DB_Editor.Model
         {
             if (oldAllParameters is not null)
                 foreach (var parameter in oldAllParameters)
-                    parameter.PropertyChanged -= AllParameterChanged;
+                    parameter.PropertyChanged -= AllParameter_PropertyChanged;
             oldAllParameters = _allParameters.ToArray();
             foreach (var parameter in _allParameters)
-                parameter.PropertyChanged += AllParameterChanged;
+                parameter.PropertyChanged += AllParameter_PropertyChanged;
 
             foreach (var c in AllCategories) c.ParentLibrary_AllParameters_CollectionChanged(sender, e);
         }
 
-        private void AllParameterChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void AllParameter_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             foreach (var c in AllCategories) c.ParentLibrary_AllParameter_PropertyChanged(sender, e);
         }

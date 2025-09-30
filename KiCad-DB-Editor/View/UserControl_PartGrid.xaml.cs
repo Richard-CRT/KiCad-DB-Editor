@@ -301,10 +301,9 @@ namespace KiCad_DB_Editor.View
 
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
-                if (VisualTreeHelper.GetChildrenCount(dataGrid_Main) > 0 && VisualTreeHelper.GetChild(dataGrid_Main, 0) is Decorator border)
-                {
-                    if (border.Child is ScrollViewer scroll) scroll.ScrollToEnd();
-                }
+                Debug.Assert(e.NewItems is not null && e.NewItems.Count == 1);
+                PartVM newItem = (PartVM)e.NewItems[0]!;
+                dataGrid_Main.ScrollIntoView(newItem);
             }
         }
 

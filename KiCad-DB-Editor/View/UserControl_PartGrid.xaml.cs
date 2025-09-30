@@ -1154,6 +1154,7 @@ namespace KiCad_DB_Editor.View
 
         private void dataGrid_Main_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            /* Disabled due to issue #40 i.e. cells clearing when filters being edited
             if (e.Key == Key.Delete && Keyboard.Modifiers == ModifierKeys.None && !editing)
             {
                 var selectedCells = dataGrid_Main.SelectedCells;
@@ -1165,7 +1166,9 @@ namespace KiCad_DB_Editor.View
                         _editPropertyByReflection(selectedCell, "");
                     }
                 }
+                e.Handled = true;
             }
+            */
         }
 
         private bool editing = false;

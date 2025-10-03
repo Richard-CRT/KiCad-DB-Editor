@@ -31,8 +31,8 @@ namespace KiCad_DB_Editor.Utilities
         // Definitely no quotes, I don't want to have to deal with DB sanitisation
         // No slashes, forward or back, as could be used as a delimeter / escape character
         // No | as used for a visual splitter for the KiCad categories
-        public static HashSet<char> SafeCategoryCharacters = new HashSet<char>("abcdefghjiklmnopqrstuvwxyz0123456789_-&@ ");
-        public static HashSet<char> SafeParameterCharacters = new HashSet<char>("abcdefghjiklmnopqrstuvwxyz0123456789_-&@ ");
+        public static HashSet<char> SafeCategoryCharacters = new HashSet<char>("abcdefghjiklmnopqrstuvwxyz0123456789_-&@() ");
+        public static HashSet<char> SafeParameterCharacters = new HashSet<char>("abcdefghjiklmnopqrstuvwxyz0123456789_-&@() ");
 
         public static Dictionary<byte, char> Base32EncodeBook = new()
         {

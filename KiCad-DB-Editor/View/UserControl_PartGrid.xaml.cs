@@ -266,6 +266,7 @@ namespace KiCad_DB_Editor.View
                 PartVMsCollectionView.SortDescriptions.Add(new SortDescription($"{nameof(PartVM.Path)}", ListSortDirection.Ascending));
                 PartVMsCollectionView.SortDescriptions.Add(new SortDescription($"{nameof(PartVM.Part)}.{nameof(Part.Manufacturer)}", ListSortDirection.Ascending));
                 PartVMsCollectionView.SortDescriptions.Add(new SortDescription($"{nameof(PartVM.Part)}.{nameof(Part.MPN)}", ListSortDirection.Ascending));
+                PartVMsCollectionView.SortDescriptions.Add(new SortDescription($"{nameof(PartVM.Part)}.{nameof(Part.PartUID)}", ListSortDirection.Ascending));
                 // Have to do this if I want the arrow to show on the column
                 //dataGrid_Main.Columns[4].SortDirection = ListSortDirection.Ascending;
             }

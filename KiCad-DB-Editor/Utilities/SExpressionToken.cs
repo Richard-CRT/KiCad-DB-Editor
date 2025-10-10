@@ -18,7 +18,6 @@ namespace KiCad_DB_Editor.Utilities
             ParsingTokenName,
             ScanningForTokenSubObject,
             ParsingTokenAttribute,
-            ParsingTokenSubToken,
             FinishedParsingToken,
         }
 
@@ -26,7 +25,7 @@ namespace KiCad_DB_Editor.Utilities
         public List<string> Attributes { get; set; }
         public List<SExpressionToken> SubTokens { get; set; }
 
-        public SExpressionToken(string sExpressionString, int scanStart = -1, int scanEnd = -1)
+        public SExpressionToken(string sExpressionString, out int sExpressionStringLen, int scanStart = 0)
         {
             Name = "";
             Attributes = new();
@@ -34,19 +33,14 @@ namespace KiCad_DB_Editor.Utilities
 
             string nameInProgress = "";
             string tokenAttributeInProgress = "";
-            int startIndexOfTokenSubToken = -1;
-            int tokenSubTokenDepth = -1;
-
-            if (scanStart == -1)
-                scanStart = 0;
-            if (scanEnd == -1)
-                scanEnd = sExpressionString.Length - 1;
 
             bool inString = false;
             int numConsecutiveBackslashes = 0;
 
             SExpTokenParsingState state = SExpTokenParsingState.ScanningForOpeningToken;
-            for (int i = scanStart; i <= scanEnd && state != SExpTokenParsingState.FinishedParsingToken; i++)
+
+            int scanEnd = -1;
+            for (int i = scanStart; i < sExpressionString.Length && state != SExpTokenParsingState.FinishedParsingToken; i++)
             {
                 char c = sExpressionString[i];
                 switch (state)
@@ -64,6 +58,7 @@ namespace KiCad_DB_Editor.Utilities
                         else if (c == ')')
                         {
                             Name = nameInProgress;
+                            scanEnd = i;
                             state = SExpTokenParsingState.FinishedParsingToken;
                         }
                         else
@@ -73,12 +68,15 @@ namespace KiCad_DB_Editor.Utilities
                         if (!Char.IsWhiteSpace(c))
                         {
                             if (c == ')')
+                            {
+                                scanEnd = i;
                                 state = SExpTokenParsingState.FinishedParsingToken;
+                            }
                             else if (c == '(')
                             {
-                                state = SExpTokenParsingState.ParsingTokenSubToken;
-                                startIndexOfTokenSubToken = i;
-                                tokenSubTokenDepth = 1;
+                                SExpressionToken subToken = new SExpressionToken(sExpressionString, out int subTokenSExpressionStringLen, i);
+                                SubTokens.Add(subToken);
+                                i += subTokenSExpressionStringLen;
                             }
                             else if (c == '"')
                             {
@@ -116,6 +114,7 @@ namespace KiCad_DB_Editor.Utilities
                             else
                             {
                                 Attributes.Add(tokenAttributeInProgress);
+                                scanEnd = i;
                                 state = SExpTokenParsingState.FinishedParsingToken;
                             }
                         }
@@ -125,45 +124,13 @@ namespace KiCad_DB_Editor.Utilities
                             state = SExpTokenParsingState.ScanningForTokenSubObject;
                         }
                         break;
-                    case SExpTokenParsingState.ParsingTokenSubToken:
-                        if (!inString)
-                        {
-                            if (c == '"')
-                            {
-                                inString = true;
-                                numConsecutiveBackslashes = 0;
-                            }
-                            else
-                            {
-                                if (c == '(')
-                                    tokenSubTokenDepth++;
-                                else if (c == ')')
-                                {
-                                    tokenSubTokenDepth--;
-                                    if (tokenSubTokenDepth == 0)
-                                    {
-                                        SExpressionToken subToken = new SExpressionToken(sExpressionString, startIndexOfTokenSubToken, i);
-                                        SubTokens.Add(subToken);
-                                        state = SExpTokenParsingState.ScanningForTokenSubObject;
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if (c == '"' && (numConsecutiveBackslashes % 2) == 0)
-                                inString = false;
-                            else if (c == '\\')
-                                numConsecutiveBackslashes++;
-                            else
-                                numConsecutiveBackslashes = 0;
-                        }
-                        break;
                 }
             }
 
             if (state != SExpTokenParsingState.FinishedParsingToken)
                 throw new FormatException("Did not finish parsing S-Expression token within the string limits");
+
+            sExpressionStringLen = scanEnd - scanStart + 1;
         }
 
         public string Serialise(int maxPrettyPrintDepth = 0, char prettyPrintIndent = '\t', int depth = 0)

@@ -728,12 +728,34 @@ VALUES (
 
                 JsonKiCadDblFile jsonKiCadDblFile = new(this.KiCadExportPartLibraryName, this.KiCadExportPartLibraryDescription, this.KiCadExportOdbcName);
 
-                File.Delete(kiCadSqliteFilePath);
                 using (var connection = new SqliteConnection($"Data Source={kiCadSqliteFilePath}"))
                 {
                     connection.Open();
+
+                    // Fetch the names of all the existing tables
+                    var selectTableNamesCommand = connection.CreateCommand();
+                    selectTableNamesCommand.CommandText = "SELECT name FROM sqlite_master WHERE type='table';";
+                    List<string> tableNames = new();
+                    using (var reader = selectTableNamesCommand.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var tableName = (string)reader["name"];
+                            tableNames.Add(tableName);
+                        }
+                    }
+
                     using (var transaction = connection.BeginTransaction())
                     {
+                        // Drop all the existing tables
+                        foreach (string tableName in tableNames)
+                        {
+                            var dropTableCommand = connection.CreateCommand();
+                            // No sanitisation as the name was just fetched literally from a SELECT
+                            dropTableCommand.CommandText = $@"DROP TABLE IF EXISTS ""{tableName}"";";
+                            dropTableCommand.ExecuteNonQuery();
+                        }
+
                         foreach (Category category in AllCategories)
                         {
                             string tableName = categoryToKiCadExportCategoryStringMap[category];
@@ -755,6 +777,14 @@ VALUES (
                             jsonKiCadDbl_Library.jsonKiCadDbl_Library_Properties.Add("exclude_from_board", "Exclude from Board");
                             jsonKiCadDbl_Library.jsonKiCadDbl_Library_Properties.Add("exclude_from_sim", "Exclude from Sim");
 
+
+                            // Already in order as InheritedAndNormalParameters already does a ParentLibrary.AllParameters.Intersect(...)
+                            // Cache a local copy of category.InheritedAndNormalParameters as we use it multiple times and it's an expensive property to get
+                            var categoryParametersInOrder = category.InheritedAndNormalParameters;
+
+                            foreach (var parameter in categoryParametersInOrder)
+                                jsonKiCadDbl_Library.jsonKiCadDbl_Library_Fields.Add(new(parameter.Name, parameter.Name, true, true));
+
                             var createTableCommand = connection.CreateCommand();
                             StringBuilder createTableSqlStringBuilder = new();
                             createTableSqlStringBuilder.Append($@"
@@ -772,12 +802,8 @@ CREATE TABLE ""{tableName.Replace("\"", "\"\"")}"" (
 ""Exclude from Sim"" TEXT,"
 );
 
-                            // Already in order as InheritedAndNormalParameters already does a ParentLibrary.AllParameters.Intersect(...)
-                            // Cache a local copy of category.InheritedAndNormalParameters as we use it multiple times and it's an expensive property to get
-                            var categoryParametersInOrder = category.InheritedAndNormalParameters;
-                            foreach (var parameter in category.InheritedAndNormalParameters)
+                            foreach (var parameter in categoryParametersInOrder)
                             {
-                                jsonKiCadDbl_Library.jsonKiCadDbl_Library_Fields.Add(new(parameter.Name, parameter.Name, true, true));
                                 // Can't use prepared statements for column titles, so use .Replace("\"", "\"\"") to escape any potential quotes (even though we controlled the input)
                                 createTableSqlStringBuilder.AppendFormat("\"{0}\" TEXT, ", parameter.Name.Replace("\"", "\"\""));
                             }

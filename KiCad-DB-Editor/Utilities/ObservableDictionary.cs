@@ -55,5 +55,8 @@ namespace KiCad_DB_Editor.Utilities
             base.Clear();
             CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
+
+        public ObservableDictionary() : base() { }
+        public ObservableDictionary(Dictionary<TKey, TValue> collection) : base(collection) { }
     }
 }

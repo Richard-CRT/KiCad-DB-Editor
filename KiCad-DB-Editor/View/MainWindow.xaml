@@ -19,16 +19,20 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem x:Name="menuItem_FileNewLibrary" Header="_New Library" Command="{Binding NewLibraryCommand, Mode=OneWay}" InputGestureText="Ctrl+N" />
-                <MenuItem x:Name="menuItem_FileOpenLibrary" Header="_Open Library..." Command="{Binding OpenLibraryCommand, Mode=OneWay}" InputGestureText="Ctrl+O" />
+                <MenuItem Header="_New Library" Command="{Binding NewLibraryCommand, Mode=OneWay}" InputGestureText="Ctrl+N" />
+                <MenuItem Header="_Open Library..." Command="{Binding OpenLibraryCommand, Mode=OneWay}" InputGestureText="Ctrl+O" />
                 <Separator />
-                <MenuItem x:Name="menuItem_FileSaveLibrary" Header="_Save Library" Command="{Binding SaveLibraryCommand, Mode=OneWay}" InputGestureText="Ctrl+S" />
-                <MenuItem x:Name="menuItem_FileSaveAsLibrary" Header="Save Library _As..." Command="{Binding SaveAsLibraryCommand, Mode=OneWay}" />
+                <MenuItem Header="_Save Library" Command="{Binding SaveLibraryCommand, Mode=OneWay}" InputGestureText="Ctrl+S" />
+                <MenuItem Header="Save Library _As..." Command="{Binding SaveAsLibraryCommand, Mode=OneWay}" />
                 <Separator />
-                <MenuItem x:Name="menuItem_FileExit" Header="_Exit" Command="{Binding ExitLibraryCommand, Mode=OneWay}" />
+                <MenuItem Header="_Exit" Command="{Binding ExitLibraryCommand, Mode=OneWay}" />
             </MenuItem>
             <MenuItem Header="_Help">
-                <MenuItem x:Name="menuItem_HelpHelp" Header="_KiCad DB Documentation" Command="{Binding HelpLibraryCommand, Mode=OneWay}" InputGestureText="F1" />
+                <MenuItem Header="_KiCad DB Documentation" Command="{Binding HelpLibraryCommand, Mode=OneWay}" InputGestureText="F1" />
+            </MenuItem>
+            <MenuItem Header="_About">
+                <MenuItem Header="Created by Richard-CRT" />
+                <MenuItem Header="{Binding AppVersion}" />
             </MenuItem>
         </Menu>
         <local:UserControl_Library DockPanel.Dock="Top" LibraryVM="{Binding LibraryVM}" Margin="5,5,5,5" />

@@ -1,18 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Text.Json;
-using System.Threading.Tasks;
-using KiCad_DB_Editor;
-using KiCad_DB_Editor.Model;
+﻿using KiCad_DB_Editor;
 using KiCad_DB_Editor.Commands;
-using System.Diagnostics;
-using System.Security.Cryptography;
+using KiCad_DB_Editor.Model;
 using Microsoft.Win32;
-using System.Windows.Input;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+using System.Windows.Input;
 using System.Windows.Threading;
 
 namespace KiCad_DB_Editor.ViewModel
@@ -23,6 +24,13 @@ namespace KiCad_DB_Editor.ViewModel
         private DispatcherTimer _autoSaveTimer;
 
         #region Notify Properties
+        public string AppVersion
+        {
+            get
+            {
+                return $"v{Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion}";
+            }
+        }
         public string WindowTitle
         {
             get

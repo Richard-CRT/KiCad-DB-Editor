@@ -11,6 +11,8 @@ namespace KiCad_DB_Editor
     {
         private void Application_Startup(object sender, StartupEventArgs e)
         {
+            // ClickOnce publishing requires strong name for ApplicationSettingsBase.Upgrade to work
+            // https://learn.microsoft.com/en-us/visualstudio/deployment/clickonce-and-application-settings?view=vs-2022#net-core-and-net-5
             // Copy user settings from previous application version only if UpdateSettings is True (default)
             // UpdateSettings check necessary, or it replaces current version settings with previous version settings
             if (KiCad_DB_Editor.Properties.Settings.Default.UpdateSettings)

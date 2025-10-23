@@ -58,6 +58,8 @@
                          Text="{Binding CategoryVM.NumNewParts, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" />
                 <Button Content="New Parts" Padding="5,1,5,1" Margin="5,0,0,0"
                         Command="{Binding CategoryVM.NewPartsCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
+                <Button Content="Duplicate Part" Padding="5,1,5,1" Margin="5,0,0,0"
+                        Command="{Binding CategoryVM.DuplicatePartCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
                 <Button Content="Delete Parts" Padding="5,1,5,1" Margin="5,0,0,0"
                         Command="{Binding CategoryVM.DeletePartsCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
                 <Button Content="Add Footprint" Padding="5,1,5,1" Margin="5,0,0,0"

@@ -148,7 +148,8 @@ namespace KiCad_DB_Editor.ViewModel
             AddParameterCommand = new BasicCommand(AddParameterCommandExecuted, AddParameterCommandCanExecute);
             RemoveParameterCommand = new BasicCommand(RemoveParameterCommandExecuted, RemoveParameterCommandCanExecute);
             NewPartsCommand = new BasicCommand(NewPartsCommandExecuted, null);
-            DeletePartsCommand = new BasicCommand(DeletePartCommandExecuted, DeletePartsCommandCanExecute);
+            DuplicatePartCommand = new BasicCommand(DuplicatePartCommandExecuted, DuplicatePartCommandCanExecute);
+            DeletePartsCommand = new BasicCommand(DeletePartsCommandExecuted, DeletePartsCommandCanExecute);
             AddFootprintCommand = new BasicCommand(AddFootprintCommandExecuted, AddFootprintCommandCanExecute);
             RemoveFootprintCommand = new BasicCommand(RemoveFootprintCommandExecuted, RemoveFootprintCommandCanExecute);
 
@@ -255,12 +256,14 @@ namespace KiCad_DB_Editor.ViewModel
                 _newPartsLoopTimer.Stop();
         }
 
-        private void _newPart()
+        private void _newPart(Part? existingPartToDuplicate = null)
         {
             string partUID = Util.GeneratePartUID(Category.ParentLibrary.PartUIDScheme);
             Part part = new(partUID, Category.ParentLibrary, Category);
             foreach (Parameter parameter in Category.InheritedAndNormalParameters)
                 part.ParameterValues.Add(parameter, "");
+            if (existingPartToDuplicate is not null)
+                part.CopyFromPart(existingPartToDuplicate);
             Category.Parts.Add(part);
             Category.ParentLibrary.AllParts.Add(part);
         }
@@ -270,6 +273,7 @@ namespace KiCad_DB_Editor.ViewModel
         public IBasicCommand AddParameterCommand { get; }
         public IBasicCommand RemoveParameterCommand { get; }
         public IBasicCommand NewPartsCommand { get; }
+        public IBasicCommand DuplicatePartCommand { get; }
         public IBasicCommand DeletePartsCommand { get; }
         public IBasicCommand AddFootprintCommand { get; }
         public IBasicCommand RemoveFootprintCommand { get; }
@@ -329,12 +333,24 @@ namespace KiCad_DB_Editor.ViewModel
             }
         }
 
+        private bool DuplicatePartCommandCanExecute(object? parameter)
+        {
+            return SelectedPartVMs.Length == 1;
+        }
+
+        private void DuplicatePartCommandExecuted(object? parameter)
+        {
+            Debug.Assert(SelectedPartVMs.Length == 1);
+            Part partToBeDuplicated = SelectedPartVMs[0].Part;
+            _newPart(partToBeDuplicated);
+        }
+
         private bool DeletePartsCommandCanExecute(object? parameter)
         {
             return SelectedPartVMs.Length > 0;
         }
 
-        private void DeletePartCommandExecuted(object? parameter)
+        private void DeletePartsCommandExecuted(object? parameter)
         {
             Debug.Assert(SelectedPartVMs.Length > 0);
             List<Part> psToBeRemoved = new(SelectedPartVMs.Select(pVM => pVM.Part));

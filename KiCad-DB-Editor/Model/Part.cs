@@ -134,9 +134,26 @@ namespace KiCad_DB_Editor.Model
             _parentCategory = parentCategory;
             PartUID = partUID;
 
-            // Initialise collection with events
             _footprintPairs = new();
             _parameterValues = new();
+        }
+
+        public void CopyFromPart(Part partToCopy)
+        {
+            this.Description = partToCopy.Description;
+            this.Manufacturer = partToCopy.Manufacturer;
+            // Not copying MPN because that's not sensible
+            this.Value = partToCopy.Value;
+            this.Datasheet = partToCopy.Datasheet;
+            this.SymbolLibraryName = partToCopy.SymbolLibraryName;
+            this.SymbolName = partToCopy.SymbolName;
+            this.ExcludeFromBOM = partToCopy.ExcludeFromBOM;
+            this.ExcludeFromBoard = partToCopy.ExcludeFromBoard;
+            this.ExcludeFromSim = partToCopy.ExcludeFromSim;
+
+            _footprintPairs = new(partToCopy.FootprintPairs); // Shallow copy because using ValueTuple
+            foreach (Parameter parameter in this.ParameterValues.Keys) // Guarantees that we don't add parameters from the partToCopy that don't already exist on this part
+                this.ParameterValues[parameter] = partToCopy.ParameterValues[parameter];
         }
 
         public override string ToString()

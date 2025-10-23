@@ -273,11 +273,13 @@
                                 <Button DockPanel.Dock="Right"
                                         Width="{Binding ActualHeight, Mode=OneWay, RelativeSource={RelativeSource Self}}"
                                         Margin="2,0,0,0"
+                                        Padding="-0.5,1,0,1"
                                         Command="{Binding OpenDatasheetFileCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}"
-                                        >🗗</Button>
+                                        >🔗</Button>
                                 <Button DockPanel.Dock="Right"
                                         Width="{Binding ActualHeight, Mode=OneWay, RelativeSource={RelativeSource Self}}"
                                         Margin="2,0,0,0"
+                                        Padding="-0.5,1,0,1"
                                         Command="{Binding BrowseDatasheetFileCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}}"
                                         >🖿</Button>
                                 <TextBox

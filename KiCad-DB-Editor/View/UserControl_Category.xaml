@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:KiCad_DB_Editor.View"
              xmlns:conv="clr-namespace:KiCad_DB_Editor.View.Converters"
+             xmlns:properties="clr-namespace:KiCad_DB_Editor.Properties"
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="800">
     <Grid>
@@ -72,6 +73,8 @@
                 Parameters="{Binding CategoryVM.Category.InheritedAndNormalParameters, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}"           
                 PartVMs="{Binding CategoryVM.PartVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}"
                 SelectedPartVMs="{Binding CategoryVM.SelectedPartVMs, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}, UpdateSourceTrigger=PropertyChanged}"
+                ShowCADLinkColumns="{Binding CategoryShowCADLinkColumns, Mode=TwoWay, Source={x:Static properties:Settings.Default}, UpdateSourceTrigger=PropertyChanged}"
+                ShowParameterColumns="{Binding CategoryShowParameterColumns, Mode=TwoWay, Source={x:Static properties:Settings.Default}, UpdateSourceTrigger=PropertyChanged}"
                 />
         </DockPanel>
     </Grid>

@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:KiCad_DB_Editor.View"
              xmlns:vm="clr-namespace:KiCad_DB_Editor.ViewModel"
              xmlns:conv="clr-namespace:KiCad_DB_Editor.View.Converters"
+             xmlns:properties="clr-namespace:KiCad_DB_Editor.Properties"
              mc:Ignorable="d" 
              d:DesignHeight="960" d:DesignWidth="1200" FontSize="14">
     <UserControl.Resources>
@@ -128,7 +129,8 @@
                                                 PartVMs="{Binding LibraryVM.AllPartVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"
                                                 SelectedPartVMs="{Binding LibraryVM.SelectedPartVMs, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}, UpdateSourceTrigger=PropertyChanged}"
                                                 DisplayPartCategory="True"
-                                                ShowCADLinkColumns="True"
+                                                ShowCADLinkColumns="{Binding OverallShowCADLinkColumns, Mode=TwoWay, Source={x:Static properties:Settings.Default}, UpdateSourceTrigger=PropertyChanged}"
+                                                ShowParameterColumns="{Binding OverallShowParameterColumns, Mode=TwoWay, Source={x:Static properties:Settings.Default}, UpdateSourceTrigger=PropertyChanged}"
                     />
                 </DockPanel>
             </TabItem>

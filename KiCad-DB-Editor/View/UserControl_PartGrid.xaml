@@ -14,7 +14,7 @@
     </UserControl.Resources>
     <DockPanel>
         <DockPanel DockPanel.Dock="Top">
-            <CheckBox DockPanel.Dock="Right" Content="Show Parameters" Margin="5,0,0,0" VerticalContentAlignment="Center"
+            <CheckBox DockPanel.Dock="Right" Content="Show Parameters" Margin="5,0,5,0" VerticalContentAlignment="Center"
                       IsChecked="{Binding ShowParameterColumns, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_PartGrid}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"/>
             <CheckBox DockPanel.Dock="Right" Content="Show CAD Link Columns" Margin="5,0,0,0" VerticalContentAlignment="Center"
                       IsChecked="{Binding ShowCADLinkColumns, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_PartGrid}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"/>

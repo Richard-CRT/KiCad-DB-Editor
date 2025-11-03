@@ -900,18 +900,18 @@ $exclude_from_sim, "
                                 foreach (Part part in category.Parts.OrderBy(p => p.PartUID))
                                 {
                                     partUIDParameter.Value = part.PartUID;
-                                    descriptionParameter.Value = part.Description;
+                                    descriptionParameter.Value = part.Substitute(part.Description); // Substitute to make it more readable in symbol picker
                                     manufacturerParameter.Value = part.Manufacturer;
                                     mpnParameter.Value = part.MPN;
-                                    valueParameter.Value = part.Value;
+                                    valueParameter.Value = part.Substitute(part.Value); // Substitute to make it more readable in symbol picker
                                     // Best way I can come up with for checking for web URL and absolute-ing the file-based datasheet paths
                                     if (string.IsNullOrWhiteSpace(part.Datasheet))
                                         datasheetParameter.Value = "";
                                     else if (part.Datasheet.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
                                         part.Datasheet.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-                                        datasheetParameter.Value = part.Datasheet;
+                                        datasheetParameter.Value = part.Substitute(part.Datasheet);
                                     else
-                                        datasheetParameter.Value = Path.Combine(this.KiCadExportPartLibraryEnvironmentVariable, part.Datasheet);
+                                        datasheetParameter.Value = part.Substitute(Path.Combine(this.KiCadExportPartLibraryEnvironmentVariable, part.Datasheet));
                                     schematicSymbolParameter.Value = (part.SymbolLibraryName != "" || part.SymbolName != "") ? $"{part.SymbolLibraryName}:{part.SymbolName}" : "";
                                     footprintsParameter.Value = $"{string.Join(';', part.FootprintPairs.Select(pair => $"{pair.Item1}:{pair.Item2}"))}";
                                     excludeFromBomParameter.Value = part.ExcludeFromBOM ? 1 : 0;

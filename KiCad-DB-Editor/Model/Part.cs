@@ -156,6 +156,27 @@ namespace KiCad_DB_Editor.Model
                 this.ParameterValues[parameter] = partToCopy.ParameterValues[parameter];
         }
 
+        public string Substitute(string input)
+        {
+            int startSearchIndex = 0;
+            int startIndex;
+            while ((startIndex = input.IndexOf("${", startSearchIndex)) >= 0)
+            {
+                int endIndex;
+                if ((endIndex = input.IndexOf('}', startIndex + 2)) > startIndex)
+                {
+                    string substring = input[startIndex..(endIndex + 1)];
+                    string parameterName = substring[2..^1].ToLowerInvariant();
+                    Parameter? parameter = ParameterValues.Keys.FirstOrDefault(k => k!.Name.Equals(parameterName, StringComparison.InvariantCultureIgnoreCase), null);
+                    if (parameter is not null)
+                        input = input.Replace(substring, ParameterValues[parameter], StringComparison.InvariantCultureIgnoreCase);
+                    else
+                        startSearchIndex = endIndex + 1;
+                }
+            }
+            return input;
+        }
+
         public override string ToString()
         {
             return $"{PartUID}";

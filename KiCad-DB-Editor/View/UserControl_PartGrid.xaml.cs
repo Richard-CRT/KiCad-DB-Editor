@@ -223,13 +223,13 @@ namespace KiCad_DB_Editor.View
 
         public static readonly DependencyProperty PartVMsCollectionViewProperty = DependencyProperty.Register(
             nameof(PartVMsCollectionView),
-            typeof(CollectionView),
+            typeof(ListCollectionView),
             typeof(UserControl_PartGrid)
             );
 
-        public CollectionView PartVMsCollectionView
+        public ListCollectionView PartVMsCollectionView
         {
-            get => (CollectionView)GetValue(PartVMsCollectionViewProperty);
+            get => (ListCollectionView)GetValue(PartVMsCollectionViewProperty);
             set => SetValue(PartVMsCollectionViewProperty, value);
         }
 
@@ -258,7 +258,7 @@ namespace KiCad_DB_Editor.View
         private ObservableCollectionEx<PartVM>? oldPartVMs = null;
         protected void PartVMsPropertyChanged()
         {
-            PartVMsCollectionView = (CollectionView)CollectionViewSource.GetDefaultView(PartVMs);
+            PartVMsCollectionView = (ListCollectionView)CollectionViewSource.GetDefaultView(PartVMs);
             if (PartVMsCollectionView is not null)
             {
                 PartVMsCollectionView.Filter = OnFilterPartVMsCollectionView;

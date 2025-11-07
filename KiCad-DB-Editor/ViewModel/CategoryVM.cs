@@ -289,11 +289,11 @@ namespace KiCad_DB_Editor.ViewModel
 
             Parameter pToBeAdded = SelectedAvailableParameter;
 
-            int indexOfPToBeAddedInLibrary = Category.ParentLibrary.AllParameters.IndexOf(pToBeAdded);
+            int indexOfPToBeAddedInLibrary = Category.ParentLibrary.UniversalParameters.IndexOf(pToBeAdded);
             int newIndex;
             for (newIndex = 0; newIndex < Category.Parameters.Count; newIndex++)
             {
-                if (indexOfPToBeAddedInLibrary < Category.ParentLibrary.AllParameters.IndexOf(Category.Parameters[newIndex]))
+                if (indexOfPToBeAddedInLibrary < Category.ParentLibrary.UniversalParameters.IndexOf(Category.Parameters[newIndex]))
                 {
                     break;
                 }

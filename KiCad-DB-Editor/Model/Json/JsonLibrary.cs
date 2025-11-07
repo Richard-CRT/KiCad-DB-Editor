@@ -72,8 +72,8 @@ namespace KiCad_DB_Editor.Model.Json
         [JsonPropertyName("auto_export_relative_path"), JsonPropertyOrder(7)]
         public string KiCadAutoExportRelativePath { get; set; } = "";
 
-        [JsonPropertyName("parameters"), JsonPropertyOrder(8)]
-        public List<JsonParameter> AllParameters { get; set; } = new();
+        [JsonPropertyName("universal_parameters"), JsonPropertyOrder(8)]
+        public List<string> UniversalParameters { get; set; } = new();
 
         [JsonPropertyName("top_level_categories"), JsonPropertyOrder(9)]
         public List<JsonCategory> TopLevelCategories { get; set; } = new();
@@ -96,7 +96,7 @@ namespace KiCad_DB_Editor.Model.Json
             KiCadExportPartLibraryEnvironmentVariable = library.KiCadExportPartLibraryEnvironmentVariable;
             KiCadAutoExportOnSave = library.KiCadAutoExportOnSave;
             KiCadAutoExportRelativePath = library.KiCadAutoExportRelativePath;
-            AllParameters = new(library.AllParameters.Select(p => new JsonParameter(p)));
+            UniversalParameters = new(library.UniversalParameters);
             TopLevelCategories = new(library.TopLevelCategories.Select(c => new JsonCategory(c)));
             KiCadSymbolLibraries = new(library.KiCadSymbolLibraries.Select(kSL => new JsonKiCadSymbolLibrary(kSL)));
             KiCadFootprintLibraries = new(library.KiCadFootprintLibraries.Select(kFL => new JsonKiCadFootprintLibrary(kFL)));

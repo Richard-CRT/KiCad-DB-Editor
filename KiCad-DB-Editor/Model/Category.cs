@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -78,8 +79,8 @@ namespace KiCad_DB_Editor.Model
         }
 
         // No setter, to prevent the VM needing to listening PropertyChanged events
-        private ObservableCollectionEx<Parameter> _parameters;
-        public ObservableCollectionEx<Parameter> Parameters
+        private ObservableCollectionEx<string> _parameters;
+        public ObservableCollectionEx<string> Parameters
         {
             get { return _parameters; }
         }
@@ -98,19 +99,14 @@ namespace KiCad_DB_Editor.Model
             get { return _parts; }
         }
 
-        public ObservableCollectionEx<Parameter> InheritedAndNormalParameters
+        public ObservableCollectionEx<string> InheritedAndNormalParameters
         {
-            get { return new(ParentLibrary.AllParameters.Intersect(Parameters.Concat(InheritedParameters))); }
+            get { return new(InheritedParameters.Concat(Parameters)); }
         }
 
-        public ObservableCollectionEx<Parameter> InheritedParameters
+        public ObservableCollectionEx<string> InheritedParameters
         {
-            get { return ParentCategory is null ? new(ParentLibrary.AllParameters.Where(p => p.Universal)) : new(ParentCategory.InheritedAndNormalParameters); }
-        }
-
-        public ObservableCollectionEx<Parameter> AvailableParameters
-        {
-            get { return new(ParentLibrary.AllParameters.Except(Parameters)); }
+            get { return ParentCategory is null ? new(ParentLibrary.UniversalParameters) : new(ParentCategory.InheritedAndNormalParameters); }
         }
 
         #endregion Notify Properties
@@ -121,7 +117,7 @@ namespace KiCad_DB_Editor.Model
             _parentCategory = parentCategory;
             Name = jsonCategory.Name;
 
-            _parameters = new(ParentLibrary.AllParameters.Where(p => jsonCategory.Parameters.Contains(p.UUID)));
+            _parameters = new(jsonCategory.Parameters);
             // We don't worry about unsubscribing because this object is the event publisher
             _parameters.CollectionChanged += Parameters_CollectionChanged;
             // _parameters must be set up first, as this line will rely on that
@@ -142,72 +138,6 @@ namespace KiCad_DB_Editor.Model
             _parts = new();
         }
 
-        public void ParentLibrary_AllParameter_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            switch (e.PropertyName)
-            {
-                case nameof(Parameter.Universal):
-                    // The contents of these 2 may have changed, so invoke updates
-                    InvokePropertyChanged(nameof(InheritedParameters));
-                    InvokePropertyChanged(nameof(InheritedAndNormalParameters));
-
-                    // Potentially need to add to or remove from parts
-                    // Do this here instead of in the Part objects as we have more information about the Parameters the category
-                    // already has, whereas the Parts would have to query the ParentCategory a lot
-                    // Also the Part objects are lightweight
-                    Debug.Assert(sender is Parameter);
-                    Parameter parameter = (Parameter)sender;
-                    if (parameter.Universal)
-                        foreach (Part part in Parts)
-                            part.ParameterValues.TryAdd(parameter, "");
-                    // Check if the category is still supposed to have parameter before removing it
-                    else if (!InheritedAndNormalParameters.Contains(parameter))
-                        foreach (Part part in Parts)
-                            part.ParameterValues.Remove(parameter);
-
-                    break;
-            }
-        }
-
-        public void ParentLibrary_AllParameters_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            // The values and order of this one may have changed, so invoke updates
-            InvokePropertyChanged(nameof(AvailableParameters));
-
-            // The order of these 2 may have changed, so invoke updates
-            InvokePropertyChanged(nameof(InheritedParameters));
-            InvokePropertyChanged(nameof(InheritedAndNormalParameters));
-
-            // Potentially need to remove from or reorder Parameters
-            // If there's no changes performed by this bit (e.g. if Parameters doesn't contain the ones that have moved) Parameters doesn't
-            // get shuffled, so Parameters_CollectionChanged is not called, so we can't rely on its InvokePropertyChange calls hence the calls
-            // above may duplicate it
-            foreach (var parameterToRemove in Parameters.Except(ParentLibrary.AllParameters).ToArray()) // Taking a copy so I can edit it
-                Parameters.Remove(parameterToRemove);
-            int categoryParameterIndex = 0;
-            for (int libraryParameterIndex = 0; libraryParameterIndex < ParentLibrary.AllParameters.Count; libraryParameterIndex++)
-            {
-                Parameter libraryParameter = ParentLibrary.AllParameters[libraryParameterIndex];
-                int originalCategoryParameterIndex = Parameters.IndexOf(libraryParameter);
-                if (originalCategoryParameterIndex != -1)
-                {
-                    if (categoryParameterIndex != originalCategoryParameterIndex)
-                    {
-                        // Paramater is later in the category list than it is in the category-subset of the Library list
-                        Parameters.Move(originalCategoryParameterIndex, categoryParameterIndex);
-                    }
-                    categoryParameterIndex++;
-                }
-            }
-
-            foreach (Part part in Parts)
-            {
-                var parametersToBeRemoved = part.ParameterValues.Keys.Except(ParentLibrary.AllParameters).ToArray();
-                foreach (Parameter parameterToBeRemoved in parametersToBeRemoved)
-                    part.ParameterValues.Remove(parameterToBeRemoved);
-            }
-        }
-
         public void ParentCategory_InheritedParameters_PropertyChanged()
         {
             InvokePropertyChanged(nameof(InheritedParameters));
@@ -218,17 +148,17 @@ namespace KiCad_DB_Editor.Model
             foreach (Part part in Parts)
             {
                 var parametersToBeRemoved = part.ParameterValues.Keys.Except(InheritedAndNormalParameters).ToArray();
-                foreach (Parameter parameterToBeRemoved in parametersToBeRemoved)
+                foreach (string parameterToBeRemoved in parametersToBeRemoved)
                     part.ParameterValues.Remove(parameterToBeRemoved);
+
                 var parametersToBeAdded = InheritedAndNormalParameters.Except(part.ParameterValues.Keys).ToArray();
-                foreach (Parameter parameterToBeAdded in parametersToBeAdded)
-                    part.ParameterValues.Add(parameterToBeAdded, "");
+                foreach (string parameterToBeAdded in parametersToBeAdded)
+                    part.ParameterValues.TryAdd(parameterToBeAdded, "");
             }
         }
 
         private void Parameters_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            InvokePropertyChanged(nameof(AvailableParameters));
             InvokePropertyChanged(nameof(InheritedAndNormalParameters));
 
             foreach (Category c in Categories) c.ParentCategory_InheritedParameters_PropertyChanged();
@@ -236,11 +166,12 @@ namespace KiCad_DB_Editor.Model
             foreach (Part part in Parts)
             {
                 var parametersToBeRemoved = part.ParameterValues.Keys.Except(InheritedAndNormalParameters).ToArray();
-                foreach (Parameter parameterToBeRemoved in parametersToBeRemoved)
+                foreach (string parameterToBeRemoved in parametersToBeRemoved)
                     part.ParameterValues.Remove(parameterToBeRemoved);
+
                 var parametersToBeAdded = InheritedAndNormalParameters.Except(part.ParameterValues.Keys).ToArray();
-                foreach (Parameter parameterToBeAdded in parametersToBeAdded)
-                    part.ParameterValues.Add(parameterToBeAdded, "");
+                foreach (string parameterToBeAdded in parametersToBeAdded)
+                    part.ParameterValues.TryAdd(parameterToBeAdded, "");
             }
         }
     }

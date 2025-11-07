@@ -457,7 +457,7 @@ namespace KiCad_DB_Editor.ViewModel
             {
                 if (!Util.ReservedParameterNames.Contains(lowerValue) && Util.ReservedParameterNameStarts.All(s => !lowerValue.StartsWith(s)))
                 {
-                    if (!Library.AllParameters.Any(p => p.Name.ToLower() == lowerValue))
+                    if (!Library.UniversalParameters.Any(p => p.Name.ToLower() == lowerValue))
                     {
                         return true;
                     }
@@ -469,7 +469,7 @@ namespace KiCad_DB_Editor.ViewModel
         private void NewParameterCommandExecuted(object? parameter)
         {
             Parameter newParameter = new(this.NewParameterName);
-            Library.AllParameters.Add(newParameter);
+            Library.UniversalParameters.Add(newParameter);
             SelectedParameter = newParameter;
         }
 
@@ -480,7 +480,7 @@ namespace KiCad_DB_Editor.ViewModel
             {
                 if (!Util.ReservedParameterNames.Contains(lowerValue) && Util.ReservedParameterNameStarts.All(s => !lowerValue.StartsWith(s)))
                 {
-                    if (!Library.AllParameters.Any(p => p.Name.ToLower() == lowerValue))
+                    if (!Library.UniversalParameters.Any(p => p.Name.ToLower() == lowerValue))
                     {
                         return true;
                     }
@@ -503,35 +503,35 @@ namespace KiCad_DB_Editor.ViewModel
         private void DeleteParameterCommandExecuted(object? parameter)
         {
             Debug.Assert(SelectedParameter is not null);
-            Library.AllParameters.Remove(SelectedParameter);
+            Library.UniversalParameters.Remove(SelectedParameter);
 
-            SelectedParameter = Library.AllParameters.FirstOrDefault();
+            SelectedParameter = Library.UniversalParameters.FirstOrDefault();
         }
 
         private bool MoveParameterUpCommandCanExecute(object? parameter)
         {
-            return SelectedParameter is not null && Library.AllParameters.First() != SelectedParameter;
+            return SelectedParameter is not null && Library.UniversalParameters.First() != SelectedParameter;
         }
 
         private void MoveParameterUpCommandExecuted(object? parameter)
         {
             Debug.Assert(SelectedParameter is not null);
-            int oldIndex = Library.AllParameters.IndexOf(SelectedParameter);
+            int oldIndex = Library.UniversalParameters.IndexOf(SelectedParameter);
             Debug.Assert(oldIndex > 0);
-            Library.AllParameters.Move(oldIndex, oldIndex - 1);
+            Library.UniversalParameters.Move(oldIndex, oldIndex - 1);
         }
 
         private bool MoveParameterDownCommandCanExecute(object? parameter)
         {
-            return SelectedParameter is not null && Library.AllParameters.Last() != SelectedParameter;
+            return SelectedParameter is not null && Library.UniversalParameters.Last() != SelectedParameter;
         }
 
         private void MoveParameterDownCommandExecuted(object? parameter)
         {
             Debug.Assert(SelectedParameter is not null);
-            int oldIndex = Library.AllParameters.IndexOf(SelectedParameter);
-            Debug.Assert(oldIndex < Library.AllParameters.Count - 1);
-            Library.AllParameters.Move(oldIndex, oldIndex + 1);
+            int oldIndex = Library.UniversalParameters.IndexOf(SelectedParameter);
+            Debug.Assert(oldIndex < Library.UniversalParameters.Count - 1);
+            Library.UniversalParameters.Move(oldIndex, oldIndex + 1);
         }
 
         private bool AddFootprintCommandCanExecute(object? parameter)

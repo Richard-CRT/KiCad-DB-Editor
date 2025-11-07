@@ -22,67 +22,11 @@
             <TabItem Header="Structure">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="0*" MinWidth="200" />
-                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="0*" MinWidth="200"/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="1*" MinWidth="500"/>
                     </Grid.ColumnDefinitions>
-                    <DockPanel>
-                        <TextBlock DockPanel.Dock="Top" HorizontalAlignment="Center">Special Parameters</TextBlock>
-                        <ListBox DockPanel.Dock="Top" >
-                            <ListBoxItem Content="Part UID"/>
-                            <ListBoxItem Content="Description"/>
-                            <ListBoxItem Content="Manufacturer"/>
-                            <ListBoxItem Content="MPN"/>
-                            <ListBoxItem Content="Value"/>
-                        </ListBox>
-                        <TextBlock DockPanel.Dock="Top" HorizontalAlignment="Center">Custom Parameters</TextBlock>
-                        <Button DockPanel.Dock="Bottom" Content="Rename" Padding="5,1,5,1"
-                            Command="{Binding LibraryVM.RenameParameterCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />
-                        <Button DockPanel.Dock="Bottom" Content="Add" Padding="5,1,5,1"
-                            Command="{Binding LibraryVM.NewParameterCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />
-                        <TextBox DockPanel.Dock="Bottom" Text="{Binding LibraryVM.NewParameterName, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBlock DockPanel.Dock="Bottom" HorizontalAlignment="Center">Parameter</TextBlock>
-                        <Separator DockPanel.Dock="Bottom" Margin="0,10,0,10" />
-                        <DockPanel DockPanel.Dock="Bottom">
-                            <Button Content="▼" DockPanel.Dock="Right" Width="{Binding ActualHeight, Mode=OneWay, RelativeSource={RelativeSource Self}}" 
-                                    Command="{Binding LibraryVM.MoveParameterDownCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
-                                    />
-                            <Button Content="▲" DockPanel.Dock="Right" Width="{Binding ActualHeight, Mode=OneWay, RelativeSource={RelativeSource Self}}" 
-                                    Command="{Binding LibraryVM.MoveParameterUpCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
-                                    />
-                            <Button Content="Delete Parameter" Padding="5,1,5,1"
-                                    Command="{Binding LibraryVM.DeleteParameterCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />
-                        </DockPanel>
-                        <ListView ItemsSource="{Binding LibraryVM.Library.AllParameters, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
-                                  d:ItemsSource="{d:SampleData}"
-                                  MinHeight="60"
-                                  SelectedItem="{Binding LibraryVM.SelectedParameter, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
-                                  Foreground="Black">
-                            <ListView.ItemContainerStyle>
-                                <Style TargetType="ListViewItem">
-                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                                </Style>
-                            </ListView.ItemContainerStyle>
-                            <ListView.View>
-                                <GridView>
-                                    <GridViewColumn Header="Name"
-                                                    DisplayMemberBinding="{Binding Name}"
-                                                    Width="134"/>
-                                    <GridViewColumn Header="Universal">
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Universal}"/>
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                </GridView>
-                            </ListView.View>
-                        </ListView>
-                    </DockPanel>
-                    <GridSplitter Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="3,0,3,0" Width="3" />
-                    <DockPanel Grid.Column="2">
+                    <DockPanel Grid.Column="0">
                         <Button DockPanel.Dock="Bottom" Content="Add Sub-Category" Padding="5,1,5,1" 
                             Command="{Binding LibraryVM.NewSubCategoryCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
                             CommandParameter="{Binding SelectedItem, ElementName=treeView_FoldersAndCategories, Mode=OneWay}" />
@@ -116,8 +60,8 @@
                             </TreeView.ItemContainerStyle>
                         </TreeView>
                     </DockPanel>
-                    <GridSplitter Grid.Column="3" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="3,0,3,0" Width="3" />
-                    <local:UserControl_Category Grid.Column="4"
+                    <GridSplitter Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="3,0,3,0" Width="3" />
+                    <local:UserControl_Category Grid.Column="2"
                                             CategoryVM="{Binding SelectedItem, ElementName=treeView_FoldersAndCategories, Mode=OneWay}"
                                             Visibility="{Binding CategoryVM, Converter={StaticResource Null_to_Visibility_Converter}, Mode=OneWay, RelativeSource={RelativeSource Mode=Self}}"
                                             />
@@ -146,6 +90,32 @@
                     <TextBlock>Part UID Scheme</TextBlock>
                     <TextBox Text="{Binding LibraryVM.PartUIDScheme, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" />
                     <Separator Margin="0,10,0,10" />
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" HorizontalAlignment="Center">Universal Parameters</TextBlock>
+                        <Button DockPanel.Dock="Bottom" Content="Rename" Padding="5,1,5,1"
+                                Command="{Binding LibraryVM.RenameParameterCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />
+                        <Button DockPanel.Dock="Bottom" Content="Add" Padding="5,1,5,1"
+                                Command="{Binding LibraryVM.NewParameterCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />
+                        <TextBox DockPanel.Dock="Bottom" Text="{Binding LibraryVM.NewParameterName, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock DockPanel.Dock="Bottom" HorizontalAlignment="Center">Parameter</TextBlock>
+                        <Separator DockPanel.Dock="Bottom" Margin="0,10,0,10" />
+                        <DockPanel DockPanel.Dock="Bottom">
+                            <Button Content="▼" DockPanel.Dock="Right" Width="{Binding ActualHeight, Mode=OneWay, RelativeSource={RelativeSource Self}}" 
+                                    Command="{Binding LibraryVM.MoveParameterDownCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
+                                    />
+                            <Button Content="▲" DockPanel.Dock="Right" Width="{Binding ActualHeight, Mode=OneWay, RelativeSource={RelativeSource Self}}" 
+                                    Command="{Binding LibraryVM.MoveParameterUpCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
+                                    />
+                            <Button Content="Delete Parameter" Padding="5,1,5,1"
+                                    Command="{Binding LibraryVM.DeleteParameterCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />
+                        </DockPanel>
+                        <ListBox 
+                            ItemsSource="{Binding LibraryVM.Library.AllParameters, 
+                            RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" 
+                            DisplayMemberPath="Name" 
+                            MinHeight="60" 
+                            SelectedItem="{Binding LibraryVM.SelectedParameter, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" />
+                    </DockPanel>
                 </StackPanel>
             </TabItem>
             <TabItem Header="KiCad Settings">

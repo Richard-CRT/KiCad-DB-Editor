@@ -99,8 +99,8 @@ namespace KiCad_DB_Editor.Model
         }
 
         // No setter, to prevent the VM needing to listening PropertyChanged events
-        private ObservableDictionary<Parameter, string> _parameterValues;
-        public ObservableDictionary<Parameter, string> ParameterValues
+        private ObservableDictionary<string, string> _parameterValues;
+        public ObservableDictionary<string, string> ParameterValues
         {
             get { return _parameterValues; }
         }

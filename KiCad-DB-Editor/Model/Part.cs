@@ -179,7 +179,7 @@ namespace KiCad_DB_Editor.Model
 
         public override string ToString()
         {
-            return $"{PartUID}";
+            return $"Part: {PartUID} {MPN}";
         }
     }
 }

@@ -174,5 +174,10 @@ namespace KiCad_DB_Editor.Model
                     part.ParameterValues.TryAdd(parameterToBeAdded, "");
             }
         }
+
+        public override string ToString()
+        {
+            return $"Category: {Name} [{Parts.Count}]";
+        }
     }
 }

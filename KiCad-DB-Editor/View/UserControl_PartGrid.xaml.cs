@@ -137,14 +137,14 @@ namespace KiCad_DB_Editor.View
 
         public static readonly DependencyProperty ParametersProperty = DependencyProperty.Register(
             nameof(Parameters),
-            typeof(ObservableCollectionEx<Parameter>),
+            typeof(ObservableCollectionEx<string>),
             typeof(UserControl_PartGrid),
             new PropertyMetadata(new PropertyChangedCallback(ParameterVMsPropertyChangedCallback))
             );
 
-        public ObservableCollectionEx<Parameter> Parameters
+        public ObservableCollectionEx<string> Parameters
         {
-            get => (ObservableCollectionEx<Parameter>)GetValue(ParametersProperty);
+            get => (ObservableCollectionEx<string>)GetValue(ParametersProperty);
             set => SetValue(ParametersProperty, value);
         }
 
@@ -153,7 +153,7 @@ namespace KiCad_DB_Editor.View
             if (d is UserControl_PartGrid uc_pg) uc_pg.ParametersPropertyChanged();
         }
 
-        private ObservableCollectionEx<Parameter>? oldParameters = null;
+        private ObservableCollectionEx<string>? oldParameters = null;
         protected void ParametersPropertyChanged()
         {
             if (oldParameters is not null)
@@ -166,21 +166,8 @@ namespace KiCad_DB_Editor.View
         }
 
         private static readonly string[] specialParameterNamesWithVarWrapping = (new string[] { "Part UID", "Manufacturer", "MPN" }).Select(pN => $"${{{pN}}}").ToArray();
-        private ObservableCollectionEx<Parameter>? oldParametersCopy = null;
         private void Parameters_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            if (oldParametersCopy is not null)
-            {
-                foreach (Parameter p in oldParametersCopy)
-                    p.PropertyChanged -= Parameter_PropertyChanged;
-            }
-            oldParametersCopy = Parameters is not null ? new(Parameters) : null;
-            if (oldParametersCopy is not null)
-            {
-                foreach (Parameter p in oldParametersCopy)
-                    p.PropertyChanged += Parameter_PropertyChanged;
-            }
-
             // Need to regenerate the list of the Parameters with variable wrapping i.e. ${...}
             // Need to update the keys of the ParameterFilterValues dict for the accessor,
             // but don't delete the values if the parameter is staying (otherwise the existing
@@ -193,28 +180,15 @@ namespace KiCad_DB_Editor.View
             else
             {
                 ParameterNamesWithVarWrapping.Clear();
-                ParameterNamesWithVarWrapping.AddRange(specialParameterNamesWithVarWrapping.Concat(Parameters.Select(p => $"${{{p.Name}}}")));
+                ParameterNamesWithVarWrapping.AddRange(specialParameterNamesWithVarWrapping.Concat(Parameters.Select(p => $"${{{p}}}")));
 
-                foreach (Parameter parameterToAdd in Parameters.Except(ParameterFilterValues.Keys))
+                foreach (string parameterToAdd in Parameters.Except(ParameterFilterValues.Keys))
                     ParameterFilterValues.Add(parameterToAdd, "");
 
-                foreach (Parameter parameterToRemove in ParameterFilterValues.Keys.Except(Parameters))
+                foreach (string parameterToRemove in ParameterFilterValues.Keys.Except(Parameters))
                     ParameterFilterValues.Remove(parameterToRemove);
             }
             redoColumns_PotentialParametersColumnChange(e);
-        }
-
-        private void Parameter_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (sender is Parameter parameter)
-            {
-                if (e.PropertyName == nameof(Parameter.Name))
-                {
-                    ParameterNamesWithVarWrapping.Clear();
-                    ParameterNamesWithVarWrapping.AddRange(specialParameterNamesWithVarWrapping.Concat(Parameters.Select(p => $"${{{p.Name}}}")));
-                    redoColumns_ParameterNameChange(parameter);
-                }
-            }
         }
 
         #endregion
@@ -457,7 +431,7 @@ namespace KiCad_DB_Editor.View
             get { return _parameterNamesWithVarWrapping; }
         }
 
-        public Dictionary<Parameter, string> ParameterFilterValues { get; set; } = new();
+        public Dictionary<string, string> ParameterFilterValues { get; set; } = new();
         public ObservableCollectionEx<(string, string)> FootprintFilterValuePairs = new();
 
         private DispatcherTimer _partVMsCollectionViewFilterTimer;
@@ -506,7 +480,7 @@ namespace KiCad_DB_Editor.View
             if (specialParameterMatch)
             {
                 bool parameterMatch = true;
-                foreach ((Parameter parameter, string filterValue) in ParameterFilterValues)
+                foreach ((string parameter, string filterValue) in ParameterFilterValues)
                 {
                     string? paramVal = null;
                     if (filterValue != "" && part.ParameterValues.TryGetValue(parameter, out paramVal) && !paramVal.Contains(filterValue))
@@ -700,9 +674,9 @@ namespace KiCad_DB_Editor.View
             return newFootprintColumn(footprintIndex, true);
         }
 
-        private void updateParameterBindings(DataGridTextColumn column, Parameter parameter)
+        private void updateParameterBindings(DataGridTextColumn column, string parameterName)
         {
-            Binding valueBinding = new($"ParameterAccessor[{parameter.UUID}]");
+            Binding valueBinding = new($"ParameterAccessor[{parameterName}]");
             valueBinding.Mode = BindingMode.TwoWay;
             valueBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
             column.Binding = valueBinding;
@@ -719,7 +693,7 @@ namespace KiCad_DB_Editor.View
             column.CellStyle = cellStyle;
         }
 
-        private StackPanel generateParameterColumnHeader(Parameter parameter)
+        private StackPanel generateParameterColumnHeader(string parameterName)
         {
             /*
             <StackPanel Orientation="Vertical">
@@ -732,12 +706,12 @@ namespace KiCad_DB_Editor.View
             stackPanel.Orientation = Orientation.Vertical;
 
             TextBlock headerTextBlock = new();
-            headerTextBlock.Text = parameter.Name;
+            headerTextBlock.Text = parameterName;
             headerTextBlock.HorizontalAlignment = HorizontalAlignment.Center;
             stackPanel.Children.Add(headerTextBlock);
 
             TextBox headerTextBox = new();
-            Binding valueBinding = new($"DataContext.ParameterFilterAccessor[{parameter.UUID}]");
+            Binding valueBinding = new($"DataContext.ParameterFilterAccessor[{parameterName}]");
             valueBinding.Mode = BindingMode.TwoWay;
             valueBinding.Source = dummyElementToGetDataContext;
             valueBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
@@ -751,9 +725,9 @@ namespace KiCad_DB_Editor.View
             return stackPanel;
         }
 
-        private DataGridTextColumn newParameterColumn(Parameter parameter, int index)
+        private DataGridTextColumn newParameterColumn(string parameterName, int index)
         {
-            StackPanel stackPanel = generateParameterColumnHeader(parameter);
+            StackPanel stackPanel = generateParameterColumnHeader(parameterName);
 
             DataGridTextColumn dataGridTextColumn = new();
             dataGridTextColumn.Header = stackPanel;
@@ -772,25 +746,18 @@ namespace KiCad_DB_Editor.View
             };
             BindingOperations.SetBinding(dataGridTextColumn, DataGridTextColumn.IsReadOnlyProperty, isReadOnlyBinding);
 
-            updateParameterBindings(dataGridTextColumn, parameter);
+            updateParameterBindings(dataGridTextColumn, parameterName);
 
-            parameterToDataGridColumn[parameter] = dataGridTextColumn;
-            parametersThatHaveColumns.Insert(index, parameter);
+            parameterToDataGridColumn[parameterName] = dataGridTextColumn;
+            parametersThatHaveColumns.Insert(index, parameterName);
 
             dataGrid_Main.Columns.Insert(_baseColumnIndexToInsertFootprintColumnsAt + (2 * _lastMaxFootprints) + index, dataGridTextColumn);
 
             return dataGridTextColumn;
         }
 
-        private void redoColumns_ParameterNameChange(Parameter parameterWithNameChange)
-        {
-            DataGridTextColumn columnToUpdate = parameterToDataGridColumn[parameterWithNameChange];
-            StackPanel stackPanel = generateParameterColumnHeader(parameterWithNameChange);
-            columnToUpdate.Header = stackPanel;
-        }
-
-        private List<Parameter> parametersThatHaveColumns = new();
-        private Dictionary<Parameter, DataGridTextColumn> parameterToDataGridColumn = new();
+        private List<string> parametersThatHaveColumns = new();
+        private Dictionary<string, DataGridTextColumn> parameterToDataGridColumn = new();
         private void redoColumns_PotentialParametersColumnChange(NotifyCollectionChangedEventArgs? e = null)
         {
             if (Parameters is not null)
@@ -808,7 +775,7 @@ namespace KiCad_DB_Editor.View
                     case NotifyCollectionChangedAction.Add:
                         {
                             Debug.Assert(e!.NewItems is not null && e.NewItems.Count == 1);
-                            Parameter parameterThatNeedsANewColumn = (e.NewItems[0] as Parameter)!;
+                            string parameterThatNeedsANewColumn = (e.NewItems[0] as string)!;
                             int indexOfPToBeAddedInParentCollection = e.NewStartingIndex;
                             int newIndex;
                             for (newIndex = 0; newIndex < parametersThatHaveColumns.Count; newIndex++)
@@ -820,7 +787,7 @@ namespace KiCad_DB_Editor.View
                     case NotifyCollectionChangedAction.Remove:
                         {
                             Debug.Assert(e!.OldItems is not null && e.OldItems.Count == 1);
-                            var parameterThatNeedsToBeRemoved = (e.OldItems[0] as Parameter)!;
+                            var parameterThatNeedsToBeRemoved = (e.OldItems[0] as string)!;
                             DataGridTextColumn column = parameterToDataGridColumn[parameterThatNeedsToBeRemoved];
                             dataGrid_Main.Columns.Remove(column);
                             BindingOperations.ClearAllBindings(column); // Not sure this is necessary but can't hurt
@@ -838,7 +805,7 @@ namespace KiCad_DB_Editor.View
                             int parametersThatHaveColumnsIndex = 0;
                             for (int sourceParameterIndex = 0; sourceParameterIndex < Parameters.Count; sourceParameterIndex++)
                             {
-                                Parameter sourceParameter = Parameters[sourceParameterIndex];
+                                string sourceParameter = Parameters[sourceParameterIndex];
                                 int originalParametersThatHaveColumnsIndex = parametersThatHaveColumns.IndexOf(sourceParameter);
                                 if (originalParametersThatHaveColumnsIndex != -1)
                                 {
@@ -852,7 +819,7 @@ namespace KiCad_DB_Editor.View
                                 }
                             }
 
-                            foreach (Parameter parameter in parametersThatNeedToBeRemoved)
+                            foreach (string parameter in parametersThatNeedToBeRemoved)
                             {
                                 DataGridTextColumn column = parameterToDataGridColumn[parameter];
                                 dataGrid_Main.Columns.Remove(column);
@@ -862,7 +829,7 @@ namespace KiCad_DB_Editor.View
                             }
 
                             // Inserts parameter columns at the right index
-                            foreach (Parameter parameter in parametersThatNeedANewColumn)
+                            foreach (string parameter in parametersThatNeedANewColumn)
                             {
                                 int indexOfPToBeAddedInParentCollection = Parameters.IndexOf(parameter);
                                 int newIndex;
@@ -1300,15 +1267,14 @@ namespace KiCad_DB_Editor.View
 
         #region Notify Properties
 
-        public string? this[string parameterUUID]
+        public string? this[string parameterName]
         {
             get
             {
-                Parameter? parameter = OwnerUserControl_PartGrid.Parameters.FirstOrDefault(p => p!.UUID == parameterUUID, null);
                 // This will get null if you remove a parameter i.e. remove a column, then edit a different column's filtering,
                 // before GC happens. The binding to the old parameter UUID will still exist, and then parameter will be null
                 // Instead of erroring, we direct it towards return null; until GC comes along
-                if (parameter is not null && OwnerUserControl_PartGrid.ParameterFilterValues.TryGetValue(parameter, out string? val))
+                if (OwnerUserControl_PartGrid.ParameterFilterValues.TryGetValue(parameterName, out string? val))
                     return val;
                 else
                     return null;
@@ -1317,12 +1283,11 @@ namespace KiCad_DB_Editor.View
             {
                 if (value is not null)
                 {
-                    Parameter parameter = OwnerUserControl_PartGrid.Parameters.First(p => p.UUID == parameterUUID);
-                    if (OwnerUserControl_PartGrid.ParameterFilterValues.TryGetValue(parameter, out string? s))
+                    if (OwnerUserControl_PartGrid.ParameterFilterValues.TryGetValue(parameterName, out string? s))
                     {
                         if (s != value)
                         {
-                            OwnerUserControl_PartGrid.ParameterFilterValues[parameter] = value;
+                            OwnerUserControl_PartGrid.ParameterFilterValues[parameterName] = value;
                             InvokePropertyChanged($"Item[]");
 
                             OwnerUserControl_PartGrid.PartVMsCollectionViewStartFilterTimer();

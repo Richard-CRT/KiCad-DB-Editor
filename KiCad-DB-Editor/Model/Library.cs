@@ -35,20 +35,25 @@ namespace KiCad_DB_Editor.Model
         {
             try
             {
-                throw new NotImplementedException();
-                //Library library = new();
-                //string? projectDirectory = Path.GetDirectoryName(projectFilePath);
-                //string? projectName = Path.GetFileNameWithoutExtension(projectFilePath);
-                //if (projectDirectory is null || projectDirectory == "" || projectName is null || projectName == "")
-                //    throw new InvalidOperationException();
+                JsonLibraryMetadataOnly jsonLibraryMetadataOnly = JsonLibraryMetadataOnly.FromFile(projectFilePath);
 
-                //string dataFilePath = Path.Combine(projectDirectory, projectName) + ".sqlite3";
+                if (jsonLibraryMetadataOnly.Metadata is null)
+                    Legacy.V5.Upgrader.Upgrade(projectFilePath);
+
+                string? projectDirectory = Path.GetDirectoryName(projectFilePath);
+                string? projectName = Path.GetFileNameWithoutExtension(projectFilePath);
+                if (projectDirectory is null || projectDirectory == "" || projectName is null || projectName == "")
+                    throw new InvalidOperationException();
+
+                string dataFilePath = Path.Combine(projectDirectory, projectName) + ".sqlite3";
+
+                Library library = new();
 
                 //// Must populate these before KiCadSymbolLibraries and KiCadFootprintLibraries
                 //library.ProjectDirectoryPath = projectDirectory;
                 //library.ProjectName = projectName;
 
-                //JsonLibrary jsonLibrary = JsonLibrary.FromFile(projectFilePath);
+                //var jsonLibrary = JsonV6.JsonLibrary.FromFile(projectFilePath);
 
                 //library.PartUIDScheme = jsonLibrary.PartUIDScheme;
                 //library.KiCadExportPartLibraryName = jsonLibrary.KiCadExportPartLibraryName;
@@ -184,8 +189,8 @@ namespace KiCad_DB_Editor.Model
                 //}
                 //SqliteConnection.ClearAllPools();
 
-                //outLibrary = library;
-                //return true;
+                outLibrary = library;
+                return true;
             }
             catch (Exception)
             {
@@ -334,7 +339,6 @@ namespace KiCad_DB_Editor.Model
             _kiCadFootprintLibraries = new();
         }
 
-        private Parameter[]? oldAllParameters = null;
         private void _allParameters_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             foreach (var c in TopLevelCategories) c.ParentCategory_InheritedParameters_PropertyChanged();
@@ -365,7 +369,7 @@ namespace KiCad_DB_Editor.Model
                     dataFilePath += ".autosave";
                 }
 
-                JsonLibrary jsonLibrary = new JsonLibrary(this);
+                Json.JsonLibrary jsonLibrary = new(this);
                 if (!jsonLibrary.WriteToFile(projectFilePath, autosave)) return false;
 
                 Dictionary<Category, string> categoryToCategoryStringMap = new();
@@ -731,7 +735,7 @@ VALUES (
                             var categoryParametersInOrder = category.InheritedAndNormalParameters;
 
                             foreach (var parameter in categoryParametersInOrder)
-                                jsonKiCadDbl_Library.jsonKiCadDbl_Library_Fields.Add(new(parameter.Name, parameter.Name, true, true));
+                                jsonKiCadDbl_Library.jsonKiCadDbl_Library_Fields.Add(new(parameter, parameter, true, true));
 
                             var createTableCommand = connection.CreateCommand();
                             StringBuilder createTableSqlStringBuilder = new();
@@ -753,7 +757,7 @@ CREATE TABLE ""{tableName.Replace("\"", "\"\"")}"" (
                             foreach (var parameter in categoryParametersInOrder)
                             {
                                 // Can't use prepared statements for column titles, so use .Replace("\"", "\"\"") to escape any potential quotes (even though we controlled the input)
-                                createTableSqlStringBuilder.AppendFormat("\"{0}\" TEXT, ", parameter.Name.Replace("\"", "\"\""));
+                                createTableSqlStringBuilder.AppendFormat("\"{0}\" TEXT, ", parameter.Replace("\"", "\"\""));
                             }
 
                             createTableSqlStringBuilder.Remove(createTableSqlStringBuilder.Length - 2, 2);

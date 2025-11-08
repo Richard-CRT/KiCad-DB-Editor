@@ -46,19 +46,19 @@ namespace KiCad_DB_Editor.ViewModel
             }
         }
 
-        private Parameter? _selectedParameter = null;
-        public Parameter? SelectedParameter
+        private int _selectedUniversalParameterIndex = -1;
+        public int SelectedUniversalParameterIndex
         {
-            get { return _selectedParameter; }
+            get { return _selectedUniversalParameterIndex; }
             set
             {
-                if (_selectedParameter != value)
+                if (_selectedUniversalParameterIndex != value)
                 {
-                    _selectedParameter = value;
+                    _selectedUniversalParameterIndex = value;
                     InvokePropertyChanged();
 
-                    if (_selectedParameter is not null)
-                        NewParameterName = _selectedParameter.Name;
+                    if (_selectedUniversalParameterIndex != -1)
+                        NewUniversalParameterName = Library.UniversalParameters[_selectedUniversalParameterIndex];
                 }
             }
         }
@@ -77,15 +77,15 @@ namespace KiCad_DB_Editor.ViewModel
             }
         }
 
-        private string _newParameterName = "";
-        public string NewParameterName
+        private string _newUniversalParameterName = "";
+        public string NewUniversalParameterName
         {
-            get { return _newParameterName; }
+            get { return _newUniversalParameterName; }
             set
             {
-                if (_newParameterName != value)
+                if (_newUniversalParameterName != value)
                 {
-                    _newParameterName = value;
+                    _newUniversalParameterName = value;
                     InvokePropertyChanged();
                 }
             }
@@ -257,11 +257,11 @@ namespace KiCad_DB_Editor.ViewModel
             NewSubCategoryCommand = new BasicCommand(NewSubCategoryCommandExecuted, NewSubCategoryCommandCanExecute);
             DeleteCategoryCommand = new BasicCommand(DeleteCategoryCommandExecuted, DeleteCategoryCommandCanExecute);
 
-            NewParameterCommand = new BasicCommand(NewParameterCommandExecuted, NewParameterCommandCanExecute);
-            RenameParameterCommand = new BasicCommand(RenameParameterCommandExecuted, RenameParameterCommandCanExecute);
-            DeleteParameterCommand = new BasicCommand(DeleteParameterCommandExecuted, DeleteParameterCommandCanExecute);
-            MoveParameterUpCommand = new BasicCommand(MoveParameterUpCommandExecuted, MoveParameterUpCommandCanExecute);
-            MoveParameterDownCommand = new BasicCommand(MoveParameterDownCommandExecuted, MoveParameterDownCommandCanExecute);
+            NewUniversalParameterCommand = new BasicCommand(NewUniversalParameterCommandExecuted, NewUniversalParameterCommandCanExecute);
+            RenameUniversalParameterCommand = new BasicCommand(RenameUniversalParameterCommandExecuted, RenameUniversalParameterCommandCanExecute);
+            DeleteUniversalParameterCommand = new BasicCommand(DeleteUniversalParameterCommandExecuted, DeleteUniversalParameterCommandCanExecute);
+            MoveUniversalParameterUpCommand = new BasicCommand(MoveUniversalParameterUpCommandExecuted, MoveUniversalParameterUpCommandCanExecute);
+            MoveUniversalParameterDownCommand = new BasicCommand(MoveUniversalParameterDownCommandExecuted, MoveUniversalParameterDownCommandCanExecute);
 
             AddFootprintCommand = new BasicCommand(AddFootprintCommandExecuted, AddFootprintCommandCanExecute);
             RemoveFootprintCommand = new BasicCommand(RemoveFootprintCommandExecuted, RemoveFootprintCommandCanExecute);
@@ -374,11 +374,11 @@ namespace KiCad_DB_Editor.ViewModel
         public IBasicCommand NewTopLevelCategoryCommand { get; }
         public IBasicCommand NewSubCategoryCommand { get; }
         public IBasicCommand DeleteCategoryCommand { get; }
-        public IBasicCommand NewParameterCommand { get; }
-        public IBasicCommand RenameParameterCommand { get; }
-        public IBasicCommand DeleteParameterCommand { get; }
-        public IBasicCommand MoveParameterUpCommand { get; }
-        public IBasicCommand MoveParameterDownCommand { get; }
+        public IBasicCommand NewUniversalParameterCommand { get; }
+        public IBasicCommand RenameUniversalParameterCommand { get; }
+        public IBasicCommand DeleteUniversalParameterCommand { get; }
+        public IBasicCommand MoveUniversalParameterUpCommand { get; }
+        public IBasicCommand MoveUniversalParameterDownCommand { get; }
         public IBasicCommand AddFootprintCommand { get; }
         public IBasicCommand RemoveFootprintCommand { get; }
         public IBasicCommand BrowseKiCadSymbolLibraryCommand { get; }
@@ -450,14 +450,14 @@ namespace KiCad_DB_Editor.ViewModel
                 selectedCategory.ParentCategory.Categories.Remove(selectedCategory);
         }
 
-        private bool NewParameterCommandCanExecute(object? parameter)
+        private bool NewUniversalParameterCommandCanExecute(object? parameter)
         {
-            string lowerValue = this.NewParameterName.ToLower();
-            if (this.NewParameterName.Length > 0 && lowerValue.All(c => Util.SafeParameterCharacters.Contains(c)))
+            string lowerValue = this.NewUniversalParameterName.ToLower();
+            if (this.NewUniversalParameterName.Length > 0 && lowerValue.All(c => Util.SafeParameterCharacters.Contains(c)))
             {
                 if (!Util.ReservedParameterNames.Contains(lowerValue) && Util.ReservedParameterNameStarts.All(s => !lowerValue.StartsWith(s)))
                 {
-                    if (!Library.UniversalParameters.Any(p => p.Name.ToLower() == lowerValue))
+                    if (!Library.UniversalParameters.Any(p => p.ToLower() == lowerValue))
                     {
                         return true;
                     }
@@ -466,21 +466,20 @@ namespace KiCad_DB_Editor.ViewModel
             return false;
         }
 
-        private void NewParameterCommandExecuted(object? parameter)
+        private void NewUniversalParameterCommandExecuted(object? parameter)
         {
-            Parameter newParameter = new(this.NewParameterName);
-            Library.UniversalParameters.Add(newParameter);
-            SelectedParameter = newParameter;
+            Library.UniversalParameters.Add(this.NewUniversalParameterName);
+            SelectedUniversalParameterIndex = Library.UniversalParameters.Count - 1;
         }
 
-        private bool RenameParameterCommandCanExecute(object? parameter)
+        private bool RenameUniversalParameterCommandCanExecute(object? parameter)
         {
-            string lowerValue = this.NewParameterName.ToLower();
-            if (SelectedParameter is not null && this.NewParameterName.Length > 0 && lowerValue.All(c => Util.SafeParameterCharacters.Contains(c)))
+            string lowerValue = this.NewUniversalParameterName.ToLower();
+            if (SelectedUniversalParameterIndex != -1 && this.NewUniversalParameterName.Length > 0 && lowerValue.All(c => Util.SafeParameterCharacters.Contains(c)))
             {
                 if (!Util.ReservedParameterNames.Contains(lowerValue) && Util.ReservedParameterNameStarts.All(s => !lowerValue.StartsWith(s)))
                 {
-                    if (!Library.UniversalParameters.Any(p => p.Name.ToLower() == lowerValue))
+                    if (!Library.UniversalParameters.Any(p => p.Equals(lowerValue, StringComparison.OrdinalIgnoreCase)))
                     {
                         return true;
                     }
@@ -489,49 +488,45 @@ namespace KiCad_DB_Editor.ViewModel
             return false;
         }
 
-        private void RenameParameterCommandExecuted(object? parameter)
+        private void RenameUniversalParameterCommandExecuted(object? parameter)
         {
-            Debug.Assert(SelectedParameter is not null);
-            SelectedParameter.Name = this.NewParameterName;
+            Debug.Assert(SelectedUniversalParameterIndex != -1);
+            Library.UniversalParameters[SelectedUniversalParameterIndex] = this.NewUniversalParameterName;
         }
 
-        private bool DeleteParameterCommandCanExecute(object? parameter)
+        private bool DeleteUniversalParameterCommandCanExecute(object? parameter)
         {
-            return SelectedParameter is not null;
+            return SelectedUniversalParameterIndex != -1;
         }
 
-        private void DeleteParameterCommandExecuted(object? parameter)
+        private void DeleteUniversalParameterCommandExecuted(object? parameter)
         {
-            Debug.Assert(SelectedParameter is not null);
-            Library.UniversalParameters.Remove(SelectedParameter);
-
-            SelectedParameter = Library.UniversalParameters.FirstOrDefault();
+            Debug.Assert(SelectedUniversalParameterIndex != -1);
+            Library.UniversalParameters.RemoveAt(SelectedUniversalParameterIndex);
         }
 
-        private bool MoveParameterUpCommandCanExecute(object? parameter)
+        private bool MoveUniversalParameterUpCommandCanExecute(object? parameter)
         {
-            return SelectedParameter is not null && Library.UniversalParameters.First() != SelectedParameter;
+            return SelectedUniversalParameterIndex != -1 && SelectedUniversalParameterIndex > 0;
         }
 
-        private void MoveParameterUpCommandExecuted(object? parameter)
+        private void MoveUniversalParameterUpCommandExecuted(object? parameter)
         {
-            Debug.Assert(SelectedParameter is not null);
-            int oldIndex = Library.UniversalParameters.IndexOf(SelectedParameter);
-            Debug.Assert(oldIndex > 0);
-            Library.UniversalParameters.Move(oldIndex, oldIndex - 1);
+            Debug.Assert(SelectedUniversalParameterIndex != -1);
+            Debug.Assert(SelectedUniversalParameterIndex > 0);
+            Library.UniversalParameters.Move(SelectedUniversalParameterIndex, SelectedUniversalParameterIndex - 1);
         }
 
-        private bool MoveParameterDownCommandCanExecute(object? parameter)
+        private bool MoveUniversalParameterDownCommandCanExecute(object? parameter)
         {
-            return SelectedParameter is not null && Library.UniversalParameters.Last() != SelectedParameter;
+            return SelectedUniversalParameterIndex != -1 && SelectedUniversalParameterIndex < Library.UniversalParameters.Count - 1;
         }
 
-        private void MoveParameterDownCommandExecuted(object? parameter)
+        private void MoveUniversalParameterDownCommandExecuted(object? parameter)
         {
-            Debug.Assert(SelectedParameter is not null);
-            int oldIndex = Library.UniversalParameters.IndexOf(SelectedParameter);
-            Debug.Assert(oldIndex < Library.UniversalParameters.Count - 1);
-            Library.UniversalParameters.Move(oldIndex, oldIndex + 1);
+            Debug.Assert(SelectedUniversalParameterIndex != -1);
+            Debug.Assert(SelectedUniversalParameterIndex < Library.UniversalParameters.Count - 1);
+            Library.UniversalParameters.Move(SelectedUniversalParameterIndex, SelectedUniversalParameterIndex + 1);
         }
 
         private bool AddFootprintCommandCanExecute(object? parameter)

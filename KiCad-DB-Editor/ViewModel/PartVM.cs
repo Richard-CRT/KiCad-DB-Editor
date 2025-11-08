@@ -110,11 +110,11 @@ namespace KiCad_DB_Editor.ViewModel
 
         #region Notify Properties
 
-        public string? this[string parameterUUID]
+        public string? this[string parameterName]
         {
             get
             {
-                Parameter? parameter = OwnerPartVM.Part.ParentLibrary.UniversalParameters.FirstOrDefault(p => p!.UUID == parameterUUID, null);
+                string? parameter = OwnerPartVM.Part.ParentLibrary.UniversalParameters.FirstOrDefault(p => p == parameterName, null);
                 Debug.Assert(parameter is not null); // I want to know if this is null
                 if (OwnerPartVM.Part.ParameterValues.TryGetValue(parameter, out string? val))
                     return val;
@@ -125,7 +125,7 @@ namespace KiCad_DB_Editor.ViewModel
             {
                 if (value is not null)
                 {
-                    Parameter parameter = OwnerPartVM.Part.ParentLibrary.UniversalParameters.First(p => p.UUID == parameterUUID);
+                    string parameter = OwnerPartVM.Part.ParentLibrary.UniversalParameters.First(p => p == parameterName);
                     if (OwnerPartVM.Part.ParameterValues.TryGetValue(parameter, out string? s))
                     {
                         if (s != value)

@@ -1,6 +1,11 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
-namespace KiCad_DB_Editor.Model.Json
+namespace KiCad_DB_Editor.Model.Legacy.V5.Json
 {
     public class JsonKiCadFootprintLibrary
     {
@@ -17,12 +22,6 @@ namespace KiCad_DB_Editor.Model.Json
         {
             Nickname = kiCadFootprintLibrary.Nickname;
             RelativePath = kiCadFootprintLibrary.RelativePath;
-        }
-
-        public JsonKiCadFootprintLibrary(Legacy.V5.Json.JsonKiCadFootprintLibrary jsonV5KiCadFootprintLibrary)
-        {
-            Nickname = jsonV5KiCadFootprintLibrary.Nickname;
-            RelativePath = jsonV5KiCadFootprintLibrary.RelativePath;
         }
     }
 }

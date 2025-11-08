@@ -32,6 +32,7 @@ namespace KiCad_DB_Editor.Utilities
         // No slashes, forward or back, as could be used as a delimeter / escape character
         // No | as used for a visual splitter for the KiCad categories
         // No {} as it breaks KiCad's field substitution
+        // No [] as we bind directly to parameter names
         public static HashSet<char> SafeCategoryCharacters = new HashSet<char>("abcdefghjiklmnopqrstuvwxyz0123456789_-&@() ");
         public static HashSet<char> SafeParameterCharacters = new HashSet<char>("abcdefghjiklmnopqrstuvwxyz0123456789_-&@() ");
 

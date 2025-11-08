@@ -24,11 +24,6 @@ namespace KiCad_DB_Editor.Model.Json
             JsonLibraryMetadataOnly jsonLibraryMetadataOnly;
             try
             {
-                string? projectDirectory = Path.GetDirectoryName(projectFilePath);
-                string? projectName = Path.GetFileNameWithoutExtension(projectFilePath);
-                if (projectDirectory is null || projectDirectory == "" || projectName is null || projectName == "")
-                    throw new InvalidOperationException();
-
                 var jsonString = File.ReadAllText(projectFilePath);
 
                 JsonLibraryMetadataOnly? o;

@@ -1,6 +1,8 @@
 ﻿using KiCad_DB_Editor.Model.Legacy.V5.Json;
 using KiCad_DB_Editor.Model.Loaders;
+using KiCad_DB_Editor.ViewModel;
 using Microsoft.Data.Sqlite;
+using System.IO;
 using System.Reflection.Metadata;
 
 namespace KiCad_DB_Editor.Model.Legacy.V5
@@ -8,158 +10,305 @@ namespace KiCad_DB_Editor.Model.Legacy.V5
 
     public class Upgrader : IUpgrader
     {
-        public static bool Upgrade(string projectFilePath)
+        public static void Upgrade(string projectFilePath)
         {
-            try
+            string? projectDirectory = Path.GetDirectoryName(projectFilePath);
+            string? projectName = Path.GetFileNameWithoutExtension(projectFilePath);
+            if (projectDirectory is null || projectDirectory == "" || projectName is null || projectName == "")
+                throw new InvalidOperationException();
+
+            string dataFilePath = Path.Combine(projectDirectory, projectName) + ".sqlite3";
+
+            string newV5ProjectFilePath = projectFilePath + ".v5bak";
+            string newV5DataFilePath = dataFilePath + ".v5bak";
+
+            File.Move(projectFilePath, newV5ProjectFilePath, true);
+            File.Move(dataFilePath, newV5DataFilePath, true);
+
+            var jsonV5Library = JsonLibrary.FromFile(newV5ProjectFilePath);
+            var jsonV6Library = new Model.Json.JsonLibrary(jsonV5Library);
+
+            using (var connectionV5Data = new SqliteConnection($"Data Source={newV5DataFilePath}"))
+            using (var connectionV6Data = new SqliteConnection($"Data Source={dataFilePath}"))
             {
-                var jsonV5Library = JsonLibrary.FromFile(projectFilePath);
-                var jsonV6Library = new Model.Json.JsonLibrary(jsonV5Library);
+                    connectionV5Data.Open();
+                connectionV6Data.Open();
 
-                //jsonV6Library.WriteToFile(projectFilePath);
+                using (var transaction = connectionV6Data.BeginTransaction())
+                {
+                    var createTablesCommand = connectionV6Data.CreateCommand();
+                    createTablesCommand.CommandText = @"
+CREATE TABLE ""Categories"" (
+    ""ID"" INTEGER,
+    ""String"" TEXT,
+    PRIMARY KEY(""ID"" AUTOINCREMENT)
+);
+CREATE TABLE ""Parts"" (
+    ""ID"" INTEGER,
+    ""Category ID"" INTEGER,
+    ""Part UID"" TEXT,
+    ""Description"" TEXT,
+    ""Manufacturer"" TEXT,
+    ""MPN"" TEXT,
+    ""Value"" TEXT,
+    ""Datasheet"" TEXT,
+    ""Exclude from BOM"" INTEGER,
+    ""Exclude from Board"" INTEGER,
+    ""Exclude from Sim"" INTEGER,
+    ""Symbol Library Name"" TEXT,
+    ""Symbol Name"" TEXT,
+    PRIMARY KEY(""ID"" AUTOINCREMENT)
+);
+CREATE TABLE ""PartParameterLinks"" (
+    ""Part ID"" INTEGER,
+    ""Parameter Name"" TEXT,
+    ""Value"" TEXT,
+    PRIMARY KEY(""Part ID"", ""Parameter Name"")
+);
+CREATE TABLE ""PartFootprints"" (
+    ""ID"" INTEGER,
+    ""Part ID"" INTEGER,
+    ""Library Name"" INTEGER,
+    ""Name"" TEXT,
+    PRIMARY KEY(""ID"" AUTOINCREMENT)
+);
+";
+                    createTablesCommand.ExecuteNonQuery();
 
-                return false;
+                    var insertCategoryCommand = connectionV6Data.CreateCommand();
+                    insertCategoryCommand.CommandText = @"
+INSERT INTO ""Categories"" (""ID"", ""String"")
+VALUES (
+    $id,
+    $category_string
+)
+";
 
-                //library.PartUIDScheme = jsonLibrary.PartUIDScheme;
-                //library.KiCadExportPartLibraryName = jsonLibrary.KiCadExportPartLibraryName;
-                //library.KiCadExportPartLibraryDescription = jsonLibrary.KiCadExportPartLibraryDescription;
-                //library.KiCadExportPartLibraryEnvironmentVariable = jsonLibrary.KiCadExportPartLibraryEnvironmentVariable;
-                //library.KiCadExportOdbcName = jsonLibrary.KiCadExportOdbcName;
-                //library.KiCadAutoExportOnSave = jsonLibrary.KiCadAutoExportOnSave;
-                //library.KiCadAutoExportRelativePath = jsonLibrary.KiCadAutoExportRelativePath;
-                //library.AllParameters.AddRange(jsonLibrary.AllParameters.Select(jP => new Parameter(jP)));
-                //library.TopLevelCategories.AddRange(jsonLibrary.TopLevelCategories.Select(c => new Category(c, library, null)));
-                //library.AllCategories.AddRange(library.TopLevelCategories);
-                //for (int i = 0; i < library.AllCategories.Count; i++)
-                //    library.AllCategories.AddRange(library.AllCategories[i].Categories);
-                //library.KiCadSymbolLibraries.AddRange(jsonLibrary.KiCadSymbolLibraries.Select(kSL => new KiCadSymbolLibrary(kSL, library)));
-                //library.KiCadFootprintLibraries.AddRange(jsonLibrary.KiCadFootprintLibraries.Select(kFL => new KiCadFootprintLibrary(kFL, library)));
+                    var insertCategoryCommand_IdParameter = insertCategoryCommand.CreateParameter();
+                    insertCategoryCommand_IdParameter.ParameterName = "$id";
+                    insertCategoryCommand.Parameters.Add(insertCategoryCommand_IdParameter);
 
-                //Dictionary<string, Category> categoryStringToCategoryMap = new();
-                //foreach (Category category in library.AllCategories)
-                //{
-                //    string path = $"/{category.Name}";
-                //    var c = category;
-                //    while (c.ParentCategory is not null)
-                //    {
-                //        path = $"/{c.ParentCategory.Name}{path}";
-                //        c = c.ParentCategory;
-                //    }
-                //    categoryStringToCategoryMap[path] = category;
-                //}
-                //Dictionary<string, Parameter> parameterUuidToParameterMap = new();
-                //foreach (Parameter parameter in library.AllParameters)
-                //    parameterUuidToParameterMap[parameter.UUID] = parameter;
+                    var insertCategoryCommand_CategoryStringParameter = insertCategoryCommand.CreateParameter();
+                    insertCategoryCommand_CategoryStringParameter.ParameterName = "$category_string";
+                    insertCategoryCommand.Parameters.Add(insertCategoryCommand_CategoryStringParameter);
 
-                //using (var connection = new SqliteConnection($"Data Source={dataFilePath}"))
-                //{
-                //    connection.Open();
+                    // Doesn't actually seem to affect performance, but adding for completeness
+                    insertCategoryCommand.Prepare();
 
-                //    Dictionary<Int64, Category> categoryIdToCategory = new();
-                //    Dictionary<Int64, Parameter> parameterIdToParameter = new();
-                //    Dictionary<Int64, Part> partIdToPart = new();
+                    var selectCategoriesCommand = connectionV5Data.CreateCommand();
+                    selectCategoriesCommand.CommandText = "SELECT * FROM \"Categories\"";
+                    using (var reader = selectCategoriesCommand.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            insertCategoryCommand_IdParameter.Value = (Int64)reader["ID"];
+                            insertCategoryCommand_CategoryStringParameter.Value = (string)reader["String"];
+                            insertCategoryCommand.ExecuteNonQuery();
+                        }
+                    }
 
-                //    var selectCategoriesCommand = connection.CreateCommand();
-                //    selectCategoriesCommand.CommandText = "SELECT * FROM \"Categories\"";
-                //    using (var reader = selectCategoriesCommand.ExecuteReader())
-                //    {
-                //        while (reader.Read())
-                //        {
-                //            var categoryId = (Int64)reader["ID"];
-                //            var categoryString = (string)reader["String"];
-                //            categoryIdToCategory[categoryId] = categoryStringToCategoryMap[categoryString];
-                //        }
-                //    }
 
-                //    var selectParametersCommand = connection.CreateCommand();
-                //    selectParametersCommand.CommandText = "SELECT * FROM \"Parameters\"";
-                //    using (var reader = selectParametersCommand.ExecuteReader())
-                //    {
-                //        while (reader.Read())
-                //        {
-                //            var parameterId = (Int64)reader["ID"];
-                //            var parameterUuid = (string)reader["UUID"];
-                //            parameterIdToParameter[parameterId] = parameterUuidToParameterMap[parameterUuid];
-                //        }
-                //    }
+                    var insertPartCommand = connectionV6Data.CreateCommand();
+                    insertPartCommand.CommandText = @"
+INSERT INTO ""Parts"" (
+    ""ID"",
+    ""Category ID"",
+    ""Part UID"",
+    ""Description"",
+    ""Manufacturer"",
+    ""MPN"",
+    ""Value"",
+    ""Datasheet"",
+    ""Exclude from BOM"",
+    ""Exclude from Board"",
+    ""Exclude from Sim"",
+    ""Symbol Library Name"",
+    ""Symbol Name""
+)
+VALUES (
+    $id,
+    $category_id,
+    $part_uid,
+    $description,
+    $manufacturer,
+    $mpn,
+    $value,
+    $datasheet,
+    $exclude_from_bom,
+    $exclude_from_board,
+    $exclude_from_sim,
+    $symbol_lib_name,
+    $symbol_name
+)
+";
 
-                //    var selectPartsCommand = connection.CreateCommand();
-                //    selectPartsCommand.CommandText = "SELECT * FROM \"Parts\"";
-                //    using (var reader = selectPartsCommand.ExecuteReader())
-                //    {
-                //        while (reader.Read())
-                //        {
-                //            var partId = (Int64)reader["ID"];
-                //            var categoryId = (Int64)reader["Category ID"];
-                //            var partUID = (string)reader["Part UID"];
-                //            var description = (string)reader["Description"];
-                //            var manufacturer = (string)reader["Manufacturer"];
-                //            var mpn = (string)reader["MPN"];
-                //            var value = (string)reader["Value"];
-                //            var datasheet = (string)reader["Datasheet"];
-                //            var excludeFromBOM = (Int64)reader["Exclude from BOM"];
-                //            var excludeFromBoard = (Int64)reader["Exclude from Board"];
-                //            var excludeFromSim = (Int64)reader["Exclude from Sim"];
-                //            var symbolLibraryName = (string)reader["Symbol Library Name"];
-                //            var symbolName = (string)reader["Symbol Name"];
+                    var insertPartCommand_IdParameter = insertPartCommand.CreateParameter();
+                    insertPartCommand_IdParameter.ParameterName = "$id";
+                    insertPartCommand.Parameters.Add(insertPartCommand_IdParameter);
 
-                //            Category category = categoryIdToCategory[categoryId];
+                    var insertPartCommand_CategoryIdParameter = insertPartCommand.CreateParameter();
+                    insertPartCommand_CategoryIdParameter.ParameterName = "$category_id";
+                    insertPartCommand.Parameters.Add(insertPartCommand_CategoryIdParameter);
 
-                //            Part part = new(partUID, library, category);
-                //            part.Description = description;
-                //            part.Manufacturer = manufacturer;
-                //            part.MPN = mpn;
-                //            part.Value = value;
-                //            part.Datasheet = datasheet;
-                //            part.ExcludeFromBOM = excludeFromBOM == 1;
-                //            part.ExcludeFromBoard = excludeFromBoard == 1;
-                //            part.ExcludeFromSim = excludeFromSim == 1;
-                //            part.SymbolLibraryName = symbolLibraryName;
-                //            part.SymbolName = symbolName;
+                    var insertPartCommand_PartUIDParameter = insertPartCommand.CreateParameter();
+                    insertPartCommand_PartUIDParameter.ParameterName = "$part_uid";
+                    insertPartCommand.Parameters.Add(insertPartCommand_PartUIDParameter);
 
-                //            partIdToPart[partId] = part;
-                //            library.AllParts.Add(part);
-                //            category.Parts.Add(part);
-                //        }
-                //    }
+                    var insertPartCommand_DescriptionParameter = insertPartCommand.CreateParameter();
+                    insertPartCommand_DescriptionParameter.ParameterName = "$description";
+                    insertPartCommand.Parameters.Add(insertPartCommand_DescriptionParameter);
 
-                //    var selectPartParameterLinksCommand = connection.CreateCommand();
-                //    selectPartsCommand.CommandText = "SELECT * FROM \"PartParameterLinks\"";
-                //    using (var reader = selectPartsCommand.ExecuteReader())
-                //    {
-                //        while (reader.Read())
-                //        {
-                //            var partId = (Int64)reader["Part ID"];
-                //            var parameterId = (Int64)reader["Parameter ID"];
-                //            var value = (string)reader["Value"];
+                    var insertPartCommand_ManufacturerParameter = insertPartCommand.CreateParameter();
+                    insertPartCommand_ManufacturerParameter.ParameterName = "$manufacturer";
+                    insertPartCommand.Parameters.Add(insertPartCommand_ManufacturerParameter);
 
-                //            var part = partIdToPart[partId];
-                //            var parameter = parameterIdToParameter[parameterId];
-                //            part.ParameterValues[parameter] = value;
-                //        }
-                //    }
+                    var insertPartCommand_MpnParameter = insertPartCommand.CreateParameter();
+                    insertPartCommand_MpnParameter.ParameterName = "$mpn";
+                    insertPartCommand.Parameters.Add(insertPartCommand_MpnParameter);
 
-                //    var selectPartFootprintsCommand = connection.CreateCommand();
-                //    // Needs to be order by ID ASC as this determines which number the footprint is on the part
-                //    selectPartFootprintsCommand.CommandText = "SELECT * FROM \"PartFootprints\" ORDER BY \"ID\" ASC";
-                //    using (var reader = selectPartFootprintsCommand.ExecuteReader())
-                //    {
-                //        while (reader.Read())
-                //        {
-                //            var partId = (Int64)reader["Part ID"];
-                //            var libraryName = (string)reader["Library Name"];
-                //            var name = (string)reader["Name"];
+                    var insertPartCommand_ValueParameter = insertPartCommand.CreateParameter();
+                    insertPartCommand_ValueParameter.ParameterName = "$value";
+                    insertPartCommand.Parameters.Add(insertPartCommand_ValueParameter);
 
-                //            var part = partIdToPart[partId];
-                //            part.FootprintPairs.Add((libraryName, name));
-                //        }
-                //    }
-                //}
-                //SqliteConnection.ClearAllPools();
+                    var insertPartCommand_DatasheetParameter = insertPartCommand.CreateParameter();
+                    insertPartCommand_DatasheetParameter.ParameterName = "$datasheet";
+                    insertPartCommand.Parameters.Add(insertPartCommand_DatasheetParameter);
+
+                    var insertPartCommand_ExcludeFromBomParameter = insertPartCommand.CreateParameter();
+                    insertPartCommand_ExcludeFromBomParameter.ParameterName = "$exclude_from_bom";
+                    insertPartCommand.Parameters.Add(insertPartCommand_ExcludeFromBomParameter);
+
+                    var insertPartCommand_ExcludeFromBoardParameter = insertPartCommand.CreateParameter();
+                    insertPartCommand_ExcludeFromBoardParameter.ParameterName = "$exclude_from_board";
+                    insertPartCommand.Parameters.Add(insertPartCommand_ExcludeFromBoardParameter);
+
+                    var insertPartCommand_ExcludeFromSimParameter = insertPartCommand.CreateParameter();
+                    insertPartCommand_ExcludeFromSimParameter.ParameterName = "$exclude_from_sim";
+                    insertPartCommand.Parameters.Add(insertPartCommand_ExcludeFromSimParameter);
+
+                    var insertPartCommand_SymbolLibNameParameter = insertPartCommand.CreateParameter();
+                    insertPartCommand_SymbolLibNameParameter.ParameterName = "$symbol_lib_name";
+                    insertPartCommand.Parameters.Add(insertPartCommand_SymbolLibNameParameter);
+
+                    var insertPartCommand_SymbolNameParameter = insertPartCommand.CreateParameter();
+                    insertPartCommand_SymbolNameParameter.ParameterName = "$symbol_name";
+                    insertPartCommand.Parameters.Add(insertPartCommand_SymbolNameParameter);
+
+                    // Doesn't actually seem to affect performance, but adding for completeness
+                    insertPartCommand.Prepare();
+
+                    var selectPartsCommand = connectionV5Data.CreateCommand();
+                    selectPartsCommand.CommandText = "SELECT * FROM \"Parts\"";
+                    using (var reader = selectPartsCommand.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            insertPartCommand_IdParameter.Value = (Int64)reader["ID"];
+                            insertPartCommand_CategoryIdParameter.Value = (Int64)reader["Category ID"];
+                            insertPartCommand_PartUIDParameter.Value = (string)reader["Part UID"];
+                            insertPartCommand_DescriptionParameter.Value = (string)reader["Description"];
+                            insertPartCommand_ManufacturerParameter.Value = (string)reader["Manufacturer"];
+                            insertPartCommand_MpnParameter.Value = (string)reader["MPN"];
+                            insertPartCommand_ValueParameter.Value = (string)reader["Value"];
+                            insertPartCommand_DatasheetParameter.Value = (string)reader["Datasheet"];
+                            insertPartCommand_ExcludeFromBomParameter.Value = (Int64)reader["Exclude from BOM"];
+                            insertPartCommand_ExcludeFromBoardParameter.Value = (Int64)reader["Exclude from Board"];
+                            insertPartCommand_ExcludeFromSimParameter.Value = (Int64)reader["Exclude from Sim"];
+                            insertPartCommand_SymbolLibNameParameter.Value = (string)reader["Symbol Library Name"];
+                            insertPartCommand_SymbolNameParameter.Value = (string)reader["Symbol Name"];
+                            insertPartCommand.ExecuteNonQuery();
+                        }
+                    }
+
+                    var insertPartFootprintCommand = connectionV6Data.CreateCommand();
+                    insertPartFootprintCommand.CommandText = @"
+INSERT INTO ""PartFootprints"" (""ID"", ""Part ID"", ""Library Name"", ""Name"")
+VALUES (
+    $id,
+    $part_id,
+    $library_name,
+    $name
+)
+";
+                    var insertPartFootprintCommand_IdParameter = insertPartFootprintCommand.CreateParameter();
+                    insertPartFootprintCommand_IdParameter.ParameterName = "$id";
+                    insertPartFootprintCommand.Parameters.Add(insertPartFootprintCommand_IdParameter);
+
+                    var insertPartFootprintCommand_PartIdParameter = insertPartFootprintCommand.CreateParameter();
+                    insertPartFootprintCommand_PartIdParameter.ParameterName = "$part_id";
+                    insertPartFootprintCommand.Parameters.Add(insertPartFootprintCommand_PartIdParameter);
+
+                    var insertPartFootprintCommand_LibraryNameParameter = insertPartFootprintCommand.CreateParameter();
+                    insertPartFootprintCommand_LibraryNameParameter.ParameterName = "$library_name";
+                    insertPartFootprintCommand.Parameters.Add(insertPartFootprintCommand_LibraryNameParameter);
+
+                    var insertPartFootprintCommand_NameParameter = insertPartFootprintCommand.CreateParameter();
+                    insertPartFootprintCommand_NameParameter.ParameterName = "$name";
+                    insertPartFootprintCommand.Parameters.Add(insertPartFootprintCommand_NameParameter);
+
+                    // Doesn't actually seem to affect performance, but adding for completeness
+                    insertPartFootprintCommand.Prepare();
+
+                    var selectPartFootprintsCommand = connectionV5Data.CreateCommand();
+                    selectPartFootprintsCommand.CommandText = "SELECT * FROM \"PartFootprints\"";
+                    using (var reader = selectPartFootprintsCommand.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            insertPartFootprintCommand_IdParameter.Value = (Int64)reader["ID"];
+                            insertPartFootprintCommand_PartIdParameter.Value = (Int64)reader["Part ID"];
+                            insertPartFootprintCommand_LibraryNameParameter.Value = (string)reader["Library Name"];
+                            insertPartFootprintCommand_NameParameter.Value = (string)reader["Name"];
+                            insertPartFootprintCommand.ExecuteNonQuery();
+                        }
+                    }
+
+                    // Changes actually needed on the next ones
+
+                    var insertPartParameterLinkCommand = connectionV6Data.CreateCommand();
+                    insertPartParameterLinkCommand.CommandText = @"
+INSERT INTO ""PartParameterLinks"" (""Part ID"", ""Parameter Name"", ""Value"")
+VALUES (
+    $part_id,
+    $parameter_name,
+    $value
+)
+";
+
+                    var insertPartParameterLinkCommand_PartIdParameter = insertPartParameterLinkCommand.CreateParameter();
+                    insertPartParameterLinkCommand_PartIdParameter.ParameterName = "$part_id";
+                    insertPartParameterLinkCommand.Parameters.Add(insertPartParameterLinkCommand_PartIdParameter);
+
+                    var insertPartParameterLinkCommand_ParameterNameParameter = insertPartParameterLinkCommand.CreateParameter();
+                    insertPartParameterLinkCommand_ParameterNameParameter.ParameterName = "$parameter_name";
+                    insertPartParameterLinkCommand.Parameters.Add(insertPartParameterLinkCommand_ParameterNameParameter);
+
+                    var insertPartParameterLinkCommand_ValueParameter = insertPartParameterLinkCommand.CreateParameter();
+                    insertPartParameterLinkCommand_ValueParameter.ParameterName = "$value";
+                    insertPartParameterLinkCommand.Parameters.Add(insertPartParameterLinkCommand_ValueParameter);
+
+                    // Doesn't actually seem to affect performance, but adding for completeness
+                    insertPartParameterLinkCommand.Prepare();
+
+                    var selectPartParameterLinksCommand = connectionV5Data.CreateCommand();
+                    selectPartsCommand.CommandText = "SELECT \"PartParameterLinks\".\"Part ID\", \"Parameters\".\"UUID\" AS \"Parameter UUID\", \"PartParameterLinks\".\"Value\" FROM \"PartParameterLinks\" INNER JOIN \"Parameters\" ON \"PartParameterLinks\".\"Parameter ID\" = \"Parameters\".\"ID\"";
+                    using (var reader = selectPartsCommand.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            insertPartParameterLinkCommand_PartIdParameter.Value = (Int64)reader["Part ID"];
+                            insertPartParameterLinkCommand_ParameterNameParameter.Value = jsonV5Library.AllParameters.First(p => p.UUID.Equals((string)reader["Parameter UUID"], StringComparison.OrdinalIgnoreCase)).Name;
+                            insertPartParameterLinkCommand_ValueParameter.Value = (string)reader["Value"];
+                            insertPartParameterLinkCommand.ExecuteNonQuery();
+                        }
+                    }
+
+                    transaction.Commit();
+                }
             }
-            catch (Exception)
-            {
-                return false;
-            }
+            SqliteConnection.ClearAllPools();
+
+            jsonV6Library.WriteToFile(projectFilePath);
         }
     }
 }

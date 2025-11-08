@@ -113,19 +113,10 @@ namespace KiCad_DB_Editor.Model.Json
             UniversalParameters = new(jsonV5Library.AllParameters.Where(p => p.Universal).Select(p => p.Name));
         }
 
-        public bool WriteToFile(string filePath, bool autosave = false)
+        public void WriteToFile(string filePath, bool autosave = false)
         {
-            try
-            {
-                //File.WriteAllText(tempProjectPath, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true, ReferenceHandler = ReferenceHandler.Preserve }));
-                File.WriteAllText(filePath, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
-
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            //File.WriteAllText(tempProjectPath, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true, ReferenceHandler = ReferenceHandler.Preserve }));
+            File.WriteAllText(filePath, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
         }
     }
 }

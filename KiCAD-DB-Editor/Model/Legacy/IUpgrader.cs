@@ -9,6 +9,6 @@ namespace KiCad_DB_Editor.Model.Loaders
 {
     public interface IUpgrader
     {
-        public static abstract bool Upgrade(string projectFilePath);
+        public static abstract void Upgrade(string projectFilePath);
     }
 }

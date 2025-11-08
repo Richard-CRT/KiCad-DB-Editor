@@ -35,159 +35,146 @@ namespace KiCad_DB_Editor.Model
         {
             try
             {
-                JsonLibraryMetadataOnly jsonLibraryMetadataOnly = JsonLibraryMetadataOnly.FromFile(projectFilePath);
-
-                if (jsonLibraryMetadataOnly.Metadata is null)
-                    Legacy.V5.Upgrader.Upgrade(projectFilePath);
-
                 string? projectDirectory = Path.GetDirectoryName(projectFilePath);
                 string? projectName = Path.GetFileNameWithoutExtension(projectFilePath);
                 if (projectDirectory is null || projectDirectory == "" || projectName is null || projectName == "")
                     throw new InvalidOperationException();
 
+                JsonLibraryMetadataOnly jsonLibraryMetadataOnly = JsonLibraryMetadataOnly.FromFile(projectFilePath);
+
+                if (jsonLibraryMetadataOnly.Metadata is null)
+                    Legacy.V5.Upgrader.Upgrade(projectFilePath);
+
                 string dataFilePath = Path.Combine(projectDirectory, projectName) + ".sqlite3";
 
                 Library library = new();
 
-                //// Must populate these before KiCadSymbolLibraries and KiCadFootprintLibraries
-                //library.ProjectDirectoryPath = projectDirectory;
-                //library.ProjectName = projectName;
+                // Must populate these before KiCadSymbolLibraries and KiCadFootprintLibraries
+                library.ProjectDirectoryPath = projectDirectory;
+                library.ProjectName = projectName;
 
-                //var jsonLibrary = JsonV6.JsonLibrary.FromFile(projectFilePath);
+                var jsonLibrary = JsonLibrary.FromFile(projectFilePath);
 
-                //library.PartUIDScheme = jsonLibrary.PartUIDScheme;
-                //library.KiCadExportPartLibraryName = jsonLibrary.KiCadExportPartLibraryName;
-                //library.KiCadExportPartLibraryDescription = jsonLibrary.KiCadExportPartLibraryDescription;
-                //library.KiCadExportPartLibraryEnvironmentVariable = jsonLibrary.KiCadExportPartLibraryEnvironmentVariable;
-                //library.KiCadExportOdbcName = jsonLibrary.KiCadExportOdbcName;
-                //library.KiCadAutoExportOnSave = jsonLibrary.KiCadAutoExportOnSave;
-                //library.KiCadAutoExportRelativePath = jsonLibrary.KiCadAutoExportRelativePath;
-                //library.UniversalParameters.AddRange(jsonLibrary.UniversalParameters);
-                //library.TopLevelCategories.AddRange(jsonLibrary.TopLevelCategories.Select(c => new Category(c, library, null)));
-                //library.AllCategories.AddRange(library.TopLevelCategories);
-                //for (int i = 0; i < library.AllCategories.Count; i++)
-                //    library.AllCategories.AddRange(library.AllCategories[i].Categories);
-                //library.KiCadSymbolLibraries.AddRange(jsonLibrary.KiCadSymbolLibraries.Select(kSL => new KiCadSymbolLibrary(kSL, library)));
-                //library.KiCadFootprintLibraries.AddRange(jsonLibrary.KiCadFootprintLibraries.Select(kFL => new KiCadFootprintLibrary(kFL, library)));
+                library.PartUIDScheme = jsonLibrary.PartUIDScheme;
+                library.KiCadExportPartLibraryName = jsonLibrary.KiCadExportPartLibraryName;
+                library.KiCadExportPartLibraryDescription = jsonLibrary.KiCadExportPartLibraryDescription;
+                library.KiCadExportPartLibraryEnvironmentVariable = jsonLibrary.KiCadExportPartLibraryEnvironmentVariable;
+                library.KiCadExportOdbcName = jsonLibrary.KiCadExportOdbcName;
+                library.KiCadAutoExportOnSave = jsonLibrary.KiCadAutoExportOnSave;
+                library.KiCadAutoExportRelativePath = jsonLibrary.KiCadAutoExportRelativePath;
+                library.UniversalParameters.AddRange(jsonLibrary.UniversalParameters);
+                library.TopLevelCategories.AddRange(jsonLibrary.TopLevelCategories.Select(c => new Category(c, library, null)));
+                library.AllCategories.AddRange(library.TopLevelCategories);
+                for (int i = 0; i < library.AllCategories.Count; i++)
+                    library.AllCategories.AddRange(library.AllCategories[i].Categories);
+                library.KiCadSymbolLibraries.AddRange(jsonLibrary.KiCadSymbolLibraries.Select(kSL => new KiCadSymbolLibrary(kSL, library)));
+                library.KiCadFootprintLibraries.AddRange(jsonLibrary.KiCadFootprintLibraries.Select(kFL => new KiCadFootprintLibrary(kFL, library)));
 
-                //Dictionary<string, Category> categoryStringToCategoryMap = new();
-                //foreach (Category category in library.AllCategories)
-                //{
-                //    string path = $"/{category.Name}";
-                //    var c = category;
-                //    while (c.ParentCategory is not null)
-                //    {
-                //        path = $"/{c.ParentCategory.Name}{path}";
-                //        c = c.ParentCategory;
-                //    }
-                //    categoryStringToCategoryMap[path] = category;
-                //}
+                Dictionary<string, Category> categoryStringToCategoryMap = new();
+                foreach (Category category in library.AllCategories)
+                {
+                    string path = $"/{category.Name}";
+                    var c = category;
+                    while (c.ParentCategory is not null)
+                    {
+                        path = $"/{c.ParentCategory.Name}{path}";
+                        c = c.ParentCategory;
+                    }
+                    categoryStringToCategoryMap[path] = category;
+                }
 
-                //using (var connection = new SqliteConnection($"Data Source={dataFilePath}"))
-                //{
-                //    connection.Open();
+                using (var connection = new SqliteConnection($"Data Source={dataFilePath}"))
+                {
+                    connection.Open();
 
-                //    Dictionary<Int64, Category> categoryIdToCategory = new();
-                //    Dictionary<Int64, Parameter> parameterIdToParameter = new();
-                //    Dictionary<Int64, Part> partIdToPart = new();
+                    Dictionary<Int64, Category> categoryIdToCategory = new();
+                    Dictionary<Int64, Parameter> parameterIdToParameter = new();
+                    Dictionary<Int64, Part> partIdToPart = new();
 
-                //    var selectCategoriesCommand = connection.CreateCommand();
-                //    selectCategoriesCommand.CommandText = "SELECT * FROM \"Categories\"";
-                //    using (var reader = selectCategoriesCommand.ExecuteReader())
-                //    {
-                //        while (reader.Read())
-                //        {
-                //            var categoryId = (Int64)reader["ID"];
-                //            var categoryString = (string)reader["String"];
-                //            categoryIdToCategory[categoryId] = categoryStringToCategoryMap[categoryString];
-                //        }
-                //    }
+                    var selectCategoriesCommand = connection.CreateCommand();
+                    selectCategoriesCommand.CommandText = "SELECT * FROM \"Categories\"";
+                    using (var reader = selectCategoriesCommand.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var categoryId = (Int64)reader["ID"];
+                            var categoryString = (string)reader["String"];
+                            categoryIdToCategory[categoryId] = categoryStringToCategoryMap[categoryString];
+                        }
+                    }
 
-                //    var selectParametersCommand = connection.CreateCommand();
-                //    selectParametersCommand.CommandText = "SELECT * FROM \"Parameters\"";
-                //    using (var reader = selectParametersCommand.ExecuteReader())
-                //    {
-                //        while (reader.Read())
-                //        {
-                //            var parameterId = (Int64)reader["ID"];
-                //            var parameterUuid = (string)reader["UUID"];
-                //            parameterIdToParameter[parameterId] = parameterUuidToParameterMap[parameterUuid];
-                //        }
-                //    }
+                    var selectPartsCommand = connection.CreateCommand();
+                    selectPartsCommand.CommandText = "SELECT * FROM \"Parts\"";
+                    using (var reader = selectPartsCommand.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var partId = (Int64)reader["ID"];
+                            var categoryId = (Int64)reader["Category ID"];
+                            var partUID = (string)reader["Part UID"];
+                            var description = (string)reader["Description"];
+                            var manufacturer = (string)reader["Manufacturer"];
+                            var mpn = (string)reader["MPN"];
+                            var value = (string)reader["Value"];
+                            var datasheet = (string)reader["Datasheet"];
+                            var excludeFromBOM = (Int64)reader["Exclude from BOM"];
+                            var excludeFromBoard = (Int64)reader["Exclude from Board"];
+                            var excludeFromSim = (Int64)reader["Exclude from Sim"];
+                            var symbolLibraryName = (string)reader["Symbol Library Name"];
+                            var symbolName = (string)reader["Symbol Name"];
 
-                //    var selectPartsCommand = connection.CreateCommand();
-                //    selectPartsCommand.CommandText = "SELECT * FROM \"Parts\"";
-                //    using (var reader = selectPartsCommand.ExecuteReader())
-                //    {
-                //        while (reader.Read())
-                //        {
-                //            var partId = (Int64)reader["ID"];
-                //            var categoryId = (Int64)reader["Category ID"];
-                //            var partUID = (string)reader["Part UID"];
-                //            var description = (string)reader["Description"];
-                //            var manufacturer = (string)reader["Manufacturer"];
-                //            var mpn = (string)reader["MPN"];
-                //            var value = (string)reader["Value"];
-                //            var datasheet = (string)reader["Datasheet"];
-                //            var excludeFromBOM = (Int64)reader["Exclude from BOM"];
-                //            var excludeFromBoard = (Int64)reader["Exclude from Board"];
-                //            var excludeFromSim = (Int64)reader["Exclude from Sim"];
-                //            var symbolLibraryName = (string)reader["Symbol Library Name"];
-                //            var symbolName = (string)reader["Symbol Name"];
+                            Category category = categoryIdToCategory[categoryId];
 
-                //            Category category = categoryIdToCategory[categoryId];
+                            Part part = new(partUID, library, category);
+                            part.Description = description;
+                            part.Manufacturer = manufacturer;
+                            part.MPN = mpn;
+                            part.Value = value;
+                            part.Datasheet = datasheet;
+                            part.ExcludeFromBOM = excludeFromBOM == 1;
+                            part.ExcludeFromBoard = excludeFromBoard == 1;
+                            part.ExcludeFromSim = excludeFromSim == 1;
+                            part.SymbolLibraryName = symbolLibraryName;
+                            part.SymbolName = symbolName;
 
-                //            Part part = new(partUID, library, category);
-                //            part.Description = description;
-                //            part.Manufacturer = manufacturer;
-                //            part.MPN = mpn;
-                //            part.Value = value;
-                //            part.Datasheet = datasheet;
-                //            part.ExcludeFromBOM = excludeFromBOM == 1;
-                //            part.ExcludeFromBoard = excludeFromBoard == 1;
-                //            part.ExcludeFromSim = excludeFromSim == 1;
-                //            part.SymbolLibraryName = symbolLibraryName;
-                //            part.SymbolName = symbolName;
+                            partIdToPart[partId] = part;
+                            library.AllParts.Add(part);
+                            category.Parts.Add(part);
+                        }
+                    }
 
-                //            partIdToPart[partId] = part;
-                //            library.AllParts.Add(part);
-                //            category.Parts.Add(part);
-                //        }
-                //    }
+                    var selectPartParameterLinksCommand = connection.CreateCommand();
+                    selectPartsCommand.CommandText = "SELECT * FROM \"PartParameterLinks\"";
+                    using (var reader = selectPartsCommand.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var partId = (Int64)reader["Part ID"];
+                            var parameterName = (string)reader["Parameter Name"];
+                            var value = (string)reader["Value"];
 
-                //    var selectPartParameterLinksCommand = connection.CreateCommand();
-                //    selectPartsCommand.CommandText = "SELECT * FROM \"PartParameterLinks\"";
-                //    using (var reader = selectPartsCommand.ExecuteReader())
-                //    {
-                //        while (reader.Read())
-                //        {
-                //            var partId = (Int64)reader["Part ID"];
-                //            var parameterId = (Int64)reader["Parameter ID"];
-                //            var value = (string)reader["Value"];
+                            var part = partIdToPart[partId];
+                            part.ParameterValues[parameterName] = value;
+                        }
+                    }
 
-                //            var part = partIdToPart[partId];
-                //            var parameter = parameterIdToParameter[parameterId];
-                //            part.ParameterValues[parameter] = value;
-                //        }
-                //    }
+                    var selectPartFootprintsCommand = connection.CreateCommand();
+                    // Needs to be order by ID ASC as this determines which number the footprint is on the part
+                    selectPartFootprintsCommand.CommandText = "SELECT * FROM \"PartFootprints\" ORDER BY \"ID\" ASC";
+                    using (var reader = selectPartFootprintsCommand.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var partId = (Int64)reader["Part ID"];
+                            var libraryName = (string)reader["Library Name"];
+                            var name = (string)reader["Name"];
 
-                //    var selectPartFootprintsCommand = connection.CreateCommand();
-                //    // Needs to be order by ID ASC as this determines which number the footprint is on the part
-                //    selectPartFootprintsCommand.CommandText = "SELECT * FROM \"PartFootprints\" ORDER BY \"ID\" ASC";
-                //    using (var reader = selectPartFootprintsCommand.ExecuteReader())
-                //    {
-                //        while (reader.Read())
-                //        {
-                //            var partId = (Int64)reader["Part ID"];
-                //            var libraryName = (string)reader["Library Name"];
-                //            var name = (string)reader["Name"];
-
-                //            var part = partIdToPart[partId];
-                //            part.FootprintPairs.Add((libraryName, name));
-                //        }
-                //    }
-                //}
-                //SqliteConnection.ClearAllPools();
+                            var part = partIdToPart[partId];
+                            part.FootprintPairs.Add((libraryName, name));
+                        }
+                    }
+                }
+                SqliteConnection.ClearAllPools();
 
                 outLibrary = library;
                 return true;
@@ -370,7 +357,7 @@ namespace KiCad_DB_Editor.Model
                 }
 
                 Json.JsonLibrary jsonLibrary = new(this);
-                if (!jsonLibrary.WriteToFile(projectFilePath, autosave)) return false;
+                jsonLibrary.WriteToFile(projectFilePath, autosave);
 
                 Dictionary<Category, string> categoryToCategoryStringMap = new();
                 foreach (Category category in AllCategories)
@@ -445,12 +432,12 @@ VALUES (
 RETURNING ""ID""
 ";
 
-                        // Doesn't actually seem to affect performance, but adding for completeness
-                        insertCategoryCommand.Prepare();
-
                         var insertCategoryCommand_CategoryStringParameter = insertCategoryCommand.CreateParameter();
                         insertCategoryCommand_CategoryStringParameter.ParameterName = "$category_string";
                         insertCategoryCommand.Parameters.Add(insertCategoryCommand_CategoryStringParameter);
+
+                        // Doesn't actually seem to affect performance, but adding for completeness
+                        insertCategoryCommand.Prepare();
 
                         foreach (var category in AllCategories)
                         {
@@ -545,7 +532,7 @@ RETURNING ""ID""
 
                         var insertPartParameterLinkCommand = connection.CreateCommand();
                         insertPartParameterLinkCommand.CommandText = @"
-INSERT INTO ""PartParameterLinks"" (""Part ID"", ""Parameter ID"", ""Value"")
+INSERT INTO ""PartParameterLinks"" (""Part ID"", ""Parameter Name"", ""Value"")
 VALUES (
     $part_id,
     $parameter_name,
@@ -553,7 +540,7 @@ VALUES (
 )
 ";
                         var insertPartParameterLinkCommand_PartIdParameter = insertPartParameterLinkCommand.CreateParameter();
-                        insertPartParameterLinkCommand_PartIdParameter.ParameterName = "part_id";
+                        insertPartParameterLinkCommand_PartIdParameter.ParameterName = "$part_id";
                         insertPartParameterLinkCommand.Parameters.Add(insertPartParameterLinkCommand_PartIdParameter);
 
                         var insertPartParameterLinkCommand_ParameterNameParameter = insertPartParameterLinkCommand.CreateParameter();
@@ -561,7 +548,7 @@ VALUES (
                         insertPartParameterLinkCommand.Parameters.Add(insertPartParameterLinkCommand_ParameterNameParameter);
 
                         var insertPartParameterLinkCommand_ValueParameter = insertPartParameterLinkCommand.CreateParameter();
-                        insertPartParameterLinkCommand_ValueParameter.ParameterName = "value";
+                        insertPartParameterLinkCommand_ValueParameter.ParameterName = "$value";
                         insertPartParameterLinkCommand.Parameters.Add(insertPartParameterLinkCommand_ValueParameter);
 
                         // Doesn't actually seem to affect performance, but adding for completeness
@@ -578,15 +565,15 @@ VALUES (
 )
 ";
                         var insertPartFootprintCommand_PartIdParameter = insertPartFootprintCommand.CreateParameter();
-                        insertPartFootprintCommand_PartIdParameter.ParameterName = "part_id";
+                        insertPartFootprintCommand_PartIdParameter.ParameterName = "$part_id";
                         insertPartFootprintCommand.Parameters.Add(insertPartFootprintCommand_PartIdParameter);
 
                         var insertPartFootprintCommand_LibraryNameParameter = insertPartFootprintCommand.CreateParameter();
-                        insertPartFootprintCommand_LibraryNameParameter.ParameterName = "library_name";
+                        insertPartFootprintCommand_LibraryNameParameter.ParameterName = "$library_name";
                         insertPartFootprintCommand.Parameters.Add(insertPartFootprintCommand_LibraryNameParameter);
 
                         var insertPartFootprintCommand_NameParameter = insertPartFootprintCommand.CreateParameter();
-                        insertPartFootprintCommand_NameParameter.ParameterName = "name";
+                        insertPartFootprintCommand_NameParameter.ParameterName = "$name";
                         insertPartFootprintCommand.Parameters.Add(insertPartFootprintCommand_NameParameter);
 
                         // Doesn't actually seem to affect performance, but adding for completeness

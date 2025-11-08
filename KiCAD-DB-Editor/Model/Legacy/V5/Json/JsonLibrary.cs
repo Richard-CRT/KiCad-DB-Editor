@@ -23,14 +23,6 @@ namespace KiCad_DB_Editor.Model.Legacy.V5.Json
             JsonLibrary jsonLibrary;
             try
             {
-                string? projectDirectory = Path.GetDirectoryName(projectFilePath);
-                string? projectName = Path.GetFileNameWithoutExtension(projectFilePath);
-                if (projectDirectory is null || projectDirectory == "" || projectName is null || projectName == "")
-                    throw new InvalidOperationException();
-
-                string componentsFilePath = Path.Combine(projectDirectory, projectName);
-                componentsFilePath += ".sqlite3";
-
                 var jsonString = File.ReadAllText(projectFilePath);
 
                 JsonLibrary? o;

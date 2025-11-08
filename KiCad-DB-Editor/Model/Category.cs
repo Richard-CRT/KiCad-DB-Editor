@@ -101,7 +101,8 @@ namespace KiCad_DB_Editor.Model
 
         public ObservableCollectionEx<string> InheritedAndNormalParameters
         {
-            get { return new(InheritedParameters.Concat(Parameters)); }
+            // I think .Distinct is not guaranteed to behave as I want it to, but it is right now anyway! Hopefully it doesn't change :)
+            get { return new(InheritedParameters.Concat(Parameters).Distinct()); }
         }
 
         public ObservableCollectionEx<string> InheritedParameters

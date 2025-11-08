@@ -152,7 +152,7 @@ namespace KiCad_DB_Editor.Model
             this.ExcludeFromSim = partToCopy.ExcludeFromSim;
 
             _footprintPairs = new(partToCopy.FootprintPairs); // Shallow copy because using ValueTuple
-            foreach (Parameter parameter in this.ParameterValues.Keys) // Guarantees that we don't add parameters from the partToCopy that don't already exist on this part
+            foreach (string parameter in this.ParameterValues.Keys) // Guarantees that we don't add parameters from the partToCopy that don't already exist on this part
                 this.ParameterValues[parameter] = partToCopy.ParameterValues[parameter];
         }
 
@@ -167,7 +167,7 @@ namespace KiCad_DB_Editor.Model
                 {
                     string substring = input[startIndex..(endIndex + 1)];
                     string parameterName = substring[2..^1].ToLowerInvariant();
-                    Parameter? parameter = ParameterValues.Keys.FirstOrDefault(k => k!.Name.Equals(parameterName, StringComparison.InvariantCultureIgnoreCase), null);
+                    string? parameter = ParameterValues.Keys.FirstOrDefault(k => k!.Equals(parameterName, StringComparison.InvariantCultureIgnoreCase), null);
                     if (parameter is not null)
                         input = input.Replace(substring, ParameterValues[parameter], StringComparison.InvariantCultureIgnoreCase);
                     else

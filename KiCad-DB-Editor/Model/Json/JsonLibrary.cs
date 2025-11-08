@@ -1,18 +1,8 @@
-﻿using KiCad_DB_Editor.ViewModel;
-using Microsoft.Data.Sqlite;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
+﻿using System.Data;
 using System.IO;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Text;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Windows.Documents;
 
 namespace KiCad_DB_Editor.Model.Json
 {
@@ -28,9 +18,6 @@ namespace KiCad_DB_Editor.Model.Json
                 if (projectDirectory is null || projectDirectory == "" || projectName is null || projectName == "")
                     throw new InvalidOperationException();
 
-                string componentsFilePath = Path.Combine(projectDirectory, projectName);
-                componentsFilePath += ".sqlite3";
-
                 var jsonString = File.ReadAllText(projectFilePath);
 
                 JsonLibrary? o;
@@ -39,7 +26,7 @@ namespace KiCad_DB_Editor.Model.Json
 
                 if (o is null) throw new ArgumentNullException("Library is null");
 
-                jsonLibrary = (JsonLibrary)o!;
+                jsonLibrary = o!;
             }
             catch (FileNotFoundException)
             {
@@ -51,37 +38,40 @@ namespace KiCad_DB_Editor.Model.Json
 
         // ======================================================================
 
-        [JsonPropertyName("part_uid_scheme"), JsonPropertyOrder(1)]
+        [JsonPropertyName("metadata"), JsonPropertyOrder(1)]
+        public JsonMetadata? Metadata { get; set; } = null;
+
+        [JsonPropertyName("part_uid_scheme"), JsonPropertyOrder(2)]
         public string PartUIDScheme { get; set; } = "";
 
-        [JsonPropertyName("part_lib_name"), JsonPropertyOrder(2)]
+        [JsonPropertyName("part_lib_name"), JsonPropertyOrder(3)]
         public string KiCadExportPartLibraryName { get; set; } = "";
 
-        [JsonPropertyName("part_lib_desc"), JsonPropertyOrder(3)]
+        [JsonPropertyName("part_lib_desc"), JsonPropertyOrder(4)]
         public string KiCadExportPartLibraryDescription { get; set; } = "";
 
-        [JsonPropertyName("export_odbc_name"), JsonPropertyOrder(4)]
+        [JsonPropertyName("export_odbc_name"), JsonPropertyOrder(5)]
         public string KiCadExportOdbcName { get; set; } = "";
 
-        [JsonPropertyName("kicad_part_lib_env_var"), JsonPropertyOrder(5)]
+        [JsonPropertyName("kicad_part_lib_env_var"), JsonPropertyOrder(6)]
         public string KiCadExportPartLibraryEnvironmentVariable { get; set; } = "";
 
-        [JsonPropertyName("auto_export"), JsonPropertyOrder(6)]
+        [JsonPropertyName("auto_export"), JsonPropertyOrder(7)]
         public bool KiCadAutoExportOnSave { get; set; } = false;
 
-        [JsonPropertyName("auto_export_relative_path"), JsonPropertyOrder(7)]
+        [JsonPropertyName("auto_export_relative_path"), JsonPropertyOrder(8)]
         public string KiCadAutoExportRelativePath { get; set; } = "";
 
-        [JsonPropertyName("universal_parameters"), JsonPropertyOrder(8)]
+        [JsonPropertyName("universal_parameters"), JsonPropertyOrder(9)]
         public List<string> UniversalParameters { get; set; } = new();
 
-        [JsonPropertyName("top_level_categories"), JsonPropertyOrder(9)]
+        [JsonPropertyName("top_level_categories"), JsonPropertyOrder(10)]
         public List<JsonCategory> TopLevelCategories { get; set; } = new();
 
-        [JsonPropertyName("kicad_symbol_libraries"), JsonPropertyOrder(10)]
+        [JsonPropertyName("kicad_symbol_libraries"), JsonPropertyOrder(11)]
         public List<JsonKiCadSymbolLibrary> KiCadSymbolLibraries { get; set; } = new();
 
-        [JsonPropertyName("kicad_footprint_libraries"), JsonPropertyOrder(11)]
+        [JsonPropertyName("kicad_footprint_libraries"), JsonPropertyOrder(12)]
         public List<JsonKiCadFootprintLibrary> KiCadFootprintLibraries { get; set; } = new();
 
         [JsonConstructor]
@@ -89,6 +79,8 @@ namespace KiCad_DB_Editor.Model.Json
 
         public JsonLibrary(Library library)
         {
+            Metadata = new JsonMetadata();
+            Metadata.Version = Assembly.GetEntryAssembly()!.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion;
             PartUIDScheme = library.PartUIDScheme;
             KiCadExportPartLibraryName = library.KiCadExportPartLibraryName;
             KiCadExportPartLibraryDescription = library.KiCadExportPartLibraryDescription;
@@ -100,6 +92,25 @@ namespace KiCad_DB_Editor.Model.Json
             TopLevelCategories = new(library.TopLevelCategories.Select(c => new JsonCategory(c)));
             KiCadSymbolLibraries = new(library.KiCadSymbolLibraries.Select(kSL => new JsonKiCadSymbolLibrary(kSL)));
             KiCadFootprintLibraries = new(library.KiCadFootprintLibraries.Select(kFL => new JsonKiCadFootprintLibrary(kFL)));
+        }
+
+        public JsonLibrary(Legacy.V5.Json.JsonLibrary jsonV5Library)
+        {
+            Metadata = new JsonMetadata();
+            Metadata.Version = Assembly.GetEntryAssembly()!.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion;
+            PartUIDScheme = jsonV5Library.PartUIDScheme;
+            KiCadExportPartLibraryName = jsonV5Library.KiCadExportPartLibraryName;
+            KiCadExportPartLibraryDescription = jsonV5Library.KiCadExportPartLibraryDescription;
+            KiCadExportOdbcName = jsonV5Library.KiCadExportOdbcName;
+            KiCadExportPartLibraryEnvironmentVariable = jsonV5Library.KiCadExportPartLibraryEnvironmentVariable;
+            KiCadAutoExportOnSave = jsonV5Library.KiCadAutoExportOnSave;
+            KiCadAutoExportRelativePath = jsonV5Library.KiCadAutoExportRelativePath;
+            TopLevelCategories = new(jsonV5Library.TopLevelCategories.Select(c => new JsonCategory(jsonV5Library, c)));
+            KiCadSymbolLibraries = new(jsonV5Library.KiCadSymbolLibraries.Select(kCSL => new JsonKiCadSymbolLibrary(kCSL)));
+            KiCadFootprintLibraries = new(jsonV5Library.KiCadFootprintLibraries.Select(kCFL => new JsonKiCadFootprintLibrary(kCFL)));
+
+            // This has changed
+            UniversalParameters = new(jsonV5Library.AllParameters.Where(p => p.Universal).Select(p => p.Name));
         }
 
         public bool WriteToFile(string filePath, bool autosave = false)

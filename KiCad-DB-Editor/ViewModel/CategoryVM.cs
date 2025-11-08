@@ -105,15 +105,8 @@ namespace KiCad_DB_Editor.ViewModel
             }
         }
 
-        private Parameter? _selectedAvailableParameter = null;
-        public Parameter? SelectedAvailableParameter
-        {
-            get { return _selectedAvailableParameter; }
-            set { if (_selectedAvailableParameter != value) { _selectedAvailableParameter = value; InvokePropertyChanged(); } }
-        }
-
-        private Parameter? _selectedParameter = null;
-        public Parameter? SelectedParameter
+        private string? _selectedParameter = null;
+        public string? SelectedParameter
         {
             get { return _selectedParameter; }
             set { if (_selectedParameter != value) { _selectedParameter = value; InvokePropertyChanged(); } }
@@ -145,8 +138,6 @@ namespace KiCad_DB_Editor.ViewModel
             Debug.Assert(_partVMs is not null);
 
             // Setup commands
-            AddParameterCommand = new BasicCommand(AddParameterCommandExecuted, AddParameterCommandCanExecute);
-            RemoveParameterCommand = new BasicCommand(RemoveParameterCommandExecuted, RemoveParameterCommandCanExecute);
             NewPartsCommand = new BasicCommand(NewPartsCommandExecuted, null);
             DuplicatePartCommand = new BasicCommand(DuplicatePartCommandExecuted, DuplicatePartCommandCanExecute);
             DeletePartsCommand = new BasicCommand(DeletePartsCommandExecuted, DeletePartsCommandCanExecute);
@@ -260,7 +251,7 @@ namespace KiCad_DB_Editor.ViewModel
         {
             string partUID = Util.GeneratePartUID(Category.ParentLibrary.PartUIDScheme);
             Part part = new(partUID, Category.ParentLibrary, Category);
-            foreach (Parameter parameter in Category.InheritedAndNormalParameters)
+            foreach (string parameter in Category.InheritedAndNormalParameters)
                 part.ParameterValues.Add(parameter, "");
             if (existingPartToDuplicate is not null)
                 part.CopyFromPart(existingPartToDuplicate);
@@ -270,57 +261,11 @@ namespace KiCad_DB_Editor.ViewModel
 
         #region Commands
 
-        public IBasicCommand AddParameterCommand { get; }
-        public IBasicCommand RemoveParameterCommand { get; }
         public IBasicCommand NewPartsCommand { get; }
         public IBasicCommand DuplicatePartCommand { get; }
         public IBasicCommand DeletePartsCommand { get; }
         public IBasicCommand AddFootprintCommand { get; }
         public IBasicCommand RemoveFootprintCommand { get; }
-
-        private bool AddParameterCommandCanExecute(object? parameter)
-        {
-            return SelectedAvailableParameter is not null;
-        }
-
-        private void AddParameterCommandExecuted(object? parameter)
-        {
-            Debug.Assert(SelectedAvailableParameter is not null);
-
-            Parameter pToBeAdded = SelectedAvailableParameter;
-
-            int indexOfPToBeAddedInLibrary = Category.ParentLibrary.UniversalParameters.IndexOf(pToBeAdded);
-            int newIndex;
-            for (newIndex = 0; newIndex < Category.Parameters.Count; newIndex++)
-            {
-                if (indexOfPToBeAddedInLibrary < Category.ParentLibrary.UniversalParameters.IndexOf(Category.Parameters[newIndex]))
-                {
-                    break;
-                }
-            }
-            if (newIndex == Category.Parameters.Count)
-                Category.Parameters.Add(pToBeAdded);
-            else
-                Category.Parameters.Insert(newIndex, pToBeAdded);
-
-            SelectedAvailableParameter = Category.AvailableParameters.FirstOrDefault();
-        }
-
-        private bool RemoveParameterCommandCanExecute(object? parameter)
-        {
-            return SelectedParameter is not null;
-        }
-
-        private void RemoveParameterCommandExecuted(object? parameter)
-        {
-            Debug.Assert(SelectedParameter is not null);
-
-            Parameter pToBeRemoved = SelectedParameter;
-
-            Category.Parameters.Remove(pToBeRemoved);
-
-            SelectedParameter = Category.Parameters.FirstOrDefault();
-        }
 
         private void NewPartsCommandExecuted(object? _)
         {

@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace KiCad_DB_Editor.Model.Json
+namespace KiCad_DB_Editor.Model.Legacy.V5.Json
 {
     public class JsonKiCadSymbolLibrary
     {
@@ -23,12 +23,6 @@ namespace KiCad_DB_Editor.Model.Json
         {
             Nickname = kiCadSymbolLibrary.Nickname;
             RelativePath = kiCadSymbolLibrary.RelativePath;
-        }
-
-        public JsonKiCadSymbolLibrary(Legacy.V5.Json.JsonKiCadSymbolLibrary jsonV5KiCadSymbolLibrary)
-        {
-            Nickname = jsonV5KiCadSymbolLibrary.Nickname;
-            RelativePath = jsonV5KiCadSymbolLibrary.Nickname;
         }
     }
 }

@@ -22,7 +22,7 @@
             <TabItem Header="Structure">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="0*" MinWidth="200"/>
+                        <ColumnDefinition Width="0*" MinWidth="250"/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="1*" MinWidth="500"/>
                     </Grid.ColumnDefinitions>

@@ -1,25 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Collections.Specialized;
-using System.Net.Http.Headers;
-using System.Windows.Data;
-using System.ComponentModel;
-using Microsoft.VisualBasic;
-using KiCad_DB_Editor.Commands;
-using KiCad_DB_Editor.View;
-using KiCad_DB_Editor.Utilities;
+﻿using KiCad_DB_Editor.Commands;
 using KiCad_DB_Editor.Exceptions;
 using KiCad_DB_Editor.Model;
+using KiCad_DB_Editor.Utilities;
+using KiCad_DB_Editor.View;
 using KiCad_DB_Editor.View.Dialogs;
-using System.Security.Cryptography;
-using System.Windows.Media;
-using System.Formats.Asn1;
+using Microsoft.VisualBasic;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Formats.Asn1;
+using System.Linq;
+using System.Net.Http.Headers;
+using System.Reflection.Metadata;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Data;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace KiCad_DB_Editor.ViewModel
@@ -105,11 +106,21 @@ namespace KiCad_DB_Editor.ViewModel
             }
         }
 
-        private string? _selectedParameter = null;
-        public string? SelectedParameter
+        private int _selectedParameterIndex = -1;
+        public int SelectedParameterIndex
         {
-            get { return _selectedParameter; }
-            set { if (_selectedParameter != value) { _selectedParameter = value; InvokePropertyChanged(); } }
+            get { return _selectedParameterIndex; }
+            set
+            {
+                if (_selectedParameterIndex != value)
+                {
+                    _selectedParameterIndex = value;
+                    InvokePropertyChanged();
+
+                    if (_selectedParameterIndex != -1)
+                        NewParameterName = this.Category.Parameters[_selectedParameterIndex];
+                }
+            }
         }
 
         private PartVM[] _selectedPartVMs = Array.Empty<PartVM>();
@@ -118,6 +129,20 @@ namespace KiCad_DB_Editor.ViewModel
             // For some reason I can't do OneWayToSource :(
             get { return _selectedPartVMs; }
             set { if (_selectedPartVMs != value) { _selectedPartVMs = value; InvokePropertyChanged(); } }
+        }
+
+        private string _newParameterName = "";
+        public string NewParameterName
+        {
+            get { return _newParameterName; }
+            set
+            {
+                if (_newParameterName != value)
+                {
+                    _newParameterName = value;
+                    InvokePropertyChanged();
+                }
+            }
         }
 
         #endregion Notify Properties
@@ -138,9 +163,16 @@ namespace KiCad_DB_Editor.ViewModel
             Debug.Assert(_partVMs is not null);
 
             // Setup commands
+            AddParameterCommand = new BasicCommand(AddParameterCommandExecuted, AddParameterCommandCanExecute);
+            RenameParameterCommand = new BasicCommand(RenameParameterCommandExecuted, RenameParameterCommandCanExecute);
+            RemoveParameterCommand = new BasicCommand(RemoveParameterCommandExecuted, RemoveParameterCommandCanExecute);
+            MoveParameterUpCommand = new BasicCommand(MoveParameterUpCommandExecuted, MoveParameterUpCommandCanExecute);
+            MoveParameterDownCommand = new BasicCommand(MoveParameterDownCommandExecuted, MoveParameterDownCommandCanExecute);
+
             NewPartsCommand = new BasicCommand(NewPartsCommandExecuted, null);
             DuplicatePartCommand = new BasicCommand(DuplicatePartCommandExecuted, DuplicatePartCommandCanExecute);
             DeletePartsCommand = new BasicCommand(DeletePartsCommandExecuted, DeletePartsCommandCanExecute);
+
             AddFootprintCommand = new BasicCommand(AddFootprintCommandExecuted, AddFootprintCommandCanExecute);
             RemoveFootprintCommand = new BasicCommand(RemoveFootprintCommandExecuted, RemoveFootprintCommandCanExecute);
 
@@ -261,11 +293,95 @@ namespace KiCad_DB_Editor.ViewModel
 
         #region Commands
 
+        public IBasicCommand AddParameterCommand { get; }
+        public IBasicCommand RenameParameterCommand { get; }
+        public IBasicCommand RemoveParameterCommand { get; }
+        public IBasicCommand MoveParameterUpCommand { get; }
+        public IBasicCommand MoveParameterDownCommand { get; }
         public IBasicCommand NewPartsCommand { get; }
         public IBasicCommand DuplicatePartCommand { get; }
         public IBasicCommand DeletePartsCommand { get; }
         public IBasicCommand AddFootprintCommand { get; }
         public IBasicCommand RemoveFootprintCommand { get; }
+
+        private bool AddParameterCommandCanExecute(object? parameter)
+        {
+            string lowerValue = this.NewParameterName.ToLower();
+            if (lowerValue.Length > 0 && lowerValue.All(c => Util.SafeParameterCharacters.Contains(c)))
+            {
+                if (!Util.ReservedParameterNames.Contains(lowerValue) && Util.ReservedParameterNameStarts.All(s => !lowerValue.StartsWith(s)))
+                {
+                    if (!this.Category.Parameters.Any(p => p.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase)))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private void AddParameterCommandExecuted(object? parameter)
+        {
+            this.Category.Parameters.Add(this.NewParameterName);
+            SelectedParameterIndex = this.Category.Parameters.Count - 1;
+        }
+
+        private bool RenameParameterCommandCanExecute(object? parameter)
+        {
+            string lowerValue = this.NewParameterName.ToLower();
+            if (SelectedParameterIndex != -1 && lowerValue.Length > 0 && lowerValue.All(c => Util.SafeParameterCharacters.Contains(c)))
+            {
+                if (!Util.ReservedParameterNames.Contains(lowerValue) && Util.ReservedParameterNameStarts.All(s => !lowerValue.StartsWith(s)))
+                {
+                    if (!this.Category.Parameters.Any(p => p.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase)))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private void RenameParameterCommandExecuted(object? parameter)
+        {
+            Debug.Assert(SelectedParameterIndex != -1);
+            this.Category.Parameters[SelectedParameterIndex] = this.NewParameterName;
+        }
+
+        private bool RemoveParameterCommandCanExecute(object? parameter)
+        {
+            return SelectedParameterIndex != -1;
+        }
+
+        private void RemoveParameterCommandExecuted(object? parameter)
+        {
+            Debug.Assert(SelectedParameterIndex != -1);
+            Category.Parameters.RemoveAt(SelectedParameterIndex);
+        }
+
+        private bool MoveParameterUpCommandCanExecute(object? parameter)
+        {
+            return SelectedParameterIndex != -1 && SelectedParameterIndex > 0;
+        }
+
+        private void MoveParameterUpCommandExecuted(object? parameter)
+        {
+            Debug.Assert(SelectedParameterIndex != -1);
+            Debug.Assert(SelectedParameterIndex > 0);
+            this.Category.Parameters.Move(SelectedParameterIndex, SelectedParameterIndex - 1);
+        }
+
+        private bool MoveParameterDownCommandCanExecute(object? parameter)
+        {
+            return SelectedParameterIndex != -1 && SelectedParameterIndex < this.Category.Parameters.Count - 1;
+        }
+
+        private void MoveParameterDownCommandExecuted(object? parameter)
+        {
+            Debug.Assert(SelectedParameterIndex != -1);
+            Debug.Assert(SelectedParameterIndex < this.Category.Parameters.Count - 1);
+            this.Category.Parameters.Move(SelectedParameterIndex, SelectedParameterIndex + 1);
+        }
 
         private void NewPartsCommandExecuted(object? _)
         {

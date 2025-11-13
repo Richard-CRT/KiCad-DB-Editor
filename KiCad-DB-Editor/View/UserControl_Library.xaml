@@ -111,8 +111,7 @@
                         </DockPanel>
                         <ListBox 
                             ItemsSource="{Binding LibraryVM.Library.UniversalParameters, 
-                            RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" 
-                            DisplayMemberPath="Name" 
+                            RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
                             MinHeight="60"
                             SelectedIndex="{Binding LibraryVM.SelectedUniversalParameterIndex, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
                             />

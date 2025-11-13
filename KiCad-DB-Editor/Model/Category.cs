@@ -101,8 +101,9 @@ namespace KiCad_DB_Editor.Model
 
         public ObservableCollectionEx<string> InheritedAndNormalParameters
         {
-            // I think .Distinct is not guaranteed to behave as I want it to, but it is right now anyway! Hopefully it doesn't change :)
-            get { return new(InheritedParameters.Concat(Parameters).Distinct()); }
+            // I think .Distinct is not guaranteed to behave as I want it to i.e. keeping the first one it finds, but it is right now anyway! Hopefully it doesn't change :)
+            // We want inherited parameters at the end, but want the Distinct call to prioritise keeping the Inherited one, so need some Reverses
+            get { return new(Parameters.Concat(InheritedParameters).Reverse().Distinct().Reverse()); }
         }
 
         public ObservableCollectionEx<string> InheritedParameters

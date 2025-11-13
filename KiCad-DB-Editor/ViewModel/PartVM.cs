@@ -114,9 +114,7 @@ namespace KiCad_DB_Editor.ViewModel
         {
             get
             {
-                string? parameter = OwnerPartVM.Part.ParentLibrary.UniversalParameters.FirstOrDefault(p => p == parameterName, null);
-                Debug.Assert(parameter is not null); // I want to know if this is null
-                if (OwnerPartVM.Part.ParameterValues.TryGetValue(parameter, out string? val))
+                if (OwnerPartVM.Part.ParameterValues.TryGetValue(parameterName, out string? val))
                     return val;
                 else
                     return null;

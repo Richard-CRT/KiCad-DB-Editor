@@ -453,11 +453,11 @@ namespace KiCad_DB_Editor.ViewModel
         private bool NewUniversalParameterCommandCanExecute(object? parameter)
         {
             string lowerValue = this.NewUniversalParameterName.ToLower();
-            if (this.NewUniversalParameterName.Length > 0 && lowerValue.All(c => Util.SafeParameterCharacters.Contains(c)))
+            if (lowerValue.Length > 0 && lowerValue.All(c => Util.SafeParameterCharacters.Contains(c)))
             {
                 if (!Util.ReservedParameterNames.Contains(lowerValue) && Util.ReservedParameterNameStarts.All(s => !lowerValue.StartsWith(s)))
                 {
-                    if (!Library.UniversalParameters.Any(p => p.ToLower() == lowerValue))
+                    if (!Library.UniversalParameters.Any(p => p.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase)))
                     {
                         return true;
                     }
@@ -479,7 +479,7 @@ namespace KiCad_DB_Editor.ViewModel
             {
                 if (!Util.ReservedParameterNames.Contains(lowerValue) && Util.ReservedParameterNameStarts.All(s => !lowerValue.StartsWith(s)))
                 {
-                    if (!Library.UniversalParameters.Any(p => p.Equals(lowerValue, StringComparison.OrdinalIgnoreCase)))
+                    if (!Library.UniversalParameters.Any(p => p.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase)))
                     {
                         return true;
                     }

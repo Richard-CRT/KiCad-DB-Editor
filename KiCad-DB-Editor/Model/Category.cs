@@ -99,6 +99,7 @@ namespace KiCad_DB_Editor.Model
             get { return _parts; }
         }
 
+        // Needs to be ObservableCollectionEx because bindings expecting this form
         public ObservableCollectionEx<string> InheritedAndNormalParameters
         {
             // I think .Distinct is not guaranteed to behave as I want it to i.e. keeping the first one it finds, but it is right now anyway! Hopefully it doesn't change :)
@@ -106,6 +107,7 @@ namespace KiCad_DB_Editor.Model
             get { return new(Parameters.Concat(InheritedParameters).Reverse().Distinct().Reverse()); }
         }
 
+        // Needs to be ObservableCollectionEx because bindings expecting this form
         public ObservableCollectionEx<string> InheritedParameters
         {
             get { return ParentCategory is null ? new(ParentLibrary.UniversalParameters) : new(ParentCategory.InheritedAndNormalParameters); }
@@ -175,6 +177,8 @@ namespace KiCad_DB_Editor.Model
                 foreach (string parameterToBeAdded in parametersToBeAdded)
                     part.ParameterValues.TryAdd(parameterToBeAdded, "");
             }
+
+            this.ParentLibrary.Category_ParametersCollectionChanged();
         }
 
         public override string ToString()

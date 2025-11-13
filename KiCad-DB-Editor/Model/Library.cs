@@ -5,6 +5,7 @@ using KiCad_DB_Editor.ViewModel;
 using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Data;
 using System.Data.Common;
@@ -270,6 +271,12 @@ namespace KiCad_DB_Editor.Model
             get { return _allParts; }
         }
 
+        // Needs to be ObservableCollectionEx because bindings expecting this form
+        public ObservableCollectionEx<string> AllParameters
+        {
+            get { return new(UniversalParameters.Concat(AllCategories.SelectMany(c => c.Parameters)).Distinct()); }
+        }
+
         // No setter, to prevent the VM needing to listening PropertyChanged events
         private ObservableCollectionEx<string> _universalParameters;
         public ObservableCollectionEx<string> UniversalParameters
@@ -291,6 +298,7 @@ namespace KiCad_DB_Editor.Model
             get { return _topLevelCategories; }
         }
 
+        // Needs to be ObservableCollectionEx because bindings expecting this form
         public ObservableCollectionEx<string> AllManufacturers
         {
             get { return new ObservableCollectionEx<string>(AllParts.Select(p => p.Manufacturer).ToHashSet().Where(m => !string.IsNullOrEmpty(m)).Order()); }
@@ -319,16 +327,23 @@ namespace KiCad_DB_Editor.Model
             _allParts = new();
             _universalParameters = new();
             // We don't worry about unsubscribing because this object is the event publisher
-            _universalParameters.CollectionChanged += _allParameters_CollectionChanged;
+            _universalParameters.CollectionChanged += _universalParameters_CollectionChanged;
             _allCategories = new();
             _topLevelCategories = new();
             _kiCadSymbolLibraries = new();
             _kiCadFootprintLibraries = new();
         }
 
-        private void _allParameters_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        private void _universalParameters_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             foreach (var c in TopLevelCategories) c.ParentCategory_InheritedParameters_PropertyChanged();
+
+            InvokePropertyChanged(nameof(AllParameters));
+        }
+
+        public void Category_ParametersCollectionChanged()
+        {
+            InvokePropertyChanged(nameof(AllParameters));
         }
 
         public bool WriteToFile(string projectFilePath, out string errorMessage, bool autosave = false)

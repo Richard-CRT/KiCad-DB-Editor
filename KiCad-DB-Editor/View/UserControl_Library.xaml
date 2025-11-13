@@ -76,7 +76,7 @@
                                 Command="{Binding LibraryVM.RemoveFootprintCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}" />
                     </StackPanel>
                     <local:UserControl_PartGrid Grid.Row="2"
-                                                d:Parameters="{Binding LibraryVM.Library.AllParameters, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"
+                                                Parameters="{Binding LibraryVM.Library.AllParameters, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"
                                                 PartVMs="{Binding LibraryVM.AllPartVMs, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}}"
                                                 SelectedPartVMs="{Binding LibraryVM.SelectedPartVMs, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Library}}, UpdateSourceTrigger=PropertyChanged}"
                                                 DisplayPartCategory="True"

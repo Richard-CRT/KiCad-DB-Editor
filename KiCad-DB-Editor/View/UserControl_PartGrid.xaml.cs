@@ -647,7 +647,8 @@ namespace KiCad_DB_Editor.View
 
             // Need to add footprintIndex * 2 because we always insert starting at the low number first
             // so in order for columns to count up left to right we need to move along
-            dataGrid_Main.Columns.Insert(_baseColumnIndexToInsertFootprintColumnsAt + (footprintIndex * 2), dataGridTemplateColumn);
+            dataGrid_Main.Columns.Add(dataGridTemplateColumn);
+            dataGridTemplateColumn.DisplayIndex = _baseColumnIndexToInsertFootprintColumnsAt + (footprintIndex * 2);
 
             return dataGridTemplateColumn;
 
@@ -751,7 +752,8 @@ namespace KiCad_DB_Editor.View
             parameterToDataGridColumn[parameterName] = dataGridTextColumn;
             parametersThatHaveColumns.Insert(index, parameterName);
 
-            dataGrid_Main.Columns.Insert(_baseColumnIndexToInsertFootprintColumnsAt + (2 * _lastMaxFootprints) + index, dataGridTextColumn);
+            dataGrid_Main.Columns.Add(dataGridTextColumn);
+            dataGridTextColumn.DisplayIndex = _baseColumnIndexToInsertFootprintColumnsAt + (2 * _lastMaxFootprints) + index;
 
             return dataGridTextColumn;
         }
@@ -798,27 +800,10 @@ namespace KiCad_DB_Editor.View
                     case NotifyCollectionChangedAction.Reset:
                     default:
                         {
-                            var parametersThatNeedANewColumn = Parameters.Except(parametersThatHaveColumns).ToList();
-                            var parametersThatNeedToBeRemoved = parametersThatHaveColumns.Except(Parameters).ToList();
+                            var parametersThatNeedANewColumn = Parameters.Except(parametersThatHaveColumns).ToList(); // Have to do ToList because the loops modify the sources
+                            var parametersThatNeedToBeRemoved = parametersThatHaveColumns.Except(Parameters).ToList(); // Have to do ToList because the loops modify the sources
 
-                            // Identify the ones that aren't in the right index anymore, and add them to the pile of ones requiring removal & (re)creation
-                            int parametersThatHaveColumnsIndex = 0;
-                            for (int sourceParameterIndex = 0; sourceParameterIndex < Parameters.Count; sourceParameterIndex++)
-                            {
-                                string sourceParameter = Parameters[sourceParameterIndex];
-                                int originalParametersThatHaveColumnsIndex = parametersThatHaveColumns.IndexOf(sourceParameter);
-                                if (originalParametersThatHaveColumnsIndex != -1)
-                                {
-                                    if (parametersThatHaveColumnsIndex != originalParametersThatHaveColumnsIndex)
-                                    {
-                                        // Parameter is later in the parametersThatHaveColumns list than it is in the parametersThatHaveColumns-subset of the source list
-                                        parametersThatNeedANewColumn.Add(sourceParameter);
-                                        parametersThatNeedToBeRemoved.Add(sourceParameter);
-                                    }
-                                    parametersThatHaveColumnsIndex++;
-                                }
-                            }
-
+                            // Remove the ones that we know need to be removed before we do the index check, otherwise the code thinks everything is at the 'wrong' index
                             foreach (string parameter in parametersThatNeedToBeRemoved)
                             {
                                 DataGridTextColumn column = parameterToDataGridColumn[parameter];
@@ -828,15 +813,28 @@ namespace KiCad_DB_Editor.View
                                 parameterToDataGridColumn.Remove(parameter);
                             }
 
-                            // Inserts parameter columns at the right index
+                            // Reorder the existing columns so they match the parameters source (at this point there may be columns missing, but that's the next stage)
+                            var sourceParametersThatAlreadyHaveAColumn = Parameters.Intersect(parametersThatHaveColumns).ToList();
+                            Debug.Assert(parametersThatHaveColumns.Count == sourceParametersThatAlreadyHaveAColumn.Count);
+                            for (int i = 0; i < parametersThatHaveColumns.Count; i++)
+                            {
+                                if (parametersThatHaveColumns[i] != sourceParametersThatAlreadyHaveAColumn[i])
+                                {
+                                    string parameter = sourceParametersThatAlreadyHaveAColumn[i];
+                                    int currentIndexOfParameterThatHasColumnInWrongPlace = parametersThatHaveColumns.IndexOf(parameter);
+                                    int diffIndexDifference = currentIndexOfParameterThatHasColumnInWrongPlace - i;
+                                    parameterToDataGridColumn[parameter].DisplayIndex -= diffIndexDifference;
+                                    parametersThatHaveColumns.RemoveAt(currentIndexOfParameterThatHasColumnInWrongPlace);
+                                    parametersThatHaveColumns.Insert(currentIndexOfParameterThatHasColumnInWrongPlace - diffIndexDifference, parameter);
+                                }
+                            }
+
+                            // parametersThatHaveColumns is now going to be missing the columns in parametersThatNeedANewColumn
+                            // We just need to insert them at the right place
                             foreach (string parameter in parametersThatNeedANewColumn)
                             {
                                 int indexOfPToBeAddedInParentCollection = Parameters.IndexOf(parameter);
-                                int newIndex;
-                                for (newIndex = 0; newIndex < parametersThatHaveColumns.Count; newIndex++)
-                                    if (indexOfPToBeAddedInParentCollection < Parameters.IndexOf(parametersThatHaveColumns[newIndex]))
-                                        break;
-                                newParameterColumn(parameter, newIndex);
+                                newParameterColumn(parameter, indexOfPToBeAddedInParentCollection);
                             }
                         }
                         break;

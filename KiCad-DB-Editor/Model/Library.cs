@@ -274,7 +274,9 @@ namespace KiCad_DB_Editor.Model
         // Needs to be ObservableCollectionEx because bindings expecting this form
         public ObservableCollectionEx<string> AllParameters
         {
-            get { return new(UniversalParameters.Concat(AllCategories.SelectMany(c => c.Parameters)).Distinct()); }
+            // I think .Distinct is not guaranteed to behave as I want it to i.e. keeping the first one it finds, but it is right now anyway! Hopefully it doesn't change :)
+            // We want universal parameters at the end, but want the Distinct call to prioritise keeping the universal one, so need some Reverses
+            get { return new(AllCategories.SelectMany(c => c.Parameters).Concat(UniversalParameters).Reverse().Distinct().Reverse()); }
         }
 
         // No setter, to prevent the VM needing to listening PropertyChanged events
@@ -336,7 +338,7 @@ namespace KiCad_DB_Editor.Model
 
         private void _universalParameters_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            foreach (var c in TopLevelCategories) c.ParentCategory_InheritedParameters_PropertyChanged();
+            foreach (var c in TopLevelCategories) c.ParentCategory_InheritedParameters_PropertyChanged(e);
 
             InvokePropertyChanged(nameof(AllParameters));
         }

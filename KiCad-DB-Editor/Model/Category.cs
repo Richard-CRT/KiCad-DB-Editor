@@ -3,6 +3,7 @@ using KiCad_DB_Editor.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection.Metadata;
@@ -142,43 +143,73 @@ namespace KiCad_DB_Editor.Model
             _parts = new();
         }
 
-        public void ParentCategory_InheritedParameters_PropertyChanged()
+        public void ParentCategory_InheritedParameters_PropertyChanged(NotifyCollectionChangedEventArgs e)
         {
             InvokePropertyChanged(nameof(InheritedParameters));
             InvokePropertyChanged(nameof(InheritedAndNormalParameters));
 
-            foreach (Category c in Categories) c.ParentCategory_InheritedParameters_PropertyChanged();
+            foreach (Category c in Categories) c.ParentCategory_InheritedParameters_PropertyChanged(e);
 
-            foreach (Part part in Parts)
-            {
-                var parametersToBeRemoved = part.ParameterValues.Keys.Except(InheritedAndNormalParameters).ToArray();
-                foreach (string parameterToBeRemoved in parametersToBeRemoved)
-                    part.ParameterValues.Remove(parameterToBeRemoved);
-
-                var parametersToBeAdded = InheritedAndNormalParameters.Except(part.ParameterValues.Keys).ToArray();
-                foreach (string parameterToBeAdded in parametersToBeAdded)
-                    part.ParameterValues.TryAdd(parameterToBeAdded, "");
-            }
+            UpdatePartsParameters(e);
         }
 
-        private void Parameters_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        private void Parameters_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             InvokePropertyChanged(nameof(InheritedAndNormalParameters));
 
-            foreach (Category c in Categories) c.ParentCategory_InheritedParameters_PropertyChanged();
+            UpdatePartsParameters(e);
 
-            foreach (Part part in Parts)
-            {
-                var parametersToBeRemoved = part.ParameterValues.Keys.Except(InheritedAndNormalParameters).ToArray();
-                foreach (string parameterToBeRemoved in parametersToBeRemoved)
-                    part.ParameterValues.Remove(parameterToBeRemoved);
-
-                var parametersToBeAdded = InheritedAndNormalParameters.Except(part.ParameterValues.Keys).ToArray();
-                foreach (string parameterToBeAdded in parametersToBeAdded)
-                    part.ParameterValues.TryAdd(parameterToBeAdded, "");
-            }
+            foreach (Category c in Categories) c.ParentCategory_InheritedParameters_PropertyChanged(e);
 
             this.ParentLibrary.Category_ParametersCollectionChanged();
+        }
+
+        private void UpdatePartsParameters(NotifyCollectionChangedEventArgs e)
+        {
+            foreach (Part part in Parts)
+            {
+                if (e.Action == NotifyCollectionChangedAction.Replace)
+                {
+                    Debug.Assert(e.OldItems!.Count == 1);
+                    Debug.Assert(e.NewItems!.Count == 1);
+                    string newParameterName = (string)e.NewItems[0]!;
+                    string oldParameterName = (string)e.OldItems[0]!;
+
+                    // Need to handle:
+                    // The parts already have new parameter (what to do with the value in the new one?)
+                    // The parts don't have new parameter (create it)
+                    // The parts should still have old parameter after rename (what to do with the value in the old one?)
+
+                    if (part.ParameterValues.ContainsKey(newParameterName))
+                    {
+                        // Could choose to leave the existing new parameter value if the old parameter value is blank
+                        // but for now favour consistency in the data replacement
+                        // if (part.ParameterValues.GetValueOrDefault(oldParameterName, "") != "")
+
+                        // Override the existing new parameter value with the value in the old parameter
+                        part.ParameterValues[newParameterName] = part.ParameterValues[oldParameterName];
+                    }
+                    else
+                        part.ParameterValues.Add(newParameterName, part.ParameterValues.GetValueOrDefault(oldParameterName, ""));
+
+                    if (InheritedAndNormalParameters.Contains(oldParameterName))
+                        // Needs to still have the parameter after rename
+                        part.ParameterValues[oldParameterName] = "";
+                    else
+                        part.ParameterValues.Remove(oldParameterName);
+                }
+                else
+                {
+                    var parametersToBeRemoved = part.ParameterValues.Keys.Except(InheritedAndNormalParameters).ToArray();
+                    foreach (string parameterToBeRemoved in parametersToBeRemoved)
+                        part.ParameterValues.Remove(parameterToBeRemoved);
+
+                    var parametersToBeAdded = InheritedAndNormalParameters.Except(part.ParameterValues.Keys).ToArray();
+                    foreach (string parameterToBeAdded in parametersToBeAdded)
+                        // May already exist
+                        part.ParameterValues.TryAdd(parameterToBeAdded, "");
+                }
+            }
         }
 
         public override string ToString()

@@ -123,12 +123,11 @@ namespace KiCad_DB_Editor.ViewModel
             {
                 if (value is not null)
                 {
-                    string parameter = OwnerPartVM.Part.ParentLibrary.UniversalParameters.First(p => p == parameterName);
-                    if (OwnerPartVM.Part.ParameterValues.TryGetValue(parameter, out string? s))
+                    if (OwnerPartVM.Part.ParameterValues.TryGetValue(parameterName, out string? s))
                     {
                         if (s != value)
                         {
-                            OwnerPartVM.Part.ParameterValues[parameter] = value;
+                            OwnerPartVM.Part.ParameterValues[parameterName] = value;
 
                             // Don't need to InvokePropertyChanged for this as changing OwnerPartVM.Part.ParameterValues
                             // already causes that

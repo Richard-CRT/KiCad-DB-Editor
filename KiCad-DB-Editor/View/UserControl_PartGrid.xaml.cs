@@ -1086,8 +1086,6 @@ namespace KiCad_DB_Editor.View
                         }
                         else
                         {
-
-
                             int minX = selectedCellCoords.MinBy(kvp => kvp.Key.Item1).Key.Item1;
                             int minY = selectedCellCoords.MinBy(kvp => kvp.Key.Item2).Key.Item2;
                             int maxX = selectedCellCoords.MaxBy(kvp => kvp.Key.Item1).Key.Item1;

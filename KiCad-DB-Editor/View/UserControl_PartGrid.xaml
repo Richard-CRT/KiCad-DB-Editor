@@ -27,7 +27,7 @@
                           Visibility="Collapsed" />
         <!-- EnableRowVirtualization must be true or it creates every single part row even if not displayed -->
         <DataGrid x:Name="dataGrid_Main" AutoGenerateColumns="False" SelectionUnit="CellOrRowHeader" CanUserResizeRows="False"
-                  ItemsSource="{Binding PartVMsCollectionView, Mode=TwoWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}, UpdateSourceTrigger=PropertyChanged}"
+                  ItemsSource="{Binding PartVMsCollectionView, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_PartGrid}}, UpdateSourceTrigger=PropertyChanged}"
                   d:ItemsSource="{d:SampleData}"
                   SelectedCellsChanged="dataGrid_Main_SelectedCellsChanged"
                   KeyDown="dataGrid_Main_KeyDown"

@@ -221,16 +221,19 @@ namespace KiCad_DB_Editor.View
 
         #region PartVMsCollectionView DependencyProperty
 
-        public static readonly DependencyProperty PartVMsCollectionViewProperty = DependencyProperty.Register(
+        private static readonly DependencyPropertyKey PartVMsCollectionViewPropertyKey = DependencyProperty.RegisterReadOnly(
             nameof(PartVMsCollectionView),
             typeof(ListCollectionView),
-            typeof(UserControl_PartGrid)
+            typeof(UserControl_PartGrid),
+            new PropertyMetadata()
             );
+
+        public static readonly DependencyProperty PartVMsCollectionViewProperty = PartVMsCollectionViewPropertyKey.DependencyProperty;
 
         public ListCollectionView PartVMsCollectionView
         {
             get => (ListCollectionView)GetValue(PartVMsCollectionViewProperty);
-            set => SetValue(PartVMsCollectionViewProperty, value);
+            set => SetValue(PartVMsCollectionViewPropertyKey, value);
         }
 
         #endregion

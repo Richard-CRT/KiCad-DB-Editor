@@ -16,12 +16,30 @@ using System.Windows.Shapes;
 namespace KiCad_DB_Editor.View.Dialogs
 {
     /// <summary>
-    /// Interaction logic for Window_AreYouSureDialog.xaml
+    /// Interaction logic for Window_ConfirmDialog.xaml
     /// </summary>
-    public partial class Window_AreYouSureDialog : Window
+    public partial class Window_ConfirmDialog : Window
     {
-        public Window_AreYouSureDialog()
+        #region Dependency Properties
+
+        public static readonly DependencyProperty MessageProperty = DependencyProperty.Register(
+            nameof(Message),
+            typeof(string),
+            typeof(Window_ErrorDialog)
+            );
+
+        public string Message
         {
+            get => (string)GetValue(MessageProperty);
+            set => SetValue(MessageProperty, value);
+        }
+
+        #endregion
+
+        public Window_ConfirmDialog(string message)
+        {
+            Message = message;
+
             InitializeComponent();
         }
 

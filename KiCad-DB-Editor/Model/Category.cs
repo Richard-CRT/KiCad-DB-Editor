@@ -39,42 +39,8 @@ namespace KiCad_DB_Editor.Model
             {
                 if (_name != value)
                 {
-                    string lowerValue = value.ToLowerInvariant();
-                    if (value.Length == 0 || lowerValue.Any(c => !Util.SafeCategoryCharacters.Contains(c)))
-                        throw new Exceptions.ArgumentValidationException("Proposed name invalid");
-
-                    ObservableCollectionEx<Category> categoryCollection;
-                    if (ParentCategory is null)
-                        categoryCollection = ParentLibrary.TopLevelCategories;
-                    else
-                        categoryCollection = ParentCategory.Categories;
-
-                    if (categoryCollection is not null && categoryCollection.Any(c => c.Name.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase)))
-                        throw new Exceptions.ArgumentValidationException("Parent already contains category with proposed name");
-
                     _name = value;
                     InvokePropertyChanged();
-
-                    if (categoryCollection is not null)
-                    {
-                        int oldIndex = categoryCollection.IndexOf(this);
-                        if (oldIndex != -1)
-                        {
-                            int newIndex = 0;
-                            for (int i = 0; i < categoryCollection.Count; i++)
-                            {
-                                Category compareCategory = categoryCollection[i];
-                                if (compareCategory != this)
-                                {
-                                    if (compareCategory.Name.CompareTo(this.Name) > 0)
-                                        break;
-                                    newIndex++;
-                                }
-                            }
-                            if (oldIndex != newIndex)
-                                categoryCollection.Move(oldIndex, newIndex);
-                        }
-                    }
                 }
             }
         }

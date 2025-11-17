@@ -145,6 +145,20 @@ namespace KiCad_DB_Editor.ViewModel
             }
         }
 
+        private string _newCategoryName = "";
+        public string NewCategoryName
+        {
+            get { return _newCategoryName; }
+            set
+            {
+                if (_newCategoryName != value)
+                {
+                    _newCategoryName = value;
+                    InvokePropertyChanged();
+                }
+            }
+        }
+
         #endregion Notify Properties
 
         public CategoryVM(Model.Category category)
@@ -168,6 +182,8 @@ namespace KiCad_DB_Editor.ViewModel
             RemoveParameterCommand = new BasicCommand(RemoveParameterCommandExecuted, RemoveParameterCommandCanExecute);
             MoveParameterUpCommand = new BasicCommand(MoveParameterUpCommandExecuted, MoveParameterUpCommandCanExecute);
             MoveParameterDownCommand = new BasicCommand(MoveParameterDownCommandExecuted, MoveParameterDownCommandCanExecute);
+
+            RenameCategoryCommand = new BasicCommand(RenameCategoryCommandExecuted, RenameCategoryCommandCanExecute);
 
             NewPartsCommand = new BasicCommand(NewPartsCommandExecuted, null);
             DuplicatePartCommand = new BasicCommand(DuplicatePartCommandExecuted, DuplicatePartCommandCanExecute);
@@ -298,6 +314,7 @@ namespace KiCad_DB_Editor.ViewModel
         public IBasicCommand RemoveParameterCommand { get; }
         public IBasicCommand MoveParameterUpCommand { get; }
         public IBasicCommand MoveParameterDownCommand { get; }
+        public IBasicCommand RenameCategoryCommand { get; }
         public IBasicCommand NewPartsCommand { get; }
         public IBasicCommand DuplicatePartCommand { get; }
         public IBasicCommand DeletePartsCommand { get; }
@@ -385,6 +402,57 @@ namespace KiCad_DB_Editor.ViewModel
             Debug.Assert(SelectedParameterIndex != -1);
             Debug.Assert(SelectedParameterIndex < this.Category.Parameters.Count - 1);
             this.Category.Parameters.Move(SelectedParameterIndex, SelectedParameterIndex + 1);
+        }
+
+        private bool RenameCategoryCommandCanExecute(object? parameter)
+        {
+            ObservableCollectionEx<Category> categoryCollection;
+            if (Category.ParentCategory is null)
+                categoryCollection = Category.ParentLibrary.TopLevelCategories;
+            else
+                categoryCollection = Category.ParentCategory.Categories;
+
+            string lowerValue = this.NewCategoryName.ToLowerInvariant();
+            if (this.NewCategoryName.Length > 0 && lowerValue.All(c => Util.SafeCategoryCharacters.Contains(c)))
+            {
+                if (!categoryCollection.Any(c => c.Name.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private void RenameCategoryCommandExecuted(object? parameter)
+        {
+            this.Category.Name = this.NewCategoryName;
+
+            ObservableCollectionEx<Category> categoryCollection;
+            if (Category.ParentCategory is null)
+                categoryCollection = Category.ParentLibrary.TopLevelCategories;
+            else
+                categoryCollection = Category.ParentCategory.Categories;
+
+            if (categoryCollection is not null)
+            {
+                int oldIndex = categoryCollection.IndexOf(Category);
+                if (oldIndex != -1)
+                {
+                    int newIndex = 0;
+                    for (int i = 0; i < categoryCollection.Count; i++)
+                    {
+                        Category compareCategory = categoryCollection[i];
+                        if (compareCategory != Category)
+                        {
+                            if (compareCategory.Name.CompareTo(Category.Name) > 0)
+                                break;
+                            newIndex++;
+                        }
+                    }
+                    if (oldIndex != newIndex)
+                        categoryCollection.Move(oldIndex, newIndex);
+                }
+            }
         }
 
         private void NewPartsCommandExecuted(object? _)

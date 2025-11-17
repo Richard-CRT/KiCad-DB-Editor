@@ -30,22 +30,6 @@ namespace KiCad_DB_Editor.ViewModel
 
         #region Notify Properties
 
-        public string PartUIDScheme
-        {
-            get { return Library.PartUIDScheme; }
-            set
-            {
-                if (Library.PartUIDScheme != value)
-                {
-                    if (value.Count(c => c == '#') != Util.PartUIDSchemeNumberOfWildcards)
-                        throw new Exceptions.ArgumentValidationException("Proposed scheme does not contain the necessary wildcard characters");
-
-                    Library.PartUIDScheme = value;
-                    InvokePropertyChanged();
-                }
-            }
-        }
-
         private int _selectedUniversalParameterIndex = -1;
         public int SelectedUniversalParameterIndex
         {

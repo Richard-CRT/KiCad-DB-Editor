@@ -469,7 +469,7 @@ namespace KiCad_DB_Editor.ViewModel
 
         private bool UpdatePartUIDSchemeCommandCanExecute(object? parameter)
         {
-            return NewPartUIDScheme.Count(c => c == '#') == Util.PartUIDSchemeNumberOfWildcards;
+            return Library.PartUIDScheme != NewPartUIDScheme && NewPartUIDScheme.Count(c => c == '#') == Util.PartUIDSchemeNumberOfWildcards;
         }
 
         private void UpdatePartUIDSchemeCommandExecuted(object? parameter)

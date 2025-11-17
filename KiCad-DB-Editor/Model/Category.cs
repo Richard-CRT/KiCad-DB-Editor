@@ -35,15 +35,52 @@ namespace KiCad_DB_Editor.Model
         public string Name
         {
             get { return _name; }
+            set { if (_name != value) { _name = value; InvokePropertyChanged(); } }
+        }
+
+        private bool _overridePartUIDScheme { get; set; } = false;
+        public bool OverridePartUIDScheme
+        {
+            get { return _overridePartUIDScheme; }
             set
             {
-                if (_name != value)
+                if (_overridePartUIDScheme != value)
                 {
-                    _name = value;
+                    // Must do this before updating the override as the value of ActivePartUIDScheme depends on it
+                    if (value)
+                        PartUIDScheme = ActivePartUIDScheme;
+                    else
+                        PartUIDScheme = "";
+
+                    _overridePartUIDScheme = value;
                     InvokePropertyChanged();
+
+                    InvokePropertyChanged(nameof(ActivePartUIDScheme));
+                    if (Categories is not null) // Null guard in case Categories hasn't been created yet
+                        foreach (Category c in Categories) c.ParentCategory_PartUIDScheme_PropertyChanged();
                 }
             }
         }
+
+        private string _partUIDScheme { get; set; } = "";
+        public string PartUIDScheme
+        {
+            get { return _partUIDScheme; }
+            set
+            {
+                if (_partUIDScheme != value)
+                {
+                    _partUIDScheme = value;
+                    InvokePropertyChanged();
+
+                    InvokePropertyChanged(nameof(ActivePartUIDScheme));
+                    if (Categories is not null) // Null guard in case Categories hasn't been created yet
+                        foreach (Category c in Categories) c.ParentCategory_PartUIDScheme_PropertyChanged();
+                }
+            }
+        }
+
+        public string ActivePartUIDScheme => OverridePartUIDScheme ? PartUIDScheme : (ParentCategory is not null ? ParentCategory.ActivePartUIDScheme : ParentLibrary.PartUIDScheme);
 
         // No setter, to prevent the VM needing to listening PropertyChanged events
         private ObservableCollectionEx<string> _parameters;
@@ -96,6 +133,9 @@ namespace KiCad_DB_Editor.Model
 
             Name = jsonCategory.Name;
 
+            OverridePartUIDScheme = jsonCategory.PartUIDScheme != "";
+            PartUIDScheme = jsonCategory.PartUIDScheme;
+
             _parameters = new(jsonCategory.Parameters);
             // We don't worry about unsubscribing because this object is the event publisher
             _parameters.CollectionChanged += Parameters_CollectionChanged;
@@ -118,6 +158,13 @@ namespace KiCad_DB_Editor.Model
             _allSubCategories = new();
             _categories = new();
             _parts = new();
+        }
+
+        public void ParentCategory_PartUIDScheme_PropertyChanged()
+        {
+            InvokePropertyChanged(nameof(ActivePartUIDScheme));
+
+            foreach (Category c in Categories) c.ParentCategory_PartUIDScheme_PropertyChanged();
         }
 
         public void ParentCategory_InheritedParameters_PropertyChanged(NotifyCollectionChangedEventArgs e)

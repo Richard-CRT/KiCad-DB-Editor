@@ -12,6 +12,9 @@ namespace KiCad_DB_Editor.Model.Json
         [JsonPropertyName("name"), JsonPropertyOrder(0)]
         public string Name { get; set; } = "";
 
+        [JsonPropertyName("part_uid_scheme"), JsonPropertyOrder(2)]
+        public string PartUIDScheme { get; set; } = "";
+
         [JsonPropertyName("parameters"), JsonPropertyOrder(3)]
         public List<string> Parameters { get; set; } = new();
 
@@ -26,6 +29,7 @@ namespace KiCad_DB_Editor.Model.Json
         public JsonCategory(Category category)
         {
             Name = category.Name;
+            PartUIDScheme = category.OverridePartUIDScheme ? category.PartUIDScheme : "";
             Parameters = new(category.Parameters);
             Categories = new(category.Categories.Select(c => new JsonCategory(c)));
         }

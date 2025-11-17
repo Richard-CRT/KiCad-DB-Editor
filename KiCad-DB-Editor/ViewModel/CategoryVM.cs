@@ -16,6 +16,7 @@ using System.Formats.Asn1;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Reflection.Metadata;
+using System.Reflection.Metadata.Ecma335;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -159,6 +160,20 @@ namespace KiCad_DB_Editor.ViewModel
             }
         }
 
+        private string _newPartUIDScheme = "";
+        public string NewPartUIDScheme
+        {
+            get { return _newPartUIDScheme; }
+            set
+            {
+                if (_newPartUIDScheme != value)
+                {
+                    _newPartUIDScheme = value;
+                    InvokePropertyChanged();
+                }
+            }
+        }
+
         #endregion Notify Properties
 
         public CategoryVM(Model.Category category)
@@ -167,6 +182,7 @@ namespace KiCad_DB_Editor.ViewModel
             Category = category;
 
             NewCategoryName = category.Name;
+            NewPartUIDScheme = category.ActivePartUIDScheme;
 
             Category.PropertyChanged += Category_PropertyChanged;
 
@@ -186,6 +202,7 @@ namespace KiCad_DB_Editor.ViewModel
             MoveParameterDownCommand = new BasicCommand(MoveParameterDownCommandExecuted, MoveParameterDownCommandCanExecute);
 
             RenameCategoryCommand = new BasicCommand(RenameCategoryCommandExecuted, RenameCategoryCommandCanExecute);
+            UpdatePartUIDSchemeCommand = new BasicCommand(UpdatePartUIDSchemeCommandExecuted, UpdatePartUIDSchemeCommandCanExecute);
 
             NewPartsCommand = new BasicCommand(NewPartsCommandExecuted, null);
             DuplicatePartCommand = new BasicCommand(DuplicatePartCommandExecuted, DuplicatePartCommandCanExecute);
@@ -269,8 +286,13 @@ namespace KiCad_DB_Editor.ViewModel
             {
                 case nameof(Category.Name):
                     InvokePropertyChanged_Path();
+                    NewCategoryName = Category.Name;
                     break;
-                    // Categories, Parameters, Parts do not have setter so we don't need to listen here
+                case nameof(Category.ActivePartUIDScheme):
+                    if (!Category.OverridePartUIDScheme)
+                        NewPartUIDScheme = Category.ActivePartUIDScheme;
+                    break;
+                // Categories, Parameters, Parts do not have setter so we don't need to listen here)
             }
         }
 
@@ -299,7 +321,7 @@ namespace KiCad_DB_Editor.ViewModel
 
         private void _newPart(Part? existingPartToDuplicate = null)
         {
-            string partUID = Util.GeneratePartUID(Category.ParentLibrary.PartUIDScheme);
+            string partUID = Util.GeneratePartUID(Category.ActivePartUIDScheme);
             Part part = new(partUID, Category.ParentLibrary, Category);
             foreach (string parameter in Category.InheritedAndNormalParameters)
                 part.ParameterValues.Add(parameter, "");
@@ -317,6 +339,7 @@ namespace KiCad_DB_Editor.ViewModel
         public IBasicCommand MoveParameterUpCommand { get; }
         public IBasicCommand MoveParameterDownCommand { get; }
         public IBasicCommand RenameCategoryCommand { get; }
+        public IBasicCommand UpdatePartUIDSchemeCommand { get; }
         public IBasicCommand NewPartsCommand { get; }
         public IBasicCommand DuplicatePartCommand { get; }
         public IBasicCommand DeletePartsCommand { get; }
@@ -408,13 +431,18 @@ namespace KiCad_DB_Editor.ViewModel
 
         private bool RenameCategoryCommandCanExecute(object? parameter)
         {
+            string lowerValue = this.NewCategoryName.ToLowerInvariant();
+
+            // Early exit if same name
+            if (lowerValue.Equals(Category.Name, StringComparison.InvariantCultureIgnoreCase))
+                return false;
+
             ObservableCollectionEx<Category> categoryCollection;
             if (Category.ParentCategory is null)
                 categoryCollection = Category.ParentLibrary.TopLevelCategories;
             else
                 categoryCollection = Category.ParentCategory.Categories;
 
-            string lowerValue = this.NewCategoryName.ToLowerInvariant();
             if (this.NewCategoryName.Length > 0 && lowerValue.All(c => Util.SafeCategoryCharacters.Contains(c)))
             {
                 if (!categoryCollection.Any(c => c.Name.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase)))
@@ -455,6 +483,16 @@ namespace KiCad_DB_Editor.ViewModel
                         categoryCollection.Move(oldIndex, newIndex);
                 }
             }
+        }
+
+        private bool UpdatePartUIDSchemeCommandCanExecute(object? parameter)
+        {
+            return Category.OverridePartUIDScheme && NewPartUIDScheme.Count(c => c == '#') == Util.PartUIDSchemeNumberOfWildcards;
+        }
+
+        private void UpdatePartUIDSchemeCommandExecuted(object? parameter)
+        {
+            Category.PartUIDScheme = NewPartUIDScheme;
         }
 
         private void NewPartsCommandExecuted(object? _)

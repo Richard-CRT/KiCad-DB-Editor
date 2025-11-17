@@ -39,7 +39,7 @@ namespace KiCad_DB_Editor.Model
             {
                 if (_name != value)
                 {
-                    string lowerValue = value.ToLower();
+                    string lowerValue = value.ToLowerInvariant();
                     if (value.Length == 0 || lowerValue.Any(c => !Util.SafeCategoryCharacters.Contains(c)))
                         throw new Exceptions.ArgumentValidationException("Proposed name invalid");
 
@@ -49,7 +49,7 @@ namespace KiCad_DB_Editor.Model
                     else
                         categoryCollection = ParentCategory.Categories;
 
-                    if (categoryCollection is not null && categoryCollection.Any(c => c.Name.ToLower() == lowerValue))
+                    if (categoryCollection is not null && categoryCollection.Any(c => c.Name.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase)))
                         throw new Exceptions.ArgumentValidationException("Parent already contains category with proposed name");
 
                     _name = value;
@@ -94,6 +94,13 @@ namespace KiCad_DB_Editor.Model
         }
 
         // No setter, to prevent the VM needing to listening PropertyChanged events
+        private ObservableCollectionEx<Category> _allSubCategories;
+        public ObservableCollectionEx<Category> AllSubCategories
+        {
+            get { return _allSubCategories; }
+        }
+
+        // No setter, to prevent the VM needing to listening PropertyChanged events
         private ObservableCollectionEx<Part> _parts;
         public ObservableCollectionEx<Part> Parts
         {
@@ -120,12 +127,14 @@ namespace KiCad_DB_Editor.Model
         {
             _parentLibrary = parentLibrary;
             _parentCategory = parentCategory;
+
             Name = jsonCategory.Name;
 
             _parameters = new(jsonCategory.Parameters);
             // We don't worry about unsubscribing because this object is the event publisher
             _parameters.CollectionChanged += Parameters_CollectionChanged;
-            // _parameters must be set up first, as this line will rely on that
+            _allSubCategories = new();
+            // _parameters & _allSubCategories must be set up first, as this line will rely on that
             _categories = new(jsonCategory.Categories.Select(jC => new Category(jC, ParentLibrary, this)));
             _parts = new();
         }
@@ -138,7 +147,9 @@ namespace KiCad_DB_Editor.Model
             Name = name;
 
             _parameters = new();
+            // We don't worry about unsubscribing because this object is the event publisher
             _parameters.CollectionChanged += Parameters_CollectionChanged;
+            _allSubCategories = new();
             _categories = new();
             _parts = new();
         }

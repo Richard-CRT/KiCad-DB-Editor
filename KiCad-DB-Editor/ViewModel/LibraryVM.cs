@@ -339,10 +339,10 @@ namespace KiCad_DB_Editor.ViewModel
 
         private bool canNewCategory(ObservableCollectionEx<Category> categoryCollection)
         {
-            string lowerValue = this.NewCategoryName.ToLower();
+            string lowerValue = this.NewCategoryName.ToLowerInvariant();
             if (this.NewCategoryName.Length > 0 && lowerValue.All(c => Util.SafeCategoryCharacters.Contains(c)))
             {
-                if (!categoryCollection.Any(c => c.Name.ToLower() == lowerValue))
+                if (!categoryCollection.Any(c => c.Name.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase)))
                 {
                     return true;
                 }
@@ -352,7 +352,7 @@ namespace KiCad_DB_Editor.ViewModel
 
         private void newCategory(Category? parentCategory, ObservableCollectionEx<Category> categoryCollection)
         {
-            string lowerValue = this.NewCategoryName.ToLower();
+            string lowerValue = this.NewCategoryName.ToLowerInvariant();
             int newIndex;
             for (newIndex = 0; newIndex < categoryCollection.Count; newIndex++)
             {
@@ -361,6 +361,12 @@ namespace KiCad_DB_Editor.ViewModel
                     break;
             }
             Category newCategory = new Category(this.NewCategoryName, Library, parentCategory);
+            var walkCategory = newCategory.ParentCategory;
+            while (walkCategory is not null)
+            {
+                walkCategory.AllSubCategories.Add(newCategory);
+                walkCategory = walkCategory.ParentCategory;
+            }
             if (newIndex == categoryCollection.Count)
                 categoryCollection.Add(newCategory);
             else
@@ -447,17 +453,26 @@ namespace KiCad_DB_Editor.ViewModel
             if (selectedCategory.ParentCategory is null)
                 Library.TopLevelCategories.Remove(selectedCategory);
             else
+            {
                 selectedCategory.ParentCategory.Categories.Remove(selectedCategory);
+                var walkCategory = selectedCategory.ParentCategory;
+                while (walkCategory is not null)
+                {
+                    walkCategory.AllSubCategories.Remove(selectedCategory);
+                    walkCategory = walkCategory.ParentCategory;
+                }
+            }
         }
 
         private bool NewUniversalParameterCommandCanExecute(object? parameter)
         {
-            string lowerValue = this.NewUniversalParameterName.ToLower();
+            string lowerValue = this.NewUniversalParameterName.ToLowerInvariant();
             if (lowerValue.Length > 0 && lowerValue.All(c => Util.SafeParameterCharacters.Contains(c)))
             {
                 if (!Util.ReservedParameterNames.Contains(lowerValue) && Util.ReservedParameterNameStarts.All(s => !lowerValue.StartsWith(s)))
                 {
-                    if (!Library.UniversalParameters.Any(p => p.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase)))
+                    if (!Library.UniversalParameters.Any(p => p.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase))
+                        && !Library.AllCategories.Any(c => c.Parameters.Any(p => p.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase))))
                     {
                         return true;
                     }
@@ -474,12 +489,13 @@ namespace KiCad_DB_Editor.ViewModel
 
         private bool RenameUniversalParameterCommandCanExecute(object? parameter)
         {
-            string lowerValue = this.NewUniversalParameterName.ToLower();
+            string lowerValue = this.NewUniversalParameterName.ToLowerInvariant();
             if (SelectedUniversalParameterIndex != -1 && this.NewUniversalParameterName.Length > 0 && lowerValue.All(c => Util.SafeParameterCharacters.Contains(c)))
             {
                 if (!Util.ReservedParameterNames.Contains(lowerValue) && Util.ReservedParameterNameStarts.All(s => !lowerValue.StartsWith(s)))
                 {
-                    if (!Library.UniversalParameters.Any(p => p.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase)))
+                    if (!Library.UniversalParameters.Any(p => p.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase))
+                        && !Library.AllCategories.Any(c => c.Parameters.Any(p => p.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase))))
                     {
                         return true;
                     }
@@ -531,7 +547,7 @@ namespace KiCad_DB_Editor.ViewModel
 
         private bool AddFootprintCommandCanExecute(object? parameter)
         {
-            return SelectedPartVMs.Count() > 0;
+            return SelectedPartVMs.Length > 0;
         }
 
         private void AddFootprintCommandExecuted(object? parameter)
@@ -544,7 +560,7 @@ namespace KiCad_DB_Editor.ViewModel
 
         private bool RemoveFootprintCommandCanExecute(object? parameter)
         {
-            return SelectedPartVMs.Count() > 0 && SelectedPartVMs.All(pVM => pVM.FootprintCount > 0);
+            return SelectedPartVMs.Length > 0 && SelectedPartVMs.All(pVM => pVM.FootprintCount > 0);
         }
 
         private void RemoveFootprintCommandExecuted(object? parameter)
@@ -576,7 +592,7 @@ namespace KiCad_DB_Editor.ViewModel
         private bool NewKiCadSymbolLibraryCommandCanExecute(object? parameter)
         {
             if (this.NewKiCadSymbolLibraryName.Length > 0 && this.NewKiCadSymbolLibraryRelativePath.Length > 0)
-                return !Library.KiCadSymbolLibraries.Any(kSL => kSL.Nickname.ToLower() == this.NewKiCadSymbolLibraryName.ToLower());
+                return !Library.KiCadSymbolLibraries.Any(kSL => kSL.Nickname.Equals(this.NewKiCadSymbolLibraryName, StringComparison.InvariantCultureIgnoreCase));
             else
                 return false;
         }
@@ -604,7 +620,7 @@ namespace KiCad_DB_Editor.ViewModel
         {
             if (SelectedKiCadSymbolLibrary is not null && this.NewKiCadSymbolLibraryName.Length > 0 && this.NewKiCadSymbolLibraryRelativePath.Length > 0)
             {
-                var kiCadSymbolLibrariesWithSameName = Library.KiCadSymbolLibraries.Where(p => p.Nickname.ToLower() == this.NewKiCadSymbolLibraryName.ToLower()).ToArray();
+                var kiCadSymbolLibrariesWithSameName = Library.KiCadSymbolLibraries.Where(p => p.Nickname.Equals(this.NewKiCadSymbolLibraryName, StringComparison.InvariantCultureIgnoreCase)).ToArray();
 
                 // Allow updates if none share the same name, or the name is the same as current, but the path is not (path case sensitive because of UNIX)
                 return (kiCadSymbolLibrariesWithSameName.Length == 0) ||
@@ -681,7 +697,7 @@ namespace KiCad_DB_Editor.ViewModel
         private bool NewKiCadFootprintLibraryCommandCanExecute(object? parameter)
         {
             if (this.NewKiCadFootprintLibraryName.Length > 0 && this.NewKiCadFootprintLibraryRelativePath.Length > 0)
-                return !Library.KiCadFootprintLibraries.Any(p => p.Nickname.ToLower() == this.NewKiCadFootprintLibraryName.ToLower());
+                return !Library.KiCadFootprintLibraries.Any(p => p.Nickname.Equals(this.NewKiCadFootprintLibraryName, StringComparison.InvariantCultureIgnoreCase));
             else
                 return false;
         }
@@ -709,7 +725,7 @@ namespace KiCad_DB_Editor.ViewModel
         {
             if (SelectedKiCadFootprintLibrary is not null && this.NewKiCadFootprintLibraryName.Length > 0 && this.NewKiCadFootprintLibraryRelativePath.Length > 0)
             {
-                var kiCadFootprintLibrariesWithSameName = Library.KiCadFootprintLibraries.Where(p => p.Nickname.ToLower() == this.NewKiCadFootprintLibraryName.ToLower()).ToArray();
+                var kiCadFootprintLibrariesWithSameName = Library.KiCadFootprintLibraries.Where(p => p.Nickname.Equals(this.NewKiCadFootprintLibraryName, StringComparison.InvariantCultureIgnoreCase)).ToArray();
 
                 // Allow updates if none share the same name, or the name is the same as current, but the path is not (path case sensitive because of UNIX)
                 return (kiCadFootprintLibrariesWithSameName.Length == 0) ||

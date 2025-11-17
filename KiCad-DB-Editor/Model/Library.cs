@@ -67,7 +67,16 @@ namespace KiCad_DB_Editor.Model
                 library.TopLevelCategories.AddRange(jsonLibrary.TopLevelCategories.Select(c => new Category(c, library, null)));
                 library.AllCategories.AddRange(library.TopLevelCategories);
                 for (int i = 0; i < library.AllCategories.Count; i++)
-                    library.AllCategories.AddRange(library.AllCategories[i].Categories);
+                {
+                    Category category = library.AllCategories[i];
+                    var walkCategory = category.ParentCategory;
+                    while (walkCategory is not null)
+                    {
+                        walkCategory.AllSubCategories.Add(category);
+                        walkCategory = walkCategory.ParentCategory;
+                    }
+                    library.AllCategories.AddRange(category.Categories);
+                }
                 library.KiCadSymbolLibraries.AddRange(jsonLibrary.KiCadSymbolLibraries.Select(kSL => new KiCadSymbolLibrary(kSL, library)));
                 library.KiCadFootprintLibraries.AddRange(jsonLibrary.KiCadFootprintLibraries.Select(kFL => new KiCadFootprintLibrary(kFL, library)));
 

@@ -306,12 +306,14 @@ namespace KiCad_DB_Editor.ViewModel
 
         private bool AddParameterCommandCanExecute(object? parameter)
         {
-            string lowerValue = this.NewParameterName.ToLower();
+            string lowerValue = this.NewParameterName.ToLowerInvariant();
             if (lowerValue.Length > 0 && lowerValue.All(c => Util.SafeParameterCharacters.Contains(c)))
             {
                 if (!Util.ReservedParameterNames.Contains(lowerValue) && Util.ReservedParameterNameStarts.All(s => !lowerValue.StartsWith(s)))
                 {
-                    if (!this.Category.Parameters.Any(p => p.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase)))
+                    if (!this.Category.InheritedParameters.Any(p => p.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase))
+                        && !this.Category.Parameters.Any(p => p.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase))
+                        && !this.Category.AllSubCategories.Any(c => c.Parameters.Any(p => p.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase))))
                     {
                         return true;
                     }
@@ -328,12 +330,14 @@ namespace KiCad_DB_Editor.ViewModel
 
         private bool RenameParameterCommandCanExecute(object? parameter)
         {
-            string lowerValue = this.NewParameterName.ToLower();
+            string lowerValue = this.NewParameterName.ToLowerInvariant();
             if (SelectedParameterIndex != -1 && lowerValue.Length > 0 && lowerValue.All(c => Util.SafeParameterCharacters.Contains(c)))
             {
                 if (!Util.ReservedParameterNames.Contains(lowerValue) && Util.ReservedParameterNameStarts.All(s => !lowerValue.StartsWith(s)))
                 {
-                    if (!this.Category.Parameters.Any(p => p.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase)))
+                    if (!this.Category.InheritedParameters.Any(p => p.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase))
+                        && !this.Category.Parameters.Any(p => p.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase))
+                        && !this.Category.AllSubCategories.Any(c => c.Parameters.Any(p => p.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase))))
                     {
                         return true;
                     }
@@ -424,7 +428,7 @@ namespace KiCad_DB_Editor.ViewModel
 
         private bool AddFootprintCommandCanExecute(object? parameter)
         {
-            return SelectedPartVMs.Count() > 0;
+            return SelectedPartVMs.Length > 0;
         }
 
         private void AddFootprintCommandExecuted(object? parameter)
@@ -437,7 +441,7 @@ namespace KiCad_DB_Editor.ViewModel
 
         private bool RemoveFootprintCommandCanExecute(object? parameter)
         {
-            return SelectedPartVMs.Count() > 0 && SelectedPartVMs.All(pVM => pVM.FootprintCount > 0);
+            return SelectedPartVMs.Length > 0 && SelectedPartVMs.All(pVM => pVM.FootprintCount > 0);
         }
 
         private void RemoveFootprintCommandExecuted(object? parameter)

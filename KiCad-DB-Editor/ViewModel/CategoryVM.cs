@@ -166,6 +166,8 @@ namespace KiCad_DB_Editor.ViewModel
             // Link model
             Category = category;
 
+            NewCategoryName = category.Name;
+
             Category.PropertyChanged += Category_PropertyChanged;
 
             Category.Categories.CollectionChanged += Categories_CollectionChanged;

@@ -237,6 +237,9 @@ namespace KiCad_DB_Editor.ViewModel
             // Setup commands
             ExportToKiCadCommand = new BasicCommand(ExportToKiCadCommandExecuted, null);
 
+            ExpandAllCategoriesCommand = new BasicCommand(ExpandAllCategoriesCommandExecuted, null);
+            CollapseAllCategoriesCommand = new BasicCommand(CollapseAllCategoriesCommandExecuted, null);
+
             NewTopLevelCategoryCommand = new BasicCommand(NewTopLevelCategoryCommandExecuted, NewTopLevelCategoryCommandCanExecute);
             NewSubCategoryCommand = new BasicCommand(NewSubCategoryCommandExecuted, NewSubCategoryCommandCanExecute);
             DeleteCategoryCommand = new BasicCommand(DeleteCategoryCommandExecuted, DeleteCategoryCommandCanExecute);
@@ -361,6 +364,8 @@ namespace KiCad_DB_Editor.ViewModel
         #region Commands
 
         public IBasicCommand ExportToKiCadCommand { get; }
+        public IBasicCommand ExpandAllCategoriesCommand { get; }
+        public IBasicCommand CollapseAllCategoriesCommand { get; }
         public IBasicCommand NewTopLevelCategoryCommand { get; }
         public IBasicCommand NewSubCategoryCommand { get; }
         public IBasicCommand DeleteCategoryCommand { get; }
@@ -397,6 +402,26 @@ namespace KiCad_DB_Editor.ViewModel
                     (new View.Dialogs.Window_ErrorDialog($"Export failed!{Environment.NewLine}{Environment.NewLine}Details:{Environment.NewLine}{errorMessage}")).ShowDialog();
                     // BREAKS MVVM BUT NOT WORTH THE EFFORT TO DO DIALOGS PROPERLY
                 }
+            }
+        }
+
+        private void ExpandAllCategoriesCommandExecuted(object? parameter)
+        {
+            List<CategoryVM> categoryVMs = new(TopLevelCategoryVMs);
+            for (int i = 0; i < categoryVMs.Count; i++)
+            {
+                categoryVMs[i].IsExpanded = true;
+                categoryVMs.AddRange(categoryVMs[i].CategoryVMs);
+            }
+        }
+
+        private void CollapseAllCategoriesCommandExecuted(object? parameter)
+        {
+            List<CategoryVM> categoryVMs = new(TopLevelCategoryVMs);
+            for (int i = 0; i < categoryVMs.Count; i++)
+            {
+                categoryVMs[i].IsExpanded = false;
+                categoryVMs.AddRange(categoryVMs[i].CategoryVMs);
             }
         }
 

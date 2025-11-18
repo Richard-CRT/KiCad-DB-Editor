@@ -26,7 +26,7 @@ using System.Windows.Threading;
 
 namespace KiCad_DB_Editor.ViewModel
 {
-    public class CategoryVM : NotifyObject
+    public class CategoryVM : TreeViewItemVM
     {
         public Category Category { get; }
         private DispatcherTimer _newPartsLoopTimer;

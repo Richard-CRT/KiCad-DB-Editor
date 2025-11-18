@@ -56,25 +56,38 @@
                         </Grid>
                         <TreeView x:Name="treeView_Categories"
                               ItemsSource="{Binding LibraryVM.TopLevelCategoryVMs, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}"
+                              d:ItemsSource="{d:SampleData}"
                               >
                             <TreeView.ItemTemplate>
                                 <HierarchicalDataTemplate ItemsSource="{Binding CategoryVMs}" DataType="{x:Type vm:CategoryVM}">
                                     <StackPanel Orientation="Horizontal">
                                         <Image Source="/View/Resources/ComponentFolder.png" Height="18" Margin="0,0,5,0" />
-                                        <TextBlock >
-                                            <TextBlock.Text>
-                                                <MultiBinding StringFormat="{}[{1}] {0}">
-                                                    <Binding Path="Category.Name" />
-                                                    <Binding Path="Category.Parts.Count" />
-                                                </MultiBinding>
-                                            </TextBlock.Text>
+                                        <TextBlock Text="{Binding Category.Parts.Count, StringFormat={}{0}}" Margin="0,0,4,0">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="Gray" />
+                                                    <Style.Triggers>
+                                                        <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding Path=IsKeyboardFocusWithin, ElementName=treeView_Categories}" Value="true" />
+                                                                <Condition Binding="{Binding IsSelected}" Value="true" />
+                                                            </MultiDataTrigger.Conditions>
+                                                            <MultiDataTrigger.Setters>
+                                                                <Setter Property="Foreground" Value="LightGray" />
+                                                            </MultiDataTrigger.Setters>
+                                                        </MultiDataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
                                         </TextBlock>
+                                        <TextBlock Text="{Binding Category.Name}" />
                                     </StackPanel>
                                 </HierarchicalDataTemplate>
                             </TreeView.ItemTemplate>
                             <TreeView.ItemContainerStyle>
                                 <Style TargetType="TreeViewItem">
                                     <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                 </Style>
                             </TreeView.ItemContainerStyle>
                         </TreeView>

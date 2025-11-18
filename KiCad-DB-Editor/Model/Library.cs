@@ -222,6 +222,9 @@ namespace KiCad_DB_Editor.Model
             {
                 if (this.PartUIDScheme != value)
                 {
+                    if (value.Count(c => c == '#') != Util.PartUIDSchemeNumberOfWildcards)
+                        throw new Exceptions.ArgumentValidationException("Proposed scheme does not contain the necessary wildcard characters");
+
                     _partUIDScheme = value;
                     InvokePropertyChanged();
 

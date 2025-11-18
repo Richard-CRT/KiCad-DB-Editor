@@ -160,20 +160,6 @@ namespace KiCad_DB_Editor.ViewModel
             }
         }
 
-        private string _newPartUIDScheme = "";
-        public string NewPartUIDScheme
-        {
-            get { return _newPartUIDScheme; }
-            set
-            {
-                if (_newPartUIDScheme != value)
-                {
-                    _newPartUIDScheme = value;
-                    InvokePropertyChanged();
-                }
-            }
-        }
-
         #endregion Notify Properties
 
         public CategoryVM(Model.Category category)
@@ -182,7 +168,6 @@ namespace KiCad_DB_Editor.ViewModel
             Category = category;
 
             NewCategoryName = category.Name;
-            NewPartUIDScheme = category.ActivePartUIDScheme;
 
             Category.PropertyChanged += Category_PropertyChanged;
 
@@ -202,7 +187,6 @@ namespace KiCad_DB_Editor.ViewModel
             MoveParameterDownCommand = new BasicCommand(MoveParameterDownCommandExecuted, MoveParameterDownCommandCanExecute);
 
             RenameCategoryCommand = new BasicCommand(RenameCategoryCommandExecuted, RenameCategoryCommandCanExecute);
-            UpdatePartUIDSchemeCommand = new BasicCommand(UpdatePartUIDSchemeCommandExecuted, UpdatePartUIDSchemeCommandCanExecute);
 
             NewPartsCommand = new BasicCommand(NewPartsCommandExecuted, null);
             DuplicatePartCommand = new BasicCommand(DuplicatePartCommandExecuted, DuplicatePartCommandCanExecute);
@@ -288,10 +272,6 @@ namespace KiCad_DB_Editor.ViewModel
                     InvokePropertyChanged_Path();
                     NewCategoryName = Category.Name;
                     break;
-                case nameof(Category.ActivePartUIDScheme):
-                    if (!Category.OverridePartUIDScheme)
-                        NewPartUIDScheme = Category.ActivePartUIDScheme;
-                    break;
                 // Categories, Parameters, Parts do not have setter so we don't need to listen here)
             }
         }
@@ -339,7 +319,6 @@ namespace KiCad_DB_Editor.ViewModel
         public IBasicCommand MoveParameterUpCommand { get; }
         public IBasicCommand MoveParameterDownCommand { get; }
         public IBasicCommand RenameCategoryCommand { get; }
-        public IBasicCommand UpdatePartUIDSchemeCommand { get; }
         public IBasicCommand NewPartsCommand { get; }
         public IBasicCommand DuplicatePartCommand { get; }
         public IBasicCommand DeletePartsCommand { get; }
@@ -483,16 +462,6 @@ namespace KiCad_DB_Editor.ViewModel
                         categoryCollection.Move(oldIndex, newIndex);
                 }
             }
-        }
-
-        private bool UpdatePartUIDSchemeCommandCanExecute(object? parameter)
-        {
-            return Category.OverridePartUIDScheme && NewPartUIDScheme.Count(c => c == '#') == Util.PartUIDSchemeNumberOfWildcards;
-        }
-
-        private void UpdatePartUIDSchemeCommandExecuted(object? parameter)
-        {
-            Category.PartUIDScheme = NewPartUIDScheme;
         }
 
         private void NewPartsCommandExecuted(object? _)

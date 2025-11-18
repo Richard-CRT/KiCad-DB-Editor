@@ -61,20 +61,6 @@ namespace KiCad_DB_Editor.ViewModel
             }
         }
 
-        private string _newPartUIDScheme = "";
-        public string NewPartUIDScheme
-        {
-            get { return _newPartUIDScheme; }
-            set
-            {
-                if (_newPartUIDScheme != value)
-                {
-                    _newPartUIDScheme = value;
-                    InvokePropertyChanged();
-                }
-            }
-        }
-
         private string _newUniversalParameterName = "";
         public string NewUniversalParameterName
         {
@@ -240,8 +226,6 @@ namespace KiCad_DB_Editor.ViewModel
             // Link model
             Library = library;
 
-            NewPartUIDScheme = library.PartUIDScheme;
-
             Library.TopLevelCategories.CollectionChanged += Library_TopLevelCategories_CollectionChanged;
             TopLevelCategoryVMs = new(library.TopLevelCategories.Select(c => new CategoryVM(c)));
             Debug.Assert(_topLevelCategoryVMs is not null);
@@ -256,8 +240,6 @@ namespace KiCad_DB_Editor.ViewModel
             NewTopLevelCategoryCommand = new BasicCommand(NewTopLevelCategoryCommandExecuted, NewTopLevelCategoryCommandCanExecute);
             NewSubCategoryCommand = new BasicCommand(NewSubCategoryCommandExecuted, NewSubCategoryCommandCanExecute);
             DeleteCategoryCommand = new BasicCommand(DeleteCategoryCommandExecuted, DeleteCategoryCommandCanExecute);
-
-            UpdatePartUIDSchemeCommand = new BasicCommand(UpdatePartUIDSchemeCommandExecuted, UpdatePartUIDSchemeCommandCanExecute);
 
             NewUniversalParameterCommand = new BasicCommand(NewUniversalParameterCommandExecuted, NewUniversalParameterCommandCanExecute);
             RenameUniversalParameterCommand = new BasicCommand(RenameUniversalParameterCommandExecuted, RenameUniversalParameterCommandCanExecute);
@@ -382,7 +364,6 @@ namespace KiCad_DB_Editor.ViewModel
         public IBasicCommand NewTopLevelCategoryCommand { get; }
         public IBasicCommand NewSubCategoryCommand { get; }
         public IBasicCommand DeleteCategoryCommand { get; }
-        public IBasicCommand UpdatePartUIDSchemeCommand { get; }
         public IBasicCommand NewUniversalParameterCommand { get; }
         public IBasicCommand RenameUniversalParameterCommand { get; }
         public IBasicCommand DeleteUniversalParameterCommand { get; }
@@ -465,16 +446,6 @@ namespace KiCad_DB_Editor.ViewModel
                     walkCategory = walkCategory.ParentCategory;
                 }
             }
-        }
-
-        private bool UpdatePartUIDSchemeCommandCanExecute(object? parameter)
-        {
-            return Library.PartUIDScheme != NewPartUIDScheme && NewPartUIDScheme.Count(c => c == '#') == Util.PartUIDSchemeNumberOfWildcards;
-        }
-
-        private void UpdatePartUIDSchemeCommandExecuted(object? parameter)
-        {
-            Library.PartUIDScheme = NewPartUIDScheme;
         }
 
         private bool NewUniversalParameterCommandCanExecute(object? parameter)

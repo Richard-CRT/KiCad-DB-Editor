@@ -93,36 +93,10 @@
                     <TextBlock DockPanel.Dock="Left" Margin="0,0,5,0">Override Part UID Scheme:</TextBlock>
                     <CheckBox DockPanel.Dock="Left" Margin="0,0,3,0" VerticalContentAlignment="Center"
                       IsChecked="{Binding CategoryVM.Category.OverridePartUIDScheme, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Category}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"/>
-                    <Button DockPanel.Dock="Right" Content="Update" Padding="5,1,5,1" Margin="5,0,0,0"
-                        Command="{Binding CategoryVM.UpdatePartUIDSchemeCommand, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UserControl_Category}}}" />
                     <TextBox
-                        Text="{Binding CategoryVM.NewPartUIDScheme, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Category}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}"
+                        Text="{Binding CategoryVM.Category.PartUIDScheme, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Category}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
                         IsEnabled="{Binding CategoryVM.Category.OverridePartUIDScheme, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Category}, Mode=FindAncestor}}"
-                        >
-                        <TextBox.Style>
-                            <Style TargetType="TextBox">
-                                <Style.Triggers>
-                                    <MultiDataTrigger>
-                                        <MultiDataTrigger.Setters>
-                                            <Setter Property="Background" Value="LightYellow"/>
-                                        </MultiDataTrigger.Setters>
-                                        <MultiDataTrigger.Conditions>
-                                            <Condition Binding="{Binding CategoryVM.Category.OverridePartUIDScheme, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Category}, Mode=FindAncestor}}"
-                                                       Value="true" />
-                                            <Condition Value="false">
-                                                <Condition.Binding>
-                                                    <MultiBinding Converter="{StaticResource MultiValue_to_Equality_Converter}">
-                                                        <Binding RelativeSource="{RelativeSource AncestorType={x:Type local:UserControl_Category}, Mode=FindAncestor}" Path="CategoryVM.NewPartUIDScheme" Mode="OneWay" />
-                                                        <Binding RelativeSource="{RelativeSource AncestorType={x:Type local:UserControl_Category}, Mode=FindAncestor}" Path="CategoryVM.Category.PartUIDScheme" Mode="OneWay"/>
-                                                    </MultiBinding>
-                                                </Condition.Binding>
-                                            </Condition>
-                                        </MultiDataTrigger.Conditions>
-                                    </MultiDataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBox.Style>
-                    </TextBox>
+                        />
                 </DockPanel>
             </DockPanel>
         </Grid>

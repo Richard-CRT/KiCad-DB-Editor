@@ -49,10 +49,13 @@ namespace KiCad_DB_Editor.Model
                     // Must do this before updating the override as the value of ActivePartUIDScheme depends on it
                     if (value)
                         PartUIDScheme = ActivePartUIDScheme;
-                    else
-                        PartUIDScheme = "";
 
                     _overridePartUIDScheme = value;
+
+                    // Must do this after updating the override as the value of ActivePartUIDScheme depends on it
+                    if (!value)
+                        PartUIDScheme = ActivePartUIDScheme;
+
                     InvokePropertyChanged();
 
                     InvokePropertyChanged(nameof(ActivePartUIDScheme));
@@ -70,6 +73,9 @@ namespace KiCad_DB_Editor.Model
             {
                 if (_partUIDScheme != value)
                 {
+                    if (value.Count(c => c == '#') != Util.PartUIDSchemeNumberOfWildcards)
+                        throw new Exceptions.ArgumentValidationException("Proposed scheme does not contain the necessary wildcard characters");
+
                     _partUIDScheme = value;
                     InvokePropertyChanged();
 
@@ -134,7 +140,7 @@ namespace KiCad_DB_Editor.Model
             Name = jsonCategory.Name;
 
             OverridePartUIDScheme = jsonCategory.PartUIDScheme != "";
-            PartUIDScheme = jsonCategory.PartUIDScheme;
+            PartUIDScheme = OverridePartUIDScheme ? jsonCategory.PartUIDScheme : ActivePartUIDScheme;
 
             _parameters = new(jsonCategory.Parameters);
             // We don't worry about unsubscribing because this object is the event publisher
@@ -162,6 +168,9 @@ namespace KiCad_DB_Editor.Model
 
         public void ParentCategory_PartUIDScheme_PropertyChanged()
         {
+            if (!OverridePartUIDScheme)
+                PartUIDScheme = ActivePartUIDScheme;
+
             InvokePropertyChanged(nameof(ActivePartUIDScheme));
 
             foreach (Category c in Categories) c.ParentCategory_PartUIDScheme_PropertyChanged();

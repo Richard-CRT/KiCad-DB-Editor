@@ -36,6 +36,7 @@
                         <TextBox DockPanel.Dock="Bottom" Text="{Binding LibraryVM.NewCategoryName, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock DockPanel.Dock="Bottom" HorizontalAlignment="Center">New Category</TextBlock>
                         <Separator DockPanel.Dock="Bottom" Margin="0,10,0,10" />
+                        <!-- CommandParameter necessary as TreeView SelectedItem is broken -->
                         <Button DockPanel.Dock="Bottom" Content="Delete Category" Padding="5,1,5,1"
                             Command="{Binding LibraryVM.DeleteCategoryCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" CommandParameter="{Binding SelectedItem, ElementName=treeView_FoldersAndCategories, Mode=OneWay}" />
                         <TreeView x:Name="treeView_FoldersAndCategories"

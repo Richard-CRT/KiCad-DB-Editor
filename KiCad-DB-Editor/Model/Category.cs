@@ -38,19 +38,19 @@ namespace KiCad_DB_Editor.Model
             set { if (_name != value) { _name = value; InvokePropertyChanged(); } }
         }
 
-        private bool _overridePartUIDScheme { get; set; } = false;
-        public bool OverridePartUIDScheme
+        private bool _isPartUIDSchemeOverridden { get; set; } = false;
+        public bool IsPartUIDSchemeOverridden
         {
-            get { return _overridePartUIDScheme; }
+            get { return _isPartUIDSchemeOverridden; }
             set
             {
-                if (_overridePartUIDScheme != value)
+                if (_isPartUIDSchemeOverridden != value)
                 {
                     // Must do this before updating the override as the value of ActivePartUIDScheme depends on it
                     if (value)
                         PartUIDScheme = ActivePartUIDScheme;
 
-                    _overridePartUIDScheme = value;
+                    _isPartUIDSchemeOverridden = value;
 
                     // Must do this after updating the override as the value of ActivePartUIDScheme depends on it
                     if (!value)
@@ -86,7 +86,7 @@ namespace KiCad_DB_Editor.Model
             }
         }
 
-        public string ActivePartUIDScheme => OverridePartUIDScheme ? PartUIDScheme : (ParentCategory is not null ? ParentCategory.ActivePartUIDScheme : ParentLibrary.PartUIDScheme);
+        public string ActivePartUIDScheme => IsPartUIDSchemeOverridden ? PartUIDScheme : (ParentCategory is not null ? ParentCategory.ActivePartUIDScheme : ParentLibrary.PartUIDScheme);
 
         // No setter, to prevent the VM needing to listening PropertyChanged events
         private ObservableCollectionEx<string> _parameters;
@@ -139,8 +139,8 @@ namespace KiCad_DB_Editor.Model
 
             Name = jsonCategory.Name;
 
-            OverridePartUIDScheme = jsonCategory.PartUIDScheme != "";
-            PartUIDScheme = OverridePartUIDScheme ? jsonCategory.PartUIDScheme : ActivePartUIDScheme;
+            IsPartUIDSchemeOverridden = jsonCategory.PartUIDScheme != "";
+            PartUIDScheme = IsPartUIDSchemeOverridden ? jsonCategory.PartUIDScheme : ActivePartUIDScheme;
 
             _parameters = new(jsonCategory.Parameters);
             // We don't worry about unsubscribing because this object is the event publisher
@@ -168,7 +168,7 @@ namespace KiCad_DB_Editor.Model
 
         public void ParentCategory_PartUIDScheme_PropertyChanged()
         {
-            if (!OverridePartUIDScheme)
+            if (!IsPartUIDSchemeOverridden)
                 PartUIDScheme = ActivePartUIDScheme;
 
             InvokePropertyChanged(nameof(ActivePartUIDScheme));

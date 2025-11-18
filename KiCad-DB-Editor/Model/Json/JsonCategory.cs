@@ -29,7 +29,7 @@ namespace KiCad_DB_Editor.Model.Json
         public JsonCategory(Category category)
         {
             Name = category.Name;
-            PartUIDScheme = category.OverridePartUIDScheme ? category.PartUIDScheme : "";
+            PartUIDScheme = category.IsPartUIDSchemeOverridden ? category.PartUIDScheme : "";
             Parameters = new(category.Parameters);
             Categories = new(category.Categories.Select(c => new JsonCategory(c)));
         }

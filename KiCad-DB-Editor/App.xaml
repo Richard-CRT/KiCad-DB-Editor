@@ -20,6 +20,7 @@
                 </Trigger>
                 <Trigger Property="Validation.HasError" Value="True">
                     <Setter Property="ToolTip" Value="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={x:Static RelativeSource.Self}, FallbackValue=''}" />
+                    <Setter Property="ToolTipService.InitialShowDelay" Value="200" />
                     <Setter Property="Background" Value="LightCoral" />
                 </Trigger>
             </Style.Triggers>

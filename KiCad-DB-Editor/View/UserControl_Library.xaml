@@ -41,7 +41,7 @@
                         <!-- CommandParameter necessary as TreeView SelectedItem is broken -->
                         <Button DockPanel.Dock="Bottom" Content="Delete Category" Padding="5,1,5,1"
                             Command="{Binding LibraryVM.DeleteCategoryCommand, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}}" CommandParameter="{Binding SelectedItem, ElementName=treeView_Categories, Mode=OneWay}" />
-                        <Grid DockPanel.Dock="Top">
+                        <Grid DockPanel.Dock="Top" Margin="0,0,0,3">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="3" />

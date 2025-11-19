@@ -40,6 +40,7 @@
                   >
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="LightGray"/>
+                <!-- Must not be set in DataGrid CellStyle otherwise the dynamically created columns don't use it -->
                 <Style TargetType="{x:Type DataGridCell}" >
                     <Setter Property="Template">
                         <Setter.Value>

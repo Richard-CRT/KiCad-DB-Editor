@@ -1,4 +1,7 @@
 {
+  "metadata": {
+    "version": "6.0.0\u002B196c1256a609330b63a42287cb7c0c4da61bfa12"
+  },
   "part_uid_scheme": "CMP-#######-####",
   "part_lib_name": "Sample Part Lib",
   "part_lib_desc": "Sample part library used for testing and demonstrating the KiCad DB Editor",
@@ -6,53 +9,43 @@
   "kicad_part_lib_env_var": "",
   "auto_export": true,
   "auto_export_relative_path": "sample_kicad_library/kicad_db.kicad_dbl",
-  "parameters": [
-    {
-      "uuid": "28268508-1b23-483b-901d-d9756d49e7e6",
-      "name": "BOM Comments",
-      "universal": false
-    },
-    {
-      "uuid": "787ebf49-a7ad-4f5f-8bc6-76fcbfe6994c",
-      "name": "Package",
-      "universal": false
-    },
-    {
-      "uuid": "18902a19-9568-4ad2-9b5b-b6539d64b2b7",
-      "name": "Notes",
-      "universal": false
-    }
-  ],
+  "universal_parameters": [],
   "top_level_categories": [
     {
       "name": "Capacitors",
+      "part_uid_scheme": "",
       "parameters": [],
       "categories": []
     },
     {
       "name": "Connectors",
+      "part_uid_scheme": "",
       "parameters": [
-        "787ebf49-a7ad-4f5f-8bc6-76fcbfe6994c"
+        "Package"
       ],
       "categories": [
         {
           "name": "Card Edge Connectors",
+          "part_uid_scheme": "",
           "parameters": [],
           "categories": []
         },
         {
           "name": "Headers \u0026 Wire Housings",
+          "part_uid_scheme": "",
           "parameters": [],
           "categories": []
         },
         {
           "name": "RF",
+          "part_uid_scheme": "",
           "parameters": [
-            "28268508-1b23-483b-901d-d9756d49e7e6"
+            "BOM Comments"
           ],
           "categories": [
             {
               "name": "SMA",
+              "part_uid_scheme": "",
               "parameters": [],
               "categories": []
             }
@@ -62,22 +55,26 @@
     },
     {
       "name": "Diodes",
+      "part_uid_scheme": "",
       "parameters": [
-        "18902a19-9568-4ad2-9b5b-b6539d64b2b7"
+        "Notes"
       ],
       "categories": [
         {
           "name": "Schottky",
+          "part_uid_scheme": "",
           "parameters": [],
           "categories": []
         },
         {
           "name": "TVS",
+          "part_uid_scheme": "",
           "parameters": [],
           "categories": []
         },
         {
           "name": "Zener",
+          "part_uid_scheme": "",
           "parameters": [],
           "categories": []
         }
@@ -85,20 +82,24 @@
     },
     {
       "name": "Fiducials",
+      "part_uid_scheme": "",
       "parameters": [],
       "categories": []
     },
     {
       "name": "Frequency \u0026 Timing",
+      "part_uid_scheme": "",
       "parameters": [],
       "categories": [
         {
           "name": "Crystals",
+          "part_uid_scheme": "",
           "parameters": [],
           "categories": []
         },
         {
           "name": "Oscillators",
+          "part_uid_scheme": "",
           "parameters": [],
           "categories": []
         }
@@ -106,66 +107,79 @@
     },
     {
       "name": "Graphical",
+      "part_uid_scheme": "",
       "parameters": [],
       "categories": []
     },
     {
       "name": "Inductors",
+      "part_uid_scheme": "",
       "parameters": [],
       "categories": []
     },
     {
       "name": "Integrated Circuits",
+      "part_uid_scheme": "",
       "parameters": [],
       "categories": []
     },
     {
       "name": "LED",
+      "part_uid_scheme": "",
       "parameters": [],
       "categories": []
     },
     {
       "name": "Mechanical",
+      "part_uid_scheme": "",
       "parameters": [],
       "categories": []
     },
     {
       "name": "Miscellaneous",
+      "part_uid_scheme": "",
       "parameters": [],
       "categories": []
     },
     {
       "name": "Radio \u0026 RF",
+      "part_uid_scheme": "",
       "parameters": [],
       "categories": []
     },
     {
       "name": "Relays",
+      "part_uid_scheme": "",
       "parameters": [],
       "categories": []
     },
     {
       "name": "Resistors",
+      "part_uid_scheme": "",
       "parameters": [],
       "categories": []
     },
     {
       "name": "Sensors",
+      "part_uid_scheme": "",
       "parameters": [],
       "categories": []
     },
     {
       "name": "Switches",
+      "part_uid_scheme": "",
       "parameters": [],
       "categories": []
     },
     {
       "name": "Test Points",
+      "part_uid_scheme": "",
       "parameters": [],
       "categories": []
     },
     {
       "name": "Transistors",
+      "part_uid_scheme": "",
       "parameters": [],
       "categories": []
     }

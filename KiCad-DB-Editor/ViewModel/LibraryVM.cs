@@ -326,10 +326,9 @@ namespace KiCad_DB_Editor.ViewModel
 
         private bool canNewCategory(ObservableCollectionEx<Category> categoryCollection)
         {
-            string lowerValue = this.NewCategoryName.ToLowerInvariant();
-            if (this.NewCategoryName.Length > 0 && lowerValue.All(c => Util.SafeCategoryCharacters.Contains(c)))
+            if (this.NewCategoryName.Length > 0 && this.NewCategoryName.All(c => Util.SafeCategoryCharacters.Contains(c)))
             {
-                if (!categoryCollection.Any(c => c.Name.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase)))
+                if (!categoryCollection.Any(c => c.Name.Equals(this.NewCategoryName, StringComparison.OrdinalIgnoreCase)))
                 {
                     return true;
                 }
@@ -339,12 +338,11 @@ namespace KiCad_DB_Editor.ViewModel
 
         private void newCategory(Category? parentCategory, ObservableCollectionEx<Category> categoryCollection)
         {
-            string lowerValue = this.NewCategoryName.ToLowerInvariant();
             int newIndex;
             for (newIndex = 0; newIndex < categoryCollection.Count; newIndex++)
             {
                 Category compareCategory = categoryCollection[newIndex];
-                if (compareCategory.Name.CompareTo(lowerValue) > 0)
+                if (string.Compare(compareCategory.Name, this.NewCategoryName, StringComparison.OrdinalIgnoreCase) > 0)
                     break;
             }
             Category newCategory = new Category(this.NewCategoryName, Library, parentCategory);
@@ -475,13 +473,12 @@ namespace KiCad_DB_Editor.ViewModel
 
         private bool NewUniversalParameterCommandCanExecute(object? parameter)
         {
-            string lowerValue = this.NewUniversalParameterName.ToLowerInvariant();
-            if (lowerValue.Length > 0 && lowerValue.All(c => Util.SafeParameterCharacters.Contains(c)))
+            if (this.NewUniversalParameterName.Length > 0 && this.NewUniversalParameterName.All(c => Util.SafeParameterCharacters.Contains(c)))
             {
-                if (!Util.ReservedParameterNames.Contains(lowerValue) && Util.ReservedParameterNameStarts.All(s => !lowerValue.StartsWith(s)))
+                if (!Util.ReservedParameterNames.Contains(this.NewUniversalParameterName) && Util.ReservedParameterNameStarts.All(s => !this.NewUniversalParameterName.StartsWith(s, StringComparison.OrdinalIgnoreCase)))
                 {
-                    if (!Library.UniversalParameters.Any(p => p.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase))
-                        && !Library.AllCategories.Any(c => c.Parameters.Any(p => p.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase))))
+                    if (!Library.UniversalParameters.Any(p => p.Equals(this.NewUniversalParameterName, StringComparison.OrdinalIgnoreCase))
+                        && !Library.AllCategories.Any(c => c.Parameters.Any(p => p.Equals(this.NewUniversalParameterName, StringComparison.OrdinalIgnoreCase))))
                     {
                         return true;
                     }
@@ -498,13 +495,12 @@ namespace KiCad_DB_Editor.ViewModel
 
         private bool RenameUniversalParameterCommandCanExecute(object? parameter)
         {
-            string lowerValue = this.NewUniversalParameterName.ToLowerInvariant();
-            if (SelectedUniversalParameterIndex != -1 && this.NewUniversalParameterName.Length > 0 && lowerValue.All(c => Util.SafeParameterCharacters.Contains(c)))
+            if (SelectedUniversalParameterIndex != -1 && this.NewUniversalParameterName.Length > 0 && this.NewUniversalParameterName.All(c => Util.SafeParameterCharacters.Contains(c)))
             {
-                if (!Util.ReservedParameterNames.Contains(lowerValue) && Util.ReservedParameterNameStarts.All(s => !lowerValue.StartsWith(s)))
+                if (!Util.ReservedParameterNames.Contains(this.NewUniversalParameterName) && Util.ReservedParameterNameStarts.All(s => !this.NewUniversalParameterName.StartsWith(s, StringComparison.OrdinalIgnoreCase)))
                 {
-                    if (!Library.UniversalParameters.Any(p => p.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase))
-                        && !Library.AllCategories.Any(c => c.Parameters.Any(p => p.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase))))
+                    if (!Library.UniversalParameters.Any(p => p.Equals(this.NewUniversalParameterName, StringComparison.OrdinalIgnoreCase))
+                        && !Library.AllCategories.Any(c => c.Parameters.Any(p => p.Equals(this.NewUniversalParameterName, StringComparison.OrdinalIgnoreCase))))
                     {
                         return true;
                     }
@@ -601,7 +597,7 @@ namespace KiCad_DB_Editor.ViewModel
         private bool NewKiCadSymbolLibraryCommandCanExecute(object? parameter)
         {
             if (this.NewKiCadSymbolLibraryName.Length > 0 && this.NewKiCadSymbolLibraryRelativePath.Length > 0)
-                return !Library.KiCadSymbolLibraries.Any(kSL => kSL.Nickname.Equals(this.NewKiCadSymbolLibraryName, StringComparison.InvariantCultureIgnoreCase));
+                return !Library.KiCadSymbolLibraries.Any(kSL => kSL.Nickname.Equals(this.NewKiCadSymbolLibraryName, StringComparison.OrdinalIgnoreCase));
             else
                 return false;
         }
@@ -612,7 +608,7 @@ namespace KiCad_DB_Editor.ViewModel
             for (newIndex = 0; newIndex < Library.KiCadSymbolLibraries.Count; newIndex++)
             {
                 var compareKSL = Library.KiCadSymbolLibraries[newIndex];
-                if (compareKSL.Nickname.CompareTo(this.NewKiCadSymbolLibraryName) > 0)
+                if (string.Compare(compareKSL.Nickname, this.NewKiCadSymbolLibraryName, StringComparison.OrdinalIgnoreCase) > 0)
                     break;
             }
 
@@ -629,7 +625,7 @@ namespace KiCad_DB_Editor.ViewModel
         {
             if (SelectedKiCadSymbolLibrary is not null && this.NewKiCadSymbolLibraryName.Length > 0 && this.NewKiCadSymbolLibraryRelativePath.Length > 0)
             {
-                var kiCadSymbolLibrariesWithSameName = Library.KiCadSymbolLibraries.Where(p => p.Nickname.Equals(this.NewKiCadSymbolLibraryName, StringComparison.InvariantCultureIgnoreCase)).ToArray();
+                var kiCadSymbolLibrariesWithSameName = Library.KiCadSymbolLibraries.Where(p => p.Nickname.Equals(this.NewKiCadSymbolLibraryName, StringComparison.OrdinalIgnoreCase)).ToArray();
 
                 // Allow updates if none share the same name, or the name is the same as current, but the path is not (path case sensitive because of UNIX)
                 return (kiCadSymbolLibrariesWithSameName.Length == 0) ||
@@ -653,7 +649,7 @@ namespace KiCad_DB_Editor.ViewModel
                 var compareKSL = Library.KiCadSymbolLibraries[i];
                 if (compareKSL != SelectedKiCadSymbolLibrary)
                 {
-                    if (compareKSL.Nickname.CompareTo(this.NewKiCadSymbolLibraryName) > 0)
+                    if (string.Compare(compareKSL.Nickname, this.NewKiCadSymbolLibraryName, StringComparison.OrdinalIgnoreCase) > 0)
                         break;
                     newIndex++;
                 }
@@ -706,7 +702,7 @@ namespace KiCad_DB_Editor.ViewModel
         private bool NewKiCadFootprintLibraryCommandCanExecute(object? parameter)
         {
             if (this.NewKiCadFootprintLibraryName.Length > 0 && this.NewKiCadFootprintLibraryRelativePath.Length > 0)
-                return !Library.KiCadFootprintLibraries.Any(p => p.Nickname.Equals(this.NewKiCadFootprintLibraryName, StringComparison.InvariantCultureIgnoreCase));
+                return !Library.KiCadFootprintLibraries.Any(p => p.Nickname.Equals(this.NewKiCadFootprintLibraryName, StringComparison.OrdinalIgnoreCase));
             else
                 return false;
         }
@@ -717,7 +713,7 @@ namespace KiCad_DB_Editor.ViewModel
             for (newIndex = 0; newIndex < Library.KiCadFootprintLibraries.Count; newIndex++)
             {
                 var compareKFL = Library.KiCadFootprintLibraries[newIndex];
-                if (compareKFL.Nickname.CompareTo(this.NewKiCadFootprintLibraryName) > 0)
+                if (string.Compare(compareKFL.Nickname, this.NewKiCadFootprintLibraryName, StringComparison.OrdinalIgnoreCase) > 0)
                     break;
             }
 
@@ -734,7 +730,7 @@ namespace KiCad_DB_Editor.ViewModel
         {
             if (SelectedKiCadFootprintLibrary is not null && this.NewKiCadFootprintLibraryName.Length > 0 && this.NewKiCadFootprintLibraryRelativePath.Length > 0)
             {
-                var kiCadFootprintLibrariesWithSameName = Library.KiCadFootprintLibraries.Where(p => p.Nickname.Equals(this.NewKiCadFootprintLibraryName, StringComparison.InvariantCultureIgnoreCase)).ToArray();
+                var kiCadFootprintLibrariesWithSameName = Library.KiCadFootprintLibraries.Where(p => p.Nickname.Equals(this.NewKiCadFootprintLibraryName, StringComparison.OrdinalIgnoreCase)).ToArray();
 
                 // Allow updates if none share the same name, or the name is the same as current, but the path is not (path case sensitive because of UNIX)
                 return (kiCadFootprintLibrariesWithSameName.Length == 0) ||
@@ -758,7 +754,7 @@ namespace KiCad_DB_Editor.ViewModel
                 var compareKFL = Library.KiCadFootprintLibraries[i];
                 if (compareKFL != SelectedKiCadFootprintLibrary)
                 {
-                    if (compareKFL.Nickname.CompareTo(this.NewKiCadFootprintLibraryName) > 0)
+                    if (string.Compare(compareKFL.Nickname, this.NewKiCadFootprintLibraryName, StringComparison.OrdinalIgnoreCase) > 0)
                         break;
                     newIndex++;
                 }

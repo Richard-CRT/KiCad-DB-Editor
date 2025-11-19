@@ -166,10 +166,10 @@ namespace KiCad_DB_Editor.Model
                 if ((endIndex = input.IndexOf('}', startIndex + 2)) > startIndex)
                 {
                     string substring = input[startIndex..(endIndex + 1)];
-                    string parameterName = substring[2..^1].ToLowerInvariant();
-                    string? parameter = ParameterValues.Keys.FirstOrDefault(k => k!.Equals(parameterName, StringComparison.InvariantCultureIgnoreCase), null);
+                    string parameterName = substring[2..^1];
+                    string? parameter = ParameterValues.Keys.FirstOrDefault(k => k!.Equals(parameterName, StringComparison.OrdinalIgnoreCase), null);
                     if (parameter is not null)
-                        input = input.Replace(substring, ParameterValues[parameter], StringComparison.InvariantCultureIgnoreCase);
+                        input = input.Replace(substring, ParameterValues[parameter], StringComparison.OrdinalIgnoreCase);
                     else
                         startSearchIndex = endIndex + 1;
                 }

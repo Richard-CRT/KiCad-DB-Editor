@@ -11,7 +11,7 @@ namespace KiCad_DB_Editor.Utilities
 {
     public static class Util
     {
-        public static HashSet<string> ReservedParameterNames = new HashSet<string>()
+        public static HashSet<string> ReservedParameterNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase) // must be case insensitive
         {
             "part uid",
             "description",
@@ -33,8 +33,8 @@ namespace KiCad_DB_Editor.Utilities
         // No | as used for a visual splitter for the KiCad categories
         // No {} as it breaks KiCad's field substitution
         // No [] as we bind directly to parameter names
-        public static HashSet<char> SafeCategoryCharacters = new HashSet<char>("abcdefghjiklmnopqrstuvwxyz0123456789_-&@() ");
-        public static HashSet<char> SafeParameterCharacters = new HashSet<char>("abcdefghjiklmnopqrstuvwxyz0123456789_-&@() ");
+        public static HashSet<char> SafeCategoryCharacters = new HashSet<char>("ABCDEFGHJIKLMNOPQRSTUVWXYZabcdefghjiklmnopqrstuvwxyz0123456789_-&@() ");
+        public static HashSet<char> SafeParameterCharacters = new HashSet<char>("ABCDEFGHJIKLMNOPQRSTUVWXYZabcdefghjiklmnopqrstuvwxyz0123456789_-&@() ");
 
         public static Dictionary<byte, char> Base32EncodeBook = new()
         {

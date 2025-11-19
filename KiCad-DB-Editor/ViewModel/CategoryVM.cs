@@ -327,14 +327,13 @@ namespace KiCad_DB_Editor.ViewModel
 
         private bool AddParameterCommandCanExecute(object? parameter)
         {
-            string lowerValue = this.NewParameterName.ToLowerInvariant();
-            if (lowerValue.Length > 0 && lowerValue.All(c => Util.SafeParameterCharacters.Contains(c)))
+            if (this.NewParameterName.Length > 0 && this.NewParameterName.All(c => Util.SafeParameterCharacters.Contains(c)))
             {
-                if (!Util.ReservedParameterNames.Contains(lowerValue) && Util.ReservedParameterNameStarts.All(s => !lowerValue.StartsWith(s)))
+                if (!Util.ReservedParameterNames.Contains(this.NewParameterName) && Util.ReservedParameterNameStarts.All(s => !this.NewParameterName.StartsWith(s, StringComparison.OrdinalIgnoreCase)))
                 {
-                    if (!this.Category.InheritedParameters.Any(p => p.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase))
-                        && !this.Category.Parameters.Any(p => p.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase))
-                        && !this.Category.AllSubCategories.Any(c => c.Parameters.Any(p => p.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase))))
+                    if (!this.Category.InheritedParameters.Any(p => p.Equals(this.NewParameterName, StringComparison.OrdinalIgnoreCase))
+                        && !this.Category.Parameters.Any(p => p.Equals(this.NewParameterName, StringComparison.OrdinalIgnoreCase))
+                        && !this.Category.AllSubCategories.Any(c => c.Parameters.Any(p => p.Equals(this.NewParameterName, StringComparison.OrdinalIgnoreCase))))
                     {
                         return true;
                     }
@@ -351,14 +350,13 @@ namespace KiCad_DB_Editor.ViewModel
 
         private bool RenameParameterCommandCanExecute(object? parameter)
         {
-            string lowerValue = this.NewParameterName.ToLowerInvariant();
-            if (SelectedParameterIndex != -1 && lowerValue.Length > 0 && lowerValue.All(c => Util.SafeParameterCharacters.Contains(c)))
+            if (SelectedParameterIndex != -1 && this.NewParameterName.Length > 0 && this.NewParameterName.All(c => Util.SafeParameterCharacters.Contains(c)))
             {
-                if (!Util.ReservedParameterNames.Contains(lowerValue) && Util.ReservedParameterNameStarts.All(s => !lowerValue.StartsWith(s)))
+                if (!Util.ReservedParameterNames.Contains(this.NewParameterName) && Util.ReservedParameterNameStarts.All(s => !this.NewParameterName.StartsWith(s, StringComparison.OrdinalIgnoreCase)))
                 {
-                    if (!this.Category.InheritedParameters.Any(p => p.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase))
-                        && !this.Category.Parameters.Any(p => p.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase))
-                        && !this.Category.AllSubCategories.Any(c => c.Parameters.Any(p => p.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase))))
+                    if (!this.Category.InheritedParameters.Any(p => p.Equals(this.NewParameterName, StringComparison.OrdinalIgnoreCase))
+                        && !this.Category.Parameters.Any(p => p.Equals(this.NewParameterName, StringComparison.OrdinalIgnoreCase))
+                        && !this.Category.AllSubCategories.Any(c => c.Parameters.Any(p => p.Equals(this.NewParameterName, StringComparison.OrdinalIgnoreCase))))
                     {
                         return true;
                     }
@@ -410,10 +408,8 @@ namespace KiCad_DB_Editor.ViewModel
 
         private bool RenameCategoryCommandCanExecute(object? parameter)
         {
-            string lowerValue = this.NewCategoryName.ToLowerInvariant();
-
             // Early exit if same name
-            if (lowerValue.Equals(Category.Name, StringComparison.InvariantCultureIgnoreCase))
+            if (this.NewCategoryName.Equals(Category.Name, StringComparison.OrdinalIgnoreCase))
                 return false;
 
             ObservableCollectionEx<Category> categoryCollection;
@@ -422,9 +418,9 @@ namespace KiCad_DB_Editor.ViewModel
             else
                 categoryCollection = Category.ParentCategory.Categories;
 
-            if (this.NewCategoryName.Length > 0 && lowerValue.All(c => Util.SafeCategoryCharacters.Contains(c)))
+            if (this.NewCategoryName.Length > 0 && this.NewCategoryName.All(c => Util.SafeCategoryCharacters.Contains(c)))
             {
-                if (!categoryCollection.Any(c => c.Name.Equals(lowerValue, StringComparison.InvariantCultureIgnoreCase)))
+                if (!categoryCollection.Any(c => c.Name.Equals(this.NewCategoryName, StringComparison.OrdinalIgnoreCase)))
                 {
                     return true;
                 }
@@ -453,7 +449,7 @@ namespace KiCad_DB_Editor.ViewModel
                         Category compareCategory = categoryCollection[i];
                         if (compareCategory != Category)
                         {
-                            if (compareCategory.Name.CompareTo(Category.Name) > 0)
+                            if (string.Compare(compareCategory.Name, Category.Name, StringComparison.OrdinalIgnoreCase) > 0)
                                 break;
                             newIndex++;
                         }

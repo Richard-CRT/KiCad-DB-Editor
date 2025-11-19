@@ -114,7 +114,7 @@ namespace KiCad_DB_Editor.Model.Json
 
             // Have to cull parameters so they are only present in their inheritance trees at the highest level that they appear, as v6 prohibits adding that
             foreach (var tLC in TopLevelCategories)
-                recursivelyRemoveDuplicateParameters(tLC, new HashSet<string>(UniversalParameters, StringComparer.InvariantCultureIgnoreCase)); // Must be case insensitive
+                recursivelyRemoveDuplicateParameters(tLC, new HashSet<string>(UniversalParameters, StringComparer.OrdinalIgnoreCase)); // Must be case insensitive
 
             void recursivelyRemoveDuplicateParameters(JsonCategory jsonCategory, HashSet<string> parameters)
             {
@@ -125,7 +125,7 @@ namespace KiCad_DB_Editor.Model.Json
                 }
 
                 foreach (var c in jsonCategory.Categories)
-                    recursivelyRemoveDuplicateParameters(c, new HashSet<string>(parameters.Concat(jsonCategory.Parameters), StringComparer.InvariantCultureIgnoreCase)); // Must be case insensitive
+                    recursivelyRemoveDuplicateParameters(c, new HashSet<string>(parameters.Concat(jsonCategory.Parameters), StringComparer.OrdinalIgnoreCase)); // Must be case insensitive
             }
         }
 

@@ -1005,10 +1005,9 @@ namespace KiCad_DB_Editor.View
                 }
                 else if (propertyInfoToSetValueOn.PropertyType == typeof(bool))
                 {
-                    string lowerNewValue = newValue.ToLowerInvariant();
                     bool? newValueBool = null;
-                    if (lowerNewValue == "true") newValueBool = true;
-                    else if (lowerNewValue == "false") newValueBool = false;
+                    if (newValue.Equals("true", StringComparison.OrdinalIgnoreCase)) newValueBool = true;
+                    else if (newValue.Equals("false", StringComparison.OrdinalIgnoreCase)) newValueBool = false;
 
                     if (newValueBool is not null)
                     {

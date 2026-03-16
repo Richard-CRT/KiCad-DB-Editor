@@ -28,7 +28,7 @@ namespace KiCad_DB_Editor.Model.Json
         public JsonKiCadSymbolLibrary(Legacy.V5.Json.JsonKiCadSymbolLibrary jsonV5KiCadSymbolLibrary)
         {
             Nickname = jsonV5KiCadSymbolLibrary.Nickname;
-            RelativePath = jsonV5KiCadSymbolLibrary.Nickname;
+            RelativePath = jsonV5KiCadSymbolLibrary.RelativePath;
         }
     }
 }

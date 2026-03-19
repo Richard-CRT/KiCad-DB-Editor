@@ -62,7 +62,7 @@
                                 <HierarchicalDataTemplate ItemsSource="{Binding CategoryVMs}" DataType="{x:Type vm:CategoryVM}">
                                     <StackPanel Orientation="Horizontal">
                                         <Image Source="/View/Resources/ComponentFolder.png" Height="18" Margin="0,0,5,0" />
-                                        <TextBlock Text="{Binding Category.Parts.Count, StringFormat={}{0}}" Margin="0,0,4,0">
+                                        <TextBlock Text="{Binding Category.RecursivePartsCount, StringFormat={}{0}}" Margin="0,0,4,0">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
                                                     <Setter Property="Foreground" Value="Gray" />

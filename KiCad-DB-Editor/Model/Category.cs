@@ -116,6 +116,11 @@ namespace KiCad_DB_Editor.Model
             get { return _parts; }
         }
 
+        public int RecursivePartsCount
+        {
+            get { return Parts.Count + AllSubCategories.Sum(c => c.Parts.Count); }
+        }
+
         // Needs to be ObservableCollectionEx because bindings expecting this form
         public ObservableCollectionEx<string> InheritedAndNormalParameters
         {
@@ -149,6 +154,8 @@ namespace KiCad_DB_Editor.Model
             // _parameters & _allSubCategories must be set up first, as this line will rely on that
             _categories = new(jsonCategory.Categories.Select(jC => new Category(jC, ParentLibrary, this)));
             _parts = new();
+            // We don't worry about unsubscribing because this object is the event publisher
+            _parts.CollectionChanged += Parts_CollectionChanged;
         }
 
         public Category(string name, Library parentLibrary, Category? parentCategory)
@@ -164,6 +171,8 @@ namespace KiCad_DB_Editor.Model
             _allSubCategories = new();
             _categories = new();
             _parts = new();
+            // We don't worry about unsubscribing because this object is the event publisher
+            _parts.CollectionChanged += Parts_CollectionChanged;
         }
 
         public void ParentCategory_PartUIDScheme_PropertyChanged()
@@ -186,6 +195,13 @@ namespace KiCad_DB_Editor.Model
             UpdatePartsParameters(e);
         }
 
+        public void ChildCategory_Parts_CollectionChanged()
+        {
+            InvokePropertyChanged(nameof(RecursivePartsCount));
+
+            ParentCategory?.ChildCategory_Parts_CollectionChanged();
+        }
+
         private void Parameters_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             InvokePropertyChanged(nameof(InheritedAndNormalParameters));
@@ -195,6 +211,11 @@ namespace KiCad_DB_Editor.Model
             foreach (Category c in Categories) c.ParentCategory_InheritedParameters_PropertyChanged(e);
 
             this.ParentLibrary.Category_ParametersCollectionChanged();
+        }
+
+        private void Parts_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            ChildCategory_Parts_CollectionChanged();
         }
 
         private void UpdatePartsParameters(NotifyCollectionChangedEventArgs e)

@@ -14,7 +14,7 @@
         <KeyBinding Modifiers="Control" Key="N" Command="{Binding NewLibraryCommand, Mode=OneWay}" />
         <KeyBinding Modifiers="Control" Key="O" Command="{Binding OpenLibraryCommand, Mode=OneWay}" />
         <KeyBinding Modifiers="Control" Key="S" Command="{Binding SaveLibraryCommand, Mode=OneWay}" />
-        <KeyBinding Key="F1" Command="{Binding HelpLibraryCommand, Mode=OneWay}" />
+        <KeyBinding Key="F1" Command="{Binding HelpCommand, Mode=OneWay}" />
     </Window.InputBindings>
     <DockPanel>
         <Menu DockPanel.Dock="Top">
@@ -25,10 +25,10 @@
                 <MenuItem Header="_Save Library" Command="{Binding SaveLibraryCommand, Mode=OneWay}" InputGestureText="Ctrl+S" />
                 <MenuItem Header="Save Library _As..." Command="{Binding SaveAsLibraryCommand, Mode=OneWay}" />
                 <Separator />
-                <MenuItem Header="_Exit" Command="{Binding ExitLibraryCommand, Mode=OneWay}" />
+                <MenuItem Header="_Exit" Command="{Binding ExitCommand, Mode=OneWay}" />
             </MenuItem>
             <MenuItem Header="_Help">
-                <MenuItem Header="_KiCad DB Documentation" Command="{Binding HelpLibraryCommand, Mode=OneWay}" InputGestureText="F1" />
+                <MenuItem Header="_KiCad DB Documentation" Command="{Binding HelpCommand, Mode=OneWay}" InputGestureText="F1" />
             </MenuItem>
             <MenuItem Header="_About">
                 <MenuItem Header="Created by Richard-CRT" />

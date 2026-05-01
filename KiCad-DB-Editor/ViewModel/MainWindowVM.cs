@@ -58,8 +58,8 @@ namespace KiCad_DB_Editor.ViewModel
             OpenLibraryCommand = new BasicCommand(OpenLibraryCommandExecuted, null);
             SaveLibraryCommand = new BasicCommand(SaveLibraryCommandExecuted, SaveAsLibraryCommandCanExecute); // Note shares SaveAs CanExecute
             SaveAsLibraryCommand = new BasicCommand(SaveAsLibraryCommandExecuted, SaveAsLibraryCommandCanExecute);
-            HelpLibraryCommand = new BasicCommand(HelpCommandExecuted, null);
-            ExitLibraryCommand = new BasicCommand(ExitCommandExecuted, null);
+            HelpCommand = new BasicCommand(HelpCommandExecuted, null);
+            ExitCommand = new BasicCommand(ExitCommandExecuted, null);
 
             _autoSaveTimer = new();
             _autoSaveTimer.Interval = TimeSpan.FromMinutes(5);
@@ -131,8 +131,8 @@ namespace KiCad_DB_Editor.ViewModel
         public IBasicCommand OpenLibraryCommand { get; }
         public IBasicCommand SaveLibraryCommand { get; }
         public IBasicCommand SaveAsLibraryCommand { get; }
-        public IBasicCommand HelpLibraryCommand { get; }
-        public IBasicCommand ExitLibraryCommand { get; }
+        public IBasicCommand HelpCommand { get; }
+        public IBasicCommand ExitCommand { get; }
 
         private void NewLibraryCommandExecuted(object? parameter)
         {

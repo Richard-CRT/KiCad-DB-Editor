@@ -56,7 +56,7 @@ namespace KiCad_DB_Editor.Model
 
                 var jsonLibrary = JsonLibrary.FromFile(projectFilePath);
 
-                library.PartUIDScheme = jsonLibrary.PartUIDScheme;
+                library.PartUIDTemplate = jsonLibrary.PartUIDTemplate;
                 library.KiCadExportPartLibraryName = jsonLibrary.KiCadExportPartLibraryName;
                 library.KiCadExportPartLibraryDescription = jsonLibrary.KiCadExportPartLibraryDescription;
                 library.KiCadExportPartLibraryEnvironmentVariable = jsonLibrary.KiCadExportPartLibraryEnvironmentVariable;
@@ -200,59 +200,53 @@ namespace KiCad_DB_Editor.Model
 
         #region Notify Properties
 
-        private string _projectDirectoryPath = "";
         public string ProjectDirectoryPath
         {
-            get { return _projectDirectoryPath; }
-            set { if (_projectDirectoryPath != value) { _projectDirectoryPath = value; InvokePropertyChanged(); } }
-        }
+            get;
+            set { if (field != value) { field = value; InvokePropertyChanged(); } }
+        } = "";
 
-        private string _projectName = "";
         public string ProjectName
         {
-            get { return _projectName; }
-            set { if (_projectName != value) { _projectName = value; InvokePropertyChanged(); } }
-        }
+            get;
+            set { if (field != value) { field = value; InvokePropertyChanged(); } }
+        } = "";
 
-        private string _partUIDScheme { get; set; } = "CMP-#######-####";
-        public string PartUIDScheme
+        public string PartUIDTemplate
         {
-            get { return _partUIDScheme; }
+            get;
             set
             {
-                if (this.PartUIDScheme != value)
+                if (field != value)
                 {
-                    if (value.Count(c => c == '#') != Util.PartUIDSchemeNumberOfWildcards)
-                        throw new Exceptions.ArgumentValidationException("Proposed scheme does not contain the necessary wildcard characters");
+                    if (value.Count(c => c == '#') != Util.PartUIDTemplateNumberOfWildcards)
+                        throw new Exceptions.ArgumentValidationException("Proposed template does not contain the necessary wildcard characters");
 
-                    _partUIDScheme = value;
+                    field = value;
                     InvokePropertyChanged();
 
-                    foreach (Category c in TopLevelCategories) c.ParentCategory_PartUIDScheme_PropertyChanged();
+                    foreach (Category c in TopLevelCategories) c.ParentCategory_PartUIDTemplate_PropertyChanged();
                 }
             }
-        }
+        } = "CMP-#######-####";
 
-        private string _kiCadExportPartLibraryName { get; set; } = "";
         public string KiCadExportPartLibraryName
         {
-            get { return _kiCadExportPartLibraryName; }
-            set { if (_kiCadExportPartLibraryName != value) { _kiCadExportPartLibraryName = value; InvokePropertyChanged(); } }
-        }
+            get;
+            set { if (field != value) { field = value; InvokePropertyChanged(); } }
+        } = "";
 
-        private string _kiCadExportPartLibraryDescription { get; set; } = "";
         public string KiCadExportPartLibraryDescription
         {
-            get { return _kiCadExportPartLibraryDescription; }
-            set { if (_kiCadExportPartLibraryDescription != value) { _kiCadExportPartLibraryDescription = value; InvokePropertyChanged(); } }
-        }
+            get;
+            set { if (field != value) { field = value; InvokePropertyChanged(); } }
+        } = "";
 
-        private string _kiCadExportOdbcName { get; set; } = "";
         public string KiCadExportOdbcName
         {
-            get { return _kiCadExportOdbcName; }
-            set { if (_kiCadExportOdbcName != value) { _kiCadExportOdbcName = value; InvokePropertyChanged(); } }
-        }
+            get;
+            set { if (field != value) { field = value; InvokePropertyChanged(); } }
+        } = "";
 
         private string _kiCadExportPartLibraryEnvironmentVariable { get; set; } = "${KICAD_PART_LIBRARY_PROJECT_DIR}";
         public string KiCadExportPartLibraryEnvironmentVariable

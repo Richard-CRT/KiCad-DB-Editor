@@ -110,11 +110,11 @@ namespace KiCad_DB_Editor.Utilities
 
         private static Random random = new Random();
 
-        public const int PartUIDSchemeNumberOfWildcards = 11;
-        public static string GeneratePartUID(string partUIDScheme)
+        public const int PartUIDTemplateNumberOfWildcards = 11;
+        public static string GeneratePartUID(string partUIDTemplate)
         {
-            if (partUIDScheme.Count(c => c == '#') != PartUIDSchemeNumberOfWildcards)
-                throw new InvalidDataException("Part UID scheme does not contain the necessary wildcard characters");
+            if (partUIDTemplate.Count(c => c == '#') != PartUIDTemplateNumberOfWildcards)
+                throw new InvalidDataException("Part UID template does not contain the necessary wildcard characters");
 
             // Seconds Epoch [54:20]
             // Milliseconds [19:10]
@@ -135,8 +135,8 @@ namespace KiCad_DB_Editor.Utilities
             ulong uid = secondsSinceEpoch << secondsEpochShift |
                 (ulong)milliseconds << millisecondsShift |
                 (ulong)randomValue << randomShift;
-            string base32UID = UInt64ToBase32(uid).PadLeft(PartUIDSchemeNumberOfWildcards, Base32EncodeBook[0]);
-            char[] partUIDArray = partUIDScheme.ToCharArray();
+            string base32UID = UInt64ToBase32(uid).PadLeft(PartUIDTemplateNumberOfWildcards, Base32EncodeBook[0]);
+            char[] partUIDArray = partUIDTemplate.ToCharArray();
             for (int i = 0; i < base32UID.Length; i++)
                 partUIDArray[Array.IndexOf(partUIDArray, '#')] = base32UID[i];
             string partUID = new string(partUIDArray);
@@ -156,8 +156,8 @@ namespace KiCad_DB_Editor.Utilities
             UInt64 millisecondsSinceEpoch = (UInt64)(DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalMilliseconds) & (((UInt64)1 << millisecondEpochBits) - 1);
             uint randomValue = (uint)(random.Next(1 << 10)) & ((1 << randomBits) - 1);
             UInt64 uid = ((UInt64)type << typeShift) | (millisecondsSinceEpoch << millisecondEpochShift) | ((UInt64)randomValue << randomShift);
-            string base32UID = Util.UInt64ToBase32(uid).PadLeft(Util.PartUIDSchemeNumberOfWildcards, Base32EncodeBook[0]);
-            char[] partUIDArray = partUIDScheme.ToCharArray();
+            string base32UID = Util.UInt64ToBase32(uid).PadLeft(Util.PartUIDTemplateNumberOfWildcards, Base32EncodeBook[0]);
+            char[] partUIDArray = partUIDTemplate.ToCharArray();
             for (int i = 0; i < base32UID.Length; i++)
                 partUIDArray[Array.IndexOf(partUIDArray, '#')] = base32UID[i];
             string partUID = new string(partUIDArray);
@@ -211,8 +211,8 @@ namespace KiCad_DB_Editor.Utilities
                 ((UInt128)seconds << secondsShift) |
                 ((UInt128)milliseconds << millisecondEpochShift) |
                 ((UInt128)randomValue << randomShift);
-            string base32UID = Util.UInt128ToBase32(uid).PadLeft(Util.PartUIDSchemeNumberOfWildcards, Base32EncodeBook[0]);
-            char[] partUIDArray = partUIDScheme.ToCharArray();
+            string base32UID = Util.UInt128ToBase32(uid).PadLeft(Util.PartUIDTemplateNumberOfWildcards, Base32EncodeBook[0]);
+            char[] partUIDArray = partUIDTemplate.ToCharArray();
             for (int i = 0; i < base32UID.Length; i++)
                 partUIDArray[Array.IndexOf(partUIDArray, '#')] = base32UID[i];
             string partUID = new string(partUIDArray);

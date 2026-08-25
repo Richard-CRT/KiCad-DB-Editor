@@ -301,7 +301,7 @@ namespace KiCad_DB_Editor.ViewModel
 
         private void _newPart(Part? existingPartToDuplicate = null)
         {
-            string partUID = Util.GeneratePartUID(Category.ActivePartUIDScheme);
+            string partUID = Util.GeneratePartUID(Category.ActivePartUIDTemplate);
             Part part = new(partUID, Category.ParentLibrary, Category);
             foreach (string parameter in Category.InheritedAndNormalParameters)
                 part.ParameterValues.Add(parameter, "");

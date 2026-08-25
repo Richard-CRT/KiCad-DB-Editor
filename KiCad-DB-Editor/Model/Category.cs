@@ -38,55 +38,53 @@ namespace KiCad_DB_Editor.Model
             set { if (_name != value) { _name = value; InvokePropertyChanged(); } }
         }
 
-        private bool _isPartUIDSchemeOverridden { get; set; } = false;
-        public bool IsPartUIDSchemeOverridden
+        public bool IsPartUIDTemplateOverridden
         {
-            get { return _isPartUIDSchemeOverridden; }
+            get;
             set
             {
-                if (_isPartUIDSchemeOverridden != value)
+                if (field != value)
                 {
-                    // Must do this before updating the override as the value of ActivePartUIDScheme depends on it
+                    // Must do this before updating the override as the value of ActivePartUIDTemplate depends on it
                     if (value)
-                        PartUIDScheme = ActivePartUIDScheme;
+                        PartUIDTemplate = ActivePartUIDTemplate;
 
-                    _isPartUIDSchemeOverridden = value;
+                    field = value;
 
-                    // Must do this after updating the override as the value of ActivePartUIDScheme depends on it
+                    // Must do this after updating the override as the value of ActivePartUIDTemplate depends on it
                     if (!value)
-                        PartUIDScheme = ActivePartUIDScheme;
+                        PartUIDTemplate = ActivePartUIDTemplate;
 
                     InvokePropertyChanged();
 
-                    InvokePropertyChanged(nameof(ActivePartUIDScheme));
+                    InvokePropertyChanged(nameof(ActivePartUIDTemplate));
                     if (Categories is not null) // Null guard in case Categories hasn't been created yet
-                        foreach (Category c in Categories) c.ParentCategory_PartUIDScheme_PropertyChanged();
+                        foreach (Category c in Categories) c.ParentCategory_PartUIDTemplate_PropertyChanged();
                 }
             }
-        }
+        } = false;
 
-        private string _partUIDScheme { get; set; } = "";
-        public string PartUIDScheme
+        public string PartUIDTemplate
         {
-            get { return _partUIDScheme; }
+            get;
             set
             {
-                if (_partUIDScheme != value)
+                if (field != value)
                 {
-                    if (value.Count(c => c == '#') != Util.PartUIDSchemeNumberOfWildcards)
-                        throw new Exceptions.ArgumentValidationException("Proposed scheme does not contain the necessary wildcard characters");
+                    if (value.Count(c => c == '#') != Util.PartUIDTemplateNumberOfWildcards)
+                        throw new Exceptions.ArgumentValidationException("Proposed template does not contain the necessary wildcard characters");
 
-                    _partUIDScheme = value;
+                    field = value;
                     InvokePropertyChanged();
 
-                    InvokePropertyChanged(nameof(ActivePartUIDScheme));
+                    InvokePropertyChanged(nameof(ActivePartUIDTemplate));
                     if (Categories is not null) // Null guard in case Categories hasn't been created yet
-                        foreach (Category c in Categories) c.ParentCategory_PartUIDScheme_PropertyChanged();
+                        foreach (Category c in Categories) c.ParentCategory_PartUIDTemplate_PropertyChanged();
                 }
             }
-        }
+        } = "";
 
-        public string ActivePartUIDScheme => IsPartUIDSchemeOverridden ? PartUIDScheme : (ParentCategory is not null ? ParentCategory.ActivePartUIDScheme : ParentLibrary.PartUIDScheme);
+        public string ActivePartUIDTemplate => IsPartUIDTemplateOverridden ? PartUIDTemplate : (ParentCategory is not null ? ParentCategory.ActivePartUIDTemplate : ParentLibrary.PartUIDTemplate);
 
         // No setter, to prevent the VM needing to listening PropertyChanged events
         private ObservableCollectionEx<string> _parameters;
@@ -144,8 +142,8 @@ namespace KiCad_DB_Editor.Model
 
             Name = jsonCategory.Name;
 
-            IsPartUIDSchemeOverridden = jsonCategory.PartUIDScheme != "";
-            PartUIDScheme = IsPartUIDSchemeOverridden ? jsonCategory.PartUIDScheme : ActivePartUIDScheme;
+            IsPartUIDTemplateOverridden = jsonCategory.PartUIDTemplate != "";
+            PartUIDTemplate = IsPartUIDTemplateOverridden ? jsonCategory.PartUIDTemplate : ActivePartUIDTemplate;
 
             _parameters = new(jsonCategory.Parameters);
             // We don't worry about unsubscribing because this object is the event publisher
@@ -175,14 +173,14 @@ namespace KiCad_DB_Editor.Model
             _parts.CollectionChanged += Parts_CollectionChanged;
         }
 
-        public void ParentCategory_PartUIDScheme_PropertyChanged()
+        public void ParentCategory_PartUIDTemplate_PropertyChanged()
         {
-            if (!IsPartUIDSchemeOverridden)
-                PartUIDScheme = ActivePartUIDScheme;
+            if (!IsPartUIDTemplateOverridden)
+                PartUIDTemplate = ActivePartUIDTemplate;
 
-            InvokePropertyChanged(nameof(ActivePartUIDScheme));
+            InvokePropertyChanged(nameof(ActivePartUIDTemplate));
 
-            foreach (Category c in Categories) c.ParentCategory_PartUIDScheme_PropertyChanged();
+            foreach (Category c in Categories) c.ParentCategory_PartUIDTemplate_PropertyChanged();
         }
 
         public void ParentCategory_InheritedParameters_PropertyChanged(NotifyCollectionChangedEventArgs e)

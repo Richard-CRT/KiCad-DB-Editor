@@ -42,7 +42,7 @@ namespace KiCad_DB_Editor.Model.Json
         public JsonMetadata? Metadata { get; set; } = null;
 
         [JsonPropertyName("part_uid_scheme"), JsonPropertyOrder(2)]
-        public string PartUIDScheme { get; set; } = "";
+        public string PartUIDTemplate { get; set; } = "";
 
         [JsonPropertyName("part_lib_name"), JsonPropertyOrder(3)]
         public string KiCadExportPartLibraryName { get; set; } = "";
@@ -81,7 +81,7 @@ namespace KiCad_DB_Editor.Model.Json
         {
             Metadata = new JsonMetadata();
             Metadata.Version = Assembly.GetEntryAssembly()!.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion;
-            PartUIDScheme = library.PartUIDScheme;
+            PartUIDTemplate = library.PartUIDTemplate;
             KiCadExportPartLibraryName = library.KiCadExportPartLibraryName;
             KiCadExportPartLibraryDescription = library.KiCadExportPartLibraryDescription;
             KiCadExportOdbcName = library.KiCadExportOdbcName;
@@ -98,7 +98,7 @@ namespace KiCad_DB_Editor.Model.Json
         {
             Metadata = new JsonMetadata();
             Metadata.Version = Assembly.GetEntryAssembly()!.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion;
-            PartUIDScheme = jsonV5Library.PartUIDScheme;
+            PartUIDTemplate = jsonV5Library.PartUIDScheme;
             KiCadExportPartLibraryName = jsonV5Library.KiCadExportPartLibraryName;
             KiCadExportPartLibraryDescription = jsonV5Library.KiCadExportPartLibraryDescription;
             KiCadExportOdbcName = jsonV5Library.KiCadExportOdbcName;

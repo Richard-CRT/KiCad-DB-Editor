@@ -90,12 +90,12 @@
                     </TextBox>
                 </DockPanel>
                 <DockPanel DockPanel.Dock="Top">
-                    <TextBlock DockPanel.Dock="Left" Margin="0,0,5,0">Override Part UID Scheme:</TextBlock>
+                    <TextBlock DockPanel.Dock="Left" Margin="0,0,5,0">Override Part UID Template:</TextBlock>
                     <CheckBox DockPanel.Dock="Left" Margin="0,0,3,0" VerticalContentAlignment="Center"
-                      IsChecked="{Binding CategoryVM.Category.IsPartUIDSchemeOverridden, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Category}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"/>
+                      IsChecked="{Binding CategoryVM.Category.IsPartUIDTemplateOverridden, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Category}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"/>
                     <TextBox
-                        Text="{Binding CategoryVM.Category.PartUIDScheme, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Category}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
-                        IsEnabled="{Binding CategoryVM.Category.IsPartUIDSchemeOverridden, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Category}, Mode=FindAncestor}}"
+                        Text="{Binding CategoryVM.Category.PartUIDTemplate, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Category}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
+                        IsEnabled="{Binding CategoryVM.Category.IsPartUIDTemplateOverridden, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Category}, Mode=FindAncestor}}"
                         />
                 </DockPanel>
             </DockPanel>

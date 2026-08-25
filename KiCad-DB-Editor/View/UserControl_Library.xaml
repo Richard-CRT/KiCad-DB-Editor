@@ -120,8 +120,8 @@
             <TabItem Header="Library Settings">
                 <DockPanel>
                     <DockPanel DockPanel.Dock="Top">
-                        <TextBlock DockPanel.Dock="Left" VerticalAlignment="Center" Margin="0,0,5,0">Part UID Scheme:</TextBlock>
-                        <TextBox Text="{Binding LibraryVM.Library.PartUIDScheme, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
+                        <TextBlock DockPanel.Dock="Left" VerticalAlignment="Center" Margin="0,0,5,0">Part UID Template:</TextBlock>
+                        <TextBox Text="{Binding LibraryVM.Library.PartUIDTemplate, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:UserControl_Library}, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
                             />
                     </DockPanel>
                     <Separator DockPanel.Dock="Top" Margin="0,10,0,10" />

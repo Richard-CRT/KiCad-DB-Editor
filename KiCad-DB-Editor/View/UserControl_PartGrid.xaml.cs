@@ -256,6 +256,7 @@ namespace KiCad_DB_Editor.View
 
             PartVMs_CollectionChanged(this, new(NotifyCollectionChangedAction.Reset));
 
+            // Force columns to resize to auto
             foreach (DataGridColumn col in dataGrid_Main.Columns)
             {
                 col.Width = new DataGridLength(1, DataGridLengthUnitType.Pixel);

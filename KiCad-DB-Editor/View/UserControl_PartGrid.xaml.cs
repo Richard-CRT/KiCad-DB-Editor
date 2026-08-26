@@ -255,6 +255,13 @@ namespace KiCad_DB_Editor.View
                 PartVMs.CollectionChanged += PartVMs_CollectionChanged;
 
             PartVMs_CollectionChanged(this, new(NotifyCollectionChangedAction.Reset));
+
+            foreach (DataGridColumn col in dataGrid_Main.Columns)
+            {
+                col.Width = new DataGridLength(1, DataGridLengthUnitType.Pixel);
+                col.Width = new DataGridLength(1, DataGridLengthUnitType.Auto);
+            }
+            dataGrid_Main.UpdateLayout();
         }
 
         private ObservableCollectionEx<PartVM>? oldPartVMsCopy = null;
